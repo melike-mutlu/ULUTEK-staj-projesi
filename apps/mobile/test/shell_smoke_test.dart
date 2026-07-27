@@ -1,5 +1,6 @@
 import 'package:akilli_sepet/app.dart';
 import 'package:akilli_sepet/features/onboarding/onboarding_view.dart';
+import 'package:akilli_sepet/features/profile/profile_view.dart';
 import 'package:akilli_sepet/features/shell/shell_view.dart';
 import 'package:akilli_sepet/features/shell/shell_viewmodel.dart';
 import 'package:akilli_sepet/features/shell/widgets/glass_bottom_nav.dart';
@@ -63,6 +64,53 @@ void main() {
     await tester.tap(_navLabel('Tara'));
     await tester.pumpAndSettle();
     expect(container.read(shellViewModelProvider).currentTab, ShellTab.scan);
+  });
+
+  testWidgets('ekrani kaydirinca sekme degisiyor', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: ShellView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ShellView)),
+    );
+    ShellTab currentTab() => container.read(shellViewModelProvider).currentTab;
+
+    expect(currentTab(), ShellTab.dashboard);
+
+    // Sola kaydir -> bir sonraki sekme.
+    await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(currentTab(), ShellTab.scan);
+
+    await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(currentTab(), ShellTab.home);
+
+    // Saga kaydir -> geri.
+    await tester.fling(find.byType(PageView), const Offset(400, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(currentTab(), ShellTab.scan);
+  });
+
+  testWidgets('bardan secince sayfa da o sekmeye geliyor', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: ShellView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(_navLabel('Profil'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ProfileView), findsOneWidget);
+    final controller =
+        tester.widget<PageView>(find.byType(PageView)).controller!;
+    expect(controller.page, 3.0);
   });
 
   testWidgets('secili gosterge her sekmede ayni boyutta ve kayiyor',

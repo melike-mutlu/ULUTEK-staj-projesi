@@ -15,12 +15,17 @@ import '../shell_viewmodel.dart';
 /// boyutu her sekmede aynıdır (sekme genişliğine göre hesaplanır, etiket
 /// uzunluğundan etkilenmez).
 ///
+/// Göstergenin yeri [indicatorPosition] ile dışarıdan sürülür; kesirli
+/// değerler kabul eder, böylece kullanıcı ekranı kaydırırken bar parmağı
+/// anlık takip eder (bkz. `ShellView`).
+///
 /// Bar içeriğin ÜSTÜNDE yüzdüğü için sekme ekranlarının altında yer ayrılması
 /// gerekir — bunu [reservedHeight] üzerinden `ShellView` hallediyor.
 class GlassBottomNav extends StatelessWidget {
   const GlassBottomNav({
     super.key,
     required this.currentTab,
+    required this.indicatorPosition,
     required this.onTabSelected,
   });
 
@@ -45,10 +50,12 @@ class GlassBottomNav extends StatelessWidget {
   /// Sekme ikonunun boyutu — bar yüksekliğiyle orantılı.
   static const double _iconSize = 26;
 
-  /// Highlight'ın kayma ve renklerin geçiş süresi.
-  static const Duration _motionDuration = Duration(milliseconds: 320);
-
   final ShellTab currentTab;
+
+  /// Göstergenin sekme cinsinden konumu (0 = ilk sekme). Kaydırma sırasında
+  /// ara değerler alır, örneğin 1.4.
+  final double indicatorPosition;
+
   final ValueChanged<ShellTab> onTabSelected;
 
   static const List<_NavItem> _items = <_NavItem>[
@@ -81,8 +88,7 @@ class GlassBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(barHeight / 2);
-    final selectedIndex =
-        _items.indexWhere((_NavItem item) => item.tab == currentTab);
+    final position = indicatorPosition.clamp(0.0, _items.length - 1.0);
 
     return SafeArea(
       top: false,
@@ -122,11 +128,11 @@ class GlassBottomNav extends StatelessWidget {
 
                     return Stack(
                       children: <Widget>[
-                        // Tek highlight, sekmeler arasında kayar.
-                        AnimatedPositioned(
-                          duration: _motionDuration,
-                          curve: Curves.easeOutCubic,
-                          left: selectedIndex * slotWidth + _indicatorInset,
+                        // Tek highlight, sekmeler arasında kayar. Konumu
+                        // sayfanın kayma miktarından geldiği için ayrıca
+                        // animasyona gerek yok — parmağı birebir takip eder.
+                        Positioned(
+                          left: position * slotWidth + _indicatorInset,
                           top: (barHeight - _indicatorHeight) / 2,
                           width: indicatorWidth,
                           height: _indicatorHeight,
@@ -142,14 +148,17 @@ class GlassBottomNav extends StatelessWidget {
                         ),
                         Row(
                           children: <Widget>[
-                            for (final _NavItem item in _items)
+                            for (int i = 0; i < _items.length; i++)
                               Expanded(
                                 child: _NavButton(
-                                  item: item,
-                                  isSelected: item.tab == currentTab,
-                                  duration: _motionDuration,
+                                  item: _items[i],
+                                  isSelected: _items[i].tab == currentTab,
+                                  // Gösterge bu sekmeye ne kadar yakınsa
+                                  // renk o kadar seçili tonuna kayar.
+                                  selection:
+                                      (1 - (position - i).abs()).clamp(0.0, 1.0),
                                   iconSize: _iconSize,
-                                  onTap: () => onTabSelected(item.tab),
+                                  onTap: () => onTabSelected(_items[i].tab),
                                 ),
                               ),
                           ],
@@ -182,25 +191,37 @@ class _NavItem {
 }
 
 /// Tek sekme. Kendi arka planını çizmez — highlight barın altında ayrı bir
-/// katman olarak kayar. Burada sadece ikon/etiket rengi ve ikonun dolu/boş
-/// hâli yumuşakça geçiş yapar.
+/// katman olarak kayar. Burada ikon/etiket rengi ve ikonun dolu/boş hâli
+/// [selection] değerine göre geçiş yapar.
 class _NavButton extends StatelessWidget {
   const _NavButton({
     required this.item,
     required this.isSelected,
-    required this.duration,
+    required this.selection,
     required this.iconSize,
     required this.onTap,
   });
 
   final _NavItem item;
+
+  /// Erişilebilirlik için kesin durum.
   final bool isSelected;
-  final Duration duration;
+
+  /// 0 = tamamen seçili değil, 1 = tamamen seçili. Kaydırma sırasında ara
+  /// değerler alır; renkler ve ikon geçişi bunu izler.
+  final double selection;
+
   final double iconSize;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final color = Color.lerp(
+      AppColors.navUnselected,
+      AppColors.navSelected,
+      selection,
+    )!;
+
     return Semantics(
       button: true,
       selected: isSelected,
@@ -208,51 +229,38 @@ class _NavButton extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0, end: isSelected ? 1 : 0),
-          duration: duration,
-          curve: Curves.easeOutCubic,
-          builder: (BuildContext context, double t, Widget? child) {
-            final color = Color.lerp(
-              AppColors.navUnselected,
-              AppColors.navSelected,
-              t,
-            )!;
-
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // Boş ve dolu ikon üst üste; seçim ilerledikçe çapraz geçiş.
+              Stack(
+                alignment: Alignment.center,
                 children: <Widget>[
-                  // Boş ve dolu ikon üst üste; seçim ilerledikçe çapraz geçiş.
-                  Stack(
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Opacity(
-                        opacity: 1 - t,
-                        child: Icon(item.icon, size: iconSize, color: color),
-                      ),
-                      Opacity(
-                        opacity: t,
-                        child: Icon(
-                          item.activeIcon,
-                          size: iconSize,
-                          color: color,
-                        ),
-                      ),
-                    ],
+                  Opacity(
+                    opacity: 1 - selection,
+                    child: Icon(item.icon, size: iconSize, color: color),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.label,
-                    style: AppTextStyles.navLabel.copyWith(color: color),
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
+                  Opacity(
+                    opacity: selection,
+                    child: Icon(
+                      item.activeIcon,
+                      size: iconSize,
+                      color: color,
+                    ),
                   ),
                 ],
               ),
-            );
-          },
+              const SizedBox(height: 2),
+              Text(
+                item.label,
+                style: AppTextStyles.navLabel.copyWith(color: color),
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );

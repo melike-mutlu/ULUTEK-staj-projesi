@@ -12,13 +12,64 @@ import 'widgets/glass_bottom_nav.dart';
 /// Uygulamanın alt navigasyon kabuğu: 4 sekmeyi barındırır ve yüzen kapsül
 /// barı çizer. Onboarding tamamlandıktan sonra girilen ana ekran budur.
 ///
-/// Sekmeler [IndexedStack] içinde tutulur; sekme değiştirince ekranlar
-/// yeniden kurulmaz, kendi state'lerini (scroll konumu, form girdisi vb.) korur.
-class ShellView extends ConsumerWidget {
+/// Sekmeler arasında hem bardaki sekmeye dokunarak hem de ekranı yatay
+/// kaydırarak geçilir. Sayfalar canlı tutulur ([_KeepAlivePage]); sekme
+/// değişince ekranlar yeniden kurulmaz, kendi state'lerini (scroll konumu,
+/// form girdisi vb.) korur.
+class ShellView extends ConsumerStatefulWidget {
   const ShellView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ShellView> createState() => _ShellViewState();
+}
+
+class _ShellViewState extends ConsumerState<ShellView> {
+  late final PageController _pageController;
+
+  /// Bara dokunulduğunda sayfanın kayma süresi. Gösterge sayfayı takip ettiği
+  /// için barın animasyon süresi de fiilen budur.
+  static const Duration _pageTransition = Duration(milliseconds: 320);
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(
+      initialPage: ref.read(shellViewModelProvider).currentIndex,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  /// Bardaki sekmeye dokunuldu.
+  void _onTabSelected(ShellTab tab) {
+    ref.read(shellViewModelProvider).selectTab(tab);
+    _pageController.animateToPage(
+      tab.index,
+      duration: _pageTransition,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  /// Kaydırma sonucu sayfa değişti.
+  void _onPageChanged(int index) {
+    ref.read(shellViewModelProvider).selectTab(ShellTab.values[index]);
+  }
+
+  /// Göstergenin duracağı yer: sayfa kaydıkça kesirli ilerler, böylece bar
+  /// parmağı anlık takip eder. Sayfa henüz bağlanmadıysa açılış sekmesi.
+  double get _indicatorPosition {
+    if (_pageController.hasClients && _pageController.position.hasPixels) {
+      return _pageController.page ?? _pageController.initialPage.toDouble();
+    }
+    return _pageController.initialPage.toDouble();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final viewModel = ref.watch(shellViewModelProvider);
 
     return Scaffold(
@@ -26,21 +77,51 @@ class ShellView extends ConsumerWidget {
       // Bar içeriğin üstünde yüzsün diye gövde bar alanına kadar uzatılır.
       extendBody: true,
       body: _TabContentInset(
-        child: IndexedStack(
-          index: viewModel.currentIndex,
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: _onPageChanged,
           children: const <Widget>[
-            DashboardView(),
-            ScanView(),
-            HomeView(),
-            ProfileView(),
+            _KeepAlivePage(child: DashboardView()),
+            _KeepAlivePage(child: ScanView()),
+            _KeepAlivePage(child: HomeView()),
+            _KeepAlivePage(child: ProfileView()),
           ],
         ),
       ),
-      bottomNavigationBar: GlassBottomNav(
-        currentTab: viewModel.currentTab,
-        onTabSelected: viewModel.selectTab,
+      bottomNavigationBar: AnimatedBuilder(
+        animation: _pageController,
+        builder: (BuildContext context, Widget? child) {
+          return GlassBottomNav(
+            currentTab: viewModel.currentTab,
+            indicatorPosition: _indicatorPosition,
+            onTabSelected: _onTabSelected,
+          );
+        },
       ),
     );
+  }
+}
+
+/// Sekme ekranını canlı tutar: [PageView] varsayılan olarak görünmeyen
+/// sayfaları atar, biz `IndexedStack`'teki gibi state'in korunmasını istiyoruz.
+class _KeepAlivePage extends StatefulWidget {
+  const _KeepAlivePage({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_KeepAlivePage> createState() => _KeepAlivePageState();
+}
+
+class _KeepAlivePageState extends State<_KeepAlivePage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
 
