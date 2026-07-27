@@ -25,11 +25,11 @@ class GlassBottomNav extends StatelessWidget {
   });
 
   /// Kapsülün yüksekliği. Tam yuvarlak köşe için yarıçap bunun yarısı.
-  static const double barHeight = 62;
+  static const double barHeight = 74;
 
   /// Kapsülün ekran kenarlarından boşluğu.
   static const double horizontalMargin = 16;
-  static const double bottomMargin = 12;
+  static const double bottomMargin = 2;
 
   /// Blur şiddeti — bilinçli olarak hafif tutuldu, arkadaki içerik seçilebilsin.
   static const double blurSigma = 12;
@@ -39,8 +39,11 @@ class GlassBottomNav extends StatelessWidget {
   static const double reservedHeight = barHeight + bottomMargin;
 
   /// Kayan highlight'ın ölçüleri. Genişliği sekme genişliğinden bu kadar dar.
-  static const double _indicatorInset = 8;
+  static const double _indicatorInset = 6;
   static const double _indicatorHeight = barHeight - 12;
+
+  /// Sekme ikonunun boyutu — bar yüksekliğiyle orantılı.
+  static const double _iconSize = 26;
 
   /// Highlight'ın kayma ve renklerin geçiş süresi.
   static const Duration _motionDuration = Duration(milliseconds: 320);
@@ -130,9 +133,10 @@ class GlassBottomNav extends StatelessWidget {
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               color: AppColors.navIndicator,
-                              borderRadius: BorderRadius.circular(
-                                _indicatorHeight / 2,
-                              ),
+                              // Barla aynı yarıçap; gösterge bardan alçak
+                              // olduğu için Flutter bunu tam kapsüle kırpar,
+                              // yani barın yuvarlaklığıyla uyumlu durur.
+                              borderRadius: borderRadius,
                             ),
                           ),
                         ),
@@ -144,6 +148,7 @@ class GlassBottomNav extends StatelessWidget {
                                   item: item,
                                   isSelected: item.tab == currentTab,
                                   duration: _motionDuration,
+                                  iconSize: _iconSize,
                                   onTap: () => onTabSelected(item.tab),
                                 ),
                               ),
@@ -184,12 +189,14 @@ class _NavButton extends StatelessWidget {
     required this.item,
     required this.isSelected,
     required this.duration,
+    required this.iconSize,
     required this.onTap,
   });
 
   final _NavItem item;
   final bool isSelected;
   final Duration duration;
+  final double iconSize;
   final VoidCallback onTap;
 
   @override
@@ -222,11 +229,15 @@ class _NavButton extends StatelessWidget {
                     children: <Widget>[
                       Opacity(
                         opacity: 1 - t,
-                        child: Icon(item.icon, size: 22, color: color),
+                        child: Icon(item.icon, size: iconSize, color: color),
                       ),
                       Opacity(
                         opacity: t,
-                        child: Icon(item.activeIcon, size: 22, color: color),
+                        child: Icon(
+                          item.activeIcon,
+                          size: iconSize,
+                          color: color,
+                        ),
                       ),
                     ],
                   ),
