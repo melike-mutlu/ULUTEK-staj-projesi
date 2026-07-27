@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/widgets/feature_placeholder.dart';
-
 /// Tara — alt navigasyonun 2. sekmesi.
 /// Figma: "Tarama Ekranı" mockup — mobile_scanner ile kamera görünümü
 /// + "barkodu manuel gir" yedek seçeneği.
@@ -23,7 +21,6 @@ class ScanView extends StatelessWidget {
     // start/stop'u sekme değişimine ve uygulama yaşam döngüsüne bağlanmalı.
     return Scaffold(
       appBar: AppBar(title: const Text('Tara')),
-      body: const FeaturePlaceholder(icon: Icons.qr_code_scanner_rounded),
     );
   }
 }

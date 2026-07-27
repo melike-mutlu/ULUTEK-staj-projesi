@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/widgets/feature_placeholder.dart';
-
 /// Profil — alt navigasyonun 4. sekmesi.
 /// Figma: "Profil" mockup — alerji/diyet/sağlık bilgilerini düzenleme ekranı.
 class ProfileView extends StatelessWidget {
@@ -15,9 +13,11 @@ class ProfileView extends StatelessWidget {
     // - Sağlık durumları (çoklu seçim)
     // - ProfileViewModel.load / save ile Supabase profiles tablosuna bağla
     // - Onboarding ile aynı seçenek listelerini paylaş, kopyalama
+    //
+    // Formu SafeArea ile sarmala: alt navigasyon barı için ayrılan boşluk
+    // MediaQuery'den geliyor (bkz. features/shell/shell_view.dart).
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
-      body: const FeaturePlaceholder(icon: Icons.person_rounded),
     );
   }
 }

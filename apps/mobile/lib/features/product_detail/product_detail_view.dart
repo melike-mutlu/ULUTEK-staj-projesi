@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/widgets/feature_placeholder.dart';
-
 /// Figma: "Ürün Detay Kırmızı/Sarı/Yeşil" mockup'ları — tek View, ViewModel
 /// durumuna göre farklı içerik gösterir (ayrı ayrı 3 ekran değil).
 ///
@@ -23,7 +21,6 @@ class ProductDetailView extends StatelessWidget {
     // Zorunlu disclaimer metni her durumda gösterilmeli.
     return Scaffold(
       appBar: AppBar(title: const Text('Ürün Detay')),
-      body: const FeaturePlaceholder(icon: Icons.inventory_2_rounded),
     );
   }
 }

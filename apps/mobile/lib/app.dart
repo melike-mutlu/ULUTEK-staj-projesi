@@ -10,6 +10,8 @@ class AkilliSepetApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Akıllı Sepet',
+      // Sağ üstteki "DEBUG" şeridi görünmesin.
+      debugShowCheckedModeBanner: false,
       // Renk ve tipografi tek kaynaktan: lib/core/theme/
       // Ekranlarda renk/font hardcode edilmez, AppColors / AppTextStyles kullanılır.
       theme: AppTheme.light,

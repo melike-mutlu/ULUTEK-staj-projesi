@@ -1,3 +1,5 @@
+import 'package:akilli_sepet/app.dart';
+import 'package:akilli_sepet/features/onboarding/onboarding_view.dart';
 import 'package:akilli_sepet/features/shell/shell_view.dart';
 import 'package:akilli_sepet/features/shell/shell_viewmodel.dart';
 import 'package:akilli_sepet/features/shell/widgets/glass_bottom_nav.dart';
@@ -13,6 +15,26 @@ Finder _navLabel(String label) => find.descendant(
     );
 
 void main() {
+  testWidgets('uygulama sadece onboarding ile aciliyor', (tester) async {
+    await tester.pumpWidget(const ProviderScope(child: AkilliSepetApp()));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(OnboardingView), findsOneWidget);
+    expect(find.byType(ShellView), findsNothing);
+
+    // Onboarding ilk ekran: altinda baska bir route olmamali, yoksa kullanici
+    // geri tusuyla onboarding'i atlayabilir.
+    final navigator =
+        Navigator.of(tester.element(find.byType(OnboardingView)));
+    expect(navigator.canPop(), isFalse);
+
+    // Tamamlaninca kabuga gecer ve onboarding yigindan cikar.
+    await tester.tap(find.text('Atla (geçici)'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ShellView), findsOneWidget);
+    expect(find.byType(OnboardingView), findsNothing);
+  });
+
   testWidgets('shell 4 sekmeyi cizer ve sekme degistirir', (tester) async {
     await tester.pumpWidget(
       const ProviderScope(

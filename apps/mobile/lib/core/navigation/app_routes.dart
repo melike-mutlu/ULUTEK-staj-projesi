@@ -22,7 +22,12 @@ abstract final class AppRoutes {
 
   /// Alt navigasyon kabuğu — onboarding bitince girilen ana ekran.
   /// 4 sekmeyi (Ana Sayfa · Tara · Geçmiş · Profil) barındırır.
-  static const String shell = '/';
+  ///
+  /// Bilerek '/' DEĞİL: `initialRoute` çok parçalı bir ad aldığında (örneğin
+  /// '/onboarding') Flutter route yığınını ['/', '/onboarding'] olarak kurar.
+  /// Kabuk '/' adresinde olursa uygulama onboarding'in ALTINDA kabukla açılır
+  /// ve kullanıcı geri tuşuyla onboarding'i atlayabilir.
+  static const String shell = '/shell';
 
   /// Ana Sayfa — alt navigasyonun 1. sekmesi.
   static const String dashboard = '/dashboard';

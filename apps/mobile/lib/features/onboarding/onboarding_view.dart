@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/navigation/app_routes.dart';
-import '../../core/widgets/feature_placeholder.dart';
 
 /// Figma: "Onboarding" mockup — alerji/diyet/sağlık seçim adımları.
 /// Uygulamanın ilk açılış akışı; bittiğinde alt navigasyon kabuğuna geçilir.
@@ -23,14 +22,22 @@ class OnboardingView extends StatelessWidget {
     // - Kaydetme başarılıysa completeOnboarding(context) ile kabuğa geç
     // - Profil zaten varsa bu akışı atla, doğrudan kabuğa gir
     return Scaffold(
-      body: FeaturePlaceholder(
-        icon: Icons.assignment_ind_rounded,
-        // GEÇİCİ — SİLİNECEK: iskelet aşamasında kabuk ve sekmeler
-        // gezilebilsin diye duruyor. Onboarding adımları yazılınca bu buton
-        // kaldırılıp yerine son adımın "Bitir" butonu gelecek.
-        action: OutlinedButton(
-          onPressed: () => completeOnboarding(context),
-          child: const Text('Atla (geçici)'),
+      appBar: AppBar(title: const Text('Onboarding')),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            children: <Widget>[
+              const Spacer(),
+              // GEÇİCİ — SİLİNECEK: iskelet aşamasında kabuk ve sekmeler
+              // gezilebilsin diye duruyor. Onboarding adımları yazılınca bu
+              // buton kaldırılıp yerine son adımın "Bitir" butonu gelecek.
+              OutlinedButton(
+                onPressed: () => completeOnboarding(context),
+                child: const Text('Atla (geçici)'),
+              ),
+            ],
+          ),
         ),
       ),
     );

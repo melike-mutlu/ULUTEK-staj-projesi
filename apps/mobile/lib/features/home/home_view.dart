@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/widgets/feature_placeholder.dart';
-
 /// Geçmiş — alt navigasyonun 3. sekmesi: son taranan ürünlerin listesi.
 ///
 /// Klasör adı `home`, docs/flutter-mimari.md'deki yapı korunsun diye
@@ -16,9 +14,11 @@ class HomeView extends StatelessWidget {
     // - Satıra dokununca AppRoutes.productDetail'e ürünle birlikte git
     // - Hiç tarama yoksa boş-durum görünümü
     // - HomeViewModel: geçmiş kaydını tutar ve okur
+    //
+    // Listeyi SafeArea ile sarmala: alt navigasyon barı için ayrılan boşluk
+    // MediaQuery'den geliyor (bkz. features/shell/shell_view.dart).
     return Scaffold(
       appBar: AppBar(title: const Text('Geçmiş')),
-      body: const FeaturePlaceholder(icon: Icons.history_rounded),
     );
   }
 }
