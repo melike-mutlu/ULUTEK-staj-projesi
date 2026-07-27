@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme/app_theme.dart';
 import 'features/onboarding/onboarding_view.dart';
 import 'features/home/home_view.dart';
 import 'features/scan/scan_view.dart';
@@ -13,8 +14,9 @@ class AkilliSepetApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Akıllı Sepet',
-      // TODO: Figma'daki renk paleti ve tipografiye göre ThemeData tanımla
-      theme: ThemeData(useMaterial3: true),
+      // Renk ve tipografi tek kaynaktan: lib/core/theme/
+      // Ekranlarda renk/font hardcode edilmez, AppColors / AppTextStyles kullanılır.
+      theme: AppTheme.light,
       initialRoute: '/onboarding',
       routes: {
         '/onboarding': (_) => const OnboardingView(),
