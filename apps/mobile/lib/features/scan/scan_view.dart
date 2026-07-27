@@ -64,7 +64,7 @@ class ScanView extends StatelessWidget {
                             child: Container(
                               width: 32,
                               height: 32,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 border: Border(
                                   top: BorderSide(
                                     color: AkilliSepetColors.primary,
@@ -84,7 +84,7 @@ class ScanView extends StatelessWidget {
                             child: Container(
                               width: 32,
                               height: 32,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 border: Border(
                                   top: BorderSide(
                                     color: AkilliSepetColors.primary,
@@ -104,7 +104,7 @@ class ScanView extends StatelessWidget {
                             child: Container(
                               width: 32,
                               height: 32,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(
                                     color: AkilliSepetColors.primary,
@@ -124,7 +124,7 @@ class ScanView extends StatelessWidget {
                             child: Container(
                               width: 32,
                               height: 32,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(
                                     color: AkilliSepetColors.primary,

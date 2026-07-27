@@ -29,8 +29,8 @@ class ProductDetailView extends StatelessWidget {
                   Container(
                     width: 120,
                     height: 120,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF0F0),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFF0F0),
                       shape: BoxShape.circle,
                     ),
                     child: const Center(

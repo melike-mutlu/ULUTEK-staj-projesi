@@ -43,7 +43,7 @@ class HomeView extends StatelessWidget {
                   Container(
                     width: 48,
                     height: 48,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AkilliSepetColors.primary,
                       shape: BoxShape.circle,
                     ),
@@ -159,7 +159,7 @@ class HomeView extends StatelessWidget {
       ),
       // Bottom Navigation
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: AkilliSepetColors.divider)),
         ),
         child: BottomNavigationBar(
