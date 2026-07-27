@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+//import 'package:device_preview/device_preview.dart';
 
 
 class ScanView extends StatefulWidget {
@@ -24,6 +25,12 @@ class _ScanViewState extends State<ScanView> {
           Expanded(
             flex: 3,
             child: MobileScanner(
+              controller: MobileScannerController(
+                formats: const [
+                  BarcodeFormat.ean13,
+                  BarcodeFormat.ean8
+                ],
+              ),
               onDetect: (capture){
                 final List<Barcode> barcodes = capture.barcodes;
                 for (final barcode in barcodes){
