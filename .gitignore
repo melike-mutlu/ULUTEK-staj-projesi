@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# IDE / editör
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# Ortam değişkenleri — Supabase anahtarları buraya, repoya değil
+.env
+.env.*
+!.env.example
