@@ -16,23 +16,15 @@ class OnboardingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Figma "Onboarding" mockup'ına göre çok adımlı seçim ekranını kur.
-    // Son adımdaki "Bitir" butonu OnboardingViewModel.saveProfile(...) çağırıp
-    // ardından completeOnboarding(context) ile kabuğa geçmeli.
+    // TODO: Onboarding içeriği:
+    // - Çok adımlı seçim akışı: alerjiler -> diyet tercihi -> sağlık durumları
+    // - Adım göstergesi ve geri/ileri gezinme
+    // - Son adımda OnboardingViewModel.saveProfile(...) ile profili kaydet
+    // - Kaydetme başarılıysa completeOnboarding(context) ile kabuğa geç
+    // - Profil zaten varsa bu akışı atla, doğrudan kabuğa gir
     return Scaffold(
       body: FeaturePlaceholder(
         icon: Icons.assignment_ind_rounded,
-        title: 'Onboarding',
-        description:
-            'Kullanıcının alerji, diyet ve sağlık bilgilerini topladığımız '
-            'ilk açılış akışı. Bu ekranın içeriği henüz yazılmadı.',
-        todos: const <String>[
-          'Çok adımlı seçim akışı: alerjiler → diyet tercihi → sağlık durumları',
-          'Adım göstergesi ve geri/ileri gezinme',
-          'Son adımda OnboardingViewModel.saveProfile(...) ile profili kaydet',
-          'Kaydetme başarılıysa completeOnboarding(context) ile kabuğa geç',
-          'Profil zaten varsa bu akışı atla, doğrudan kabuğa gir',
-        ],
         // GEÇİCİ — SİLİNECEK: iskelet aşamasında kabuk ve sekmeler
         // gezilebilsin diye duruyor. Onboarding adımları yazılınca bu buton
         // kaldırılıp yerine son adımın "Bitir" butonu gelecek.

@@ -9,25 +9,15 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Figma "Profil" mockup'ına göre düzenlenebilir form.
-    // ProfileViewModel.load(userId) ile mevcut profili oku,
-    // kaydet'te ProfileViewModel.save(updated) çağır.
+    // TODO: Profil içeriği:
+    // - Alerji listesi (çoklu seçim)
+    // - Diyet tercihi (DietPreference seçimi)
+    // - Sağlık durumları (çoklu seçim)
+    // - ProfileViewModel.load / save ile Supabase profiles tablosuna bağla
+    // - Onboarding ile aynı seçenek listelerini paylaş, kopyalama
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
-      body: const FeaturePlaceholder(
-        icon: Icons.person_rounded,
-        title: 'Profil',
-        description:
-            'Alerji, diyet ve sağlık bilgilerinin düzenlendiği ekran. '
-            'Bu ekranın içeriği henüz yazılmadı.',
-        todos: <String>[
-          'Alerji listesi — çoklu seçim',
-          'Diyet tercihi — DietPreference seçimi',
-          'Sağlık durumları — çoklu seçim',
-          'ProfileViewModel.load / save ile Supabase profiles tablosuna bağla',
-          'Onboarding ile aynı seçenek listelerini paylaş, kopyalama',
-        ],
-      ),
+      body: const FeaturePlaceholder(icon: Icons.person_rounded),
     );
   }
 }

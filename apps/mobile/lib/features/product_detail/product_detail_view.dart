@@ -14,27 +14,16 @@ class ProductDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: ProductDetailViewModel'i dinle, status'e göre:
     // - loading: yükleniyor göstergesi
-    // - found/partial: WarningBanner + içindekiler + katkı maddeleri
-    //   + besin değerleri + Nutri-Score
-    //   (banner hazır: widgets/warning_banner.dart, level'a göre renk seçer)
+    // - found/partial: en üstte WarningBanner (widgets/warning_banner.dart —
+    //   hazır, Explanation.level'a göre renk seçiyor), ardından ürün adı,
+    //   içindekiler, katkı maddeleri, besin değerleri, Nutri-Score,
+    //   açıklama metni ve diyet notu
     // - notFound: Figma "Urun Bulunamadi" mockup'ı
+    //
+    // Zorunlu disclaimer metni her durumda gösterilmeli.
     return Scaffold(
       appBar: AppBar(title: const Text('Ürün Detay')),
-      body: const FeaturePlaceholder(
-        icon: Icons.inventory_2_rounded,
-        title: 'Ürün Detay',
-        description:
-            'Taranan ürünün kişiselleştirilmiş değerlendirmesi. '
-            'Bu ekranın içeriği henüz yazılmadı.',
-        todos: <String>[
-          'En üstte WarningBanner (widgets/warning_banner.dart) — hazır, '
-              'Explanation.level\'a göre renk seçiyor',
-          'Ürün adı, içindekiler, katkı maddeleri, besin değerleri, Nutri-Score',
-          'Açıklama metni ve diyet notu (Explanation)',
-          'Zorunlu disclaimer metnini her durumda göster',
-          'status notFound / partial için ayrı boş-durum görünümleri',
-        ],
-      ),
+      body: const FeaturePlaceholder(icon: Icons.inventory_2_rounded),
     );
   }
 }

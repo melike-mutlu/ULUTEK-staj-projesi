@@ -10,9 +10,12 @@ class ScanView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: MobileScanner widget'ı + manuel giriş yedeği.
-    // Barkod okunduğunda ScanViewModel.onBarcodeScanned(barcode) çağrılır,
-    // sonuç ile AppRoutes.productDetail'e yönlendirilir.
+    // TODO: Tarama içeriği:
+    // - MobileScanner kamera görünümü + hedef çerçevesi
+    // - Kamera izni reddedilirse açıklama ve ayarlara yönlendirme
+    // - "Barkodu manuel gir" yedek seçeneği
+    // - Okunan barkodu ScanViewModel.onBarcodeScanned'e ver, sonucu
+    //   AppRoutes.productDetail'e taşı
     //
     // DİKKAT: Bu ekran hem sekme (IndexedStack içinde, sürekli canlı) hem de
     // ayrı bir route olarak açılabiliyor. Kamerayı sekme pasifken durdurmak
@@ -20,20 +23,7 @@ class ScanView extends StatelessWidget {
     // start/stop'u sekme değişimine ve uygulama yaşam döngüsüne bağlanmalı.
     return Scaffold(
       appBar: AppBar(title: const Text('Tara')),
-      body: const FeaturePlaceholder(
-        icon: Icons.qr_code_scanner_rounded,
-        title: 'Barkod Tarama',
-        description:
-            'Kamera ile barkod okuma ekranı. Bu ekranın içeriği henüz yazılmadı.',
-        todos: <String>[
-          'MobileScanner kamera görünümü + hedef çerçevesi',
-          'Kamera izni reddedilirse açıklama ve ayarlara yönlendirme',
-          '"Barkodu manuel gir" yedek seçeneği',
-          'Sekme pasifken / uygulama arka plandayken kamerayı durdur',
-          'Okunan barkodu ScanViewModel.onBarcodeScanned\'e ver, sonucu '
-              'AppRoutes.productDetail\'e taşı',
-        ],
-      ),
+      body: const FeaturePlaceholder(icon: Icons.qr_code_scanner_rounded),
     );
   }
 }

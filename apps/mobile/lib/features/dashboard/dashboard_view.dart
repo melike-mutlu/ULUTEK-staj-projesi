@@ -12,20 +12,14 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Figma "Ana Ekran" mockup'ına göre karşılama içeriğini kur.
-    // State için DashboardViewModel kullanılacak (şu an boş).
+    // TODO: Ana Sayfa içeriği:
+    // - Figma "Ana Ekran" mockup'ına göre selamlama ve profil özeti
+    // - Büyük "Tara" çağrısı -> AppRoutes.scan
+    // - DashboardViewModel: selamlama metni ve profil özeti verisi
     return Scaffold(
       appBar: AppBar(title: const Text('Ana Sayfa')),
       body: FeaturePlaceholder(
         icon: Icons.home_rounded,
-        title: 'Ana Sayfa',
-        description:
-            'Kullanıcıyı karşılayan giriş ekranı. Bu ekranın içeriği henüz yazılmadı.',
-        todos: const <String>[
-          'Figma "Ana Ekran" mockup\'ına göre selamlama ve profil özeti',
-          'Büyük "Tara" çağrısı — AppRoutes.scan\'e yönlendirir',
-          'DashboardViewModel: selamlama metni ve profil özeti verisi',
-        ],
         action: ElevatedButton.icon(
           onPressed: () => Navigator.pushNamed(context, AppRoutes.scan),
           icon: const Icon(Icons.qr_code_scanner_rounded),
