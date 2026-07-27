@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -30,21 +31,27 @@ class GlassBottomNav extends StatelessWidget {
   });
 
   /// Kapsülün yüksekliği. Tam yuvarlak köşe için yarıçap bunun yarısı.
-  static const double barHeight = 74;
+  static const double barHeight = 68;
 
   /// Kapsülün ekran kenarlarından boşluğu.
   static const double horizontalMargin = 16;
-  static const double bottomMargin = 2;
+
+  /// Alt boşluk sistemin güvenli alanına EKLENİR. Negatif olması barın güvenli
+  /// alanın içine doğru bu kadar sarkması demek; sonuç sıfırın altına inmez.
+  static const double bottomMargin = -3;
 
   /// Blur şiddeti — bilinçli olarak hafif tutuldu, arkadaki içerik seçilebilsin.
   static const double blurSigma = 12;
 
   /// Sekme ekranlarının altında bırakılması gereken boşluk: içerik barın
   /// arkasında kalmasın diye. Sistem güvenli alanı buna ayrıca eklenir.
-  static const double reservedHeight = barHeight + bottomMargin;
+  ///
+  /// [bottomMargin] negatifken bilerek düşülmüyor: birkaç piksel fazla boşluk
+  /// zararsız, eksik boşluk ise içeriği barın altında bırakır.
+  static const double reservedHeight = barHeight;
 
   /// Kayan highlight'ın ölçüleri. Genişliği sekme genişliğinden bu kadar dar.
-  static const double _indicatorInset = 6;
+  static const double _indicatorInset = 2;
   static const double _indicatorHeight = barHeight - 12;
 
   /// Sekme ikonunun boyutu — bar yüksekliğiyle orantılı.
@@ -90,83 +97,86 @@ class GlassBottomNav extends StatelessWidget {
     final borderRadius = BorderRadius.circular(barHeight / 2);
     final position = indicatorPosition.clamp(0.0, _items.length - 1.0);
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          horizontalMargin,
-          0,
-          horizontalMargin,
-          bottomMargin,
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: borderRadius,
-            boxShadow: const <BoxShadow>[
-              BoxShadow(
-                color: AppColors.glassShadow,
-                blurRadius: 24,
-                offset: Offset(0, 8),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: borderRadius,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-              child: Container(
-                height: barHeight,
-                decoration: BoxDecoration(
-                  color: AppColors.glassSurface,
-                  borderRadius: borderRadius,
-                  border: Border.all(color: AppColors.glassBorder),
-                ),
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    final slotWidth = constraints.maxWidth / _items.length;
-                    final indicatorWidth = slotWidth - _indicatorInset * 2;
+    // SafeArea yerine elle hesap: bottomMargin negatif olabildiği için barın
+    // güvenli alana bir miktar sarkmasına izin veriyoruz, ama ekranın dışına
+    // taşmasına değil.
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+    final bottomInset = math.max(0.0, safeBottom + bottomMargin);
 
-                    return Stack(
-                      children: <Widget>[
-                        // Tek highlight, sekmeler arasında kayar. Konumu
-                        // sayfanın kayma miktarından geldiği için ayrıca
-                        // animasyona gerek yok — parmağı birebir takip eder.
-                        Positioned(
-                          left: position * slotWidth + _indicatorInset,
-                          top: (barHeight - _indicatorHeight) / 2,
-                          width: indicatorWidth,
-                          height: _indicatorHeight,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: AppColors.navIndicator,
-                              // Barla aynı yarıçap; gösterge bardan alçak
-                              // olduğu için Flutter bunu tam kapsüle kırpar,
-                              // yani barın yuvarlaklığıyla uyumlu durur.
-                              borderRadius: borderRadius,
-                            ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        horizontalMargin,
+        0,
+        horizontalMargin,
+        bottomInset,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: AppColors.glassShadow,
+              blurRadius: 24,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: borderRadius,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+            child: Container(
+              height: barHeight,
+              decoration: BoxDecoration(
+                color: AppColors.glassSurface,
+                borderRadius: borderRadius,
+                border: Border.all(color: AppColors.glassBorder),
+              ),
+              child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  final slotWidth = constraints.maxWidth / _items.length;
+                  final indicatorWidth = slotWidth - _indicatorInset * 2;
+
+                  return Stack(
+                    children: <Widget>[
+                      // Tek highlight, sekmeler arasında kayar. Konumu
+                      // sayfanın kayma miktarından geldiği için ayrıca
+                      // animasyona gerek yok — parmağı birebir takip eder.
+                      Positioned(
+                        left: position * slotWidth + _indicatorInset,
+                        top: (barHeight - _indicatorHeight) / 2,
+                        width: indicatorWidth,
+                        height: _indicatorHeight,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColors.navIndicator,
+                            // Barla aynı yarıçap; gösterge bardan alçak
+                            // olduğu için Flutter bunu tam kapsüle kırpar,
+                            // yani barın yuvarlaklığıyla uyumlu durur.
+                            borderRadius: borderRadius,
                           ),
                         ),
-                        Row(
-                          children: <Widget>[
-                            for (int i = 0; i < _items.length; i++)
-                              Expanded(
-                                child: _NavButton(
-                                  item: _items[i],
-                                  isSelected: _items[i].tab == currentTab,
-                                  // Gösterge bu sekmeye ne kadar yakınsa
-                                  // renk o kadar seçili tonuna kayar.
-                                  selection:
-                                      (1 - (position - i).abs()).clamp(0.0, 1.0),
-                                  iconSize: _iconSize,
-                                  onTap: () => onTabSelected(_items[i].tab),
-                                ),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          for (int i = 0; i < _items.length; i++)
+                            Expanded(
+                              child: _NavButton(
+                                item: _items[i],
+                                isSelected: _items[i].tab == currentTab,
+                                // Gösterge bu sekmeye ne kadar yakınsa
+                                // renk o kadar seçili tonuna kayar.
+                                selection:
+                                    (1 - (position - i).abs()).clamp(0.0, 1.0),
+                                iconSize: _iconSize,
+                                onTap: () => onTabSelected(_items[i].tab),
                               ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),

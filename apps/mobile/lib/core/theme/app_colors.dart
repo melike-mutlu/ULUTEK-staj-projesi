@@ -52,5 +52,5 @@ abstract final class AppColors {
   /// highlight sadece konumu belli ediyor.
   static const Color navIndicator = Color(0x1412211A);
   static const Color navSelected = brandDark;
-  static const Color navUnselected = textSecondary;
+  static const Color navUnselected = textPrimary;
 }
