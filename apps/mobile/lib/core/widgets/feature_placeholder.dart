@@ -26,28 +26,39 @@ class FeaturePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              width: 72,
-              height: 72,
-              decoration: const BoxDecoration(
-                color: AppColors.brandSoft,
-                shape: BoxShape.circle,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          // Ortalanmış içerik, ama dar ekranda (yatay mod, küçük telefon)
+          // taşmak yerine kayabilsin.
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: const BoxDecoration(
+                        color: AppColors.brandSoft,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, size: 32, color: AppColors.brandDark),
+                    ),
+                    if (action != null) ...<Widget>[
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: action,
+                      ),
+                    ],
+                  ],
+                ),
               ),
-              child: Icon(icon, size: 32, color: AppColors.brandDark),
             ),
-            if (action != null) ...<Widget>[
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: action,
-              ),
-            ],
-          ],
-        ),
+          );
+        },
       ),
     );
   }

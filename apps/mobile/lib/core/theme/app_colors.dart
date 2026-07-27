@@ -47,8 +47,10 @@ abstract final class AppColors {
   static const Color glassBorder = Color(0x1F12211A);
   static const Color glassShadow = Color(0x1A12211A);
 
-  /// Aktif sekmenin arkasındaki soft pill highlight.
-  static const Color navIndicator = brandSoft;
+  /// Aktif sekmenin arkasında kayan soft pill highlight.
+  /// Marka rengi değil nötr bir ton: vurguyu ikon ve etiket taşıyor,
+  /// highlight sadece konumu belli ediyor.
+  static const Color navIndicator = Color(0x1412211A);
   static const Color navSelected = brandDark;
   static const Color navUnselected = textSecondary;
 }

@@ -9,7 +9,11 @@ import '../shell_viewmodel.dart';
 /// Ekranın altında yüzen kapsül (pill) biçimli alt navigasyon barı.
 ///
 /// Kenarlardan margin'li, tam yuvarlak, yarı saydam; arkasındaki içerik hafif
-/// blur'lanır (glassmorphism). Aktif sekmenin arkasında soft pill highlight var.
+/// blur'lanır (glassmorphism).
+///
+/// Aktif sekme göstergesi tek bir highlight'tır: sekmeler arasında kayar,
+/// boyutu her sekmede aynıdır (sekme genişliğine göre hesaplanır, etiket
+/// uzunluğundan etkilenmez).
 ///
 /// Bar içeriğin ÜSTÜNDE yüzdüğü için sekme ekranlarının altında yer ayrılması
 /// gerekir — bunu [reservedHeight] üzerinden `ShellView` hallediyor.
@@ -33,6 +37,13 @@ class GlassBottomNav extends StatelessWidget {
   /// Sekme ekranlarının altında bırakılması gereken boşluk: içerik barın
   /// arkasında kalmasın diye. Sistem güvenli alanı buna ayrıca eklenir.
   static const double reservedHeight = barHeight + bottomMargin;
+
+  /// Kayan highlight'ın ölçüleri. Genişliği sekme genişliğinden bu kadar dar.
+  static const double _indicatorInset = 8;
+  static const double _indicatorHeight = barHeight - 12;
+
+  /// Highlight'ın kayma ve renklerin geçiş süresi.
+  static const Duration _motionDuration = Duration(milliseconds: 320);
 
   final ShellTab currentTab;
   final ValueChanged<ShellTab> onTabSelected;
@@ -67,6 +78,8 @@ class GlassBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(barHeight / 2);
+    final selectedIndex =
+        _items.indexWhere((_NavItem item) => item.tab == currentTab);
 
     return SafeArea(
       top: false,
@@ -99,17 +112,46 @@ class GlassBottomNav extends StatelessWidget {
                   borderRadius: borderRadius,
                   border: Border.all(color: AppColors.glassBorder),
                 ),
-                child: Row(
-                  children: <Widget>[
-                    for (final item in _items)
-                      Expanded(
-                        child: _NavButton(
-                          item: item,
-                          isSelected: item.tab == currentTab,
-                          onTap: () => onTabSelected(item.tab),
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    final slotWidth = constraints.maxWidth / _items.length;
+                    final indicatorWidth = slotWidth - _indicatorInset * 2;
+
+                    return Stack(
+                      children: <Widget>[
+                        // Tek highlight, sekmeler arasında kayar.
+                        AnimatedPositioned(
+                          duration: _motionDuration,
+                          curve: Curves.easeOutCubic,
+                          left: selectedIndex * slotWidth + _indicatorInset,
+                          top: (barHeight - _indicatorHeight) / 2,
+                          width: indicatorWidth,
+                          height: _indicatorHeight,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: AppColors.navIndicator,
+                              borderRadius: BorderRadius.circular(
+                                _indicatorHeight / 2,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                  ],
+                        Row(
+                          children: <Widget>[
+                            for (final _NavItem item in _items)
+                              Expanded(
+                                child: _NavButton(
+                                  item: item,
+                                  isSelected: item.tab == currentTab,
+                                  duration: _motionDuration,
+                                  onTap: () => onTabSelected(item.tab),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -134,60 +176,72 @@ class _NavItem {
   final IconData activeIcon;
 }
 
+/// Tek sekme. Kendi arka planını çizmez — highlight barın altında ayrı bir
+/// katman olarak kayar. Burada sadece ikon/etiket rengi ve ikonun dolu/boş
+/// hâli yumuşakça geçiş yapar.
 class _NavButton extends StatelessWidget {
   const _NavButton({
     required this.item,
     required this.isSelected,
+    required this.duration,
     required this.onTap,
   });
 
   final _NavItem item;
   final bool isSelected;
+  final Duration duration;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        isSelected ? AppColors.navSelected : AppColors.navUnselected;
-
     return Semantics(
       button: true,
       selected: isSelected,
       label: item.label,
-      child: InkResponse(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        radius: 48,
-        containedInkWell: true,
-        highlightShape: BoxShape.rectangle,
-        borderRadius: BorderRadius.circular(20),
-        child: Center(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOut,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.navIndicator : Colors.transparent,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Icon(
-                  isSelected ? item.activeIcon : item.icon,
-                  size: 22,
-                  color: color,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  item.label,
-                  style: AppTextStyles.navLabel.copyWith(color: color),
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: isSelected ? 1 : 0),
+          duration: duration,
+          curve: Curves.easeOutCubic,
+          builder: (BuildContext context, double t, Widget? child) {
+            final color = Color.lerp(
+              AppColors.navUnselected,
+              AppColors.navSelected,
+              t,
+            )!;
+
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Boş ve dolu ikon üst üste; seçim ilerledikçe çapraz geçiş.
+                  Stack(
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      Opacity(
+                        opacity: 1 - t,
+                        child: Icon(item.icon, size: 22, color: color),
+                      ),
+                      Opacity(
+                        opacity: t,
+                        child: Icon(item.activeIcon, size: 22, color: color),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item.label,
+                    style: AppTextStyles.navLabel.copyWith(color: color),
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
