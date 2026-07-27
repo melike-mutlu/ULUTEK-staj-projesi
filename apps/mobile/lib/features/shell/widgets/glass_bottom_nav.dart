@@ -50,9 +50,17 @@ class GlassBottomNav extends StatelessWidget {
   /// zararsız, eksik boşluk ise içeriği barın altında bırakır.
   static const double reservedHeight = barHeight;
 
-  /// Kayan highlight'ın ölçüleri. Genişliği sekme genişliğinden bu kadar dar.
-  static const double _indicatorInset = 2;
-  static const double _indicatorHeight = barHeight - 12;
+  /// Göstergenin bardan HER YÖNDE eşit boşluğu.
+  ///
+  /// Eşit olması şart: bar tam kapsül (yarıçap = yükseklik / 2) olduğu için,
+  /// her yönden eşit boşluklu bir iç kapsülün yarıçapı kendiliğinden
+  /// `barYarıçapı - boşluk` çıkar; yani iki şekil eşmerkezli olur. Yatay ve
+  /// dikey boşluk farklı olursa köşe eğrileri barınkiyle uyuşmaz.
+  static const double _indicatorInset = 4;
+  static const double _indicatorHeight = barHeight - _indicatorInset * 2;
+
+  /// = barHeight / 2 - _indicatorInset (bkz. yukarıdaki not).
+  static const double _indicatorRadius = _indicatorHeight / 2;
 
   /// Sekme ikonunun boyutu — bar yüksekliğiyle orantılı.
   static const double _iconSize = 26;
@@ -150,10 +158,11 @@ class GlassBottomNav extends StatelessWidget {
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             color: AppColors.navIndicator,
-                            // Barla aynı yarıçap; gösterge bardan alçak
-                            // olduğu için Flutter bunu tam kapsüle kırpar,
-                            // yani barın yuvarlaklığıyla uyumlu durur.
-                            borderRadius: borderRadius,
+                            // Barla eşmerkezli yarıçap: barınkinden tam olarak
+                            // aradaki boşluk kadar küçük.
+                            borderRadius: BorderRadius.circular(
+                              _indicatorRadius,
+                            ),
                           ),
                         ),
                       ),
