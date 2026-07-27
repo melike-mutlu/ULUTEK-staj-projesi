@@ -6,6 +6,7 @@ import '../../features/onboarding/onboarding_view.dart';
 import '../../features/product_detail/product_detail_view.dart';
 import '../../features/profile/profile_view.dart';
 import '../../features/scan/scan_view.dart';
+import '../../features/shell/shell_view.dart';
 
 /// Uygulamadaki TÜM route adları ve eşleştikleri ekranlar burada tanımlanır.
 ///
@@ -18,6 +19,10 @@ import '../../features/scan/scan_view.dart';
 abstract final class AppRoutes {
   /// Profil kurulumu — uygulamanın ilk açılış akışı.
   static const String onboarding = '/onboarding';
+
+  /// Alt navigasyon kabuğu — onboarding bitince girilen ana ekran.
+  /// 4 sekmeyi (Ana Sayfa · Tara · Geçmiş · Profil) barındırır.
+  static const String shell = '/';
 
   /// Ana Sayfa — alt navigasyonun 1. sekmesi.
   static const String dashboard = '/dashboard';
@@ -43,6 +48,7 @@ abstract final class AppRoutes {
   /// kayıtlar onları ayrıca tek başına (kabuksuz) açabilmek için durur.
   static Map<String, WidgetBuilder> get table => <String, WidgetBuilder>{
         onboarding: (_) => const OnboardingView(),
+        shell: (_) => const ShellView(),
         dashboard: (_) => const DashboardView(),
         scan: (_) => const ScanView(),
         home: (_) => const HomeView(),

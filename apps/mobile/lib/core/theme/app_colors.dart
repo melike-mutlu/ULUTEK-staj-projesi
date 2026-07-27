@@ -41,7 +41,10 @@ abstract final class AppColors {
   // --- Cam efekti (floating bottom navigation) ---
   /// Yarı saydam bar zemini — arkasındaki içerik blur'lanıp bunun altından görünür.
   static const Color glassSurface = Color(0xCCFFFFFF);
-  static const Color glassBorder = Color(0x33FFFFFF);
+
+  /// Kapsülün kenar çizgisi. Açık zeminde beyaz bir kenar kaybolduğu için
+  /// düşük opaklıkta koyu ton kullanılıyor.
+  static const Color glassBorder = Color(0x1F12211A);
   static const Color glassShadow = Color(0x1A12211A);
 
   /// Aktif sekmenin arkasındaki soft pill highlight.
