@@ -151,6 +151,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
         contentMaxWidth: _contentMaxWidth,
         onWelcomeIndexChanged: viewModel.goToStep,
         onSkip: viewModel.skipWelcome,
+        onPrimaryPressed: () => _handlePrimaryPressed(viewModel),
       );
     } else {
       bodyKey = ValueKey<int>(currentIndex);
@@ -222,46 +223,30 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                   child: KeyedSubtree(key: bodyKey, child: body),
                 ),
               ),
-              // Karşılama ekranlarında buton yalnızca 2. ekranda görünür; ama
-              // iki karşılama ekranı aynı PageView'i paylaştığı için butonun
-              // görünüp kaybolması ortak `Expanded`'i büyütüp küçültür ve
-              // içeriği yerinden oynatırdı. Bu yüzden karşılama ekranlarında
-              // buton gizliyken bile yerini rezerve ediyoruz (maintainSize) →
-              // görsel/metin iki ekran arasında sabit kalır.
-              if (viewModel.showPrimaryButton || isWelcomeStep)
-                Visibility(
-                  visible: viewModel.showPrimaryButton,
-                  maintainSize: isWelcomeStep,
-                  maintainAnimation: isWelcomeStep,
-                  maintainState: isWelcomeStep,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      _horizontalPadding,
-                      0,
-                      _horizontalPadding,
-                      _horizontalPadding,
-                    ),
-                    child: OnboardingPrimaryButton(
-                      label: viewModel.primaryActionLabel,
-                      icon: isSelectionStep
-                          ? (showSkipIcon
-                              ? Icons.check_rounded
-                              : Icons.chevron_right_rounded)
-                          : null,
-                      iconAtEnd: !showSkipIcon,
-                      isLoading: viewModel.isSaving,
-                      onPressed: () => _handlePrimaryPressed(viewModel),
-                    ),
+              // Karşılama ekranlarının butonu artık adımın kendi içeriğinde
+              // (bkz. OnboardingWelcomeStep) — sayfayla birlikte kayar. Burada
+              // yalnızca seçim ekranlarının alt butonu çizilir.
+              if (isSelectionStep)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    _horizontalPadding,
+                    0,
+                    _horizontalPadding,
+                    _horizontalPadding,
+                  ),
+                  child: OnboardingPrimaryButton(
+                    label: viewModel.primaryActionLabel,
+                    icon: showSkipIcon
+                        ? Icons.check_rounded
+                        : Icons.chevron_right_rounded,
+                    iconAtEnd: !showSkipIcon,
+                    isLoading: viewModel.isSaving,
+                    onPressed: () => _handlePrimaryPressed(viewModel),
                   ),
                 ),
               if (isWelcomeStep)
                 Padding(
-                  // Buton yeri iki karşılama ekranında da rezerve edildiği
-                  // için nokta göstergesinin üst boşluğu da sabit tutulur.
-                  padding: const EdgeInsets.only(
-                    top: 16,
-                    bottom: _horizontalPadding,
-                  ),
+                  padding: const EdgeInsets.only(bottom: _horizontalPadding),
                   child: Center(
                     child: _WelcomeDots(
                       count: welcomeSteps.length,
@@ -293,6 +278,7 @@ class _WelcomePager extends StatefulWidget {
     required this.contentMaxWidth,
     required this.onWelcomeIndexChanged,
     required this.onSkip,
+    required this.onPrimaryPressed,
   });
 
   final List<onboarding_steps.OnboardingWelcomeStep> steps;
@@ -301,6 +287,7 @@ class _WelcomePager extends StatefulWidget {
   final double contentMaxWidth;
   final ValueChanged<int> onWelcomeIndexChanged;
   final VoidCallback onSkip;
+  final VoidCallback onPrimaryPressed;
 
   @override
   State<_WelcomePager> createState() => _WelcomePagerState();
@@ -338,6 +325,7 @@ class _WelcomePagerState extends State<_WelcomePager> {
                 child: OnboardingWelcomeStep(
                   step: step,
                   onSkip: widget.onSkip,
+                  onPrimaryPressed: widget.onPrimaryPressed,
                 ),
               ),
             ),

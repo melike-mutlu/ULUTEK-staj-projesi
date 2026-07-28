@@ -57,13 +57,6 @@ class OnboardingViewModel extends ChangeNotifier {
     return (index + 1) / selectionSteps.length;
   }
 
-  /// `ctaLabel`'ı `null` olan karşılama adımlarında (Figma: 1. ekran) alt
-  /// buton hiç gösterilmez.
-  bool get showPrimaryButton {
-    final step = currentStep;
-    return step is! OnboardingWelcomeStep || step.ctaLabel != null;
-  }
-
   /// Sabit seçenekler + kullanıcının "+" ile eklediği seçenekler.
   List<String> optionsFor(OnboardingField field) => <String>[
         ..._stepsByField[field]!.options,
