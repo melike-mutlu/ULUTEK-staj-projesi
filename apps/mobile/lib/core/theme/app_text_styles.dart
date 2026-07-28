@@ -84,4 +84,63 @@ abstract final class AppTextStyles {
     fontWeight: FontWeight.w700,
     color: AppColors.textOnStatus,
   );
+
+  // --- Onboarding ---
+  /// Seçim ekranlarındaki soru kartının başlığı.
+  static const TextStyle onboardingQuestion = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 24,
+    height: 1.25,
+    fontWeight: FontWeight.w700,
+    color: AppColors.textPrimary,
+  );
+
+  /// Seçim çiplerinin etiketi.
+  static const TextStyle chipLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 17,
+    height: 1.2,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
+  // Kaynak: Figma "Onboarding" dosyası — karşılama ekranları (node 0:3, 1:2).
+  // Figma'daki font ailesi "Nunito"; henüz asset olarak eklenmedi, bkz.
+  // yukarıdaki `fontFamily` TODO'su — o kesinleşince bu stiller otomatik alır.
+
+  /// Karşılama ekranlarının başlığı.
+  static const TextStyle onboardingWelcomeTitle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 40,
+    height: 1.025,
+    fontWeight: FontWeight.w700,
+    color: AppColors.onboardingTextPrimary,
+  );
+
+  /// Karşılama ekranlarının açıklama metni.
+  static const TextStyle onboardingWelcomeBody = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 16,
+    height: 1.375,
+    fontWeight: FontWeight.w400,
+    color: AppColors.onboardingTextPrimary,
+  );
+
+  /// Onboarding'in tek CTA butonu.
+  static const TextStyle onboardingButtonLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 20,
+    height: 1.1,
+    fontWeight: FontWeight.w700,
+    color: AppColors.onboardingButtonText,
+  );
+
+  /// 1. karşılama ekranındaki "Skip" linki.
+  static const TextStyle onboardingSkipLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 16,
+    height: 1.375,
+    fontWeight: FontWeight.w400,
+    color: AppColors.onboardingSkipText,
+  );
 }

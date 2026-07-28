@@ -1,5 +1,6 @@
 import 'package:akilli_sepet/app.dart';
 import 'package:akilli_sepet/features/onboarding/onboarding_view.dart';
+import 'package:akilli_sepet/features/onboarding/widgets/onboarding_primary_button.dart';
 import 'package:akilli_sepet/features/profile/profile_view.dart';
 import 'package:akilli_sepet/features/shell/shell_view.dart';
 import 'package:akilli_sepet/features/shell/shell_viewmodel.dart';
@@ -29,9 +30,13 @@ void main() {
         Navigator.of(tester.element(find.byType(OnboardingView)));
     expect(navigator.canPop(), isFalse);
 
-    // Tamamlaninca kabuga gecer ve onboarding yigindan cikar.
-    await tester.tap(find.text('Atla (geçici)'));
-    await tester.pumpAndSettle();
+    // Tamamlaninca kabuga gecer ve onboarding yigindan cikar: 5 adim
+    // boyunca OnboardingPrimaryButton'a basilir (skip metniyle de olsa
+    // buton her zaman aktiftir, bkz. onboarding-plan.md §4c).
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.byType(OnboardingPrimaryButton));
+      await tester.pumpAndSettle();
+    }
     expect(find.byType(ShellView), findsOneWidget);
     expect(find.byType(OnboardingView), findsNothing);
   });
