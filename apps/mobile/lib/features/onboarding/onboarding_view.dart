@@ -222,30 +222,44 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                   child: KeyedSubtree(key: bodyKey, child: body),
                 ),
               ),
-              if (viewModel.showPrimaryButton)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    _horizontalPadding,
-                    0,
-                    _horizontalPadding,
-                    _horizontalPadding,
-                  ),
-                  child: OnboardingPrimaryButton(
-                    label: viewModel.primaryActionLabel,
-                    icon: isSelectionStep
-                        ? (showSkipIcon
-                            ? Icons.check_rounded
-                            : Icons.chevron_right_rounded)
-                        : null,
-                    iconAtEnd: !showSkipIcon,
-                    isLoading: viewModel.isSaving,
-                    onPressed: () => _handlePrimaryPressed(viewModel),
+              // Karşılama ekranlarında buton yalnızca 2. ekranda görünür; ama
+              // iki karşılama ekranı aynı PageView'i paylaştığı için butonun
+              // görünüp kaybolması ortak `Expanded`'i büyütüp küçültür ve
+              // içeriği yerinden oynatırdı. Bu yüzden karşılama ekranlarında
+              // buton gizliyken bile yerini rezerve ediyoruz (maintainSize) →
+              // görsel/metin iki ekran arasında sabit kalır.
+              if (viewModel.showPrimaryButton || isWelcomeStep)
+                Visibility(
+                  visible: viewModel.showPrimaryButton,
+                  maintainSize: isWelcomeStep,
+                  maintainAnimation: isWelcomeStep,
+                  maintainState: isWelcomeStep,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      _horizontalPadding,
+                      0,
+                      _horizontalPadding,
+                      _horizontalPadding,
+                    ),
+                    child: OnboardingPrimaryButton(
+                      label: viewModel.primaryActionLabel,
+                      icon: isSelectionStep
+                          ? (showSkipIcon
+                              ? Icons.check_rounded
+                              : Icons.chevron_right_rounded)
+                          : null,
+                      iconAtEnd: !showSkipIcon,
+                      isLoading: viewModel.isSaving,
+                      onPressed: () => _handlePrimaryPressed(viewModel),
+                    ),
                   ),
                 ),
               if (isWelcomeStep)
                 Padding(
-                  padding: EdgeInsets.only(
-                    top: viewModel.showPrimaryButton ? 16 : 0,
+                  // Buton yeri iki karşılama ekranında da rezerve edildiği
+                  // için nokta göstergesinin üst boşluğu da sabit tutulur.
+                  padding: const EdgeInsets.only(
+                    top: 16,
                     bottom: _horizontalPadding,
                   ),
                   child: Center(

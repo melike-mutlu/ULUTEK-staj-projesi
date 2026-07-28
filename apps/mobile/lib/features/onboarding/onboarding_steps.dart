@@ -15,6 +15,8 @@ final class OnboardingWelcomeStep extends OnboardingStep {
     this.skipLabel,
     this.imageScale = 1,
     this.contentTopOffset = 0,
+    this.imageTopOffset = 0,
+    this.textTopOffset = 0,
   });
 
   final String assetPath;
@@ -36,6 +38,12 @@ final class OnboardingWelcomeStep extends OnboardingStep {
 
   /// Görsel + metin bloğunu (Skip linki hariç) bu kadar aşağı kaydırır.
   final double contentTopOffset;
+
+  /// Yalnızca ortadaki görseli, metni etkilemeden bu kadar aşağı kaydırır.
+  final double imageTopOffset;
+
+  /// Yalnızca başlık + açıklama bloğunu bu kadar aşağı kaydırır.
+  final double textTopOffset;
 }
 
 /// Soru + çoklu seçim çipleri taşıyan adım.
@@ -66,6 +74,7 @@ const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
     skipLabel: 'Skip',
     imageScale: 0.7,
     contentTopOffset: 20,
+    imageTopOffset: 45,
   ),
   OnboardingWelcomeStep(
     assetPath: 'assets/images/onboarding_scan.svg',
@@ -74,6 +83,8 @@ const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
         'uygun olup olmadığını anında söyleyelim.',
     ctaLabel: 'Başlayalım!',
     imageScale: 3.5,
+    imageTopOffset: 30,
+    textTopOffset: 8,
   ),
   OnboardingSelectionStep(
     field: OnboardingField.allergies,

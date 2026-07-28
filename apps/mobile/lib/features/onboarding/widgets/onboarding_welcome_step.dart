@@ -32,33 +32,39 @@ class OnboardingWelcomeStep extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Expanded(
-                child: ClipRect(
-                  child: Transform.scale(
-                    scale: step.imageScale,
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: SvgPicture.asset(step.assetPath),
+                child: Transform.translate(
+                  offset: Offset(0, step.imageTopOffset),
+                  child: ClipRect(
+                    child: Transform.scale(
+                      scale: step.imageScale,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: SvgPicture.asset(step.assetPath),
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: _imageTitleGap),
               Flexible(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      step.title,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.onboardingWelcomeTitle,
-                    ),
-                    const SizedBox(height: _titleBodyGap),
-                    Text(
-                      step.body,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.onboardingWelcomeBody,
-                    ),
-                  ],
+                child: Transform.translate(
+                  offset: Offset(0, step.textTopOffset),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        step.title,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.onboardingWelcomeTitle,
+                      ),
+                      const SizedBox(height: _titleBodyGap),
+                      Text(
+                        step.body,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.onboardingWelcomeBody,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
