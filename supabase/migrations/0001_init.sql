@@ -73,9 +73,13 @@ create table pending_products (
   user_id uuid references auth.users(id) on delete cascade,
   product_name text,
   ingredients_text text,
-  status text not null default 'PENDING',
-  created_at timestamptz not null default now()
+  status text not null default 'PENDING' check (status in ('PENDING', 'APPROVED', 'REJECTED')),
+  created_at timestamptz not null default now(),
+  constraint pending_products_user_id_barcode_key unique (user_id, barcode)
 );
+
+create index idx_pending_products_user_id on pending_products (user_id);
+create index idx_pending_products_barcode on pending_products (barcode);
 
 alter table pending_products enable row level security;
 
@@ -96,6 +100,8 @@ create table scan_history (
   barcode text not null,
   scanned_at timestamptz not null default now()
 );
+
+create index idx_scan_history_user_id_scanned_at on scan_history (user_id, scanned_at desc);
 
 alter table scan_history enable row level security;
 
