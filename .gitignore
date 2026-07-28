@@ -12,5 +12,5 @@
 .env.*
 !.env.example
 
-# Claude Code proje talimatları — repoya gönderilmesin
+
 CLAUDE.md
