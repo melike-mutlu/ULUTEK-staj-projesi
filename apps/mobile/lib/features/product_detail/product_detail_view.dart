@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/warning_banner.dart';
 
 /// Figma: "Ürün Detay Kırmızı/Sarı/Yeşil" mockup'ları — tek View, ViewModel
 /// durumuna göre farklı içerik gösterir (ayrı ayrı 3 ekran değil).
