@@ -15,7 +15,7 @@ class AkilliSepetApp extends StatelessWidget {
       title: 'Akıllı Sepet',
       // TODO: Figma'daki renk paleti ve tipografiye göre ThemeData tanımla
       theme: ThemeData(useMaterial3: true),
-      initialRoute: '/scan',
+      initialRoute: '/onboarding',
       routes: {
         '/onboarding': (_) => const OnboardingView(),
         '/home': (_) => const HomeView(),
