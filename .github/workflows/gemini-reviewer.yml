@@ -12,8 +12,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Gemini Code Reviewer
-        uses: roqsan/gemini-code-reviewer@v1.0.0
+        uses: truongnh1992/gemini-ai-code-reviewer@main
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          EXCLUDE_PATTERNS: "*.md, *.json, package-lock.json"
+          EXCLUDE: "*.md, *.json, package-lock.json"
