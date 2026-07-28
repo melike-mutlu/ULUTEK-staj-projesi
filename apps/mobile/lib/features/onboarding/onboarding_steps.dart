@@ -74,7 +74,7 @@ const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
     skipLabel: 'Skip',
     imageScale: 0.7,
     contentTopOffset: 20,
-    imageTopOffset: 45,
+    imageTopOffset: 60,
   ),
   OnboardingWelcomeStep(
     assetPath: 'assets/images/onboarding_scan.svg',
