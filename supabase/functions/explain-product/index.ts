@@ -7,6 +7,7 @@
 // TODO (AI/LLM pod): callLlmPlaceholder() yerine gerçek LLM sağlayıcı çağrısı eklenecek.
 // API anahtarı yalnızca burada (sunucu tarafında), env variable olarak durur — istemciye asla geçmez.
 
+import { jsonResponse } from "../../services/shared/http.ts";
 Deno.serve(async (req) => {
   try {
     const { product, rule_engine_result, user_profile } = await req.json();
@@ -52,9 +53,4 @@ async function callLlmPlaceholder(_prompt: string) {
   };
 }
 
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
+
