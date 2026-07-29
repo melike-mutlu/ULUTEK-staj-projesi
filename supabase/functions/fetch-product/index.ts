@@ -8,7 +8,18 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const OFF_BASE_URL = "https://world.openfoodfacts.org/api/v2/product";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json",
+};
+
 Deno.serve(async (req) => {
+  // CORS Preflight istekleri için
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
   try {
     const { barcode } = await req.json();
     if (!barcode) {
@@ -21,12 +32,19 @@ Deno.serve(async (req) => {
     );
 
     // Çağıran kullanıcıyı isteğin Authorization header'ındaki JWT'den çöz.
-    const userClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } },
-    );
-    const { data: { user } } = await userClient.auth.getUser();
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const jwt = authHeader.replace("Bearer ", "");
+
+    let user = null;
+    if (jwt) {
+      const userClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data } = await userClient.auth.getUser(jwt);
+      user = data.user;
+    }
 
     let product = await getFromCache(supabase, barcode);
 
@@ -69,7 +87,9 @@ async function getFromCache(supabase: ReturnType<typeof createClient>, barcode: 
 }
 
 async function fetchFromOpenFoodFacts(barcode: string) {
-  const res = await fetch(`${OFF_BASE_URL}/${barcode}.json`);
+  const res = await fetch(`${OFF_BASE_URL}/${barcode}.json`, {
+    headers: { "User-Agent": "AkilliSepet - Backend - Version 1.0" },
+  });
   const json = await res.json();
   if (json.status !== 1) return null;
 
@@ -96,7 +116,6 @@ async function saveToCache(supabase: ReturnType<typeof createClient>, product: R
   return product;
 }
 
-// TODO (Backend pod): diyet tercihine göre gerçek diet_flags mantığı (vegan/diyabet) genişletilecek.
 function runRuleEngine(product: any, profile: any) {
   const userAllergies: string[] = profile?.allergies ?? [];
   const matched = userAllergies.filter((allergy) =>
@@ -109,8 +128,8 @@ function runRuleEngine(product: any, profile: any) {
     matched_allergens: matched,
     has_conflict: matched.length > 0,
     diet_flags: {
-      vegan_compatible: true, // TODO
-      diabetic_note: null, // TODO
+      vegan_compatible: true, // TODO (Backend pod)
+      diabetic_note: null,   // TODO (Backend pod)
     },
   };
 }
@@ -125,6 +144,6 @@ function findMissingFields(product: any) {
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: corsHeaders,
   });
 }
