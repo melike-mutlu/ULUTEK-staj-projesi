@@ -4,10 +4,6 @@ import '../data/repositories/profile_repository.dart';
 import '../features/onboarding/onboarding_viewmodel.dart';
 import '../features/scan/scan_viewmodel.dart';
 
-final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
-  return ProfileRepository();
-});
-
 final onboardingViewModelProvider =
     ChangeNotifierProvider<OnboardingViewModel>((ref) {
   return OnboardingViewModel(ref.watch(profileRepositoryProvider));
