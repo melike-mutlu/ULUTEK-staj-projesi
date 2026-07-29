@@ -1,8 +1,115 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 
-class ScanView extends StatelessWidget {
+/// Figma: "Tarama Ekranı" mockup — kamera görünümü + barkod çerçevesi.
+///
+/// Kamera/okuma mantığı feature/barkod_okuma PR'ından, tasarım feature/menus
+/// PR'ından geliyor. feature/api_baglantisi'nin yaptığı gibi Open Food
+/// Facts'i doğrudan istemciden çağırmıyoruz — okunan barkod
+/// ScanViewModel.onBarcodeScanned üzerinden bizim fetch-product Edge
+/// Function'ımıza gidiyor (bkz. docs/architecture.md, kural motoru orada
+/// çalışıyor).
+class ScanView extends ConsumerStatefulWidget {
   const ScanView({super.key});
+
+  @override
+  ConsumerState<ScanView> createState() => _ScanViewState();
+}
+
+class _ScanViewState extends ConsumerState<ScanView> {
+  final MobileScannerController _controller = MobileScannerController(
+    formats: const [BarcodeFormat.ean13, BarcodeFormat.ean8],
+  );
+
+  // Sonuç ekranına giderken aynı barkodu tekrar tekrar işlememek için.
+  bool _isHandlingBarcode = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleBarcode(String barcode) async {
+    if (_isHandlingBarcode) return;
+    _isHandlingBarcode = true;
+    await _controller.stop();
+
+    final result =
+        await ref.read(scanViewModelProvider).onBarcodeScanned(barcode);
+
+    if (!mounted) return;
+    await Navigator.pushNamed(context, '/product-detail', arguments: result);
+
+    if (!mounted) return;
+    _isHandlingBarcode = false;
+    await _controller.start();
+  }
+
+  void _showManualBarcodeDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Barkodu Girin'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'Örn: 8690504112233',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              final value = controller.text.trim();
+              if (value.isNotEmpty) _handleBarcode(value);
+            },
+            child: const Text('Ara'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _cornerBracket({required bool top, required bool left}) {
+    return Positioned(
+      top: top ? 12 : null,
+      bottom: top ? null : 12,
+      left: left ? 12 : null,
+      right: left ? null : 12,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          border: Border(
+            top: top
+                ? const BorderSide(color: AkilliSepetColors.primary, width: 3)
+                : BorderSide.none,
+            bottom: !top
+                ? const BorderSide(color: AkilliSepetColors.primary, width: 3)
+                : BorderSide.none,
+            left: left
+                ? const BorderSide(color: AkilliSepetColors.primary, width: 3)
+                : BorderSide.none,
+            right: !left
+                ? const BorderSide(color: AkilliSepetColors.primary, width: 3)
+                : BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +134,7 @@ class ScanView extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.flash_on, color: Colors.white),
-            onPressed: () {
-              // Flaş açma işlemi
-            },
+            onPressed: () => _controller.toggleTorch(),
           ),
         ],
       ),
@@ -38,127 +143,63 @@ class ScanView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Kamera Placeholder
             Expanded(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Kamera Görünümü Çerçevesi
-                    Container(
-                      width: 280,
-                      height: 280,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: AkilliSepetColors.primary,
-                          width: 3,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: 280,
+                        height: 280,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AkilliSepetColors.primary,
+                            width: 3,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Stack(
-                        children: [
-                          // Köşe Simgeleri
-                          Positioned(
-                            top: 12,
-                            left: 12,
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(
-                                    color: AkilliSepetColors.primary,
-                                    width: 3,
-                                  ),
-                                  left: BorderSide(
-                                    color: AkilliSepetColors.primary,
-                                    width: 3,
-                                  ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            MobileScanner(
+                              controller: _controller,
+                              onDetect: (capture) {
+                                for (final barcode in capture.barcodes) {
+                                  final value = barcode.rawValue;
+                                  if (value != null) {
+                                    _handleBarcode(value);
+                                    break;
+                                  }
+                                }
+                              },
+                            ),
+                            _cornerBracket(top: true, left: true),
+                            _cornerBracket(top: true, left: false),
+                            _cornerBracket(top: false, left: true),
+                            _cornerBracket(top: false, left: false),
+                            // Tarama Çizgisi
+                            Positioned(
+                              top: 140,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Container(
+                                  width: 200,
+                                  height: 2,
+                                  color: Colors.amber,
                                 ),
                               ),
                             ),
-                          ),
-                          Positioned(
-                            top: 12,
-                            right: 12,
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(
-                                    color: AkilliSepetColors.primary,
-                                    width: 3,
-                                  ),
-                                  right: BorderSide(
-                                    color: AkilliSepetColors.primary,
-                                    width: 3,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 12,
-                            left: 12,
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: AkilliSepetColors.primary,
-                                    width: 3,
-                                  ),
-                                  left: BorderSide(
-                                    color: AkilliSepetColors.primary,
-                                    width: 3,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 12,
-                            right: 12,
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: AkilliSepetColors.primary,
-                                    width: 3,
-                                  ),
-                                  right: BorderSide(
-                                    color: AkilliSepetColors.primary,
-                                    width: 3,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Tarama Çizgisi
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: Container(
-                                width: 200,
-                                height: 2,
-                                color: Colors.amber,
-                                margin: const EdgeInsets.only(top: 140),
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Açıklama Metni
                     Text(
-                      'Barkodu cerçeve içine hizala,\notomatik olarak okunacak',
+                      'Barkodu çerçeve içine hizala,\notomatik olarak okunacak',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.white70,
@@ -168,57 +209,18 @@ class ScanView extends StatelessWidget {
                 ),
               ),
             ),
-            // Butonlar
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Barkodu Elle Gir Butonu
                 ElevatedButton.icon(
                   icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    // Elle giriş diyaloğu
-                    _showManualBarcodeDialog(context);
-                  },
+                  onPressed: () => _showManualBarcodeDialog(context),
                   label: const Text('Barkodu Elle Gir'),
                 ),
               ],
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showManualBarcodeDialog(BuildContext context) {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Barkodu Girin'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: 'Örn: 8690504112233',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Barkod işleme
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/product-detail');
-            },
-            child: const Text('Ara'),
-          ),
-        ],
       ),
     );
   }
