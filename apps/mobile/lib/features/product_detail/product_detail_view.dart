@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/warning_banner.dart';
-
 /// Figma: "Ürün Detay Kırmızı/Sarı/Yeşil" mockup'ları — tek View, ViewModel
 /// durumuna göre farklı içerik gösterir (ayrı ayrı 3 ekran değil).
+///
+/// Şimdilik tam ekran route (AppRoutes.productDetail); bottom-sheet'e çevirme
+/// kararı sonraya bırakıldı.
 class ProductDetailView extends StatelessWidget {
   const ProductDetailView({super.key});
 
@@ -11,11 +12,15 @@ class ProductDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: ProductDetailViewModel'i dinle, status'e göre:
     // - loading: yükleniyor göstergesi
-    // - found/partial: WarningBanner + içindekiler + katkı maddeleri
-    //   + besin değerleri + Nutri-Score (bkz. widgets/warning_banner.dart)
+    // - found/partial: en üstte WarningBanner (widgets/warning_banner.dart —
+    //   hazır, Explanation.level'a göre renk seçiyor), ardından ürün adı,
+    //   içindekiler, katkı maddeleri, besin değerleri, Nutri-Score,
+    //   açıklama metni ve diyet notu
     // - notFound: Figma "Urun Bulunamadi" mockup'ı
-    return const Scaffold(
-      body: Center(child: Text('Ürün Detay')),
+    //
+    // Zorunlu disclaimer metni her durumda gösterilmeli.
+    return Scaffold(
+      appBar: AppBar(title: const Text('Ürün Detay')),
     );
   }
 }

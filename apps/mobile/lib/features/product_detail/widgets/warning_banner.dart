@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/explanation.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Ürün detay ekranının en üstündeki kişisel uyarı bandı.
 /// Figma mockup'larındaki 3 duruma karşılık gelir: Kırmızı / Sarı / Yeşil.
@@ -13,11 +15,11 @@ class WarningBanner extends StatelessWidget {
   Color _backgroundColor() {
     switch (explanation.level) {
       case WarningLevel.warning:
-        return const Color(0xFFF0402A);
+        return AppColors.warning;
       case WarningLevel.caution:
-        return const Color(0xFFFFB020);
+        return AppColors.caution;
       case WarningLevel.ok:
-        return const Color(0xFF1FA463);
+        return AppColors.ok;
     }
   }
 
@@ -29,8 +31,7 @@ class WarningBanner extends StatelessWidget {
       color: _backgroundColor(),
       child: Text(
         explanation.warningMessage,
-        style:
-            const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: AppTextStyles.bannerMessage,
       ),
     );
   }
