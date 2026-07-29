@@ -63,3 +63,52 @@ alter table product_cache enable row level security;
 create policy "Herkes ürün cache'ini okuyabilir"
   on product_cache for select
   using (true);
+
+-- ---------------------------------------------------------------------------
+-- pending_products: OFF'ta bulunamayan veya manuel eklenen ürünler
+-- ---------------------------------------------------------------------------
+create table pending_products (
+  id uuid primary key default gen_random_uuid(),
+  barcode text not null,
+  user_id uuid references auth.users(id) on delete cascade,
+  product_name text,
+  ingredients_text text,
+  status text not null default 'PENDING' check (status in ('PENDING', 'APPROVED', 'REJECTED')),
+  created_at timestamptz not null default now(),
+  constraint pending_products_user_id_barcode_key unique (user_id, barcode)
+);
+
+create index idx_pending_products_user_id on pending_products (user_id);
+create index idx_pending_products_barcode on pending_products (barcode);
+
+alter table pending_products enable row level security;
+
+create policy "Kullanıcı kendi eklediği askıdaki ürünleri okuyabilir"
+  on pending_products for select
+  using (auth.uid() = user_id);
+
+create policy "Kullanıcı yeni askıda ürün talebi oluşturabilir"
+  on pending_products for insert
+  with check (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- scan_history: Kullanıcıların barkod tarama geçmişi
+-- ---------------------------------------------------------------------------
+create table scan_history (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  barcode text not null,
+  scanned_at timestamptz not null default now()
+);
+
+create index idx_scan_history_user_id_scanned_at on scan_history (user_id, scanned_at desc);
+
+alter table scan_history enable row level security;
+
+create policy "Kullanıcı kendi tarama geçmişini okuyabilir"
+  on scan_history for select
+  using (auth.uid() = user_id);
+
+create policy "Kullanıcı tarama geçmişi ekleyebilir"
+  on scan_history for insert
+  with check (auth.uid() = user_id);

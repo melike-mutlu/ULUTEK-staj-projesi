@@ -1,7 +1,7 @@
-# Ortam değişkenleri (asla git'e eklenmemeli!)
+# Ortam değişkenleri (asla git'e eklenmemeli! - Supabase anahtarları buraya, repoya değil)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 supabase/.env
 supabase/.env.local
 
@@ -13,6 +13,10 @@ supabase/.temp
 .DS_Store
 Thumbs.db
 
-# Editör ayarları
-.vscode/*
-!.vscode/settings.json
+# IDE / editör
+.vscode/
+.idea/
+*.iml
+*.swp
+
+CLAUDE.md
