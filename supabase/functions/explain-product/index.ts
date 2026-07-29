@@ -15,7 +15,13 @@ import {
   type ProfileSchema,
 } from "./profile_parser.ts";
 
+import { jsonResponse, handleCorsPreflight } from "../../services/shared/http.ts";
+
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return handleCorsPreflight();
+  }
+
   try {
     const { product, rule_engine_result, user_profile } = await req.json();
 
@@ -191,9 +197,4 @@ function callLlmPlaceholder(reason: string) {
   };
 }
 
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
+
