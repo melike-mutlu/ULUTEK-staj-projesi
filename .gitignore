@@ -1,0 +1,18 @@
+# Ortam değişkenleri (asla git'e eklenmemeli!)
+.env
+.env.local
+.env.*.local
+supabase/.env
+supabase/.env.local
+
+# Supabase yerel geliştirme
+supabase/.branches
+supabase/.temp
+
+# İşletim sistemi dosyaları
+.DS_Store
+Thumbs.db
+
+# Editör ayarları
+.vscode/*
+!.vscode/settings.json
