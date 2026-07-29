@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../app.dart';
+import '../../core/theme/akilli_sepet_colors.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});

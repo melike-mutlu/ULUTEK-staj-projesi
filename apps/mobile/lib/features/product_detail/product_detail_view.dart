@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../app.dart';
+import '../../core/theme/akilli_sepet_colors.dart';
 import 'product_detail_viewmodel.dart';
 import 'widgets/allergens_card.dart';
 import 'widgets/nutriments_card.dart';

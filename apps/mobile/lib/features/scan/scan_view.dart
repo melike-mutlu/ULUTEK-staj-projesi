@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../app.dart';
+import '../../core/theme/akilli_sepet_colors.dart';
 
 class ScanView extends StatelessWidget {
   const ScanView({super.key});
