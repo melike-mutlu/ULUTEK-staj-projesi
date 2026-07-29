@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+<key>NSCameraUsageDescription</key>
+<string>Ürünleri taramak için kameraya erişim gerekiyor.</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Profil fotoğrafı seçmek için galeriye erişim gerekiyor.</string>
 </dict>
 </plist>
