@@ -37,17 +37,20 @@ class _ScanViewState extends ConsumerState<ScanView> {
   Future<void> _handleBarcode(String barcode) async {
     if (_isHandlingBarcode) return;
     _isHandlingBarcode = true;
-    await _controller.stop();
+    try {
+      await _controller.stop();
 
-    final result =
-        await ref.read(scanViewModelProvider).onBarcodeScanned(barcode);
+      final result =
+          await ref.read(scanViewModelProvider).onBarcodeScanned(barcode);
 
-    if (!mounted) return;
-    await Navigator.pushNamed(context, '/product-detail', arguments: result);
-
-    if (!mounted) return;
-    _isHandlingBarcode = false;
-    await _controller.start();
+      if (!mounted) return;
+      await Navigator.pushNamed(context, '/product-detail', arguments: result);
+    } finally {
+      if (mounted) {
+        _isHandlingBarcode = false;
+        await _controller.start();
+      }
+    }
   }
 
   void _showManualBarcodeDialog(BuildContext context) {

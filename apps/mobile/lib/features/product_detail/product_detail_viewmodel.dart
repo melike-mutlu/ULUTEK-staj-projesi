@@ -28,8 +28,21 @@ class ProductDetailViewModel extends ChangeNotifier {
     status = ProductDetailStatus.loading;
     notifyListeners();
 
+    final clean = state.trim();
+    if (clean == '8690504041502' || clean == 'red' || clean == 'warning') {
+      state = 'warning';
+    } else if (clean == '8690504112233' || clean == 'yellow' || clean == 'caution') {
+      state = 'caution';
+    } else if (clean == '8681234567890' || clean == 'green' || clean == 'ok') {
+      state = 'ok';
+    } else if (RegExp(r'^\d+$').hasMatch(clean)) {
+      ProductRepository().fetchProduct(clean).then((res) {
+        loadFromFetchResult(res);
+      });
+      return;
+    }
+
     switch (state) {
-      case 'warning':
       case 'red':
         product = const Product(
           barcode: '8690504041502',
