@@ -125,30 +125,89 @@ class ProductRepository {
       );
     }
 
-    // Herhangi bir barkod okutulduğunda taranan barkod için dinamik ürün üret
-    return ProductFetchResult(
-      status: 'found',
-      product: Product(
-        barcode: cleanBarcode,
-        name: 'Taranan Ürün ($cleanBarcode)',
-        brand: 'Örnek Marka',
-        ingredientsText: 'Su, şeker, buğday unu, kakao yağı, emülgatör.',
-        additives: ['E322', 'E330'],
-        allergensTags: ['en:gluten'],
-        nutriments: const Nutriments(
-          energyKcal100g: 280,
-          sugars100g: 15.0,
-          fat100g: 8.0,
-          proteins100g: 4.5,
-          salt100g: 0.2,
+    // Herhangi farklı bir barkod okutulduğunda barkodun son rakamına göre dinamik ve farklı sonuç üret
+    final lastChar = cleanBarcode.isNotEmpty ? cleanBarcode[cleanBarcode.length - 1] : '0';
+    final lastDigit = int.tryParse(lastChar) ?? 0;
+
+    if (lastDigit % 3 == 0) {
+      // 🟢 Yeşil (Uygun)
+      return ProductFetchResult(
+        status: 'found',
+        product: Product(
+          barcode: cleanBarcode,
+          name: 'Doğal Atıştırmalık ($cleanBarcode)',
+          brand: 'Organik Marka',
+          ingredientsText: 'Zeytinyağı, tam yulaf unu, elma suyu konsantresi, tarçın.',
+          additives: [],
+          allergensTags: [],
+          nutriments: const Nutriments(
+            energyKcal100g: 210,
+            sugars100g: 5.2,
+            fat100g: 4.1,
+            proteins100g: 8.5,
+            salt100g: 0.02,
+          ),
+          nutriscore: 'a',
         ),
-        nutriscore: 'c',
-      ),
-      ruleEngineResult: const RuleEngineResult(
-        matchedAllergens: ['gluten'],
-        hasConflict: true,
-        veganCompatible: false,
-      ),
-    );
+        ruleEngineResult: const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: true,
+        ),
+      );
+    } else if (lastDigit % 2 == 1) {
+      // 🟡 Sarı (Dikkat)
+      return ProductFetchResult(
+        status: 'found',
+        product: Product(
+          barcode: cleanBarcode,
+          name: 'Meyveli İçecek ($cleanBarcode)',
+          brand: 'Taze Marka',
+          ingredientsText: 'Su, portakal suyu konsantresi, pancar şekeri, sitrik asit.',
+          additives: ['E330'],
+          allergensTags: [],
+          nutriments: const Nutriments(
+            energyKcal100g: 160,
+            sugars100g: 22.0,
+            fat100g: 0.2,
+            proteins100g: 0.5,
+            salt100g: 0.01,
+          ),
+          nutriscore: 'c',
+        ),
+        ruleEngineResult: const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: true,
+          diabeticNote: 'Orta seviye şeker içerir.',
+        ),
+      );
+    } else {
+      // 🔴 Kırmızı (Uyarı)
+      return ProductFetchResult(
+        status: 'found',
+        product: Product(
+          barcode: cleanBarcode,
+          name: 'Kraker Paket ($cleanBarcode)',
+          brand: 'Lezzet Marka',
+          ingredientsText: 'Buğday unu, bitkisel yağ, peynir altı suyu tozu, susam, tuz.',
+          additives: ['E322', 'E500'],
+          allergensTags: ['en:gluten', 'en:milk'],
+          nutriments: const Nutriments(
+            energyKcal100g: 430,
+            sugars100g: 12.0,
+            fat100g: 18.0,
+            proteins100g: 7.0,
+            salt100g: 1.2,
+          ),
+          nutriscore: 'd',
+        ),
+        ruleEngineResult: const RuleEngineResult(
+          matchedAllergens: ['gluten'],
+          hasConflict: true,
+          veganCompatible: false,
+        ),
+      );
+    }
   }
 }

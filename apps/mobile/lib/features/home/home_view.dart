@@ -185,7 +185,11 @@ class HomeView extends StatelessWidget {
           currentIndex: 0,
           fixedColor: AkilliSepetColors.primary,
           onTap: (index) {
-            // Navigation implementation
+            if (index == 1) {
+              Navigator.pushNamed(context, '/scan');
+            } else if (index == 3) {
+              Navigator.pushNamed(context, '/profile');
+            }
           },
         ),
       ),
