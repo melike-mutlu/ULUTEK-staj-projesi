@@ -4,6 +4,7 @@
 !.env.example
 supabase/.env
 supabase/.env.local
+apps/mobile/.env
 
 # Supabase yerel geliştirme
 supabase/.branches

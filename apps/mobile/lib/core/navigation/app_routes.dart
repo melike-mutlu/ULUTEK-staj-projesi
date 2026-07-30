@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/auth_view.dart';
 import '../../features/dashboard/dashboard_view.dart';
 import '../../features/home/home_view.dart';
 import '../../features/onboarding/onboarding_view.dart';
@@ -17,7 +18,11 @@ import '../../features/shell/shell_view.dart';
 /// Navigasyon deseni docs/flutter-mimari.md'deki gibi düz `Navigator` +
 /// named route; bu ölçekte go_router kullanılmıyor.
 abstract final class AppRoutes {
-  /// Profil kurulumu — uygulamanın ilk açılış akışı.
+  /// Giriş / kayıt — uygulamanın ilk ekranı. Oturum açılınca onboarding'e
+  /// geçilir, böylece onboarding'de her zaman geçerli bir oturum olur.
+  static const String auth = '/auth';
+
+  /// Profil kurulumu — auth'tan sonraki adım.
   static const String onboarding = '/onboarding';
 
   /// Alt navigasyon kabuğu — onboarding bitince girilen ana ekran.
@@ -52,6 +57,7 @@ abstract final class AppRoutes {
   /// Sekme ekranları alt navigasyon kabuğunun içinde de gösterilir; buradaki
   /// kayıtlar onları ayrıca tek başına (kabuksuz) açabilmek için durur.
   static Map<String, WidgetBuilder> get table => <String, WidgetBuilder>{
+        auth: (_) => const AuthView(),
         onboarding: (_) => const OnboardingView(),
         shell: (_) => const ShellView(),
         dashboard: (_) => const DashboardView(),
