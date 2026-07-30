@@ -55,7 +55,8 @@ class InMemoryProfileRepository implements ProfileRepository {
   }
 }
 
-// TODO(backend-pod): profiles tablosu + RLS + auth hazır olunca
-// SupabaseProfileRepository()'ye çevrilecek. Başka hiçbir yer değişmeyecek.
+// Auth (email/password) ve profiles tablosu + RLS hazır olduğu için gerçek
+// repository'ye geçildi. [InMemoryProfileRepository] testler/geliştirme için
+// duruyor; geri dönmek yine tek satır.
 final profileRepositoryProvider =
-    Provider<ProfileRepository>((ref) => InMemoryProfileRepository());
+    Provider<ProfileRepository>((ref) => SupabaseProfileRepository());

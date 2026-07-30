@@ -55,17 +55,20 @@ abstract final class AppColors {
   static const Color navUnselected = textPrimary;
 
   // --- Onboarding ---
-  // Kaynak: BitePal referans görseli (bkz. docs/onboarding-plan.md §4b).
-  static const Color onboardingBackground = Color(0xFFEFEEF5);
+  // Onboarding uses the same surface as home/shell so the flow stays visually
+  // consistent with the rest of the app. Kept as an alias, not a copy of the
+  // hex, so changing [background] updates onboarding too.
+  static const Color onboardingBackground = background;
   static const Color onboardingProgressFill = Color(0xFF4AB35D);
-  static const Color onboardingProgressTrack = Color(0xFFFEFEFE);
-  static const Color onboardingSurface = Color(0xFFFEFEFE);
+  // Onboarding surfaces are pure white. Aliased to [surface] instead of
+  // repeating the hex so they stay in sync with the rest of the app.
+  static const Color onboardingProgressTrack = surface;
+  static const Color onboardingSurface = surface;
   static const Color chipSelectedBorder = Color(0xFFE17F71);
   static const Color chipSelectedDot = Color(0xFFFD8366);
   static const Color chipDot = Color(0xFFEDEAED);
 
   // Kaynak: Figma "Onboarding" dosyası — karşılama ekranları (node 0:3, 1:2).
-  static const Color onboardingWelcomeBackground = Color(0xFFFFFFFF);
   static const Color onboardingTextPrimary = Color(0xFF000000);
   static const Color onboardingSkipText = Color(0xFFA9A7A7);
   static const Color onboardingButtonBackground = Color(0xFF000000);

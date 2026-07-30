@@ -16,7 +16,7 @@ class AkilliSepetApp extends StatelessWidget {
       // Ekranlarda renk/font hardcode edilmez, AppColors / AppTextStyles kullanılır.
       theme: AppTheme.light,
       // Route adları ve ekran eşleşmeleri tek kaynaktan: lib/core/navigation/
-      initialRoute: AppRoutes.onboarding,
+      initialRoute: AppRoutes.auth,
       routes: AppRoutes.table,
     );
   }
