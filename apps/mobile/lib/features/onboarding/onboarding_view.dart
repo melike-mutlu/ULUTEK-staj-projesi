@@ -5,6 +5,7 @@ import '../../core/navigation/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import 'onboarding_steps.dart' as onboarding_steps;
 import 'onboarding_viewmodel.dart';
+import 'widgets/onboarding_error_row.dart';
 import 'widgets/onboarding_primary_button.dart';
 import 'widgets/onboarding_progress_bar.dart';
 import 'widgets/onboarding_selection_step.dart';
@@ -76,15 +77,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
 
     final success = await viewModel.submit();
     if (!mounted) return;
-    if (success) {
-      OnboardingView.completeOnboarding(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(viewModel.errorMessage ?? 'Profil kaydedilemedi.'),
-        ),
-      );
-    }
+    // Hata durumunda gövde `viewModel.errorMessage`'tan çiziliyor.
+    if (success) OnboardingView.completeOnboarding(context);
   }
 
   /// Seçim ekranının gövdesi (soru kartı + çipler).
@@ -230,14 +224,31 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                     _horizontalPadding,
                     _horizontalPadding,
                   ),
-                  child: OnboardingPrimaryButton(
-                    label: viewModel.primaryActionLabel,
-                    icon: showSkipIcon
-                        ? Icons.check_rounded
-                        : Icons.chevron_right_rounded,
-                    iconAtEnd: !showSkipIcon,
-                    isLoading: viewModel.isSaving,
-                    onPressed: () => _handlePrimaryPressed(viewModel),
+                  child: Column(
+                    children: <Widget>[
+                      if (viewModel.errorMessage != null) ...<Widget>[
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxWidth: _contentMaxWidth,
+                          ),
+                          child: OnboardingErrorRow(
+                            message: viewModel.errorMessage!,
+                            onRetry: () => _handlePrimaryPressed(viewModel),
+                            onDismiss: viewModel.clearError,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      OnboardingPrimaryButton(
+                        label: viewModel.primaryActionLabel,
+                        icon: showSkipIcon
+                            ? Icons.check_rounded
+                            : Icons.chevron_right_rounded,
+                        iconAtEnd: !showSkipIcon,
+                        isLoading: viewModel.isSaving,
+                        onPressed: () => _handlePrimaryPressed(viewModel),
+                      ),
+                    ],
                   ),
                 ),
               if (isWelcomeStep)
