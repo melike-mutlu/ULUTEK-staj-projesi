@@ -71,7 +71,7 @@ const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
     title: 'Hoş geldin!',
     body: 'Akıllı Sepet, alerjine, diyetine ve sağlık durumuna göre sana '
         'özel bir alışveriş rehberi.',
-    skipLabel: 'Skip',
+    skipLabel: 'Atla',
     imageScale: 0.7,
     contentTopOffset: 20,
     imageTopOffset: 60,

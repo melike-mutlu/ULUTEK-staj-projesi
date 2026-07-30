@@ -1,13 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repositories/product_repository.dart';
-import '../data/repositories/profile_repository.dart';
-import '../features/onboarding/onboarding_viewmodel.dart';
+import '../features/auth/auth_viewmodel.dart';
 import '../features/scan/scan_viewmodel.dart';
-
-final onboardingViewModelProvider =
-    ChangeNotifierProvider<OnboardingViewModel>((ref) {
-  return OnboardingViewModel(ref.watch(profileRepositoryProvider));
-});
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepository();
@@ -15,4 +9,8 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 
 final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {
   return ScanViewModel(ref.watch(productRepositoryProvider));
+});
+
+final authViewModelProvider = ChangeNotifierProvider<AuthViewModel>((ref) {
+  return AuthViewModel();
 });

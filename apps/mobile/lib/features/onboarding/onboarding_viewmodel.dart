@@ -34,12 +34,14 @@ class OnboardingViewModel extends ChangeNotifier {
     for (final field in OnboardingField.values) field: <String>[],
   };
 
-  bool isSaving = false;
-  String? errorMessage;
+  bool _isSaving = false;
+  String? _errorMessage;
 
   // --- Okuma ---
 
   int get currentIndex => _currentIndex;
+  bool get isSaving => _isSaving;
+  String? get errorMessage => _errorMessage;
   OnboardingStep get currentStep => onboardingSteps[_currentIndex];
   int get stepCount => onboardingSteps.length;
   double get progress => (_currentIndex + 1) / stepCount;
@@ -140,35 +142,43 @@ class OnboardingViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Dismisses the inline error without retrying the save.
+  void clearError() {
+    if (_errorMessage == null) return;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   /// Profili kaydeder, başarıysa true döner.
-  ///
-  /// Auth ekranı henüz yok: `currentUserId == null` ise kaydetme atlanır,
-  /// akış yine tamamlanmış sayılır.
   Future<bool> submit() async {
-    isSaving = true;
-    errorMessage = null;
+    _isSaving = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
       final userId = _profileRepository.currentUserId;
+      // TODO(auth): email/password login ships before onboarding, so by the
+      // time we get here there is a valid session and currentUserId is
+      // non-null. This branch is only a safety fallback and should not trigger
+      // in the normal flow — once login is wired, decide whether a missing user
+      // should surface an error instead of silently skipping the save.
       if (userId != null) {
-        await _profileRepository.saveProfile(
-          UserProfile(
-            userId: userId,
-            allergies: _selections[OnboardingField.allergies]!.toList(),
-            dietPreference: _mapDietPreference(
-              _selections[OnboardingField.diet]!,
-            ),
-            healthConditions: _selections[OnboardingField.health]!.toList(),
+        final profile = UserProfile(
+          userId: userId,
+          allergies: _selections[OnboardingField.allergies]!.toList(),
+          dietPreference: _mapDietPreference(
+            _selections[OnboardingField.diet]!,
           ),
+          healthConditions: _selections[OnboardingField.health]!.toList(),
         );
+        await _profileRepository.saveProfile(profile);
       }
-      isSaving = false;
+      _isSaving = false;
       notifyListeners();
       return true;
     } catch (_) {
-      isSaving = false;
-      errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
+      _isSaving = false;
+      _errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
       notifyListeners();
       return false;
     }
