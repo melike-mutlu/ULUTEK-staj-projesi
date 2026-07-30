@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/navigation/app_routes.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/product_repository.dart';
 import 'product_detail_viewmodel.dart';
@@ -78,6 +79,45 @@ class _ProductDetailViewState extends State<ProductDetailView> {
         ],
       ),
       body: _buildBody(context),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AkilliSepetColors.divider)),
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: AkilliSepetColors.surface,
+          selectedItemColor: AkilliSepetColors.primary,
+          unselectedItemColor: AkilliSepetColors.textSecondary,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Ana Sayfa',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.barcode_reader),
+              label: 'Tara',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history),
+              label: 'Geçmiş',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profil',
+            ),
+          ],
+          currentIndex: 0,
+          onTap: (index) {
+            if (index == 0 || index == 2) {
+              Navigator.pushNamedAndRemoveUntil(context, AppRoutes.shell, (r) => false);
+            } else if (index == 1) {
+              Navigator.pushNamed(context, AppRoutes.scan);
+            } else if (index == 3) {
+              Navigator.pushNamed(context, AppRoutes.profile);
+            }
+          },
+        ),
+      ),
     );
   }
 
@@ -148,7 +188,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                       onPressed: () {
                         Navigator.pushNamedAndRemoveUntil(
                           context,
-                          '/home',
+                          AppRoutes.shell,
                           (route) => false,
                         );
                       },
