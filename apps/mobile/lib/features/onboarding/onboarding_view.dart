@@ -129,10 +129,6 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
         viewModel.selectionsFor(currentStep.field).isNotEmpty;
     final bool showSkipIcon = isSelectionStep && !hasSelection;
 
-    final Color backgroundColor = isWelcomeStep
-        ? AppColors.onboardingWelcomeBackground
-        : AppColors.onboardingBackground;
-
     final welcomeSteps = onboarding_steps.onboardingSteps
         .whereType<onboarding_steps.OnboardingWelcomeStep>()
         .toList();
@@ -167,7 +163,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
         if (!didPop) viewModel.goBack();
       },
       child: Scaffold(
-        backgroundColor: backgroundColor,
+        backgroundColor: AppColors.onboardingBackground,
         body: SafeArea(
           child: Column(
             children: <Widget>[
