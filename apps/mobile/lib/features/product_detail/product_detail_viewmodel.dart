@@ -5,6 +5,7 @@ import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
 import '../../data/repositories/explanation_repository.dart';
+import '../../data/repositories/product_repository.dart';
 
 enum ProductDetailStatus { loading, found, notFound, partial, error }
 
@@ -183,6 +184,60 @@ class ProductDetailViewModel extends ChangeNotifier {
     status = fetchStatus == 'not_found'
         ? ProductDetailStatus.notFound
         : ProductDetailStatus.partial;
+    notifyListeners();
+  }
+
+  /// ScanView veya fetch-product API'sinden gelen gerçek sonucu ekrana yükler.
+  void loadFromFetchResult(ProductFetchResult result) {
+    if (result.status == 'not_found' || result.product == null) {
+      status = ProductDetailStatus.notFound;
+      product = null;
+      ruleEngineResult = null;
+      explanation = null;
+      notifyListeners();
+      return;
+    }
+
+    product = result.product;
+    ruleEngineResult = result.ruleEngineResult;
+    status = result.status == 'partial'
+        ? ProductDetailStatus.partial
+        : ProductDetailStatus.found;
+
+    final ruleRes = result.ruleEngineResult;
+    final hasConflict = ruleRes?.hasConflict ?? false;
+    final matchedAllergens = ruleRes?.matchedAllergens ?? [];
+
+    WarningLevel level;
+    String warningMessage;
+
+    if (hasConflict || matchedAllergens.isNotEmpty) {
+      level = WarningLevel.warning;
+      final allergenStr =
+          matchedAllergens.map((e) => e.toUpperCase()).join(', ');
+      warningMessage = matchedAllergens.isNotEmpty
+          ? 'Bu üründe $allergenStr tespit edildi. Profilinizdeki alerji kayıtlarınız ile çakışmaktadır!'
+          : 'Bu ürün diyet veya sağlık tercihlerinize kısıtlama getirmektedir.';
+    } else if (ruleRes?.diabeticNote != null &&
+        ruleRes!.diabeticNote!.isNotEmpty) {
+      level = WarningLevel.caution;
+      warningMessage =
+          'Alerjen çakışması yok ancak diyet uyarısı mevcut: ${ruleRes.diabeticNote}';
+    } else {
+      level = WarningLevel.ok;
+      warningMessage =
+          'Tebrikler! Bu ürün kişisel profilinize ve diyet tercihlerinize tam uygundur.';
+    }
+
+    explanation = Explanation(
+      summary:
+          '${product!.name}${product!.brand != null ? " (${product!.brand})" : ""} ürün analizi.',
+      level: level,
+      warningMessage: warningMessage,
+      dietNote: ruleRes?.diabeticNote,
+      disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+    );
+
     notifyListeners();
   }
 }

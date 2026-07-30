@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
+import '../../data/repositories/product_repository.dart';
 import 'product_detail_viewmodel.dart';
 import 'widgets/allergens_card.dart';
 import 'widgets/nutriments_card.dart';
@@ -15,13 +16,30 @@ class ProductDetailView extends StatefulWidget {
 
 class _ProductDetailViewState extends State<ProductDetailView> {
   late final ProductDetailViewModel _viewModel;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    // Varsayılan olarak mock kurgusu ile başlat (Kırmızı / Warning senaryosu)
-    _viewModel = ProductDetailViewModel.withMock(mockState: 'warning');
+    _viewModel = ProductDetailViewModel();
     _viewModel.addListener(_onViewModelChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _isInitialized = true;
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is ProductFetchResult) {
+        _viewModel.loadFromFetchResult(args);
+      } else if (args is String && args.isNotEmpty) {
+        _viewModel.loadMockState(args);
+      } else {
+        // Parametre yoksa demo/debug amaçlı mock state ile aç
+        _viewModel.loadMockState('warning');
+      }
+    }
   }
 
   void _onViewModelChanged() {

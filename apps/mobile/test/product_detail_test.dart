@@ -5,6 +5,8 @@ import 'package:akilli_sepet/features/product_detail/widgets/warning_banner.dart
 import 'package:akilli_sepet/features/product_detail/widgets/product_header_card.dart';
 import 'package:akilli_sepet/core/models/explanation.dart';
 import 'package:akilli_sepet/core/models/product.dart';
+import 'package:akilli_sepet/core/models/rule_engine_result.dart';
+import 'package:akilli_sepet/data/repositories/product_repository.dart';
 
 void main() {
   testWidgets('WarningBanner displays status, warning message and disclaimer', (WidgetTester tester) async {
@@ -53,7 +55,7 @@ void main() {
     expect(find.text('Nutri-Score A'), findsOneWidget);
   });
 
-  testWidgets('ProductDetailView loads and renders correctly', (WidgetTester tester) async {
+  testWidgets('ProductDetailView loads default view correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: ProductDetailView(),
@@ -67,5 +69,45 @@ void main() {
     expect(find.text('Ülker'), findsOneWidget);
     expect(find.text('Besin Değerleri (100g için)'), findsOneWidget);
     expect(find.text('Alerjenler & İçindekiler'), findsOneWidget);
+  });
+
+  testWidgets('ProductDetailView loads real ProductFetchResult argument', (WidgetTester tester) async {
+    const realProduct = Product(
+      barcode: '999888777',
+      name: 'Gerçek Zeytinyağı',
+      brand: 'Tariş',
+      ingredientsText: 'Zeytinyağı',
+      additives: [],
+      allergensTags: [],
+      nutriments: Nutriments(energyKcal100g: 800),
+      nutriscore: 'a',
+    );
+
+    const fetchResult = ProductFetchResult(
+      status: 'found',
+      product: realProduct,
+      ruleEngineResult: RuleEngineResult(
+        matchedAllergens: [],
+        hasConflict: false,
+        veganCompatible: true,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        onGenerateRoute: (settings) {
+          return MaterialPageRoute(
+            builder: (_) => const ProductDetailView(),
+            settings: RouteSettings(arguments: fetchResult),
+          );
+        },
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gerçek Zeytinyağı'), findsOneWidget);
+    expect(find.text('Tariş'), findsOneWidget);
+    expect(find.text('SİZİN İÇİN UYGUN'), findsOneWidget);
   });
 }
