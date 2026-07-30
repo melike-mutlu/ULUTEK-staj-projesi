@@ -163,16 +163,15 @@ class OnboardingViewModel extends ChangeNotifier {
       // in the normal flow — once login is wired, decide whether a missing user
       // should surface an error instead of silently skipping the save.
       if (userId != null) {
-        await _profileRepository.saveProfile(
-          UserProfile(
-            userId: userId,
-            allergies: _selections[OnboardingField.allergies]!.toList(),
-            dietPreference: _mapDietPreference(
-              _selections[OnboardingField.diet]!,
-            ),
-            healthConditions: _selections[OnboardingField.health]!.toList(),
+        final profile = UserProfile(
+          userId: userId,
+          allergies: _selections[OnboardingField.allergies]!.toList(),
+          dietPreference: _mapDietPreference(
+            _selections[OnboardingField.diet]!,
           ),
+          healthConditions: _selections[OnboardingField.health]!.toList(),
         );
+        await _profileRepository.saveProfile(profile);
       }
       _isSaving = false;
       notifyListeners();
