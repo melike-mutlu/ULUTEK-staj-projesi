@@ -201,7 +201,7 @@ class ProductDetailViewModel extends ChangeNotifier {
   }
 
   /// ScanView veya fetch-product API'sinden gelen gerçek sonucu ekrana yükler.
-  void loadFromFetchResult(ProductFetchResult result) {
+  Future<void> loadFromFetchResult(ProductFetchResult result, {UserProfile? userProfile}) async {
     if (result.status == 'not_found' || result.product == null) {
       status = ProductDetailStatus.notFound;
       product = null;
@@ -217,38 +217,24 @@ class ProductDetailViewModel extends ChangeNotifier {
         ? ProductDetailStatus.partial
         : ProductDetailStatus.found;
 
-    final ruleRes = result.ruleEngineResult;
-    final hasConflict = ruleRes?.hasConflict ?? false;
-    final matchedAllergens = ruleRes?.matchedAllergens ?? [];
+    final repo = _explanationRepository ?? ExplanationRepository();
+    final profile = userProfile ??
+        const UserProfile(
+          id: 'current-user',
+          allergies: ['gluten', 'süt'],
+          dietPreference: 'standard',
+          healthConditions: ['diyabet'],
+        );
 
-    WarningLevel level;
-    String warningMessage;
-
-    if (hasConflict || matchedAllergens.isNotEmpty) {
-      level = WarningLevel.warning;
-      final allergenStr =
-          matchedAllergens.map((e) => e.toUpperCase()).join(', ');
-      warningMessage = matchedAllergens.isNotEmpty
-          ? 'Bu üründe $allergenStr tespit edildi. Profilinizdeki alerji kayıtlarınız ile çakışmaktadır!'
-          : 'Bu ürün diyet veya sağlık tercihlerinize kısıtlama getirmektedir.';
-    } else if (ruleRes?.diabeticNote != null &&
-        ruleRes!.diabeticNote!.isNotEmpty) {
-      level = WarningLevel.caution;
-      warningMessage =
-          'Alerjen çakışması yok ancak diyet uyarısı mevcut: ${ruleRes.diabeticNote}';
-    } else {
-      level = WarningLevel.ok;
-      warningMessage =
-          'Tebrikler! Bu ürün kişisel profilinize ve diyet tercihlerinize tam uygundur.';
-    }
-
-    explanation = Explanation(
-      summary:
-          '${product!.name}${product!.brand != null ? " (${product!.brand})" : ""} ürün analizi.',
-      level: level,
-      warningMessage: warningMessage,
-      dietNote: ruleRes?.diabeticNote,
-      disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+    explanation = await repo.explainProduct(
+      product: product!,
+      ruleEngineResult: ruleEngineResult ??
+          const RuleEngineResult(
+            matchedAllergens: [],
+            hasConflict: false,
+            veganCompatible: true,
+          ),
+      userProfile: profile,
     );
 
     notifyListeners();
