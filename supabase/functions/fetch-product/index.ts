@@ -14,7 +14,7 @@ const corsHeaders = {
   "Content-Type": "application/json",
 };
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   // CORS Preflight istekleri için
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
