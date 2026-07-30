@@ -1,11 +1,8 @@
-// Akıllı Sepet — fetch-product Edge Function
-// docs/architecture.md — Sözleşme 1: Mobil -> Backend
-
-import { createAdminClient, createUserClient } from "../../services/supabase/supabaseClient.ts";
-import { getFromCache, saveToCache } from "../../services/supabase/productCache.service.ts";
-import { fetchFromOpenFoodFacts } from "../../services/openFoodFacts/openFoodFacts.service.ts";
-import { runRuleEngine, findMissingFields } from "../../services/ruleEngine/ruleEngine.service.ts";
-import { jsonResponse } from "../../services/shared/http.ts";
+import { getServiceClient, getUserClient } from "../_shared/lib/supabaseClient.ts";
+import { getFromCache, saveToCache } from "../_shared/supabase/productCache.service.ts";
+import { fetchFromOpenFoodFacts } from "../_shared/openFoodFacts/openFoodFacts.service.ts";
+import { runRuleEngine, findMissingFields } from "../_shared/ruleEngine/ruleEngine.service.ts";
+import { jsonResponse } from "../_shared/http.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -14,8 +11,8 @@ Deno.serve(async (req) => {
       return jsonResponse({ status: "error", message: "barcode zorunlu" }, 400);
     }
 
-    const supabase = createAdminClient();
-    const userClient = createUserClient(req.headers.get("Authorization") ?? "");
+    const supabase = getServiceClient();
+    const userClient = getUserClient(req);
     const { data: { user } } = await userClient.auth.getUser();
 
     let product = await getFromCache(barcode);
