@@ -81,13 +81,14 @@ abstract final class AppColors {
   static const Color linkAccent = Color(0xFF6C5CE7);
 
   /// Pastel tones for selected profile chips, handed out by chip position so a
-  /// card never reads as one solid colour block.
+  /// card never reads as one solid colour block. Saturated enough to separate
+  /// clearly from [chipUnselected] while staying in the pastel family.
   static const List<Color> chipPastels = <Color>[
-    Color(0xFFFDEAEA), // pink
-    Color(0xFFEAF1FD), // blue
-    Color(0xFFE9F7EE), // mint
-    Color(0xFFF4ECFB), // lilac
-    Color(0xFFFCF6DD), // cream
+    Color(0xFFFBD2D2), // pink
+    Color(0xFFD8E6FC), // blue
+    Color(0xFFCFEEDD), // mint
+    Color(0xFFE7D6F8), // lilac
+    Color(0xFFFAEEBE), // cream
   ];
 
   /// Disabled primary button (e.g. nothing to save).
