@@ -84,11 +84,11 @@ abstract final class AppColors {
   /// card never reads as one solid colour block. Saturated enough to separate
   /// clearly from [chipUnselected] while staying in the pastel family.
   static const List<Color> chipPastels = <Color>[
-    Color(0xFFFCD9D9), // pink
-    Color(0xFFDFEAFD), // blue
-    Color(0xFFD7F1E3), // mint
-    Color(0xFFEBDDF9), // lilac
-    Color(0xFFFBF1C9), // cream
+    Color(0xFFF8C4C4), // pink
+    Color(0xFFCCDEFB), // blue
+    Color(0xFFC2E8D3), // mint
+    Color(0xFFDCC8F5), // lilac
+    Color(0xFFF8E7A9), // cream
   ];
 
   /// Disabled primary button (e.g. nothing to save).
