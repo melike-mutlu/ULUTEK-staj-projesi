@@ -7,6 +7,7 @@ import '../../features/onboarding/onboarding_view.dart';
 import '../../features/product_detail/product_detail_view.dart';
 import '../../features/profile/profile_view.dart';
 import '../../features/scan/scan_view.dart';
+import '../../features/settings/settings_view.dart';
 import '../../features/shell/shell_view.dart';
 
 /// Uygulamadaki TÜM route adları ve eşleştikleri ekranlar burada tanımlanır.
@@ -48,6 +49,9 @@ abstract final class AppRoutes {
   /// Profil — alt navigasyonun 4. sekmesi.
   static const String profile = '/profile';
 
+  /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
+  static const String settings = '/settings';
+
   /// Ürün detay. Şimdilik tam ekran route; bottom-sheet'e çevirme kararı
   /// sonraya bırakıldı, o yüzden çağrı tarafı `pushNamed` olarak kalsın.
   static const String productDetail = '/product-detail';
@@ -64,6 +68,7 @@ abstract final class AppRoutes {
         scan: (_) => const ScanView(),
         home: (_) => const HomeView(),
         profile: (_) => const ProfileView(),
+        settings: (_) => const SettingsView(),
         productDetail: (_) => const ProductDetailView(),
       };
 }
