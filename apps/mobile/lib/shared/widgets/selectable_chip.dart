@@ -23,12 +23,14 @@ class SelectableChip extends StatelessWidget {
     required this.onTap,
     this.style = SelectableChipStyle.onboarding,
     this.selectedColor,
-  }) : _isAdd = false;
+  })  : enabled = true,
+        _isAdd = false;
 
   const SelectableChip.add({
     super.key,
     required this.onTap,
     this.style = SelectableChipStyle.onboarding,
+    this.enabled = true,
   })  : label = '',
         isSelected = false,
         selectedColor = null,
@@ -48,6 +50,10 @@ class SelectableChip extends StatelessWidget {
   final bool _isAdd;
   final VoidCallback onTap;
   final SelectableChipStyle style;
+
+  /// Only meaningful for [SelectableChip.add]: a disabled "+" is drawn muted
+  /// and ignores taps.
+  final bool enabled;
 
   /// Selected surface colour in the profile variant; falls back to the first
   /// pastel (see [AppColors.chipPastels]).
@@ -74,7 +80,7 @@ class SelectableChip extends StatelessWidget {
       child: Material(
         color: _background,
         child: InkWell(
-          onTap: onTap,
+          onTap: enabled ? onTap : null,
           child: Container(
             padding: _isProfile ? _profilePadding : _padding,
             decoration: BoxDecoration(
@@ -82,7 +88,12 @@ class SelectableChip extends StatelessWidget {
               border: Border.all(color: borderColor, width: _borderWidth),
             ),
             child: _isAdd
-                ? const Icon(Icons.add, color: AppColors.textPrimary)
+                ? Icon(
+                    Icons.add,
+                    color: enabled
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                  )
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[

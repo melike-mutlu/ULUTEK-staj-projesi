@@ -122,12 +122,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   selected: viewModel.selectionsFor(field),
                   onToggle: (String option) =>
                       viewModel.toggleOption(field, option),
-                  // Diet has no "+": a custom label has no DietPreference
-                  // counterpart, so it could not round-trip to the database.
-                  onAddCustom: field == OnboardingField.diet
-                      ? null
-                      : (String option) =>
-                          viewModel.addCustomOption(field, option),
+                  onAddCustom: (String option) =>
+                      viewModel.addCustomOption(field, option),
+                  // Diet is single-select: adding a custom option only makes
+                  // sense while nothing is chosen.
+                  canAddCustom: field != OnboardingField.diet ||
+                      viewModel.selectionsFor(field).isEmpty,
                   isExpanded: _expanded.contains(field),
                   onShowAll: () => setState(() => _expanded.add(field)),
                 ),

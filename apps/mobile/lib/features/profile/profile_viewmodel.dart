@@ -108,10 +108,14 @@ class ProfileViewModel extends ChangeNotifier {
   /// Boş/whitespace ve mevcut seçenekle (case-insensitive) çakışan girdi
   /// reddedilir.
   ///
-  /// Diyet için hiçbir şey yapmaz: katalog dışı bir etiketin `DietPreference`
-  /// karşılığı olmadığından kaydedilince sessizce `standard`'a düşerdi.
+  /// Diyet tek seçimli olduğu için yalnızca hiçbir şey seçili değilken izin
+  /// verilir; aksi hâlde eklenen seçenek mevcut tercihin yerine geçerdi.
+  ///
+  /// TODO(backend-pod): katalog dışı bir diyet etiketinin `DietPreference`
+  /// karşılığı yok, kaydedilince `standard` olarak gidiyor. `diet_preference`
+  /// `text[]`e genişleyince (bkz. dietPreferenceByLabel) burası düzelir.
   void addCustomOption(OnboardingField field, String option) {
-    if (field == OnboardingField.diet) return;
+    if (field == OnboardingField.diet && _draft[field]!.isNotEmpty) return;
 
     final trimmed = option.trim();
     if (trimmed.isEmpty) return;

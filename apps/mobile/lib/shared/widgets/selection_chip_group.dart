@@ -19,6 +19,7 @@ class SelectionChipGroup extends StatelessWidget {
     required this.selected,
     required this.onToggle,
     this.onAddCustom,
+    this.canAddCustom = true,
     this.titlePadding = EdgeInsets.zero,
     this.titleInCard = true,
     this.chipStyle = SelectableChipStyle.onboarding,
@@ -39,6 +40,10 @@ class SelectionChipGroup extends StatelessWidget {
   /// When null the "+" chip is hidden (e.g. the profile diet card: a label
   /// outside the catalog has no database counterpart).
   final ValueChanged<String>? onAddCustom;
+
+  /// False draws the "+" chip disabled instead of hiding it, so the action
+  /// stays discoverable (e.g. single-select diet with a choice already made).
+  final bool canAddCustom;
 
   /// Padding around the title only — chips are unaffected (onboarding uses a
   /// left inset to line the title up with the progress bar).
@@ -136,6 +141,7 @@ class SelectionChipGroup extends StatelessWidget {
             if (onAddCustom != null && !isTruncated)
               SelectableChip.add(
                 style: chipStyle,
+                enabled: canAddCustom,
                 onTap: () => _openAddDialog(context),
               ),
           ],

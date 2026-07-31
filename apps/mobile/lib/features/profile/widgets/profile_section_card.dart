@@ -17,6 +17,7 @@ class ProfileSectionCard extends StatelessWidget {
     required this.isExpanded,
     required this.onShowAll,
     this.onAddCustom,
+    this.canAddCustom = true,
   });
 
   final String title;
@@ -30,6 +31,9 @@ class ProfileSectionCard extends StatelessWidget {
 
   /// When null the "+" chip is hidden.
   final ValueChanged<String>? onAddCustom;
+
+  /// False keeps the "+" chip visible but disabled.
+  final bool canAddCustom;
 
   /// Chips shown while the card is collapsed.
   static const int _collapsedCount = 8;
@@ -56,6 +60,7 @@ class ProfileSectionCard extends StatelessWidget {
         selected: selected,
         onToggle: onToggle,
         onAddCustom: onAddCustom,
+        canAddCustom: canAddCustom,
         visibleCount: isExpanded ? null : _collapsedCount,
         onShowAll: onShowAll,
       ),
