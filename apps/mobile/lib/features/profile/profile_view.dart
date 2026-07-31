@@ -143,6 +143,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               ],
               PrimaryButton(
                 label: 'Kaydet',
+                isCompact: true,
+                alignment: Alignment.centerRight,
                 isLoading: viewModel.isSaving,
                 onPressed: viewModel.hasChanges ? () => _save(viewModel) : null,
               ),

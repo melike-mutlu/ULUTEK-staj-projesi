@@ -17,6 +17,8 @@ class PrimaryButton extends StatelessWidget {
     this.icon,
     this.iconAtEnd = false,
     this.isLoading = false,
+    this.isCompact = false,
+    this.alignment = Alignment.center,
     required this.onPressed,
   });
 
@@ -24,6 +26,14 @@ class PrimaryButton extends StatelessWidget {
   final IconData? icon;
   final bool iconAtEnd;
   final bool isLoading;
+
+  /// Smaller padding and label — for buttons that sit inside a form rather
+  /// than acting as the screen's main call to action.
+  final bool isCompact;
+
+  /// Where the button sits in the space it is given (it never fills the width).
+  final AlignmentGeometry alignment;
+
   final VoidCallback? onPressed;
 
   /// Figma: `rounded-[100px]` — yükseklikten büyük bir değer verilerek tam
@@ -33,6 +43,11 @@ class PrimaryButton extends StatelessWidget {
   /// Figma: `px-[32px] py-[16px]`.
   static const EdgeInsets _padding =
       EdgeInsets.symmetric(horizontal: 32, vertical: 16);
+  static const EdgeInsets _compactPadding =
+      EdgeInsets.symmetric(horizontal: 24, vertical: 12);
+
+  static const double _spinnerSize = 22;
+  static const double _compactSpinnerSize = 18;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +55,8 @@ class PrimaryButton extends StatelessWidget {
     // onPressed null oldugunda olusur ve gri gorunur.
     final bool isDisabled = onPressed == null && !isLoading;
 
-    return Center(
+    return Align(
+      alignment: alignment,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
@@ -53,19 +69,21 @@ class PrimaryButton extends StatelessWidget {
               : AppColors.onboardingButtonBackground,
           disabledForegroundColor: AppColors.onboardingButtonText,
           elevation: 0,
-          padding: _padding,
+          padding: isCompact ? _compactPadding : _padding,
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          textStyle: AppTextStyles.onboardingButtonLabel,
+          textStyle: isCompact
+              ? AppTextStyles.button
+              : AppTextStyles.onboardingButtonLabel,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radius),
           ),
         ),
         child: isLoading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
+            ? SizedBox(
+                width: isCompact ? _compactSpinnerSize : _spinnerSize,
+                height: isCompact ? _compactSpinnerSize : _spinnerSize,
+                child: const CircularProgressIndicator(
                   strokeWidth: 2.5,
                   color: AppColors.onboardingButtonText,
                 ),
