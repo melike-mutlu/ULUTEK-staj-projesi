@@ -51,6 +51,7 @@ class ProfileSectionCard extends StatelessWidget {
         titleInCard: false,
         chipStyle: SelectableChipStyle.profile,
         alignment: WrapAlignment.start,
+        selectedFirst: true,
         options: options,
         selected: selected,
         onToggle: onToggle,

@@ -23,6 +23,7 @@ class SelectionChipGroup extends StatelessWidget {
     this.titleInCard = true,
     this.chipStyle = SelectableChipStyle.onboarding,
     this.alignment = WrapAlignment.center,
+    this.selectedFirst = false,
     this.visibleCount,
     this.onShowAll,
     this.showAllLabel = 'Tümünü gör',
@@ -48,6 +49,10 @@ class SelectionChipGroup extends StatelessWidget {
 
   final SelectableChipStyle chipStyle;
   final WrapAlignment alignment;
+
+  /// Draw selected chips before the unselected ones, each keeping its relative
+  /// order. Also guarantees the selection stays visible while truncated.
+  final bool selectedFirst;
 
   /// How many chips to show; null shows all. When truncated and [onShowAll] is
   /// set, a "show all" link is drawn below.
@@ -84,16 +89,24 @@ class SelectionChipGroup extends StatelessWidget {
     if (result != null) onAddCustom?.call(result);
   }
 
-  /// Selected chips take pastels in order. The colour follows the option's
-  /// index, so colours don't jump around as the selection changes.
-  Color _pastelFor(int index) =>
-      AppColors.chipPastels[index % AppColors.chipPastels.length];
+  /// Pastel is keyed on the option's position in [options], never on the drawn
+  /// position, so [selectedFirst] reordering doesn't reshuffle the colours.
+  Color _pastelFor(String option) =>
+      AppColors.chipPastels[options.indexOf(option) %
+          AppColors.chipPastels.length];
 
   @override
   Widget build(BuildContext context) {
+    final ordered = selectedFirst
+        ? <String>[
+            ...options.where(selected.contains),
+            ...options.where((String option) => !selected.contains(option)),
+          ]
+        : options;
+
     final limit = visibleCount;
-    final bool isTruncated = limit != null && limit < options.length;
-    final visibleOptions = isTruncated ? options.take(limit) : options;
+    final bool isTruncated = limit != null && limit < ordered.length;
+    final visibleOptions = isTruncated ? ordered.take(limit) : ordered;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -110,12 +123,12 @@ class SelectionChipGroup extends StatelessWidget {
           runSpacing: 8,
           alignment: alignment,
           children: <Widget>[
-            for (final (int index, String option) in visibleOptions.indexed)
+            for (final String option in visibleOptions)
               SelectableChip(
                 label: option,
                 isSelected: selected.contains(option),
                 style: chipStyle,
-                selectedColor: _pastelFor(index),
+                selectedColor: _pastelFor(option),
                 onTap: () => onToggle(option),
               ),
             // "+" only makes sense once the list is fully expanded; while
