@@ -1,17 +1,227 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
-/// Figma: "Tarama Ekranı" mockup — mobile_scanner ile kamera görünümü
-/// + "barkodu manuel gir" yedek seçeneği.
-class ScanView extends StatelessWidget {
+import '../../core/providers.dart';
+import '../../core/theme/akilli_sepet_colors.dart';
+
+/// Figma: "Tarama Ekranı" mockup — kamera görünümü + barkod çerçevesi.
+///
+/// Kamera/okuma mantığı feature/barkod_okuma PR'ından, tasarım feature/menus
+/// PR'ından geliyor. feature/api_baglantisi'nin yaptığı gibi Open Food
+/// Facts'i doğrudan istemciden çağırmıyoruz — okunan barkod
+/// ScanViewModel.onBarcodeScanned üzerinden bizim fetch-product Edge
+/// Function'ımıza gidiyor (bkz. docs/architecture.md, kural motoru orada
+/// çalışıyor).
+class ScanView extends ConsumerStatefulWidget {
   const ScanView({super.key});
 
   @override
+  ConsumerState<ScanView> createState() => _ScanViewState();
+}
+
+class _ScanViewState extends ConsumerState<ScanView> {
+  final MobileScannerController _controller = MobileScannerController(
+    formats: const [BarcodeFormat.ean13, BarcodeFormat.ean8],
+  );
+
+  // Sonuç ekranına giderken aynı barkodu tekrar tekrar işlememek için.
+  bool _isHandlingBarcode = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleBarcode(String barcode) async {
+    if (_isHandlingBarcode) return;
+    _isHandlingBarcode = true;
+    await _controller.stop();
+
+    final result =
+        await ref.read(scanViewModelProvider).onBarcodeScanned(barcode);
+
+    if (!mounted) return;
+    await Navigator.pushNamed(context, '/product-detail', arguments: result);
+
+    if (!mounted) return;
+    _isHandlingBarcode = false;
+    await _controller.start();
+  }
+
+  void _showManualBarcodeDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Barkodu Girin'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'Örn: 8690504112233',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              final value = controller.text.trim();
+              if (value.isNotEmpty) _handleBarcode(value);
+            },
+            child: const Text('Ara'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _cornerBracket({required bool top, required bool left}) {
+    return Positioned(
+      top: top ? 12 : null,
+      bottom: top ? null : 12,
+      left: left ? 12 : null,
+      right: left ? null : 12,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          border: Border(
+            top: top
+                ? const BorderSide(color: AkilliSepetColors.primary, width: 3)
+                : BorderSide.none,
+            bottom: !top
+                ? const BorderSide(color: AkilliSepetColors.primary, width: 3)
+                : BorderSide.none,
+            left: left
+                ? const BorderSide(color: AkilliSepetColors.primary, width: 3)
+                : BorderSide.none,
+            right: !left
+                ? const BorderSide(color: AkilliSepetColors.primary, width: 3)
+                : BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: MobileScanner widget'ı + manuel giriş yedeği.
-    // Barkod okunduğunda ScanViewModel.onBarcodeScanned(barcode) çağrılır,
-    // sonuç ile /product-detail'e yönlendirilir.
-    return const Scaffold(
-      body: Center(child: Text('Tarama Ekranı')),
+    return Scaffold(
+      backgroundColor: const Color(0xFF1F1F1F), // Koyu fon
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1F1F1F),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Barkod Tara',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.flash_on, color: Colors.white),
+            onPressed: () => _controller.toggleTorch(),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Kamera Görünümü Çerçevesi
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: 280,
+                        height: 280,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AkilliSepetColors.primary,
+                            width: 3,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            MobileScanner(
+                              controller: _controller,
+                              onDetect: (capture) {
+                                for (final barcode in capture.barcodes) {
+                                  final value = barcode.rawValue;
+                                  if (value != null) {
+                                    _handleBarcode(value);
+                                    break;
+                                  }
+                                }
+                              },
+                            ),
+                            _cornerBracket(top: true, left: true),
+                            _cornerBracket(top: true, left: false),
+                            _cornerBracket(top: false, left: true),
+                            _cornerBracket(top: false, left: false),
+                            // Tarama Çizgisi
+                            Positioned(
+                              top: 140,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Container(
+                                  width: 200,
+                                  height: 2,
+                                  color: Colors.amber,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Barkodu çerçeve içine hizala,\notomatik olarak okunacak',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white70,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _showManualBarcodeDialog(context),
+                  label: const Text('Barkodu Elle Gir'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

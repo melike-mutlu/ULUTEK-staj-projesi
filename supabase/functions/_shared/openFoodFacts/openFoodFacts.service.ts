@@ -17,7 +17,9 @@ export interface OffProduct {
 }
 
 export async function fetchFromOpenFoodFacts(barcode: string): Promise<OffProduct | null> {
-  const res = await fetch(`${OFF_BASE_URL}/${barcode}.json`);
+  const res = await fetch(`${OFF_BASE_URL}/${barcode}.json`, {
+    headers: { "User-Agent": "AkilliSepet - Backend - Version 1.0" },
+  });
   const json = await res.json();
   if (json.status !== 1) return null;
 

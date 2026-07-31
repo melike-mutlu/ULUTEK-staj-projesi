@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'features/onboarding/onboarding_view.dart';
-import 'features/home/home_view.dart';
-import 'features/scan/scan_view.dart';
-import 'features/product_detail/product_detail_view.dart';
-import 'features/profile/profile_view.dart';
+import 'core/navigation/app_routes.dart';
+import 'core/theme/app_theme.dart';
 
 class AkilliSepetApp extends StatelessWidget {
   const AkilliSepetApp({super.key});
@@ -13,16 +10,14 @@ class AkilliSepetApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Akıllı Sepet',
-      // TODO: Figma'daki renk paleti ve tipografiye göre ThemeData tanımla
-      theme: ThemeData(useMaterial3: true),
-      initialRoute: '/onboarding',
-      routes: {
-        '/onboarding': (_) => const OnboardingView(),
-        '/home': (_) => const HomeView(),
-        '/scan': (_) => const ScanView(),
-        '/product-detail': (_) => const ProductDetailView(),
-        '/profile': (_) => const ProfileView(),
-      },
+      // Sağ üstteki "DEBUG" şeridi görünmesin.
+      debugShowCheckedModeBanner: false,
+      // Renk ve tipografi tek kaynaktan: lib/core/theme/
+      // Ekranlarda renk/font hardcode edilmez, AppColors / AppTextStyles kullanılır.
+      theme: AppTheme.light,
+      // Route adları ve ekran eşleşmeleri tek kaynaktan: lib/core/navigation/
+      initialRoute: AppRoutes.auth,
+      routes: AppRoutes.table,
     );
   }
 }

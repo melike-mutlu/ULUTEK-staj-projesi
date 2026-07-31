@@ -1,5 +1,13 @@
 enum DietPreference { standard, vegan, vejetaryen, diyabetDostu, sporcu }
 
+const _dietPreferenceDbNames = {
+  DietPreference.standard: 'standard',
+  DietPreference.vegan: 'vegan',
+  DietPreference.vejetaryen: 'vejetaryen',
+  DietPreference.diyabetDostu: 'diyabet_dostu',
+  DietPreference.sporcu: 'sporcu',
+};
+
 /// Supabase "profiles" tablosunun Dart karşılığı (bkz. docs/architecture.md).
 class UserProfile {
   final String userId;
@@ -18,7 +26,7 @@ class UserProfile {
     return {
       'user_id': userId,
       'allergies': allergies,
-      'diet_preference': dietPreference.name,
+      'diet_preference': _dietPreferenceDbNames[dietPreference],
       'health_conditions': healthConditions,
     };
   }
@@ -29,13 +37,15 @@ class UserProfile {
       allergies: (json['allergies'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList(),
-      dietPreference: DietPreference.values.firstWhere(
-        (e) => e.name == json['diet_preference'],
-        orElse: () => DietPreference.standard,
-      ),
+      dietPreference: _dietPreferenceDbNames.entries
+          .firstWhere(
+            (e) => e.value == json['diet_preference'],
+            orElse: () => const MapEntry(DietPreference.standard, 'standard'),
+          )
+          .key,
       healthConditions: (json['health_conditions'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList(),
     );
   }
-}
+} 

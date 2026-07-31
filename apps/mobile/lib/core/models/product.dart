@@ -28,6 +28,7 @@ class Nutriments {
 class Product {
   final String barcode;
   final String name;
+  final String? brand;
   final String ingredientsText;
   final List<String> additives;
   final List<String> allergensTags;
@@ -37,6 +38,7 @@ class Product {
   const Product({
     required this.barcode,
     required this.name,
+    this.brand,
     required this.ingredientsText,
     required this.additives,
     required this.allergensTags,
@@ -48,6 +50,7 @@ class Product {
     return Product(
       barcode: json['barcode'] as String,
       name: json['name'] as String,
+      brand: json['brand'] as String? ?? json['brands'] as String?,
       ingredientsText: json['ingredients_text'] as String? ?? '',
       additives: (json['additives'] as List<dynamic>? ?? [])
           .map((e) => e as String)
@@ -65,6 +68,7 @@ class Product {
     return {
       'barcode': barcode,
       'name': name,
+      'brand': brand,
       'ingredients_text': ingredientsText,
       'additives': additives,
       'allergens_tags': allergensTags,
