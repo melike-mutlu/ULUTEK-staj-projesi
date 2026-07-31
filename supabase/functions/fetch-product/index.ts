@@ -6,31 +6,8 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const OFF_BASE_URL = "https://world.openfoodfacts.org/api/v2/product";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Content-Type": "application/json",
-};
-
-// Vegan kontrolü için hayvansal içerik anahtar kelimeleri
-const ANIMAL_INGREDIENTS = [
-  "süt", "milk", "lait", "leche",
-  "peynir", "cheese", "fromage",
-  "yoğurt", "yogurt", "yoghurt",
-  "tereyağı", "butter", "beurre",
-  "yumurta", "egg", "oeuf",
-  "bal", "honey", "miel",
-  "et", "meat", "viande",
-  "tavuk", "chicken", "poulet",
-  "balık", "fish", "poisson",
-  "jelatin", "gelatin", "gelatine",
-  "whey", "peynir altı suyu", "casein", "kazein", "lactose", "laktoz"
-];
-
 Deno.serve(async (req: Request) => {
-  // CORS Preflight
+  // CORS Preflight istekleri için
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
