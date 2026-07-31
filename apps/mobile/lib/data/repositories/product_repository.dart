@@ -73,9 +73,13 @@ class ProductRepository {
       );
     } catch (e, stack) {
       debugPrint('[ProductRepository] fetchProduct Exception: $e\n$stack');
+      final errStr = e.toString();
+      final userMsg = (errStr.contains('SocketException') || errStr.contains('failed host lookup'))
+          ? 'Sunucuya ulaşılamadı. Lütfen .env dosyasındaki Supabase URL bilgilerini veya internet bağlantınızı kontrol edin.'
+          : 'İstek gerçekleştirilemedi: $errStr';
       return ProductFetchResult(
         status: 'error',
-        errorMessage: 'İstek gerçekleştirilemedi: ${e.toString()}',
+        errorMessage: userMsg,
       );
     }
   }

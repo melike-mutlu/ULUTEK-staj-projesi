@@ -72,9 +72,13 @@ class PendingProductRepository {
       return PendingProductResult(isSuccess: true, data: resData);
     } catch (e, stack) {
       debugPrint('[PendingProductRepository] submitPendingProduct Exception: $e\n$stack');
+      final errStr = e.toString();
+      final userMsg = (errStr.contains('SocketException') || errStr.contains('failed host lookup'))
+          ? 'Sunucuya ulaşılamadı. Lütfen .env dosyasındaki Supabase URL bilgilerini veya internet bağlantınızı kontrol edin.'
+          : 'Bildirim gönderilirken hata oluştu: $errStr';
       return PendingProductResult(
         isSuccess: false,
-        errorMessage: 'Bildirim gönderilirken hata oluştu: ${e.toString()}',
+        errorMessage: userMsg,
       );
     }
   }
