@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
+import '../../shared/widgets/inline_error_row.dart';
 
 class AuthView extends ConsumerStatefulWidget {
   const AuthView({super.key});
@@ -54,6 +55,16 @@ class _AuthViewState extends ConsumerState<AuthView> {
               obscureText: true,
             ),
             const SizedBox(height: 24),
+            if (vm.needsEmailConfirmation) ...[
+              InlineErrorRow(
+                message: 'E-postana bir doğrulama bağlantısı gönderdik. '
+                    'Bağlantıya tıklayıp hesabını doğrulamadan giriş '
+                    'yapamazsın.',
+                icon: Icons.mark_email_unread_outlined,
+                onDismiss: vm.clearEmailConfirmationNotice,
+              ),
+              const SizedBox(height: 8),
+            ],
             if (vm.errorMessage != null)
               Text(vm.errorMessage!, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),

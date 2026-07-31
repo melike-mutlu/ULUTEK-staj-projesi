@@ -10,13 +10,19 @@ class InlineErrorRow extends StatelessWidget {
   const InlineErrorRow({
     super.key,
     required this.message,
-    required this.onRetry,
     required this.onDismiss,
+    this.onRetry,
+    this.icon = Icons.error_outline_rounded,
   });
 
   final String message;
-  final VoidCallback onRetry;
   final VoidCallback onDismiss;
+
+  /// When null the retry button is hidden — for states retrying can't fix
+  /// (e.g. an unconfirmed email).
+  final VoidCallback? onRetry;
+
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +34,7 @@ class InlineErrorRow extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          const Icon(
-            Icons.error_outline_rounded,
-            size: 20,
-            color: AppColors.warning,
-          ),
+          Icon(icon, size: 20, color: AppColors.warning),
           const SizedBox(width: 10),
           // Uzun mesaj sığmazsa buton yerine metin sarılsın.
           Expanded(
@@ -41,17 +43,19 @@ class InlineErrorRow extends StatelessWidget {
               style: AppTextStyles.body.copyWith(color: AppColors.warning),
             ),
           ),
-          TextButton(
-            onPressed: onRetry,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.warning,
-              textStyle: AppTextStyles.button,
-              minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          if (onRetry != null)
+            TextButton(
+              onPressed: onRetry,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.warning,
+                textStyle: AppTextStyles.button,
+                minimumSize: Size.zero,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Tekrar dene'),
             ),
-            child: const Text('Tekrar dene'),
-          ),
           IconButton(
             onPressed: onDismiss,
             icon: const Icon(Icons.close_rounded, size: 18),
