@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 
-/// Onboarding'in tek alt buton bileşeni — karşılama ekranlarında da, seçim
-/// ekranlarında da aynı widget kullanılır.
+/// Uygulamanın tek alt buton bileşeni — onboarding karşılama/seçim
+/// ekranlarında ve profil formunda aynı widget kullanılır.
 ///
 /// Figma "Onboarding" dosyasındaki buton component'inin (node 1:3) gerçek
 /// değerleriyle yazıldı: siyah pill, içeriğe göre genişlik (tam genişlik
 /// değil), Nunito Bold 20/22. Tek dosya değiştiği için bu stil hem karşılama
 /// hem seçim ekranlarına otomatik yansır.
-class OnboardingPrimaryButton extends StatelessWidget {
-  const OnboardingPrimaryButton({
+class PrimaryButton extends StatelessWidget {
+  const PrimaryButton({
     super.key,
     required this.label,
     this.icon,

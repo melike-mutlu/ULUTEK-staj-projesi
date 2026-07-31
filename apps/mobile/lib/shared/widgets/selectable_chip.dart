@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 
-/// Onboarding seçim ekranlarındaki tek çip. Etiket + sol noktadan oluşur;
+/// Çoklu seçim ekranlarındaki tek çip (onboarding + profil ortak). Etiket +
+/// sol noktadan oluşur;
 /// "+" hâli için [SelectableChip.add] kullanılır (nokta/etiket yerine tek ikon).
 class SelectableChip extends StatelessWidget {
   const SelectableChip({

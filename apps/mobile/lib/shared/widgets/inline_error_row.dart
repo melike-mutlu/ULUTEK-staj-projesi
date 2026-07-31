@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 
-/// Inline save error with a retry action, shown above the onboarding primary
-/// button. Replaces the previous SnackBar so the message stays visible until
-/// the save succeeds or the user dismisses it.
-class OnboardingErrorRow extends StatelessWidget {
-  const OnboardingErrorRow({
+/// Inline save error with a retry action, shown above the primary button.
+/// Replaces the previous SnackBar so the message stays visible until the save
+/// succeeds or the user dismisses it.
+class InlineErrorRow extends StatelessWidget {
+  const InlineErrorRow({
     super.key,
     required this.message,
     required this.onRetry,
