@@ -28,5 +28,24 @@ class ScanHistoryRepository {
       print('❌ SUPABASE KAYIT HATASI: $e');
     }
   }
+
+  Future<List<Map<String, dynamic>>> getScanHistory({int limit = 10}) async {
+    try{
+      final userId = _supabase.auth.currentUser?.id;
+      if(userId == null) return[];
+
+      final response = await _supabase
+          .from('scan_history')
+          .select()
+          .eq('user_id', userId)
+          .order('scanned_at', ascending: false)
+          .limit(limit);
+      
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e){
+      print('❌ GEÇMİŞ OKUMA HATASI: $e');
+      return [];
+    }
+  }
 }
 

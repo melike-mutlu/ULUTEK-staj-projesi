@@ -1,163 +1,135 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
+import '../../core/providers.dart'; 
 
-class HomeView extends StatelessWidget {
+// Dinamik veri çekeceğimiz için ConsumerStatefulWidget yapıyoruz
+class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
   @override
+  ConsumerState<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends ConsumerState<HomeView> {
+  
+  @override
+  void initState() {
+    super.initState();
+    // Ekran açıldığında "verileri yükle" emrini veriyoruz
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(dashboardViewModelProvider).loadDashboardData();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // ViewModeldeki verilere ulaşıyoruz
+    final viewModel = ref.watch(dashboardViewModelProvider);
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              // Hoşgeldiniz Başlığı
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Merhaba,',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AkilliSepetColors.textSecondary,
-                            ),
-                      ),
-                      Text(
-                        'Elif',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AkilliSepetColors.textPrimary,
-                            ),
-                      ),
-                    ],
-                  ),
-                  // Profil Butonu
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: const BoxDecoration(
-                      color: AkilliSepetColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'E',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-              // Tara Butonu (Yeşil Daire)
-              Center(
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/scan');
-                  },
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: AkilliSepetColors.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AkilliSepetColors.primary.withAlpha(100),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+      body: viewModel.isLoading
+          ? const Center(child: CircularProgressIndicator(color: AkilliSepetColors.primary))
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+                    // Hoşgeldiniz Başlığı
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Barkod Simgesi
-                        const Icon(
-                          Icons.qr_code_2,
-                          color: Colors.white,
-                          size: 64,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Tara',
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Merhaba,',
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: AkilliSepetColors.textSecondary,
                                   ),
+                            ),
+                            Text(
+                              //GERÇEK KULLANICI ADI
+                              viewModel.userName.isNotEmpty ? viewModel.userName : 'Kullanıcı',
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AkilliSepetColors.textPrimary,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        // Profil Butonu
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            color: AkilliSepetColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              // İsim "E" yerine kullanıcının baş harfi olsun
+                              viewModel.userName.isNotEmpty ? viewModel.userName[0].toUpperCase() : 'U',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Alt Açıklama
-              Center(
-                child: Text(
-                  'Bir ürünün barkodunu okut, içeriğini ve\nsana uygunluğunu öğren',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AkilliSepetColors.textSecondary,
-                      ),
-                ),
-              ),
-              const SizedBox(height: 40),
-              // Son Taramaların Başlığı
-              Text(
-                'Son Taramaların',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AkilliSepetColors.textPrimary,
+                    
+                    // NOT: TARA BUTONU BURADAN KALDIRILDI!
+                    
+                    const SizedBox(height: 40),
+                    // Son Taramaların Başlığı
+                    Text(
+                      'Son Taramaların',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AkilliSepetColors.textPrimary,
+                          ),
                     ),
+                    const SizedBox(height: 16),
+                    
+                    //GERÇEK TARAMA GEÇMİŞİ LİSTESİ
+                    if (viewModel.recentScans.isEmpty)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 20),
+                          child: Text(
+                            'Henüz bir ürün taramadınız.',
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                          ),
+                        ),
+                      )
+                    else
+                      // Veritabanındaki liste kadar kart oluşturuyoruz
+                      ...viewModel.recentScans.map((item) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: _buildRecentScanCard(
+                            context,
+                            title: 'Barkod: ${item['barcode']}',
+                            note: 'İçerik Analizi', // İleride uyarı rengine göre değişebilir
+                            noteColor: AkilliSepetColors.success,
+                            backgroundColor: const Color(0xFFE8F5E9),
+                            time: 'Yeni', // İleride saati gösterebiliriz
+                          ),
+                        );
+                      }),
+
+                    const SizedBox(height: 32),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              // Son Taramalar Listesi
-              _buildRecentScanCard(
-                context,
-                title: 'Eti Cin Findıklı Gofret',
-                note: 'Uyarı — alerjen çakışması',
-                noteColor: AkilliSepetColors.warning,
-                backgroundColor: const Color(0xFFFFEBEE),
-                time: '2 dk önce',
-              ),
-              const SizedBox(height: 12),
-              _buildRecentScanCard(
-                context,
-                title: 'Ülker Bitter Çikolata %70',
-                note: 'Dikkat — diyet notu',
-                noteColor: AkilliSepetColors.caution,
-                backgroundColor: const Color(0xFFFFFDE7),
-                time: 'dün',
-              ),
-              const SizedBox(height: 12),
-              _buildRecentScanCard(
-                context,
-                title: 'Bağdat Yulaf Ezmesi Sade',
-                note: 'Uygun',
-                noteColor: AkilliSepetColors.success,
-                backgroundColor: const Color(0xFFE8F5E9),
-                time: '3 gün önce',
-              ),
-              const SizedBox(height: 32),
-            ],
-          ),
-        ),
-      ),
-      // Bottom Navigation
+            ),
+            
+      //orjinal Bottom Navigation tasarımı
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: AkilliSepetColors.divider)),
@@ -192,6 +164,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
+  //orjinal kart tasarımı
   Widget _buildRecentScanCard(
     BuildContext context, {
     required String title,
@@ -262,3 +235,5 @@ class HomeView extends StatelessWidget {
     );
   }
 }
+
+
