@@ -49,4 +49,4 @@ Deno.serve(async (req) => {
     console.error(error);
     return jsonResponse({ status: "error", message: "beklenmeyen hata" }, 500); 
   }
-});   
+});    
