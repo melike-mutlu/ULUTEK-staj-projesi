@@ -40,4 +40,27 @@ class AuthViewModel extends ChangeNotifier {
       return false;
     }
   }
-} 
+
+  /// Hesaba gerek duymadan misafir olarak giriş yapma.
+  Future<bool> signInAsGuest() async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      try {
+        await supabase.auth.signInAnonymously();
+      } catch (e) {
+        debugPrint('[AuthViewModel] Anonymous sign in fallback: $e');
+      }
+      isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      errorMessage = 'Misafir girişi başarısız: $e';
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+}
