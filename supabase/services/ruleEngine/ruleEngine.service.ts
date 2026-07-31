@@ -1,8 +1,8 @@
-// TODO (Backend pod): diyet tercihine göre gerçek diet_flags mantığı (vegan/diyabet) genişletilecek.
+// TODO (Backend pod): diyet tercihine göre gerçek diet_flags mantığı (vegan/diyabet/sporcu) genişletilecek.
 export function runRuleEngine(product: any, profile: any) {
   const userAllergies: string[] = profile?.allergies ?? [];
   
-  // 1. Alerjen Eşleşmesi Kontrolü (Mevcut yapı korundu)
+  // 1. Alerjen Eşleşmesi Kontrolü
   const matched = userAllergies.filter((allergy) =>
     (product.allergens_tags ?? []).some((tag: string) =>
       tag.toLowerCase().includes(allergy.toLowerCase())
@@ -37,9 +37,27 @@ export function runRuleEngine(product: any, profile: any) {
     diabeticNote = "Düşük şeker oranı. Diyabet dostu.";
   }
 
-  // Kullanıcı tercihi ile çakışma kontrolü
+  // 4. Sporcu Profili Kontrolü (Protein Oranına Göre - PRD Senaryo 2)
+  const proteins = product.nutriments?.proteins_100g ?? product.nutriments?.proteins ?? 0;
+  let athleteNote: string | null = null;
+  let isLowProteinForAthlete = false;
+
+  if (profile?.dietary_preferences?.is_athlete) {
+    if (proteins < 5) {
+      athleteNote = "Düşük protein oranı! Sporcu beslenmesi için yetersiz (Kırmızı Uyarı).";
+      isLowProteinForAthlete = true;
+    } else if (proteins <= 15) {
+      athleteNote = "Orta seviye protein oranı (Sarı Uyarı).";
+    } else {
+      athleteNote = "Yüksek protein oranı! Sporcu dostu ürün.";
+    }
+  }
+
+  // Çakışma Kontrolleri
   const hasVeganConflict = profile?.dietary_preferences?.is_vegan && !isVeganCompatible;
-  const hasConflict = matched.length > 0 || hasVeganConflict;
+  const hasAthleteConflict = isLowProteinForAthlete;
+
+  const hasConflict = matched.length > 0 || hasVeganConflict || hasAthleteConflict;
 
   return {
     matched_allergens: matched,
@@ -47,6 +65,8 @@ export function runRuleEngine(product: any, profile: any) {
     diet_flags: {
       vegan_compatible: isVeganCompatible,
       diabetic_note: diabeticNote,
+      athlete_note: athleteNote,
+      protein_100g: proteins
     },
   };
 }
