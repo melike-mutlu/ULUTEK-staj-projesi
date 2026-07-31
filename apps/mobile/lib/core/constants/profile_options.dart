@@ -1,5 +1,28 @@
+import '../models/user_profile.dart';
+
 /// Profilde hangi alanı doldurduğumuz. UserProfile alan adlarıyla eşleşir.
 enum OnboardingField { allergies, diet, health }
+
+/// Diyet etiketi ↔ `DietPreference`. Sözleşme `diet_preference`'ı tekil enum
+/// tanımlıyor (docs/architecture.md), bu yüzden yalnızca burada karşılığı olan
+/// etiketler veritabanına yazılıp geri okunabilir. Karşılığı olmayan etiketler
+/// `standard`'a düşer — profil ekranı onları hiç göstermez.
+///
+/// TODO(backend-pod): `diet_preference` `text[]`e genişletilirse (ya da
+/// `diet_tags text[]` eklenirse) bu tablo kalkar, çoklu seçim serbest kalır.
+const Map<String, DietPreference> dietPreferenceByLabel =
+    <String, DietPreference>{
+  'Vegan': DietPreference.vegan,
+  'Vejetaryen': DietPreference.vejetaryen,
+  'Diyabet dostu': DietPreference.diyabetDostu,
+  'Sporcu / Yüksek protein': DietPreference.sporcu,
+};
+
+/// Profil ekranının diyet seçenekleri: yalnızca veritabanına gidip geri
+/// dönebilenler (bkz. [dietPreferenceByLabel]).
+List<String> get profileDietOptions => profileOptions[OnboardingField.diet]!
+    .where(dietPreferenceByLabel.containsKey)
+    .toList();
 
 /// Onboarding ve Profil ekranlarının ORTAK seçenek kataloğu — tek kaynak.
 /// Yeni seçenek eklemek = buradaki listeye eklemek; iki ekran da görür.
