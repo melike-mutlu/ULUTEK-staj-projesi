@@ -12,15 +12,19 @@ class InlineErrorRow extends StatelessWidget {
     required this.message,
     required this.onDismiss,
     this.onRetry,
+    this.actionLabel = 'Tekrar dene',
     this.icon = Icons.error_outline_rounded,
   });
 
   final String message;
   final VoidCallback onDismiss;
 
-  /// When null the retry button is hidden — for states retrying can't fix
+  /// When null the action button is hidden — for states retrying can't fix
   /// (e.g. an unconfirmed email).
   final VoidCallback? onRetry;
+
+  /// Label of the action button; only shown when [onRetry] is set.
+  final String actionLabel;
 
   final IconData icon;
 
@@ -54,7 +58,7 @@ class InlineErrorRow extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text('Tekrar dene'),
+              child: Text(actionLabel),
             ),
           IconButton(
             onPressed: onDismiss,

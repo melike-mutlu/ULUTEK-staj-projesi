@@ -71,6 +71,20 @@ class _AuthViewState extends ConsumerState<AuthView> {
               obscureText: true,
             ),
             const SizedBox(height: 24),
+            if (vm.emailAlreadyRegistered) ...[
+              InlineErrorRow(
+                message: 'Bu e-posta zaten kayıtlı. Giriş yapın.',
+                icon: Icons.person_outline_rounded,
+                actionLabel: 'Giriş yap',
+                // Switches to sign-in with the typed email kept.
+                onRetry: () {
+                  vm.clearEmailAlreadyRegisteredNotice();
+                  setState(() => _isSignUpMode = false);
+                },
+                onDismiss: vm.clearEmailAlreadyRegisteredNotice,
+              ),
+              const SizedBox(height: 8),
+            ],
             if (vm.needsEmailConfirmation) ...[
               InlineErrorRow(
                 message: 'E-postana bir doğrulama bağlantısı gönderdik. '
