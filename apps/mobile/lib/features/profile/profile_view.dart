@@ -29,6 +29,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   static const double _contentMaxWidth = 520;
   static const double _sectionGap = 16;
 
+  /// Breathing room under the save button, added on top of the bar inset.
+  static const double _bottomPadding = 24;
+
   /// Cards the user opened with "Tümünü gör".
   final Set<OnboardingField> _expanded = <OnboardingField>{};
 
@@ -70,7 +73,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
           ),
         ],
       ),
-      body: SafeArea(child: _buildBody(viewModel)),
+      // bottom: false — letting SafeArea eat the bottom inset ends the scroll
+      // viewport above the floating bar, clipping content early. The inset goes
+      // to the scroll view's padding instead, so content flows behind the bar
+      // while the last item stays reachable above it.
+      body: SafeArea(bottom: false, child: _buildBody(viewModel)),
     );
   }
 
@@ -88,12 +95,17 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   }
 
   Widget _buildForm(ProfileViewModel viewModel) {
+    // Room for the shell's floating bar comes from MediaQuery (see
+    // shell_view.dart `_TabContentInset`); opened standalone this is just the
+    // system safe area.
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         _horizontalPadding,
         8,
         _horizontalPadding,
-        24,
+        _bottomPadding + bottomInset,
       ),
       child: Center(
         child: ConstrainedBox(
