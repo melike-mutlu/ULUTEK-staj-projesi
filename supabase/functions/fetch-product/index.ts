@@ -7,7 +7,7 @@ import { fetchFromOpenFoodFacts } from "../../services/openFoodFacts/openFoodFac
 import { runRuleEngine, findMissingFields } from "../../services/ruleEngine/ruleEngine.service.ts";
 import { jsonResponse, handleCorsPreflight } from "../../services/shared/http.ts";
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   // CORS Preflight istekleri için
   if (req.method === "OPTIONS") {
     return handleCorsPreflight();
