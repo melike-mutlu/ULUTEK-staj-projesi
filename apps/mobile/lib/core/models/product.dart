@@ -35,6 +35,9 @@ class Product {
   final Nutriments nutriments;
   final String? nutriscore;
 
+  /// Topluluk tarafından eklenmiş ve henüz onay bekleyen/doğrulanmamış ürün göstergesi.
+  final bool isPending;
+
   const Product({
     required this.barcode,
     required this.name,
@@ -44,9 +47,15 @@ class Product {
     required this.allergensTags,
     required this.nutriments,
     this.nutriscore,
+    this.isPending = false,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    final status = json['status'] as String?;
+    final verified = json['verified'] as bool?;
+    final isPendingVal = json['is_pending'] as bool? ??
+        (status == 'PENDING' || verified == false);
+
     return Product(
       barcode: json['barcode'] as String,
       name: json['name'] as String,
@@ -61,6 +70,7 @@ class Product {
       nutriments: Nutriments.fromJson(
           json['nutriments'] as Map<String, dynamic>? ?? {}),
       nutriscore: json['nutriscore'] as String?,
+      isPending: isPendingVal,
     );
   }
 
@@ -80,6 +90,7 @@ class Product {
         'salt_100g': nutriments.salt100g,
       },
       'nutriscore': nutriscore,
+      'is_pending': isPending,
     };
   }
 }

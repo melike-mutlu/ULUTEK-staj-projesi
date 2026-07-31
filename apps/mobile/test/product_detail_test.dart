@@ -123,4 +123,37 @@ void main() {
     expect(viewModel.errorMessage, equals('Sunucu bağlantı hatası 500'));
     expect(viewModel.product, isNull);
   });
+
+  test('ProductDetailViewModel overrides level to caution for unverified community products', () async {
+    final viewModel = ProductDetailViewModel();
+    final profileRepo = InMemoryProfileRepository();
+
+    const product = Product(
+      barcode: '9998887776655',
+      name: 'Unverified Granola',
+      ingredientsText: 'Yulaf',
+      additives: [],
+      allergensTags: [],
+      nutriments: Nutriments(energyKcal100g: 300),
+      isPending: true,
+    );
+    const ruleResult = RuleEngineResult(
+      matchedAllergens: [],
+      hasConflict: false,
+      veganCompatible: true,
+    );
+
+    const fetchResult = ProductFetchResult(
+      status: 'found',
+      product: product,
+      ruleEngineResult: ruleResult,
+    );
+
+    await viewModel.loadFromFetchResult(fetchResult, profileRepo);
+
+    expect(viewModel.status, equals(ProductDetailStatus.found));
+    expect(viewModel.product?.isPending, isTrue);
+    expect(viewModel.explanation?.level, isNot(equals(WarningLevel.ok)));
+    expect(viewModel.explanation?.warningMessage, contains('doğrulanmadı'));
+  });
 }

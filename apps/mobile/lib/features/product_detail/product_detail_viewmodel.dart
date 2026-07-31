@@ -88,6 +88,43 @@ class ProductDetailViewModel extends ChangeNotifier {
     notifyListeners();
 
     switch (state) {
+      case 'pending':
+      case 'unverified':
+        product = const Product(
+          barcode: '9998887776655',
+          name: 'Organik Ev Yapımı Granola',
+          brand: 'Topluluk Katkısı',
+          ingredientsText: 'Yulaf ezmesi, bal, ceviz, tarçın.',
+          additives: [],
+          allergensTags: ['en:nuts'],
+          nutriments: Nutriments(
+            energyKcal100g: 380,
+            sugars100g: 14.0,
+            fat100g: 15.0,
+            proteins100g: 9.0,
+            salt100g: 0.02,
+          ),
+          nutriscore: 'b',
+          isPending: true,
+        );
+
+        ruleEngineResult = const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: false,
+          diabeticNote: null,
+        );
+
+        explanation = const Explanation(
+          summary: 'Topluluk tarafından eklenen granola tarifi.',
+          level: WarningLevel.caution,
+          warningMessage:
+              'Bu ürün henüz yetkililerce doğrulanmadı. Tüketmeden önce içerik ve alerjen etiketini dikkatle kontrol ediniz. (Doğrulanmadı, dikkatli ol)',
+          dietNote: 'Topluluk verisidir.',
+          disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+        );
+        break;
+
       case 'warning':
       case 'red':
         product = const Product(
@@ -232,6 +269,22 @@ class ProductDetailViewModel extends ChangeNotifier {
             ? 'Bu üründe riskli içerik veya alerjen tespit edildi.'
             : 'Bu ürün profilinize uygundur.',
         disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+      );
+    }
+
+    // Güvenlik Kuralı: Doğrulanmamış/Topluluk ürünlerine ASLA "yeşil/güvenli" (ok) denmez.
+    if (product.isPending && explanation != null) {
+      final safeLevel = (explanation!.level == WarningLevel.ok)
+          ? WarningLevel.caution
+          : explanation!.level;
+
+      explanation = Explanation(
+        summary: explanation!.summary,
+        level: safeLevel,
+        warningMessage:
+            'Bu ürün henüz yetkililerce doğrulanmadı. Tüketmeden önce içerik ve alerjen etiketini dikkatle kontrol ediniz. (Doğrulanmadı, dikkatli ol)',
+        dietNote: explanation!.dietNote ?? 'Topluluk tarafından eklenmiştir.',
+        disclaimer: explanation!.disclaimer,
       );
     }
 
