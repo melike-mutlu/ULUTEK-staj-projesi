@@ -5,6 +5,7 @@ import '../../core/constants/profile_options.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../shared/widgets/error_state_view.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
 import 'profile_viewmodel.dart';
@@ -78,7 +79,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
       return const Center(child: CircularProgressIndicator());
     }
     if (viewModel.loadFailed) {
-      return _LoadErrorState(
+      return ErrorStateView(
         message: viewModel.errorMessage ?? 'Profil yüklenemedi.',
         onRetry: viewModel.load,
       );
@@ -135,41 +136,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Full-screen state when the profile could not be read.
-class _LoadErrorState extends StatelessWidget {
-  const _LoadErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const Icon(
-              Icons.cloud_off_rounded,
-              size: 40,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMuted,
-            ),
-            const SizedBox(height: 24),
-            PrimaryButton(label: 'Tekrar dene', onPressed: onRetry),
-          ],
         ),
       ),
     );
