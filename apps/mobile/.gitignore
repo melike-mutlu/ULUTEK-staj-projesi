@@ -4,3 +4,11 @@ build/
 .flutter-plugins
 .flutter-plugins-dependencies
 *.iml
+
+# Flutter/Xcode otomatik üretilen dosyalar
+**/local.properties
+**/GeneratedPluginRegistrant.*
+**/ephemeral/
+**/flutter_lldb_helper.py
+**/flutter_lldbinit
+**/Generated.xcconfig
