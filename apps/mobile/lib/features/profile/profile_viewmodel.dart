@@ -33,14 +33,25 @@ class ProfileViewModel extends ChangeNotifier {
   bool _isSaving = false;
   String? _errorMessage;
 
+  /// Son [load] başarısız mı — View bunu tam ekran "tekrar dene" ile gösterir,
+  /// kaydetme hatasını ise formun altındaki satırda.
+  bool _loadFailed = false;
+
   /// En son yüklenen/kaydedilen hâl — [hasChanges] bununla karşılaştırır.
   UserProfile? _profile;
+
+  String? _email;
 
   // --- Okuma ---
 
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
+  bool get loadFailed => _loadFailed;
+
+  /// Oturumdaki e-posta — [load] sırasında okunup saklanır ki build tarafı
+  /// Supabase'e hiç dokunmasın.
+  String? get email => _email;
   UserProfile? get profile => _profile;
 
   /// Sabit katalog + profilden gelen/kullanıcının eklediği seçenekler.
@@ -127,20 +138,25 @@ class ProfileViewModel extends ChangeNotifier {
   Future<void> load() async {
     _isLoading = true;
     _errorMessage = null;
+    _loadFailed = false;
     notifyListeners();
 
-    final userId = _profileRepository.currentUserId;
-    if (userId == null) {
-      _isLoading = false;
-      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
-      notifyListeners();
-      return;
-    }
-
+    // Oturum erişimi de try içinde: Supabase hazır değilse ekran çökmesin,
+    // hata durumuna düşsün.
     try {
+      final userId = _profileRepository.currentUserId;
+      if (userId == null) {
+        _isLoading = false;
+        _loadFailed = true;
+        _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+        notifyListeners();
+        return;
+      }
+      _email = _profileRepository.currentUserEmail;
       _profile = await _profileRepository.getProfile(userId);
       _applyToDraft(_profile);
     } catch (_) {
+      _loadFailed = true;
       _errorMessage = 'Profil yüklenemedi. Lütfen tekrar dene.';
     }
 
@@ -150,7 +166,14 @@ class ProfileViewModel extends ChangeNotifier {
 
   /// Üç kategoriyi tek seferde kaydeder, başarıysa true döner.
   Future<bool> save() async {
-    final userId = _profileRepository.currentUserId;
+    final String? userId;
+    try {
+      userId = _profileRepository.currentUserId;
+    } catch (_) {
+      _errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
+      notifyListeners();
+      return false;
+    }
     if (userId == null) {
       _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
       notifyListeners();

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 import 'question_card.dart';
 import 'selectable_chip.dart';
 
-/// Başlık + çoklu seçim çipleri. Onboarding seçim adımı ve profil formu bunu
-/// paylaşır. State tutmaz; seçimler ve seçenek listesi dışarıdan gelir.
+/// Title + multi-select chips, shared by the onboarding step and the profile
+/// form. Holds no state; selections, options and the expand decision come from
+/// the caller.
 ///
-/// Doğal yüksekliğinde çizilir (`Expanded` yok) — kaydırma kararı çağıran
-/// ekrana ait: onboarding tek grubu scroll'a sarar, profil üç grubu alt alta
-/// dizer.
+/// Drawn at natural height (no `Expanded`) — scrolling is the caller's call:
+/// onboarding wraps one group in its scroll view, profile stacks three.
 class SelectionChipGroup extends StatelessWidget {
   const SelectionChipGroup({
     super.key,
@@ -16,21 +18,42 @@ class SelectionChipGroup extends StatelessWidget {
     required this.options,
     required this.selected,
     required this.onToggle,
-    required this.onAddCustom,
+    this.onAddCustom,
     this.titlePadding = EdgeInsets.zero,
+    this.titleInCard = true,
+    this.chipStyle = SelectableChipStyle.onboarding,
+    this.alignment = WrapAlignment.center,
+    this.visibleCount,
+    this.onShowAll,
+    this.showAllLabel = 'Tümünü gör',
   });
 
   final String title;
 
-  /// Sabit seçenekler + kullanıcının "+" ile eklediği seçenekler.
+  /// Catalog options + options the user added with "+".
   final List<String> options;
   final Set<String> selected;
   final ValueChanged<String> onToggle;
-  final ValueChanged<String> onAddCustom;
 
-  /// Başlık kartının dış boşluğu — çipleri etkilemez (onboarding başlığı
-  /// progress bar ile hizalamak için sol inset verir).
+  /// When null the "+" chip is hidden (e.g. the profile diet card: a label
+  /// outside the catalog has no database counterpart).
+  final ValueChanged<String>? onAddCustom;
+
+  /// Padding around the title only — chips are unaffected (onboarding uses a
+  /// left inset to line the title up with the progress bar).
   final EdgeInsets titlePadding;
+
+  /// true → title inside a white [QuestionCard], false → plain text.
+  final bool titleInCard;
+
+  final SelectableChipStyle chipStyle;
+  final WrapAlignment alignment;
+
+  /// How many chips to show; null shows all. When truncated and [onShowAll] is
+  /// set, a "show all" link is drawn below.
+  final int? visibleCount;
+  final VoidCallback? onShowAll;
+  final String showAllLabel;
 
   static const double _gap = 20;
 
@@ -58,33 +81,62 @@ class SelectionChipGroup extends StatelessWidget {
         ],
       ),
     );
-    if (result != null) onAddCustom(result);
+    if (result != null) onAddCustom?.call(result);
   }
+
+  /// Selected chips take pastels in order. The colour follows the option's
+  /// index, so colours don't jump around as the selection changes.
+  Color _pastelFor(int index) =>
+      AppColors.chipPastels[index % AppColors.chipPastels.length];
 
   @override
   Widget build(BuildContext context) {
+    final limit = visibleCount;
+    final bool isTruncated = limit != null && limit < options.length;
+    final visibleOptions = isTruncated ? options.take(limit) : options;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Padding(
           padding: titlePadding,
-          child: QuestionCard(question: title),
+          child: titleInCard
+              ? QuestionCard(question: title)
+              : Text(title, style: AppTextStyles.profileCardTitle),
         ),
         const SizedBox(height: _gap),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          alignment: WrapAlignment.center,
+          alignment: alignment,
           children: <Widget>[
-            for (final option in options)
+            for (final (int index, String option) in visibleOptions.indexed)
               SelectableChip(
                 label: option,
                 isSelected: selected.contains(option),
+                style: chipStyle,
+                selectedColor: _pastelFor(index),
                 onTap: () => onToggle(option),
               ),
-            SelectableChip.add(onTap: () => _openAddDialog(context)),
+            // "+" only makes sense once the list is fully expanded; while
+            // truncated the user opens it with "show all" first.
+            if (onAddCustom != null && !isTruncated)
+              SelectableChip.add(
+                style: chipStyle,
+                onTap: () => _openAddDialog(context),
+              ),
           ],
         ),
+        if (isTruncated && onShowAll != null) ...<Widget>[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: GestureDetector(
+              onTap: onShowAll,
+              child: Text(showAllLabel, style: AppTextStyles.profileLink),
+            ),
+          ),
+        ],
       ],
     );
   }

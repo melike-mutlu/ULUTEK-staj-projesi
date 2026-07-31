@@ -36,13 +36,21 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // isLoading'de buton siyah kalir (spinner tasiyor); asil pasif hal
+    // onPressed null oldugunda olusur ve gri gorunur.
+    final bool isDisabled = onPressed == null && !isLoading;
+
     return Center(
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.onboardingButtonBackground,
+          backgroundColor: isDisabled
+              ? AppColors.buttonDisabled
+              : AppColors.onboardingButtonBackground,
           foregroundColor: AppColors.onboardingButtonText,
-          disabledBackgroundColor: AppColors.onboardingButtonBackground,
+          disabledBackgroundColor: isDisabled
+              ? AppColors.buttonDisabled
+              : AppColors.onboardingButtonBackground,
           disabledForegroundColor: AppColors.onboardingButtonText,
           elevation: 0,
           padding: _padding,

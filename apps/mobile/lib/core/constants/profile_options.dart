@@ -61,6 +61,14 @@ const Map<OnboardingField, List<String>> profileOptions =
   ],
 };
 
+/// Card titles on the profile screen — short form of onboarding's questions.
+const Map<OnboardingField, String> profileSectionTitles =
+    <OnboardingField, String>{
+  OnboardingField.allergies: 'Alerjilerim',
+  OnboardingField.diet: 'Beslenme düzenim',
+  OnboardingField.health: 'Sağlık durumum',
+};
+
 /// Onboarding'de alan başına sorulan soru.
 const Map<OnboardingField, String> profileQuestions = <OnboardingField, String>{
   OnboardingField.allergies: 'Herhangi bir gıda alerjin var mı?',
@@ -69,7 +77,8 @@ const Map<OnboardingField, String> profileQuestions = <OnboardingField, String>{
 };
 
 /// Hiçbir şey seçilmediğinde onboarding'in alt butonunda yazan metin.
-const Map<OnboardingField, String> profileSkipLabels = <OnboardingField, String>{
+const Map<OnboardingField, String> profileSkipLabels =
+    <OnboardingField, String>{
   OnboardingField.allergies: 'Alerjim yok',
   OnboardingField.diet: 'Özel bir diyetim yok',
   OnboardingField.health: 'Sağlık durumum yok',
