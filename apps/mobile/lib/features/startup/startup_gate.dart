@@ -6,6 +6,7 @@ import '../../core/supabase_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../shared/widgets/error_state_view.dart';
+import 'startup_destination.dart';
 
 /// Uygulamanın ilk ekranı: oturuma ve profil satırına bakıp nereye gidileceğine
 /// karar verir. Karar verilene kadar spinner gösterir.
@@ -36,27 +37,8 @@ class _StartupGateState extends ConsumerState<StartupGate> {
   Future<void> _decide() async {
     if (mounted && _failed) setState(() => _failed = false);
 
-    final repository = ref.read(profileRepositoryProvider);
-
-    final String? userId;
     try {
-      userId = repository.currentUserId;
-    } catch (_) {
-      // Supabase not initialized (e.g. widget tests): treat as signed out.
-      _go(AppRoutes.auth);
-      return;
-    }
-
-    if (userId == null) {
-      _go(AppRoutes.auth);
-      return;
-    }
-
-    try {
-      final profile = await repository.getProfile(userId);
-      // A missing row means the user never finished onboarding. A failed read
-      // must NOT land here: onboarding would overwrite an existing profile.
-      _go(profile == null ? AppRoutes.onboarding : AppRoutes.shell);
+      _go(await resolveStartupRoute(ref.read(profileRepositoryProvider)));
     } catch (_) {
       if (mounted) setState(() => _failed = true);
     }
