@@ -5,6 +5,7 @@ import 'package:akilli_sepet/features/profile/profile_view.dart';
 import 'package:akilli_sepet/features/shell/shell_view.dart';
 import 'package:akilli_sepet/features/shell/shell_viewmodel.dart';
 import 'package:akilli_sepet/features/shell/widgets/glass_bottom_nav.dart';
+import 'package:akilli_sepet/features/startup/startup_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,16 +18,22 @@ Finder _navLabel(String label) => find.descendant(
     );
 
 void main() {
-  testWidgets('uygulama auth ekrani ile aciliyor', (tester) async {
+  testWidgets('oturum yoksa StartupGate auth ekranina yonlendiriyor',
+      (tester) async {
     await tester.pumpWidget(const ProviderScope(child: AkilliSepetApp()));
+
+    // Karar verilene kadar gate gosteriliyor.
+    expect(find.byType(StartupGate), findsOneWidget);
+
     await tester.pumpAndSettle();
 
+    // Testte Supabase hic baslatilmadigi icin oturum yok sayilir.
     expect(find.byType(AuthView), findsOneWidget);
     expect(find.byType(OnboardingView), findsNothing);
     expect(find.byType(ShellView), findsNothing);
 
-    // Auth ilk ekran: altinda baska bir route olmamali, yoksa kullanici geri
-    // tusuyla oturum acmadan iceri girebilir.
+    // Gate pushReplacement yapar: altinda baska bir route kalmamali, yoksa
+    // kullanici geri tusuyla oturum acmadan iceri girebilir.
     final navigator = Navigator.of(tester.element(find.byType(AuthView)));
     expect(navigator.canPop(), isFalse);
   });

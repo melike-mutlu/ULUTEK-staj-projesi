@@ -25,11 +25,12 @@ abstract final class AppRoutes {
   /// ki giriş başarılı olunca kararı tekrar buraya devredebilelim.
   static const String startup = '/startup';
 
-  /// Giriş / kayıt — auth ekranı. Oturum açılınca onboarding'e
-  /// geçilir, böylece onboarding'de her zaman geçerli bir oturum olur.
+  /// Giriş / kayıt. Başarılı olunca [startup]'a dönülür; hedefi oradaki gate
+  /// seçer, böylece onboarding'de her zaman geçerli bir oturum olur.
   static const String auth = '/auth';
 
-  /// Profil kurulumu — auth'tan sonraki adım.
+  /// Profil kurulumu — yalnızca profil satırı olmayan (yeni kayıt) kullanıcı
+  /// için, [startup] tarafından seçilir.
   static const String onboarding = '/onboarding';
 
   /// Alt navigasyon kabuğu — onboarding bitince girilen ana ekran.

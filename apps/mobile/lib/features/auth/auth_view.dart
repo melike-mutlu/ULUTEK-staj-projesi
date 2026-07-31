@@ -25,7 +25,9 @@ class _AuthViewState extends ConsumerState<AuthView> {
         : await vm.signIn(email, password);
 
     if (success && mounted) {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.onboarding);
+      // Onboarding'e mi shell'e mi gidileceğine StartupGate karar verir:
+      // profil satırı olan kullanıcı onboarding'i tekrar görmemeli.
+      Navigator.of(context).pushReplacementNamed(AppRoutes.startup);
     }
   }
 
