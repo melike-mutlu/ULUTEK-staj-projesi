@@ -6,10 +6,14 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Room for the shell's floating nav bar (see shell_view.dart
+    // `_TabContentInset`); the tab draws no bar of its own.
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -155,38 +159,6 @@ class HomeView extends StatelessWidget {
               const SizedBox(height: 32),
             ],
           ),
-        ),
-      ),
-      // Bottom Navigation
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AkilliSepetColors.divider)),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: AkilliSepetColors.surface,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Ana Sayfa',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.barcode_reader),
-              label: 'Tara',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history),
-              label: 'Geçmiş',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profil',
-            ),
-          ],
-          currentIndex: 0,
-          fixedColor: AkilliSepetColors.primary,
-          onTap: (index) {
-            // Navigation implementation
-          },
         ),
       ),
     );
