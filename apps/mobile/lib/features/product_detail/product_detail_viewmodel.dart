@@ -5,6 +5,8 @@ import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
 import '../../data/repositories/explanation_repository.dart';
+import '../../data/repositories/product_repository.dart';
+import '../../data/repositories/profile_repository.dart';
 
 enum ProductDetailStatus { loading, found, notFound, partial, error }
 
@@ -17,10 +19,68 @@ class ProductDetailViewModel extends ChangeNotifier {
   Product? product;
   RuleEngineResult? ruleEngineResult;
   Explanation? explanation;
+  String? errorMessage;
 
   ProductDetailViewModel.withMock({String mockState = 'warning'})
       : _explanationRepository = null {
     loadMockState(mockState);
+  }
+
+  /// Barkod arama sonucunu (ProductFetchResult) ve gerçek kullanıcı profilini (profileRepository) alıp işler.
+  Future<void> loadFromFetchResult(
+    ProductFetchResult fetchResult,
+    ProfileRepository profileRepository,
+  ) async {
+    status = ProductDetailStatus.loading;
+    errorMessage = null;
+    notifyListeners();
+
+    if (fetchResult.status == 'error') {
+      status = ProductDetailStatus.error;
+      errorMessage =
+          fetchResult.errorMessage ?? 'Ürün bilgileri alınırken bir hata oluştu.';
+      notifyListeners();
+      return;
+    }
+
+    if (fetchResult.status == 'not_found' || fetchResult.product == null) {
+      status = ProductDetailStatus.notFound;
+      notifyListeners();
+      return;
+    }
+
+    final product = fetchResult.product!;
+    final ruleEngineResult = fetchResult.ruleEngineResult ??
+        const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: true,
+        );
+
+    // profileRepositoryProvider üzerinden gerçek kullanıcı profilini çek
+    UserProfile? userProfile;
+    final userId = profileRepository.currentUserId;
+    if (userId != null) {
+      try {
+        userProfile = await profileRepository.getProfile(userId);
+      } catch (e) {
+        debugPrint('[ProductDetailViewModel] Profile load warning: $e');
+      }
+    }
+
+    // Profil veritabanında henüz oluşturulmadıysa varsayılan profil
+    userProfile ??= UserProfile(
+      userId: userId ?? 'guest',
+      allergies: const [],
+      dietPreference: DietPreference.standard,
+      healthConditions: const [],
+    );
+
+    await load(
+      product: product,
+      ruleEngineResult: ruleEngineResult,
+      userProfile: userProfile,
+    );
   }
 
   void loadMockState(String state) {

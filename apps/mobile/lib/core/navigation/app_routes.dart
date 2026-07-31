@@ -4,6 +4,7 @@ import '../../features/auth/auth_view.dart';
 import '../../features/dashboard/dashboard_view.dart';
 import '../../features/home/home_view.dart';
 import '../../features/onboarding/onboarding_view.dart';
+import '../../features/pending_product/pending_product_view.dart';
 import '../../features/product_detail/product_detail_view.dart';
 import '../../features/profile/profile_view.dart';
 import '../../features/scan/scan_view.dart';
@@ -52,6 +53,9 @@ abstract final class AppRoutes {
   /// sonraya bırakıldı, o yüzden çağrı tarafı `pushNamed` olarak kalsın.
   static const String productDetail = '/product-detail';
 
+  /// Bulunamayan veya eksik ürün bildirimi (Pending Product) ekranı.
+  static const String pendingProduct = '/pending-product';
+
   /// `MaterialApp.routes` tablosu.
   ///
   /// Sekme ekranları alt navigasyon kabuğunun içinde de gösterilir; buradaki
@@ -65,5 +69,6 @@ abstract final class AppRoutes {
         home: (_) => const HomeView(),
         profile: (_) => const ProfileView(),
         productDetail: (_) => const ProductDetailView(),
+        pendingProduct: (_) => const PendingProductView(),
       };
 }
