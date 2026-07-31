@@ -72,8 +72,9 @@ abstract final class AppColors {
   /// Selection card title — dark grey, not black.
   static const Color profileCardTitle = Color(0xFF4A4A4A);
 
-  /// Unselected profile chip: grey surface, black label.
-  static const Color chipUnselected = Color(0xFFE9E9E9);
+  /// Unselected profile chip: one small step darker than [background] so the
+  /// chip reads as a surface without competing with the selected pastels.
+  static const Color chipUnselected = Color(0xFFEDEEED);
   static const Color chipUnselectedText = Color(0xFF1A1A1A);
 
   /// "Show all" link.
