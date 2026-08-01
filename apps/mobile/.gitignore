@@ -12,3 +12,4 @@ build/
 **/flutter_lldb_helper.py
 **/flutter_lldbinit
 **/Generated.xcconfig
+**/flutter_export_environment.sh
