@@ -11,6 +11,10 @@ abstract class ProfileRepository {
   /// Oturumdaki kullanıcının id'si; oturum yoksa null.
   String? get currentUserId;
 
+  /// Oturumdaki kullanıcının e-postası; oturum yoksa null. Profil ekranı
+  /// başlıkta gösteriyor — UI'ın Supabase'e doğrudan dokunmaması için burada.
+  String? get currentUserEmail;
+
   Future<UserProfile?> getProfile(String userId);
   Future<void> saveProfile(UserProfile profile);
 }
@@ -19,6 +23,9 @@ abstract class ProfileRepository {
 class SupabaseProfileRepository implements ProfileRepository {
   @override
   String? get currentUserId => supabase.auth.currentUser?.id;
+
+  @override
+  String? get currentUserEmail => supabase.auth.currentUser?.email;
 
   @override
   Future<UserProfile?> getProfile(String userId) async {
@@ -45,6 +52,9 @@ class InMemoryProfileRepository implements ProfileRepository {
 
   @override
   String? get currentUserId => 'mock-user';
+
+  @override
+  String? get currentUserEmail => 'mock@example.com';
 
   @override
   Future<UserProfile?> getProfile(String userId) async => _profile;

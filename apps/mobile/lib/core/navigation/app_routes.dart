@@ -7,7 +7,9 @@ import '../../features/onboarding/onboarding_view.dart';
 import '../../features/product_detail/product_detail_view.dart';
 import '../../features/profile/profile_view.dart';
 import '../../features/scan/scan_view.dart';
+import '../../features/settings/settings_view.dart';
 import '../../features/shell/shell_view.dart';
+import '../../features/startup/startup_gate.dart';
 
 /// Uygulamadaki TÜM route adları ve eşleştikleri ekranlar burada tanımlanır.
 ///
@@ -18,11 +20,17 @@ import '../../features/shell/shell_view.dart';
 /// Navigasyon deseni docs/flutter-mimari.md'deki gibi düz `Navigator` +
 /// named route; bu ölçekte go_router kullanılmıyor.
 abstract final class AppRoutes {
-  /// Giriş / kayıt — uygulamanın ilk ekranı. Oturum açılınca onboarding'e
-  /// geçilir, böylece onboarding'de her zaman geçerli bir oturum olur.
+  /// Açılış kapısı — oturum + profil durumuna bakıp auth/onboarding/shell
+  /// arasında seçim yapar. `MaterialApp.home` bu ekran; route olarak da durur
+  /// ki giriş başarılı olunca kararı tekrar buraya devredebilelim.
+  static const String startup = '/startup';
+
+  /// Giriş / kayıt. Başarılı olunca [startup]'a dönülür; hedefi oradaki gate
+  /// seçer, böylece onboarding'de her zaman geçerli bir oturum olur.
   static const String auth = '/auth';
 
-  /// Profil kurulumu — auth'tan sonraki adım.
+  /// Profil kurulumu — yalnızca profil satırı olmayan (yeni kayıt) kullanıcı
+  /// için, [startup] tarafından seçilir.
   static const String onboarding = '/onboarding';
 
   /// Alt navigasyon kabuğu — onboarding bitince girilen ana ekran.
@@ -48,6 +56,9 @@ abstract final class AppRoutes {
   /// Profil — alt navigasyonun 4. sekmesi.
   static const String profile = '/profile';
 
+  /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
+  static const String settings = '/settings';
+
   /// Ürün detay. Şimdilik tam ekran route; bottom-sheet'e çevirme kararı
   /// sonraya bırakıldı, o yüzden çağrı tarafı `pushNamed` olarak kalsın.
   static const String productDetail = '/product-detail';
@@ -57,6 +68,7 @@ abstract final class AppRoutes {
   /// Sekme ekranları alt navigasyon kabuğunun içinde de gösterilir; buradaki
   /// kayıtlar onları ayrıca tek başına (kabuksuz) açabilmek için durur.
   static Map<String, WidgetBuilder> get table => <String, WidgetBuilder>{
+        startup: (_) => const StartupGate(),
         auth: (_) => const AuthView(),
         onboarding: (_) => const OnboardingView(),
         shell: (_) => const ShellView(),
@@ -64,6 +76,7 @@ abstract final class AppRoutes {
         scan: (_) => const ScanView(),
         home: (_) => const HomeView(),
         profile: (_) => const ProfileView(),
+        settings: (_) => const SettingsView(),
         productDetail: (_) => const ProductDetailView(),
       };
 }

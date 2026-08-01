@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/widgets/primary_button.dart';
 import '../onboarding_steps.dart' as onboarding_steps;
-import 'onboarding_primary_button.dart';
 
 /// Karşılama adımı: SVG görsel + başlık + açıklama, `step.skipLabel` varsa
 /// sağ üstte bir "Skip" linki. `step.ctaLabel` varsa (Figma: 2. ekran) en
@@ -84,7 +84,7 @@ class OnboardingWelcomeStep extends StatelessWidget {
               ),
               if (step.ctaLabel != null) ...<Widget>[
                 const SizedBox(height: _bodyButtonGap),
-                OnboardingPrimaryButton(
+                PrimaryButton(
                   label: step.ctaLabel!,
                   onPressed: onPrimaryPressed,
                 ),

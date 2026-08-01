@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/navigation/app_routes.dart';
 import '../../core/theme/app_colors.dart';
+import '../../shared/widgets/inline_error_row.dart';
+import '../../shared/widgets/primary_button.dart';
 import 'onboarding_steps.dart' as onboarding_steps;
 import 'onboarding_viewmodel.dart';
-import 'widgets/onboarding_error_row.dart';
-import 'widgets/onboarding_primary_button.dart';
 import 'widgets/onboarding_progress_bar.dart';
 import 'widgets/onboarding_selection_step.dart';
 import 'widgets/onboarding_welcome_step.dart';
@@ -231,7 +231,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                           constraints: const BoxConstraints(
                             maxWidth: _contentMaxWidth,
                           ),
-                          child: OnboardingErrorRow(
+                          child: InlineErrorRow(
                             message: viewModel.errorMessage!,
                             onRetry: () => _handlePrimaryPressed(viewModel),
                             onDismiss: viewModel.clearError,
@@ -239,7 +239,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                         ),
                         const SizedBox(height: 12),
                       ],
-                      OnboardingPrimaryButton(
+                      PrimaryButton(
                         label: viewModel.primaryActionLabel,
                         icon: showSkipIcon
                             ? Icons.check_rounded

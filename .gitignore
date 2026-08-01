@@ -1,3 +1,4 @@
+supabase/.temp/
 # Ortam değişkenleri (asla git'e eklenmemeli! - Supabase anahtarları buraya, repoya değil)
 .env
 .env.*

@@ -11,6 +11,9 @@ class _FakeProfileRepository implements ProfileRepository {
   String? currentUserId = 'test-user';
 
   @override
+  String? currentUserEmail = 'test@example.com';
+
+  @override
   Future<UserProfile?> getProfile(String userId) async => null;
 
   @override
