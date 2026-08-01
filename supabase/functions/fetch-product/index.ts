@@ -21,6 +21,7 @@ serve(async (req) => {
       });
     }
 
+    // kural motoru servisini çağırıyoruz
     const ruleResult = runRuleEngine(product, profile);
     const missingFields = findMissingFields(product);
 
