@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Alt navigasyondaki sekmeler. Buradaki sıra ekrandaki sırayı belirler:
-/// Ana Sayfa · Tara · Geçmiş · Profil.
-enum ShellTab { dashboard, scan, home, profile }
+/// Ana Sayfa · Tara · Chatbot · Profil.
+enum ShellTab { dashboard, scan, chatbot, profile }
 
 /// Alt navigasyon kabuğunun state'i — hangi sekme açık.
 ///
