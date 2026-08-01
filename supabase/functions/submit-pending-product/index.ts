@@ -3,6 +3,7 @@
 // Çıktı:  { status: "success", product } | { status: "error", message }
 
 import { getServiceClient, getUserClient } from "../_shared/lib/supabaseClient.ts";
+import { jsonResponse } from "../_shared/http.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -54,10 +55,3 @@ Deno.serve(async (req) => {
     return jsonResponse({ status: "error", message: "beklenmeyen hata" }, 500);
   }
 });
-
-function jsonResponse(body: Record<string, unknown>, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
