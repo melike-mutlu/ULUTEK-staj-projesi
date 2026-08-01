@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers.dart';
+import '../home/home_viewmodel.dart';
 import '../../core/theme/akilli_sepet_colors.dart'; // Renkler için eklendi
 
 class DashboardView extends ConsumerStatefulWidget {
@@ -53,7 +54,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/scan');
+                    Navigator.pushNamed(context, '/scan').then((_) {
+                      ref.read(dashboardViewModelProvider).loadDashboardData();
+                      ref.read(homeViewModelProvider).loadHistory();
+                    });
                   },
                   child: Container(
                     width: 200,
