@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/profile_options.dart';
 import '../../core/models/user_profile.dart';
 import '../../data/repositories/profile_repository.dart';
 import 'onboarding_steps.dart';
@@ -193,13 +194,7 @@ class OnboardingViewModel extends ChangeNotifier {
   /// da `diet_tags text[]` eklenmesi konuşulacak; genişlerse burası tek
   /// satırlık değişir.
   DietPreference _mapDietPreference(Set<String> selections) {
-    const mapping = <String, DietPreference>{
-      'Vegan': DietPreference.vegan,
-      'Vejetaryen': DietPreference.vejetaryen,
-      'Diyabet dostu': DietPreference.diyabetDostu,
-      'Sporcu / Yüksek protein': DietPreference.sporcu,
-    };
-    for (final entry in mapping.entries) {
+    for (final entry in dietPreferenceByLabel.entries) {
       if (selections.contains(entry.key)) return entry.value;
     }
     return DietPreference.standard;

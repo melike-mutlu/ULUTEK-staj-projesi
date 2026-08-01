@@ -25,5 +25,11 @@ class ShellViewModel extends ChangeNotifier {
   }
 }
 
+/// autoDispose: kabuk yığından çıkınca (çıkış yapıldığında) state sıfırlansın.
+/// Aksi hâlde tekrar giriş yapan kullanıcı Ana Sayfa yerine en son açık olan
+/// sekmede karşılanır. Kabuğun üstüne route push edilirken widget'lar ayakta
+/// kaldığı için sekme orada korunur.
 final shellViewModelProvider =
-    ChangeNotifierProvider<ShellViewModel>((ref) => ShellViewModel());
+    ChangeNotifierProvider.autoDispose<ShellViewModel>(
+  (ref) => ShellViewModel(),
+);

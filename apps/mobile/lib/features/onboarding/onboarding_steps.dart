@@ -1,5 +1,8 @@
-/// Profilde hangi alanı doldurduğumuz. UserProfile alan adlarıyla eşleşir.
-enum OnboardingField { allergies, diet, health }
+import '../../core/constants/profile_options.dart';
+
+// Seçenek kataloğu profil ekranıyla ortak; OnboardingField'ı buradan da
+// import edenler kırılmasın diye yeniden dışa veriliyor.
+export '../../core/constants/profile_options.dart' show OnboardingField;
 
 sealed class OnboardingStep {
   const OnboardingStep();
@@ -63,10 +66,20 @@ final class OnboardingSelectionStep extends OnboardingStep {
   final String skipLabel;
 }
 
+/// Seçim adımını katalogdan kurar — soru/seçenek/skip metni tek kaynaktan
+/// (core/constants/profile_options.dart) gelir.
+OnboardingSelectionStep _selectionStep(OnboardingField field) =>
+    OnboardingSelectionStep(
+      field: field,
+      question: profileQuestions[field]!,
+      options: profileOptions[field]!,
+      skipLabel: profileSkipLabels[field]!,
+    );
+
 /// Akıştaki TÜM adımlar. Yeni adım eklemek = buraya bir kayıt eklemek;
 /// ilerleme çubuğu ve ileri/geri bu listeden beslenir, başka yer değişmez.
-const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
-  OnboardingWelcomeStep(
+final List<OnboardingStep> onboardingSteps = <OnboardingStep>[
+  const OnboardingWelcomeStep(
     assetPath: 'assets/images/onboarding_shop.svg',
     title: 'Hoş geldin!',
     body: 'Akıllı Sepet, alerjine, diyetine ve sağlık durumuna göre sana '
@@ -76,7 +89,7 @@ const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
     contentTopOffset: 20,
     imageTopOffset: 60,
   ),
-  OnboardingWelcomeStep(
+  const OnboardingWelcomeStep(
     assetPath: 'assets/images/onboarding_scan.svg',
     title: 'Barkodu Okut, Anında Öğren',
     body: 'Ürünün barkodunu okut; alerjen, diyet ve sağlık profiline göre '
@@ -86,46 +99,7 @@ const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
     imageTopOffset: 30,
     textTopOffset: 8,
   ),
-  OnboardingSelectionStep(
-    field: OnboardingField.allergies,
-    question: 'Herhangi bir gıda alerjin var mı?',
-    options: <String>[
-      'Gluten',
-      'Süt/Laktoz',
-      'Fındık/Fıstık',
-      'Yumurta',
-      'Balık',
-      'Kabuklu deniz ürünleri',
-      'Soya',
-      'Susam',
-    ],
-    skipLabel: 'Alerjim yok',
-  ),
-  OnboardingSelectionStep(
-    field: OnboardingField.diet,
-    question: 'Nasıl bir beslenme düzenin var?',
-    options: <String>[
-      'Vegan',
-      'Vejetaryen',
-      'Diyabet dostu',
-      'Sporcu / Yüksek protein',
-      'Düşük karbonhidrat',
-      'Glutensiz yaşam tarzı',
-      'Ketojenik',
-    ],
-    skipLabel: 'Özel bir diyetim yok',
-  ),
-  OnboardingSelectionStep(
-    field: OnboardingField.health,
-    question: 'Dikkat etmen gereken bir sağlık durumun var mı?',
-    options: <String>[
-      'Tansiyon',
-      'Çölyak',
-      'Yüksek kolesterol',
-      'Böbrek hastalığı',
-      'Şeker hastalığı',
-      'Kalp rahatsızlığı',
-    ],
-    skipLabel: 'Sağlık durumum yok',
-  ),
+  _selectionStep(OnboardingField.allergies),
+  _selectionStep(OnboardingField.diet),
+  _selectionStep(OnboardingField.health),
 ];
