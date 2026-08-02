@@ -32,6 +32,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   /// Breathing room under the save button, added on top of the bar inset.
   static const double _bottomPadding = 24;
 
+  /// Long enough for real names, short enough to keep the header on one line.
+  static const int _nameMaxLength = 50;
+
   /// Cards the user opened with "Tümünü gör".
   final Set<OnboardingField> _expanded = <OnboardingField>{};
 
@@ -43,6 +46,46 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ref.read(profileViewModelProvider).load();
     });
+  }
+
+  /// Adı düzenleme kutusu. Seçimler gibi yalnızca taslağa yazar; kalıcı olması
+  /// için "Kaydet" gerekir.
+  Future<void> _editName(ProfileViewModel viewModel) async {
+    // Kutuda kayıtlı ad durur — e-posta'dan türetilen yedek isim değil, yoksa
+    // kullanıcı hiç yazmadığı bir adı kaydetmiş olurdu.
+    final controller =
+        TextEditingController(text: viewModel.displayNameDraft);
+
+    final String? result = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: const Text('Adın'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: _nameMaxLength,
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(hintText: 'Adını yaz'),
+          onSubmitted: (String value) => Navigator.pop(dialogContext, value),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Vazgeç'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Tamam'),
+          ),
+        ],
+      ),
+    );
+
+    controller.dispose();
+    // null = vazgeçildi; boş string geçerli bir girdi ("adı kaldır").
+    if (result == null) return;
+    viewModel.setDisplayName(result);
   }
 
   Future<void> _save(ProfileViewModel viewModel) async {
@@ -113,7 +156,14 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              ProfileHeader(email: viewModel.email),
+              ProfileHeader(
+                email: viewModel.email,
+                name: viewModel.resolvedDisplayName,
+                avatarUrl: viewModel.avatarUrl,
+                isUploadingPhoto: viewModel.isUploadingAvatar,
+                onEditName: () => _editName(viewModel),
+                onEditPhoto: viewModel.pickAndUploadAvatar,
+              ),
               const SizedBox(height: 24),
               for (final field in OnboardingField.values) ...<Widget>[
                 ProfileSectionCard(

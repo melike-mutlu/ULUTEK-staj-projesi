@@ -150,6 +150,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                         ),
                         UserAvatarCircle(
                           name: viewModel.displayName,
+                          avatarUrl: viewModel.avatarUrl,
                           onTap: () => ref
                               .read(shellViewModelProvider)
                               .selectTab(ShellTab.profile),

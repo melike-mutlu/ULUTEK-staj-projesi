@@ -54,6 +54,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   ),
                   UserAvatarCircle(
                     name: viewModel.displayName,
+                    avatarUrl: viewModel.avatarUrl,
                     onTap: () => ref
                         .read(shellViewModelProvider)
                         .selectTab(ShellTab.profile),
