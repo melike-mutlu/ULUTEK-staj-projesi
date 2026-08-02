@@ -1,37 +1,34 @@
-enum DietPreference { standard, vegan, vejetaryen, diyabetDostu, sporcu }
-
-const _dietPreferenceDbNames = {
-  DietPreference.standard: 'standard',
-  DietPreference.vegan: 'vegan',
-  DietPreference.vejetaryen: 'vejetaryen',
-  DietPreference.diyabetDostu: 'diyabet_dostu',
-  DietPreference.sporcu: 'sporcu',
+/// `diet_preference` sütunu dönüştürülmeden önce yazılmış değerler.
+/// O dönem sabit bir enum sözlüğü vardı; artık serbest metin tutuluyor, bu
+/// yüzden eski satırlar okunurken katalog etiketlerine çevriliyor — yoksa
+/// kullanıcının seçimi "vegan" diye ayrı bir özel çip olarak görünürdü.
+const Map<String, String> _legacyDietLabels = <String, String>{
+  'vegan': 'Vegan',
+  'vejetaryen': 'Vejetaryen',
+  'diyabet_dostu': 'Diyabet dostu',
+  'sporcu': 'Sporcu / Yüksek protein',
 };
 
-/// `diet_preference` artık `text[]` — çoklu seçim serbest.
+/// `diet_preference` artık `text[]` ve serbest metin — alerjiler/sağlık
+/// durumlarıyla aynı davranır.
 ///
-/// Okuma tarafı hem diziyi hem de eski tekil string'i kabul eder: sütun
-/// dönüştürülmeden önce yazılmış satırlar hâlâ okunabilsin diye.
-/// `standard` "tercih yok" demek, listeye alınmaz — karşılığı boş listedir.
-List<DietPreference> _parseDietPreferences(dynamic value) {
+/// Okuma tarafı hem diziyi hem de eski tekil string'i kabul eder.
+/// `standard` "tercih yok" demekti, listeye alınmaz.
+List<String> _parseDietPreferences(dynamic value) {
   final List<dynamic> raw;
   if (value == null) {
-    return const <DietPreference>[];
+    return const <String>[];
   } else if (value is List) {
     raw = value;
   } else {
     raw = <dynamic>[value];
   }
 
-  final result = <DietPreference>[];
-  for (final entry in raw) {
-    for (final pair in _dietPreferenceDbNames.entries) {
-      if (pair.value == entry && pair.key != DietPreference.standard) {
-        result.add(pair.key);
-      }
-    }
-  }
-  return result;
+  return raw
+      .whereType<String>()
+      .where((String e) => e != 'standard')
+      .map((String e) => _legacyDietLabels[e] ?? e)
+      .toList();
 }
 
 /// Supabase "profiles" tablosunun Dart karşılığı (bkz. docs/architecture.md).
@@ -40,7 +37,7 @@ class UserProfile {
   final List<String> allergies;
 
   /// Seçili diyet tercihleri; boş liste "özel bir diyetim yok" demek.
-  final List<DietPreference> dietPreferences;
+  final List<String> dietPreferences;
 
   final List<String> healthConditions;
 
@@ -64,9 +61,7 @@ class UserProfile {
     return {
       'user_id': userId,
       'allergies': allergies,
-      'diet_preference': dietPreferences
-          .map((DietPreference e) => _dietPreferenceDbNames[e])
-          .toList(),
+      'diet_preference': dietPreferences,
       'health_conditions': healthConditions,
       'display_name': displayName,
       'avatar_url': avatarUrl,

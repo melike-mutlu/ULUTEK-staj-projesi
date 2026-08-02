@@ -80,11 +80,8 @@ class ProfileViewModel extends ChangeNotifier {
   UserProfile? get profile => _profile;
 
   /// Sabit katalog + profilden gelen/kullanıcının eklediği seçenekler.
-  /// Diyet için yalnızca veritabanına yazılabilen etiketler döner.
   List<String> optionsFor(OnboardingField field) => <String>[
-        ...(field == OnboardingField.diet
-            ? profileDietOptions
-            : profileOptions[field]!),
+        ...profileOptions[field]!,
         ..._extraOptions[field]!,
       ];
 
@@ -110,7 +107,10 @@ class ProfileViewModel extends ChangeNotifier {
           _draft[OnboardingField.health],
           profile.healthConditions.toSet(),
         ) ||
-        !setEquals(_draftDietLabels, profile.dietPreferences.toSet());
+        !setEquals(
+          _draft[OnboardingField.diet],
+          profile.dietPreferences.toSet(),
+        );
   }
 
   // --- Yazma ---
@@ -181,7 +181,7 @@ class ProfileViewModel extends ChangeNotifier {
     return UserProfile(
       userId: userId,
       allergies: base?.allergies ?? const <String>[],
-      dietPreferences: base?.dietPreferences ?? const <DietPreference>[],
+      dietPreferences: base?.dietPreferences ?? const <String>[],
       healthConditions: base?.healthConditions ?? const <String>[],
       displayName: displayName,
       avatarUrl: avatarUrl,
@@ -256,11 +256,9 @@ class ProfileViewModel extends ChangeNotifier {
   /// Boş/whitespace ve mevcut seçenekle (case-insensitive) çakışan girdi
   /// reddedilir.
   ///
-  /// Diyette kapalı: katalog dışı bir etiketin `DietPreference` karşılığı yok,
-  /// kaydedilse sessizce kaybolurdu (bkz. dietPreferenceByLabel).
+  /// Üç alanda da açık: `diet_preference` de `text[]` olduğu için özel diyet
+  /// değerleri diğer alanlardaki gibi olduğu gibi kaydedilir.
   void addCustomOption(OnboardingField field, String option) {
-    if (field == OnboardingField.diet) return;
-
     final trimmed = option.trim();
     if (trimmed.isEmpty) return;
 
@@ -349,7 +347,7 @@ class ProfileViewModel extends ChangeNotifier {
       final updated = UserProfile(
         userId: userId,
         allergies: _draft[OnboardingField.allergies]!.toList(),
-        dietPreferences: _draftDietPreferences,
+        dietPreferences: _draft[OnboardingField.diet]!.toList(),
         healthConditions: _draft[OnboardingField.health]!.toList(),
         displayName: _displayName,
         avatarUrl: _avatarUrl,
@@ -372,16 +370,6 @@ class ProfileViewModel extends ChangeNotifier {
 
   // --- Yardımcılar ---
 
-  /// Taslakta seçili diyet etiketlerinin enum karşılıkları. Sözlükte olmayan
-  /// etiket yazılamaz, sessizce elenir.
-  List<DietPreference> get _draftDietPreferences => _draft[OnboardingField.diet]!
-      .map((String label) => dietPreferenceByLabel[label])
-      .whereType<DietPreference>()
-      .toList();
-
-  /// [hasChanges] karşılaştırması için: taslak seçimlerin enum kümesi.
-  Set<DietPreference> get _draftDietLabels => _draftDietPreferences.toSet();
-
   void _applyToDraft(UserProfile? profile) {
     for (final selected in _draft.values) {
       selected.clear();
@@ -389,16 +377,8 @@ class ProfileViewModel extends ChangeNotifier {
     if (profile == null) return;
 
     _selectAll(OnboardingField.allergies, profile.allergies);
+    _selectAll(OnboardingField.diet, profile.dietPreferences);
     _selectAll(OnboardingField.health, profile.healthConditions);
-
-    // Enum listesi → etiketler; boş liste "seçim yok" demek.
-    for (final preference in profile.dietPreferences) {
-      final label = dietPreferenceByLabel.entries
-          .where((MapEntry<String, DietPreference> e) => e.value == preference)
-          .map((MapEntry<String, DietPreference> e) => e.key)
-          .firstOrNull;
-      if (label != null) _draft[OnboardingField.diet]!.add(label);
-    }
   }
 
   /// Kayıtlı değerleri seçili yapar; katalogda olmayanları (kullanıcının

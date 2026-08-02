@@ -1,36 +1,11 @@
-import '../models/user_profile.dart';
-
 /// Profilde hangi alanı doldurduğumuz. UserProfile alan adlarıyla eşleşir.
 enum OnboardingField { allergies, diet, health }
-
-/// Diyet etiketi ↔ `DietPreference`. `diet_preference` artık `text[]`, yani
-/// çoklu seçim serbest — ama yazılabilen DEĞERLER hâlâ bu enum'un sözlüğüyle
-/// sınırlı, çünkü kural motoru sunucu tarafında bu adları bekliyor.
-///
-/// TODO(backend-pod): sözlükte karşılığı olmayan etiketler ('Düşük
-/// karbonhidrat', 'Glutensiz yaşam tarzı', 'Ketojenik') hâlâ kaydedilemiyor;
-/// profil ekranı onları göstermiyor. Kural motoru serbest metin kabul ederse
-/// bu tablo tamamen kalkar ve diyet de alerjiler gibi düz `text[]` olur.
-const Map<String, DietPreference> dietPreferenceByLabel =
-    <String, DietPreference>{
-  'Vegan': DietPreference.vegan,
-  'Vejetaryen': DietPreference.vejetaryen,
-  'Diyabet dostu': DietPreference.diyabetDostu,
-  'Sporcu / Yüksek protein': DietPreference.sporcu,
-};
-
-/// Profil ekranının diyet seçenekleri: yalnızca veritabanına gidip geri
-/// dönebilenler (bkz. [dietPreferenceByLabel]).
-List<String> get profileDietOptions => profileOptions[OnboardingField.diet]!
-    .where(dietPreferenceByLabel.containsKey)
-    .toList();
 
 /// Onboarding ve Profil ekranlarının ORTAK seçenek kataloğu — tek kaynak.
 /// Yeni seçenek eklemek = buradaki listeye eklemek; iki ekran da görür.
 ///
-/// UYARI: `diet` listesindeki her seçeneğin `DietPreference` karşılığı yok
-/// (bkz. [dietPreferenceByLabel]). Profil ekranı yalnızca karşılığı olanları
-/// gösterir.
+/// Katalog başlangıç noktası, sınır değil: üç alanda da kullanıcı "+" ile
+/// kendi değerini ekleyebilir ve o değer olduğu gibi kaydedilir.
 const Map<OnboardingField, List<String>> profileOptions =
     <OnboardingField, List<String>>{
   OnboardingField.allergies: <String>[

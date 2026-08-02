@@ -119,7 +119,7 @@ void main() {
     expect(repository.savedProfile!.healthConditions, <String>['Tansiyon']);
     expect(
       repository.savedProfile!.dietPreferences,
-      <DietPreference>[DietPreference.vejetaryen],
+      <String>['Vejetaryen'],
     );
   });
 

@@ -160,9 +160,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       viewModel.toggleOption(field, option),
                   onAddCustom: (String option) =>
                       viewModel.addCustomOption(field, option),
-                  // Diet values must map to the enum the rule engine expects,
-                  // so free-text entries cannot be persisted there.
-                  canAddCustom: field != OnboardingField.diet,
                   isExpanded: _expanded.contains(field),
                   onShowAll: () => setState(() => _expanded.add(field)),
                 ),

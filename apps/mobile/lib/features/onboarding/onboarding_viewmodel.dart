@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants/profile_options.dart';
 import '../../core/models/user_profile.dart';
 import '../../data/repositories/profile_repository.dart';
 import 'onboarding_steps.dart';
@@ -167,9 +166,7 @@ class OnboardingViewModel extends ChangeNotifier {
         final profile = UserProfile(
           userId: userId,
           allergies: _selections[OnboardingField.allergies]!.toList(),
-          dietPreferences: _mapDietPreferences(
-            _selections[OnboardingField.diet]!,
-          ),
+          dietPreferences: _selections[OnboardingField.diet]!.toList(),
           healthConditions: _selections[OnboardingField.health]!.toList(),
         );
         await _profileRepository.saveProfile(profile);
@@ -185,15 +182,6 @@ class OnboardingViewModel extends ChangeNotifier {
     }
   }
 
-  /// Seçilen diyet etiketlerini `diet_preference` (`text[]`) karşılıklarına
-  /// çevirir. Sözlükte karşılığı olmayan etiketler yazılamaz, elenir
-  /// (bkz. dietPreferenceByLabel).
-  List<DietPreference> _mapDietPreferences(Set<String> selections) =>
-      dietPreferenceByLabel.entries
-          .where((MapEntry<String, DietPreference> e) =>
-              selections.contains(e.key))
-          .map((MapEntry<String, DietPreference> e) => e.value)
-          .toList();
 }
 
 final onboardingViewModelProvider =
