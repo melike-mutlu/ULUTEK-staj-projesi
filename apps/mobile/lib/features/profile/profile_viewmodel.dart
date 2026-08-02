@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/profile_options.dart';
 import '../../core/models/user_profile.dart';
+import '../../core/utils/display_name.dart';
 import '../../data/repositories/profile_repository.dart';
+import '../../shared/services/image_picker_service.dart';
 
 /// Onboarding'de girilen profili sonradan düzenlemek için.
 ///
@@ -11,9 +13,10 @@ import '../../data/repositories/profile_repository.dart';
 /// taslağı ViewModel'de tutulur, View yalnızca çizer. Kaydetme çip başına
 /// değil, tek "Kaydet" ile toplu yapılır.
 class ProfileViewModel extends ChangeNotifier {
-  ProfileViewModel(this._profileRepository);
+  ProfileViewModel(this._profileRepository, this._imagePickerService);
 
   final ProfileRepository _profileRepository;
+  final ImagePickerService _imagePickerService;
 
   /// Ekranda gösterilen seçim taslağı — kaydedilene kadar yereldir.
   final Map<OnboardingField, Set<String>> _draft =
@@ -31,7 +34,16 @@ class ProfileViewModel extends ChangeNotifier {
 
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _isUploadingAvatar = false;
   String? _errorMessage;
+
+  /// Ad taslağı — seçimler gibi "Kaydet"e kadar yerel. Boş string "ad girilmedi"
+  /// demek; kaydederken null'a çevrilir.
+  String _displayNameDraft = '';
+
+  /// Fotoğraf URL'i taslak DEĞİL: yükleme başarılı olur olmaz kaydedilir,
+  /// çünkü dosya o an zaten bucket'a gitmiş olur.
+  String? _avatarUrl;
 
   /// Son [load] başarısız mı — View bunu tam ekran "tekrar dene" ile gösterir,
   /// kaydetme hatasını ise formun altındaki satırda.
@@ -46,8 +58,18 @@ class ProfileViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
+  bool get isUploadingAvatar => _isUploadingAvatar;
   String? get errorMessage => _errorMessage;
   bool get loadFailed => _loadFailed;
+
+  String get displayNameDraft => _displayNameDraft;
+  String? get avatarUrl => _avatarUrl;
+
+  /// Başlıkta gösterilecek ad: girilen ad, yoksa e-posta kullanıcı adı.
+  String get resolvedDisplayName => resolveDisplayName(
+        displayName: _displayNameDraft,
+        email: _email,
+      );
 
   /// Oturumdaki e-posta — [load] sırasında okunup saklanır ki build tarafı
   /// Supabase'e hiç dokunmasın.
@@ -72,9 +94,11 @@ class ProfileViewModel extends ChangeNotifier {
   bool get hasChanges {
     final profile = _profile;
     if (profile == null) {
-      return _draft.values.any((Set<String> selected) => selected.isNotEmpty);
+      return _displayNameDraft.isNotEmpty ||
+          _draft.values.any((Set<String> selected) => selected.isNotEmpty);
     }
-    return !setEquals(
+    return _displayNameDraft != (profile.displayName ?? '') ||
+        !setEquals(
           _draft[OnboardingField.allergies],
           profile.allergies.toSet(),
         ) ||
@@ -86,6 +110,71 @@ class ProfileViewModel extends ChangeNotifier {
   }
 
   // --- Yazma ---
+
+  /// Adı taslağa yazar; kalıcı olması için "Kaydet" gerekir.
+  /// Boş/whitespace girdi "ad yok" demektir ve kabul edilir — ad zorunlu değil.
+  void setDisplayName(String value) {
+    final trimmed = value.trim();
+    if (trimmed == _displayNameDraft) return;
+    _displayNameDraft = trimmed;
+    notifyListeners();
+  }
+
+  /// Galeriden fotoğraf seçtirir, bucket'a yükler ve profile hemen yazar.
+  ///
+  /// Seçimlerin aksine beklemeye alınmaz: dosya yüklendiği anda bucket'ta olur,
+  /// URL'i sadece bellekte tutmak "Kaydet"e basılmazsa onu kaybettirirdi.
+  /// Kaydedilmemiş seçim taslağı bundan etkilenmez — yazılan satır en son
+  /// kaydedilmiş hâlin üstüne yalnızca yeni URL'i ekler.
+  Future<void> pickAndUploadAvatar() async {
+    final String? userId;
+    try {
+      userId = _profileRepository.currentUserId;
+    } catch (_) {
+      _errorMessage = 'Fotoğraf yüklenemedi. Lütfen tekrar dene.';
+      notifyListeners();
+      return;
+    }
+    if (userId == null) {
+      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      notifyListeners();
+      return;
+    }
+
+    try {
+      final picked = await _imagePickerService.pickFromGallery();
+      // Kullanıcı vazgeçti — hata değil, sessizce çık.
+      if (picked == null) return;
+
+      _isUploadingAvatar = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final url = await _profileRepository.uploadAvatar(
+        userId: userId,
+        bytes: picked.bytes,
+        fileExtension: picked.extension,
+      );
+
+      final updated = (_profile ??
+              UserProfile(
+                userId: userId,
+                allergies: const <String>[],
+                dietPreference: DietPreference.standard,
+                healthConditions: const <String>[],
+              ))
+          .copyWith(avatarUrl: url);
+
+      await _profileRepository.saveProfile(updated);
+      _profile = updated;
+      _avatarUrl = url;
+    } catch (_) {
+      _errorMessage = 'Fotoğraf yüklenemedi. Lütfen tekrar dene.';
+    }
+
+    _isUploadingAvatar = false;
+    notifyListeners();
+  }
 
   /// Diyet tek seçimlidir: yeni seçim öncekinin yerine geçer (veritabanındaki
   /// tekil enum ile birebir olsun diye). Diğer alanlar çoklu seçim.
@@ -158,6 +247,8 @@ class ProfileViewModel extends ChangeNotifier {
       }
       _email = _profileRepository.currentUserEmail;
       _profile = await _profileRepository.getProfile(userId);
+      _displayNameDraft = _profile?.displayName ?? '';
+      _avatarUrl = _profile?.avatarUrl;
       _applyToDraft(_profile);
     } catch (_) {
       _loadFailed = true;
@@ -189,11 +280,15 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Tüm alanlar açıkça veriliyor: saveProfile satırın tamamını upsert eder,
+      // eksik bırakılan alan veritabanında null'lanırdı.
       final updated = UserProfile(
         userId: userId,
         allergies: _draft[OnboardingField.allergies]!.toList(),
         dietPreference: _draftDietPreference,
         healthConditions: _draft[OnboardingField.health]!.toList(),
+        displayName: _displayNameDraft.isEmpty ? null : _displayNameDraft,
+        avatarUrl: _avatarUrl,
       );
       await _profileRepository.saveProfile(updated);
       _profile = updated;
@@ -249,5 +344,8 @@ class ProfileViewModel extends ChangeNotifier {
 
 final profileViewModelProvider =
     ChangeNotifierProvider.autoDispose<ProfileViewModel>(
-  (ref) => ProfileViewModel(ref.watch(profileRepositoryProvider)),
+  (ref) => ProfileViewModel(
+    ref.watch(profileRepositoryProvider),
+    ref.watch(imagePickerServiceProvider),
+  ),
 );

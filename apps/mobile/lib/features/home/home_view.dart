@@ -44,7 +44,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             ),
                       ),
                       Text(
-                        viewModel.userName.isNotEmpty ? viewModel.userName : 'Kullanıcı',
+                        viewModel.displayName.isNotEmpty ? viewModel.displayName : 'Kullanıcı',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AkilliSepetColors.textPrimary,
@@ -53,7 +53,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     ],
                   ),
                   UserAvatarCircle(
-                    name: viewModel.userName,
+                    name: viewModel.displayName,
                     onTap: () => ref
                         .read(shellViewModelProvider)
                         .selectTab(ShellTab.profile),
