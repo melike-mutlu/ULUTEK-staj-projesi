@@ -35,6 +35,8 @@ class Product {
   final Nutriments nutriments;
   final String? nutriscore;
   final String? status;
+
+  /// Topluluk tarafından eklenmiş ve henüz onay bekleyen/doğrulanmamış ürün göstergesi.
   final bool isPending;
 
   const Product({
@@ -52,8 +54,9 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final statusVal = json['status'] as String?;
+    final verified = json['verified'] as bool?;
     final isPendingVal = json['is_pending'] as bool? ??
-        (statusVal?.toUpperCase() == 'PENDING');
+        (statusVal?.toUpperCase() == 'PENDING' || verified == false);
 
     return Product(
       barcode: json['barcode'] as String,

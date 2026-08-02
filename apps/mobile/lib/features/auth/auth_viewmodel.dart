@@ -104,6 +104,25 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  /// Hesaba gerek duymadan misafir olarak giriş yapma.
+  Future<bool> signInAsGuest() async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      await supabase.auth.signInAnonymously();
+      isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      errorMessage = 'Misafir girişi başarısız: $e';
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   bool _isEmailAlreadyRegistered(AuthException error) =>
       error.code == ErrorCode.userAlreadyExists.code ||
       error.code == ErrorCode.emailExists.code;
@@ -111,4 +130,4 @@ class AuthViewModel extends ChangeNotifier {
   bool _isEmailNotConfirmed(AuthException error) =>
       error.code == 'email_not_confirmed' ||
       error.message.toLowerCase().contains('email not confirmed');
-} 
+}

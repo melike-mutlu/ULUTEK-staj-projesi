@@ -52,7 +52,7 @@ void main() {
 
     expect(_navLabel('Ana Sayfa'), findsOneWidget);
     expect(_navLabel('Tara'), findsOneWidget);
-    expect(_navLabel('Geçmiş'), findsOneWidget);
+    expect(_navLabel('Chatbot'), findsOneWidget);
     expect(_navLabel('Profil'), findsOneWidget);
 
     final container = ProviderScope.containerOf(
@@ -63,9 +63,9 @@ void main() {
       ShellTab.dashboard,
     );
 
-    await tester.tap(_navLabel('Geçmiş'));
+    await tester.tap(_navLabel('Chatbot'));
     await tester.pumpAndSettle();
-    expect(container.read(shellViewModelProvider).currentTab, ShellTab.home);
+    expect(container.read(shellViewModelProvider).currentTab, ShellTab.chatbot);
 
     await tester.tap(_navLabel('Tara'));
     await tester.pumpAndSettle();
@@ -94,7 +94,7 @@ void main() {
 
     await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
     await tester.pumpAndSettle();
-    expect(currentTab(), ShellTab.home);
+    expect(currentTab(), ShellTab.chatbot);
 
     // Saga kaydir -> geri.
     await tester.fling(find.byType(PageView), const Offset(400, 0), 1000);

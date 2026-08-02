@@ -17,14 +17,17 @@ class DashboardViewModel extends ChangeNotifier {
         isLoading = true;
         notifyListeners();
 
-        final user = Supabase.instance.client.auth.currentUser;
-        if (user!= null) {
-            userName = user.email?.split('@').first ?? 'Kullanıcı';
+        try {
+            final user = Supabase.instance.client.auth.currentUser;
+            if (user != null) {
+                userName = user.email?.split('@').first ?? 'Kullanıcı';
+            }
+        } catch (e) {
+            debugPrint('[DashboardViewModel] Kullanıcı bilgisi alınamadı: $e');
         }
 
         recentScans = await _scanHistoryRepository.getScanHistory(limit: 3);
         isLoading = false;
         notifyListeners();
-
     }
 }

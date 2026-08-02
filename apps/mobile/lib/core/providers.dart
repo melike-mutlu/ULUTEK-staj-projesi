@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../data/repositories/product_repository.dart';
 import '../features/auth/auth_viewmodel.dart';
 import '../features/scan/scan_viewmodel.dart';
@@ -23,7 +22,7 @@ final authViewModelProvider = ChangeNotifierProvider<AuthViewModel>((ref) {
 });
 
 final scanHistoryRepositoryProvider = Provider<ScanHistoryRepository>((ref) {
-  return ScanHistoryRepository(Supabase.instance.client);
+  return ScanHistoryRepository();
 });
 
 

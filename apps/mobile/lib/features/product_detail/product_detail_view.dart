@@ -1,27 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/navigation/app_routes.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
+import '../../data/repositories/product_repository.dart';
+import '../../data/repositories/profile_repository.dart';
 import 'product_detail_viewmodel.dart';
 import 'widgets/allergens_card.dart';
 import 'widgets/nutriments_card.dart';
 import 'widgets/product_header_card.dart';
 import 'widgets/warning_banner.dart';
 
-class ProductDetailView extends StatefulWidget {
+class ProductDetailView extends ConsumerStatefulWidget {
   const ProductDetailView({super.key});
 
   @override
-  State<ProductDetailView> createState() => _ProductDetailViewState();
+  ConsumerState<ProductDetailView> createState() => _ProductDetailViewState();
 }
 
-class _ProductDetailViewState extends State<ProductDetailView> {
+class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   late final ProductDetailViewModel _viewModel;
+  bool _isInitialLoaded = false;
+  String? _scannedBarcode;
 
   @override
   void initState() {
     super.initState();
-    // Varsayılan olarak mock kurgusu ile başlat (Kırmızı / Warning senaryosu)
-    _viewModel = ProductDetailViewModel.withMock(mockState: 'warning');
+    _viewModel = ProductDetailViewModel();
     _viewModel.addListener(_onViewModelChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialLoaded) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is ProductFetchResult) {
+        _scannedBarcode = args.product?.barcode;
+        _isInitialLoaded = true;
+        final profileRepo = ref.read(profileRepositoryProvider);
+        _viewModel.loadFromFetchResult(args, profileRepo);
+      } else if (args is String) {
+        _scannedBarcode = args;
+        _isInitialLoaded = true;
+        // Mock fallback if string barcode passed directly in mock tests
+        _viewModel.loadMockState('warning');
+      } else {
+        _isInitialLoaded = true;
+        _viewModel.loadMockState('warning');
+      }
+    }
   }
 
   void _onViewModelChanged() {
@@ -80,6 +108,9 @@ class _ProductDetailViewState extends State<ProductDetailView> {
           ),
         );
 
+      case ProductDetailStatus.error:
+        return _buildErrorState(context);
+
       case ProductDetailStatus.notFound:
         return _buildNotFoundState(context);
 
@@ -136,7 +167,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                       onPressed: () {
                         Navigator.pushNamedAndRemoveUntil(
                           context,
-                          '/home',
+                          AppRoutes.shell,
                           (route) => false,
                         );
                       },
@@ -201,6 +232,71 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     );
   }
 
+  Widget _buildErrorState(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEF2F2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                size: 52,
+                color: Colors.redAccent,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Bir Hata Oluştu',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AkilliSepetColors.textPrimary,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _viewModel.errorMessage ?? 'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AkilliSepetColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 28),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Geri Dön'),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final args = ModalRoute.of(context)?.settings.arguments;
+                    if (args is ProductFetchResult) {
+                      final profileRepo = ref.read(profileRepositoryProvider);
+                      _viewModel.loadFromFetchResult(args, profileRepo);
+                    }
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Tekrar Dene'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMockTesterBar() {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -232,13 +328,13 @@ class _ProductDetailViewState extends State<ProductDetailView> {
             child: Row(
               children: [
                 _buildMockChip('🔴 Kırmızı', () => _viewModel.loadMockState('red')),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 _buildMockChip('🟡 Sarı', () => _viewModel.loadMockState('yellow')),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 _buildMockChip('🟢 Yeşil', () => _viewModel.loadMockState('green')),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 _buildMockChip('⏳ Pending', () => _viewModel.loadMockState('pending')),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 _buildMockChip('❌ Yok', () => _viewModel.setStatusFromFetch('not_found')),
               ],
             ),
@@ -268,6 +364,8 @@ class _ProductDetailViewState extends State<ProductDetailView> {
   }
 
   Widget _buildNotFoundState(BuildContext context) {
+    final barcodeText = _scannedBarcode ?? '8690504112233';
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -298,9 +396,9 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     color: const Color(0xFFF0F0F0),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'Barkod: 8 690 504 112 233',
-                    style: TextStyle(
+                  child: Text(
+                    'Barkod: $barcodeText',
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF6B7280),
                       fontFamily: 'monospace',
@@ -338,8 +436,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Ürün bildirimi gönderildi')),
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.pendingProduct,
+                    arguments: barcodeText,
                   );
                 },
                 child: const Text('Ürünü Bize Bildir'),

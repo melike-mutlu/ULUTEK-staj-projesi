@@ -5,6 +5,8 @@ import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
 import '../../data/repositories/explanation_repository.dart';
+import '../../data/repositories/product_repository.dart';
+import '../../data/repositories/profile_repository.dart';
 
 enum ProductDetailStatus { loading, found, notFound, partial, error }
 
@@ -17,10 +19,68 @@ class ProductDetailViewModel extends ChangeNotifier {
   Product? product;
   RuleEngineResult? ruleEngineResult;
   Explanation? explanation;
+  String? errorMessage;
 
   ProductDetailViewModel.withMock({String mockState = 'warning'})
       : _explanationRepository = null {
     loadMockState(mockState);
+  }
+
+  /// Barkod arama sonucunu (ProductFetchResult) ve gerçek kullanıcı profilini (profileRepository) alıp işler.
+  Future<void> loadFromFetchResult(
+    ProductFetchResult fetchResult,
+    ProfileRepository profileRepository,
+  ) async {
+    status = ProductDetailStatus.loading;
+    errorMessage = null;
+    notifyListeners();
+
+    if (fetchResult.status == 'error') {
+      status = ProductDetailStatus.error;
+      errorMessage =
+          fetchResult.errorMessage ?? 'Ürün bilgileri alınırken bir hata oluştu.';
+      notifyListeners();
+      return;
+    }
+
+    if (fetchResult.status == 'not_found' || fetchResult.product == null) {
+      status = ProductDetailStatus.notFound;
+      notifyListeners();
+      return;
+    }
+
+    final product = fetchResult.product!;
+    final ruleEngineResult = fetchResult.ruleEngineResult ??
+        const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: true,
+        );
+
+    // profileRepositoryProvider üzerinden gerçek kullanıcı profilini çek
+    UserProfile? userProfile;
+    final userId = profileRepository.currentUserId;
+    if (userId != null) {
+      try {
+        userProfile = await profileRepository.getProfile(userId);
+      } catch (e) {
+        debugPrint('[ProductDetailViewModel] Profile load warning: $e');
+      }
+    }
+
+    // Profil veritabanında henüz oluşturulmadıysa varsayılan profil
+    userProfile ??= UserProfile(
+      userId: userId ?? 'guest',
+      allergies: const [],
+      dietPreference: DietPreference.standard,
+      healthConditions: const [],
+    );
+
+    await load(
+      product: product,
+      ruleEngineResult: ruleEngineResult,
+      userProfile: userProfile,
+    );
   }
 
   void loadMockState(String state) {
@@ -28,6 +88,43 @@ class ProductDetailViewModel extends ChangeNotifier {
     notifyListeners();
 
     switch (state) {
+      case 'pending':
+      case 'unverified':
+        product = const Product(
+          barcode: '9998887776655',
+          name: 'Organik Ev Yapımı Granola',
+          brand: 'Topluluk Katkısı',
+          ingredientsText: 'Yulaf ezmesi, bal, ceviz, tarçın.',
+          additives: [],
+          allergensTags: ['en:nuts'],
+          nutriments: Nutriments(
+            energyKcal100g: 380,
+            sugars100g: 14.0,
+            fat100g: 15.0,
+            proteins100g: 9.0,
+            salt100g: 0.02,
+          ),
+          nutriscore: 'b',
+          isPending: true,
+        );
+
+        ruleEngineResult = const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: false,
+          diabeticNote: null,
+        );
+
+        explanation = const Explanation(
+          summary: 'Topluluk tarafından eklenen granola tarifi.',
+          level: WarningLevel.caution,
+          warningMessage:
+              'Bu ürün henüz yetkililerce doğrulanmadı. Tüketmeden önce içerik ve alerjen etiketini dikkatle kontrol ediniz. (Doğrulanmadı, dikkatli ol)',
+          dietNote: 'Topluluk verisidir.',
+          disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+        );
+        break;
+
       case 'warning':
       case 'red':
         product = const Product(
@@ -99,41 +196,6 @@ class ProductDetailViewModel extends ChangeNotifier {
           warningMessage:
               'Alerjen kısıtlaması tetiklenmedi ancak laktoz hassasiyetiniz varsa porsiyon miktarına dikkat ediniz.',
           dietNote: 'Yüksek protein desteği sağlar.',
-          disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
-        );
-        break;
-
-      case 'pending':
-        product = const Product(
-          barcode: '8690000111222',
-          name: 'Organik Yulaf Ezmesi (Topluluk)',
-          brand: 'Doğal Lezzetler',
-          ingredientsText: 'Yulaf ezmesi.',
-          additives: [],
-          allergensTags: ['en:gluten'],
-          nutriments: Nutriments(
-            energyKcal100g: 370,
-            sugars100g: 1.0,
-            fat100g: 7.0,
-            proteins100g: 13.0,
-            salt100g: 0.01,
-          ),
-          nutriscore: 'a',
-          status: 'PENDING',
-          isPending: true,
-        );
-
-        ruleEngineResult = const RuleEngineResult(
-          matchedAllergens: [],
-          hasConflict: false,
-          veganCompatible: true,
-          diabeticNote: null,
-        );
-
-        explanation = const Explanation(
-          summary: 'Topluluk tarafından eklenmiş ürün.',
-          level: WarningLevel.ok,
-          warningMessage: 'Tebrikler! Bu ürün profilinize uygundur.',
           disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
         );
         break;
