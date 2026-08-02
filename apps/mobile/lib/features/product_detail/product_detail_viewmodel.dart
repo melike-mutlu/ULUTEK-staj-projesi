@@ -103,6 +103,41 @@ class ProductDetailViewModel extends ChangeNotifier {
         );
         break;
 
+      case 'pending':
+        product = const Product(
+          barcode: '8690000111222',
+          name: 'Organik Yulaf Ezmesi (Topluluk)',
+          brand: 'Doğal Lezzetler',
+          ingredientsText: 'Yulaf ezmesi.',
+          additives: [],
+          allergensTags: ['en:gluten'],
+          nutriments: Nutriments(
+            energyKcal100g: 370,
+            sugars100g: 1.0,
+            fat100g: 7.0,
+            proteins100g: 13.0,
+            salt100g: 0.01,
+          ),
+          nutriscore: 'a',
+          status: 'PENDING',
+          isPending: true,
+        );
+
+        ruleEngineResult = const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: true,
+          diabeticNote: null,
+        );
+
+        explanation = const Explanation(
+          summary: 'Topluluk tarafından eklenmiş ürün.',
+          level: WarningLevel.ok,
+          warningMessage: 'Tebrikler! Bu ürün profilinize uygundur.',
+          disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+        );
+        break;
+
       case 'ok':
       case 'green':
       default:
@@ -142,6 +177,7 @@ class ProductDetailViewModel extends ChangeNotifier {
         break;
     }
 
+    _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
   }
@@ -175,8 +211,30 @@ class ProductDetailViewModel extends ChangeNotifier {
       );
     }
 
+    _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
+  }
+
+  /// Eğer ürün PENDING ise (topluluk tarafından eklenmiş, doğrulanmamış),
+  /// kural motoru sonucu ne olursa olsun asla yeşil/güvenli gösterilmez.
+  /// Seviye en az WarningLevel.caution (nötr/dikkat) yapılır.
+  void _applyPendingProductRule() {
+    final prod = product;
+    final exp = explanation;
+    if (prod != null && prod.isPending && exp != null) {
+      final newLevel =
+          exp.level == WarningLevel.ok ? WarningLevel.caution : exp.level;
+      explanation = Explanation(
+        summary: exp.summary,
+        level: newLevel,
+        warningMessage: exp.level == WarningLevel.ok
+            ? 'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı. Bilgiler resmi onay beklemektedir.'
+            : exp.warningMessage,
+        dietNote: exp.dietNote ?? 'Topluluk verisi — Doğrulanmamış içerik',
+        disclaimer: exp.disclaimer,
+      );
+    }
   }
 
   void setStatusFromFetch(String fetchStatus) {

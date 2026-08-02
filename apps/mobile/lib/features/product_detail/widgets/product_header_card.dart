@@ -68,6 +68,36 @@ class ProductHeaderCard extends StatelessWidget {
     );
   }
 
+  Widget _buildPendingBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF3C7),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFFF59E0B), width: 1),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.gpp_maybe_rounded,
+            size: 14,
+            color: Color(0xFFB45309),
+          ),
+          SizedBox(width: 4),
+          Text(
+            'Doğrulanmadı',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFB45309),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final brandText = product.brand?.isNotEmpty == true ? product.brand! : 'Genel Marka';
@@ -92,21 +122,30 @@ class ProductHeaderCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Marka Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  brandText,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4B5563),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Marka Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      brandText,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4B5563),
+                      ),
+                    ),
                   ),
-                ),
+                  if (product.isPending) ...[
+                    const SizedBox(width: 8),
+                    _buildPendingBadge(),
+                  ],
+                ],
               ),
               // Nutri-Score (Eğer varsa)
               if (product.nutriscore != null && product.nutriscore!.isNotEmpty)

@@ -34,6 +34,8 @@ class Product {
   final List<String> allergensTags;
   final Nutriments nutriments;
   final String? nutriscore;
+  final String? status;
+  final bool isPending;
 
   const Product({
     required this.barcode,
@@ -44,9 +46,15 @@ class Product {
     required this.allergensTags,
     required this.nutriments,
     this.nutriscore,
-  });
+    this.status,
+    bool? isPending,
+  }) : isPending = isPending ?? (status == 'PENDING');
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    final statusVal = json['status'] as String?;
+    final isPendingVal = json['is_pending'] as bool? ??
+        (statusVal?.toUpperCase() == 'PENDING');
+
     return Product(
       barcode: json['barcode'] as String,
       name: json['name'] as String,
@@ -58,9 +66,13 @@ class Product {
       allergensTags: (json['allergens_tags'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList(),
-      nutriments: Nutriments.fromJson(
-          json['nutriments'] as Map<String, dynamic>? ?? {}),
+      nutriments: json['nutriments'] != null
+          ? Nutriments.fromJson(
+              Map<String, dynamic>.from(json['nutriments'] as Map))
+          : const Nutriments(),
       nutriscore: json['nutriscore'] as String?,
+      status: statusVal,
+      isPending: isPendingVal,
     );
   }
 
@@ -80,6 +92,8 @@ class Product {
         'salt_100g': nutriments.salt100g,
       },
       'nutriscore': nutriscore,
+      if (status != null) 'status': status,
+      'is_pending': isPending,
     };
   }
 }
