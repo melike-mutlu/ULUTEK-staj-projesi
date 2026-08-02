@@ -14,7 +14,7 @@ AI destekli, kişiselleştirilmiş alışveriş asistanı — staj projesi.
 **Flutter 3.44.0 (stable channel)** — `apps/mobile/pubspec.lock` ve `.metadata` bu sürüme
 göre kilitlenmiş. Farklı sürümle `flutter create .` / `flutter pub get` çalıştırmak,
 `.metadata`, `android/`, `ios/` gibi otomatik üretilen dosyalarda anlamsız PR
-çakışmalarına yol açıyor (bu PR turunda tam olarak bu yaşandı).
+çakışmalarına yol açıyor.
 
 Kontrol için:
 ```
@@ -28,12 +28,12 @@ ile ya da [FVM](https://fvm.app/) kullanarak 3.44.0'a geçin.
 Platform klasörleri (`android/`, `ios/`, `web/`) zaten repoda — `flutter create .`
 çalıştırmana gerek yok.
 
-1. **Supabase bağlantı bilgilerini gir.** `apps/mobile/lib/main.dart` içinde şu an
-   `'TODO: Supabase proje URL'` gibi yer tutucular var — bunlar gerçek değerle
-   değişmeden uygulama açılışta hata verir. Supabase Dashboard → Settings → API'den
+1. **Supabase bağlantı bilgilerini gir.** `apps/mobile/.env.example` dosyasını aynı
+   klasörde `.env` olarak kopyala, ardından Supabase Dashboard → Settings → API'den
    (proje: `ULUTEK-staj-projesi`) **Project URL** ve **anon public key**'i alıp
-   `main.dart`'a yapıştır. Bu dosyayı bu haliyle commit'leme — gerçek anahtarları
-   girdikten sonra sadece kendi makinende dursun.
+   `SUPABASE_URL` / `SUPABASE_ANON_KEY` değerlerini doldur. `.env` zaten
+   `.gitignore`'da, commit'lenmez — uygulama bu değerleri `flutter_dotenv` ile
+   açılışta okuyor (bkz. `lib/main.dart`).
 2. `apps/mobile/` klasöründe:
    ```
    flutter pub get
