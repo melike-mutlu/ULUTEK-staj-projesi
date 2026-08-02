@@ -87,10 +87,10 @@ class GlassBottomNav extends StatelessWidget {
       activeIcon: Icons.qr_code_scanner_rounded,
     ),
     _NavItem(
-      tab: ShellTab.home,
-      label: 'Geçmiş',
-      icon: Icons.history_outlined,
-      activeIcon: Icons.history_rounded,
+      tab: ShellTab.chatbot,
+      label: 'Chatbot',
+      icon: Icons.chat_bubble_outline_rounded,
+      activeIcon: Icons.chat_bubble_rounded,
     ),
     _NavItem(
       tab: ShellTab.profile,

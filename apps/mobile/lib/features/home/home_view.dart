@@ -1,9 +1,9 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
-import '../../core/providers.dart'; 
+import '../../core/providers.dart';
 
-// Dinamik veri çekeceğimiz için ConsumerStatefulWidget yapıyoruz
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
@@ -14,197 +14,101 @@ class HomeView extends ConsumerStatefulWidget {
 class _HomeViewState extends ConsumerState<HomeView> {
   
   @override
-  void initState() {
-    super.initState();
-    // Ekran açıldığında "verileri yükle" emrini veriyoruz
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(dashboardViewModelProvider).loadDashboardData();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Room for the shell's floating nav bar (see shell_view.dart
-    // `_TabContentInset`); the tab draws no bar of its own.
+    // Shell'in alt barı için gerekli boşluk hesabı
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
-    // ViewModeldeki verilere ulaşıyoruz
+    // Kullanıcı adını göstermek için (geçmiş liste ile işimiz bitti ama isim için Dashboard beyininden bilgiyi alıyoruz)
     final viewModel = ref.watch(dashboardViewModelProvider);
 
     return Scaffold(
-      body: viewModel.isLoading
-          ? const Center(child: CircularProgressIndicator(color: AkilliSepetColors.primary))
-          : SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    // Hoşgeldiniz Başlığı
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Merhaba,',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: AkilliSepetColors.textSecondary,
-                                  ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- HOŞGELDİNİZ BAŞLIĞI VE PROFİL ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Merhaba,',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: AkilliSepetColors.textSecondary,
                             ),
-                            Text(
-                              //GERÇEK KULLANICI ADI
-                              viewModel.userName.isNotEmpty ? viewModel.userName : 'Kullanıcı',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AkilliSepetColors.textPrimary,
-                                  ),
+                      ),
+                      Text(
+                        viewModel.userName.isNotEmpty ? viewModel.userName : 'Kullanıcı',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AkilliSepetColors.textPrimary,
                             ),
-                          ],
-                        ),
-                        // Profil Butonu
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            color: AkilliSepetColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              // İsim "E" yerine kullanıcının baş harfi olsun
-                              viewModel.userName.isNotEmpty ? viewModel.userName[0].toUpperCase() : 'U',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      color: AkilliSepetColors.primary,
+                      shape: BoxShape.circle,
                     ),
-                    
-                    // NOT: TARA BUTONU BURADAN KALDIRILDI!
-                    
-                    const SizedBox(height: 40),
-                    // Son Taramaların Başlığı
-                    Text(
-                      'Son Taramaların',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AkilliSepetColors.textPrimary,
-                          ),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    //GERÇEK TARAMA GEÇMİŞİ LİSTESİ
-                    if (viewModel.recentScans.isEmpty)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 20),
-                          child: Text(
-                            'Henüz bir ürün taramadınız.',
-                            style: TextStyle(color: Colors.grey, fontSize: 16),
-                          ),
+                    child: Center(
+                      child: Text(
+                        viewModel.userName.isNotEmpty ? viewModel.userName[0].toUpperCase() : 'U',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                      )
-                    else
-                      // Veritabanındaki liste kadar kart oluşturuyoruz
-                      ...viewModel.recentScans.map((item) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: _buildRecentScanCard(
-                            context,
-                            title: 'Barkod: ${item['barcode']}',
-                            note: 'İçerik Analizi', // İleride uyarı rengine göre değişebilir
-                            noteColor: AkilliSepetColors.success,
-                            backgroundColor: const Color(0xFFE8F5E9),
-                            time: 'Yeni', // İleride saati gösterebiliriz
-                          ),
-                        );
-                      }),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 40),
 
-                    const SizedBox(height: 32),
-                  ],
+              // --- CHATBOT İÇERİĞİ (GEÇİCİ YER TUTUCU) ---
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.smart_toy_outlined, // Chatbot ikonu
+                        size: 80,
+                        color: AkilliSepetColors.primary.withOpacity(0.5),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Akıllı Asistan',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AkilliSepetColors.textPrimary,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Sohbet arayüzü buraya eklenecek...',
+                        style: TextStyle(
+                          color: AkilliSepetColors.textSecondary,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-    );
-  }
-
-  //orjinal kart tasarımı
-  Widget _buildRecentScanCard(
-    BuildContext context, {
-    required String title,
-    required String note,
-    required Color noteColor,
-    required Color backgroundColor,
-    required String time,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          // Renkli Nokta
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: noteColor, width: 2),
-            ),
+            ],
           ),
-          const SizedBox(width: 12),
-          // İçerik
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AkilliSepetColors.textPrimary,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.circle, size: 6, color: noteColor),
-                    const SizedBox(width: 6),
-                    Text(
-                      note,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: noteColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Zaman
-          Text(
-            time,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AkilliSepetColors.textSecondary,
-                ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
-
 
