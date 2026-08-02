@@ -95,17 +95,19 @@ class _ShellViewState extends ConsumerState<ShellView> {
       backgroundColor: AppColors.background,
       // Bar içeriğin üstünde yüzsün diye gövde bar alanına kadar uzatılır.
       extendBody: true,
-      body: _TabContentInset(
-        child: PageView(
-          controller: _pageController,
-          onPageChanged: _onPageChanged,
-          children: const <Widget>[
-            _KeepAlivePage(child: DashboardView()),
-            _KeepAlivePage(child: ScanView()),
-            _KeepAlivePage(child: HomeView()),
-            _KeepAlivePage(child: ProfileView()),
-          ],
-        ),
+      // Sekme ekranlarının alt bar için ayıracağı boşluğu elle eklemiyoruz:
+      // `extendBody` + `bottomNavigationBar` varken Scaffold, body'nin
+      // MediaQuery.padding.bottom'ını barın GERÇEK yüksekliği kadar zaten
+      // artırıyor. Elle eklemek boşluğu iki kere saydırıyordu.
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        children: const <Widget>[
+          _KeepAlivePage(child: DashboardView()),
+          _KeepAlivePage(child: ScanView()),
+          _KeepAlivePage(child: HomeView()),
+          _KeepAlivePage(child: ProfileView()),
+        ],
       ),
       bottomNavigationBar: AnimatedBuilder(
         animation: _pageController,
@@ -141,35 +143,5 @@ class _KeepAlivePageState extends State<_KeepAlivePage>
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
-  }
-}
-
-/// Sekme ekranlarına, yüzen barın kapladığı kadar alt boşluk tanıtır.
-///
-/// Boşluğu ekranlara tek tek `Padding` olarak dağıtmak yerine [MediaQuery]'nin
-/// alt güvenli alanına eklenir: sekme ekranları içeriğini `SafeArea` ile ya da
-/// `MediaQuery.of(context).padding.bottom` okuyarak sarmaladığında (liste
-/// `padding`'i, son buton vb.) içerik barın arkasında kalmaz.
-class _TabContentInset extends StatelessWidget {
-  const _TabContentInset({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    const extra = GlassBottomNav.reservedHeight;
-
-    return MediaQuery(
-      data: mediaQuery.copyWith(
-        padding: mediaQuery.padding.copyWith(
-          bottom: mediaQuery.padding.bottom + extra,
-        ),
-        viewPadding: mediaQuery.viewPadding.copyWith(
-          bottom: mediaQuery.viewPadding.bottom + extra,
-        ),
-      ),
-      child: child,
-    );
   }
 }
