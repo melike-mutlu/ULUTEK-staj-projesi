@@ -167,12 +167,22 @@ class _ScanViewState extends ConsumerState<ScanView> {
                             MobileScanner(
                               controller: _controller,
                               onDetect: (capture) {
-                                for (final barcode in capture.barcodes) {
-                                  final value = barcode.rawValue;
-                                  if (value != null) {
-                                    _handleBarcode(value);
-                                    break;
-                                  }
+                                if (_isHandlingBarcode) return;
+
+                                // Karede birden fazla farklı barkod
+                                // görünüyorsa (örn. rafta yan yana duran
+                                // başka bir ürün, çok parçalı bir kutu)
+                                // hangisinin hedeflendiği belirsizdir —
+                                // yanlış ürün açmaktansa bu kareyi atla,
+                                // kamera akmaya devam eder ve kullanıcı
+                                // hizaladığında tek barkodlu bir kare
+                                // yakalanır.
+                                final values = capture.barcodes
+                                    .map((b) => b.rawValue)
+                                    .whereType<String>()
+                                    .toSet();
+                                if (values.length == 1) {
+                                  _handleBarcode(values.first);
                                 }
                               },
                             ),
