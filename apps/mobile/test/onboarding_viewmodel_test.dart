@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:akilli_sepet/core/models/user_profile.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 import 'package:akilli_sepet/features/onboarding/onboarding_steps.dart';
@@ -20,6 +22,14 @@ class _FakeProfileRepository implements ProfileRepository {
   Future<void> saveProfile(UserProfile profile) async {
     savedProfile = profile;
   }
+
+  @override
+  Future<String> uploadAvatar({
+    required String userId,
+    required Uint8List bytes,
+    required String fileExtension,
+  }) async =>
+      'https://example.invalid/avatars/$userId.$fileExtension';
 }
 
 void main() {
