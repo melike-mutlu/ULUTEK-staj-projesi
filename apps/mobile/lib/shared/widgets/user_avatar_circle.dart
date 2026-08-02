@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/akilli_sepet_colors.dart';
@@ -76,7 +77,14 @@ class UserAvatarCircle extends StatelessWidget {
                 child: Image.network(
                   avatarUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  // Falling back to the initial is the intended behaviour, but
+                  // a broken URL should not look identical to "no photo set".
+                  errorBuilder: (_, Object error, __) {
+                    if (kDebugMode) {
+                      debugPrint('UserAvatarCircle: $avatarUrl <- $error');
+                    }
+                    return const SizedBox.shrink();
+                  },
                 ),
               ),
             if (isLoading)

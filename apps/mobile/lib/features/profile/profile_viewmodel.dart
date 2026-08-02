@@ -128,8 +128,8 @@ class ProfileViewModel extends ChangeNotifier {
     final String? userId;
     try {
       userId = _profileRepository.currentUserId;
-    } catch (_) {
-      _errorMessage = 'Ad kaydedilemedi. Lütfen tekrar dene.';
+    } catch (error, stackTrace) {
+      _failWith('Ad kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
       notifyListeners();
       return false;
     }
@@ -156,11 +156,8 @@ class ProfileViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (error, stackTrace) {
-      // DEBUG(profile-trace): geçici — yutulan hatanın kendisi.
-      debugPrint('[profile-trace] saveDisplayName FAILED error=$error');
-      debugPrintStack(stackTrace: stackTrace);
       _isSavingName = false;
-      _errorMessage = 'Ad kaydedilemedi. Lütfen tekrar dene.';
+      _failWith('Ad kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
       notifyListeners();
       return false;
     }
@@ -168,10 +165,9 @@ class ProfileViewModel extends ChangeNotifier {
 
   /// En son kaydedilmiş satırın kopyası, verilen alan(lar) değiştirilmiş hâlde.
   ///
-  /// Alanlar tek tek veriliyor: `copyWith` tarzı bir yardımcıda null "değiştirme"
-  /// anlamına gelir ve adı temizlemeye izin vermezdi.
-  /// Her iki alan da zorunlu: null "değiştirme" değil "temizle" demek, o yüzden
-  /// çağıran taraf ikisini de açıkça vermek zorunda.
+  /// Her iki alan da zorunlu: burada null "değiştirme" değil "temizle" demek,
+  /// o yüzden çağıran taraf ikisini de açıkça vermek zorunda. `copyWith` tarzı
+  /// bir yardımcı adı temizlemeye izin vermezdi.
   UserProfile _profileWith({
     required String userId,
     required String? displayName,
@@ -198,8 +194,8 @@ class ProfileViewModel extends ChangeNotifier {
     final String? userId;
     try {
       userId = _profileRepository.currentUserId;
-    } catch (_) {
-      _errorMessage = 'Fotoğraf yüklenemedi. Lütfen tekrar dene.';
+    } catch (error, stackTrace) {
+      _failWith('Fotoğraf yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
       notifyListeners();
       return;
     }
@@ -234,10 +230,7 @@ class ProfileViewModel extends ChangeNotifier {
       _profile = updated;
       _avatarUrl = url;
     } catch (error, stackTrace) {
-      // DEBUG(profile-trace): geçici — yutulan hatanın kendisi.
-      debugPrint('[profile-trace] pickAndUploadAvatar FAILED error=$error');
-      debugPrintStack(stackTrace: stackTrace);
-      _errorMessage = 'Fotoğraf yüklenemedi. Lütfen tekrar dene.';
+      _failWith('Fotoğraf yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
     }
 
     _isUploadingAvatar = false;
@@ -272,6 +265,17 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Kullanıcıya gösterilecek mesajı yazar, teknik detayı geliştirici
+  /// konsoluna bırakır. Sessiz `catch (_)` bir backend değişikliğini (kolon
+  /// tipi, RLS) fark edilmez hâle getiriyordu.
+  void _failWith(String message, Object error, StackTrace stackTrace) {
+    _errorMessage = message;
+    if (kDebugMode) {
+      debugPrint('ProfileViewModel: $message <- $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   void clearError() {
     if (_errorMessage == null) return;
     _errorMessage = null;
@@ -302,19 +306,10 @@ class ProfileViewModel extends ChangeNotifier {
       _profile = await _profileRepository.getProfile(userId);
       _displayName = _profile?.displayName;
       _avatarUrl = _profile?.avatarUrl;
-      // DEBUG(profile-trace): geçici — ViewModel'e hidratlanan değerler.
-      debugPrint(
-        '[profile-trace] load hydrated displayName=$_displayName '
-        'avatarUrl=$_avatarUrl diet=${_profile?.dietPreferences} '
-        'resolved=$resolvedDisplayName',
-      );
       _applyToDraft(_profile);
     } catch (error, stackTrace) {
-      // DEBUG(profile-trace): geçici — yutulan hatanın kendisi.
-      debugPrint('[profile-trace] load FAILED error=$error');
-      debugPrintStack(stackTrace: stackTrace);
       _loadFailed = true;
-      _errorMessage = 'Profil yüklenemedi. Lütfen tekrar dene.';
+      _failWith('Profil yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
     }
 
     _isLoading = false;
@@ -326,8 +321,8 @@ class ProfileViewModel extends ChangeNotifier {
     final String? userId;
     try {
       userId = _profileRepository.currentUserId;
-    } catch (_) {
-      _errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
+    } catch (error, stackTrace) {
+      _failWith('Profil kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
       notifyListeners();
       return false;
     }
@@ -358,11 +353,8 @@ class ProfileViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (error, stackTrace) {
-      // DEBUG(profile-trace): geçici — yutulan hatanın kendisi.
-      debugPrint('[profile-trace] save FAILED error=$error');
-      debugPrintStack(stackTrace: stackTrace);
       _isSaving = false;
-      _errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
+      _failWith('Profil kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
       notifyListeners();
       return false;
     }

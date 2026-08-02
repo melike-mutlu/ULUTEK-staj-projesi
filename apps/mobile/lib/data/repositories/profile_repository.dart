@@ -55,35 +55,13 @@ class SupabaseProfileRepository implements ProfileRepository {
         .eq('user_id', userId)
         .maybeSingle();
 
-    // DEBUG(profile-trace): geçici — okunan ham satır.
-    debugPrint('[profile-trace] getProfile userId=$userId row=$row');
-
     if (row == null) return null;
     return UserProfile.fromJson(row);
   }
 
   @override
   Future<void> saveProfile(UserProfile profile) async {
-    final payload = profile.toJson();
-    // DEBUG(profile-trace): geçici — gönderilen tam payload.
-    debugPrint('[profile-trace] saveProfile payload=$payload');
-
-    try {
-      // .select(): yazılan satırı geri döner. RLS yazmayı engellemişse burası
-      // boş liste gelir — hatasız ama sessiz "hiçbir şey olmadı" hâli.
-      final result = await supabase
-          .from('profiles')
-          .upsert(payload)
-          .select();
-      debugPrint('[profile-trace] saveProfile result=$result');
-    } on PostgrestException catch (error) {
-      debugPrint(
-        '[profile-trace] saveProfile PostgrestException '
-        'code=${error.code} message=${error.message} '
-        'details=${error.details} hint=${error.hint}',
-      );
-      rethrow;
-    }
+    await supabase.from('profiles').upsert(profile.toJson());
   }
 
   @override
@@ -97,35 +75,19 @@ class SupabaseProfileRepository implements ProfileRepository {
     // bucket'ta birikmez.
     final path = '$userId/avatar.$ext';
 
-    // DEBUG(profile-trace): geçici — yükleme gerçekten çalışıyor mu.
-    debugPrint(
-      '[profile-trace] uploadAvatar start path=$path bytes=${bytes.length}',
-    );
-
-    try {
-      await supabase.storage.from(_avatarBucket).uploadBinary(
-            path,
-            bytes,
-            fileOptions: FileOptions(
-              upsert: true,
-              contentType: _avatarContentTypes[ext] ?? 'image/jpeg',
-            ),
-          );
-    } on StorageException catch (error) {
-      debugPrint(
-        '[profile-trace] uploadAvatar StorageException '
-        'statusCode=${error.statusCode} message=${error.message} '
-        'error=${error.error}',
-      );
-      rethrow;
-    }
+    await supabase.storage.from(_avatarBucket).uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(
+            upsert: true,
+            contentType: _avatarContentTypes[ext] ?? 'image/jpeg',
+          ),
+        );
 
     // Public URL sabit olduğu için, değişen fotoğraf cache-buster olmadan eski
     // hâliyle servis edilir.
     final url = supabase.storage.from(_avatarBucket).getPublicUrl(path);
-    final busted = '$url?v=${DateTime.now().millisecondsSinceEpoch}';
-    debugPrint('[profile-trace] uploadAvatar ok url=$busted');
-    return busted;
+    return '$url?v=${DateTime.now().millisecondsSinceEpoch}';
   }
 }
 
