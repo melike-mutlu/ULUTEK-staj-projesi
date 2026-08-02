@@ -44,4 +44,4 @@ import { jsonResponse } from "../_shared/http.ts";
     console.error(error);
     return jsonResponse({ status: "error", message: "beklenmeyen hata" }, 500);
   }
-//});
+});
