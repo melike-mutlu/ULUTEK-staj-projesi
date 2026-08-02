@@ -9,6 +9,7 @@ import '../../shared/widgets/error_state_view.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
 import 'profile_viewmodel.dart';
+import 'widgets/name_edit_dialog.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_section_card.dart';
 
@@ -53,36 +54,14 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   Future<void> _editName(ProfileViewModel viewModel) async {
     // Kutuda kayıtlı ad durur — e-posta'dan türetilen yedek isim değil, yoksa
     // kullanıcı hiç yazmadığı bir adı kaydetmiş olurdu.
-    final controller =
-        TextEditingController(text: viewModel.displayNameDraft);
-
     final String? result = await showDialog<String>(
       context: context,
-      builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('Adın'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: _nameMaxLength,
-          textCapitalization: TextCapitalization.words,
-          textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(hintText: 'Adını yaz'),
-          onSubmitted: (String value) => Navigator.pop(dialogContext, value),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Vazgeç'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: const Text('Tamam'),
-          ),
-        ],
+      builder: (BuildContext dialogContext) => NameEditDialog(
+        initialName: viewModel.displayNameDraft,
+        maxLength: _nameMaxLength,
       ),
     );
 
-    controller.dispose();
     // null = vazgeçildi; boş string geçerli bir girdi ("adı kaldır").
     if (result == null) return;
     viewModel.setDisplayName(result);
