@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../dashboard/dashboard_view.dart';
+import '../chatbot/chatbot_view.dart';
 import '../home/home_view.dart';
 import '../profile/profile_view.dart';
 import '../scan/scan_view.dart';
@@ -103,9 +103,9 @@ class _ShellViewState extends ConsumerState<ShellView> {
         controller: _pageController,
         onPageChanged: _onPageChanged,
         children: const <Widget>[
-          _KeepAlivePage(child: DashboardView()),
-          _KeepAlivePage(child: ScanView()),
           _KeepAlivePage(child: HomeView()),
+          _KeepAlivePage(child: ScanView()),
+          _KeepAlivePage(child: ChatbotView()),
           _KeepAlivePage(child: ProfileView()),
         ],
       ),

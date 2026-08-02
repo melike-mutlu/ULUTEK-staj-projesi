@@ -4,8 +4,8 @@ import '../data/repositories/profile_repository.dart';
 import '../features/auth/auth_viewmodel.dart';
 import '../features/scan/scan_viewmodel.dart';
 import '../data/repositories/scan_history_repository.dart';
-import '../features/dashboard/dashboard_viewmodel.dart';
 import '../features/home/home_viewmodel.dart';
+import '../features/chatbot/chatbot_viewmodel.dart';
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepository();
@@ -27,13 +27,13 @@ final scanHistoryRepositoryProvider = Provider<ScanHistoryRepository>((ref) {
 });
 
 
-final dashboardViewModelProvider = ChangeNotifierProvider<DashboardViewModel>((ref) {
-  return DashboardViewModel(
+final homeViewModelProvider = ChangeNotifierProvider<HomeViewModel>((ref) {
+  return HomeViewModel(
     ref.watch(scanHistoryRepositoryProvider),
     ref.watch(profileRepositoryProvider),
   );
 });
 
-final homeViewModelProvider = ChangeNotifierProvider<HomeViewModel>((ref) {
-  return HomeViewModel(ref.watch(scanHistoryRepositoryProvider));
+final chatbotViewModelProvider = ChangeNotifierProvider<ChatbotViewModel>((ref) {
+  return ChatbotViewModel(ref.watch(scanHistoryRepositoryProvider));
 });

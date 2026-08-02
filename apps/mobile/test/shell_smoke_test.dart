@@ -84,7 +84,7 @@ void main() {
     );
     expect(
       container.read(shellViewModelProvider).currentTab,
-      ShellTab.dashboard,
+      ShellTab.home,
     );
 
     await tester.tap(_navLabel('Chatbot'));
@@ -108,7 +108,7 @@ void main() {
     );
     ShellTab currentTab() => container.read(shellViewModelProvider).currentTab;
 
-    expect(currentTab(), ShellTab.dashboard);
+    expect(currentTab(), ShellTab.home);
 
     // Sola kaydir -> bir sonraki sekme.
     await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);

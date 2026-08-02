@@ -68,7 +68,7 @@ class GlassBottomNav extends StatelessWidget {
 
   static const List<_NavItem> _items = <_NavItem>[
     _NavItem(
-      tab: ShellTab.dashboard,
+      tab: ShellTab.home,
       label: 'Ana Sayfa',
       icon: Icons.home_outlined,
       activeIcon: Icons.home_rounded,
