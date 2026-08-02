@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/profile_options.dart';
 import '../../core/models/user_profile.dart';
+import '../../core/utils/display_name.dart';
 import '../../data/repositories/profile_repository.dart';
+import '../../shared/services/image_picker_service.dart';
 
 /// Onboarding'de girilen profili sonradan düzenlemek için.
 ///
@@ -11,9 +13,10 @@ import '../../data/repositories/profile_repository.dart';
 /// taslağı ViewModel'de tutulur, View yalnızca çizer. Kaydetme çip başına
 /// değil, tek "Kaydet" ile toplu yapılır.
 class ProfileViewModel extends ChangeNotifier {
-  ProfileViewModel(this._profileRepository);
+  ProfileViewModel(this._profileRepository, this._imagePickerService);
 
   final ProfileRepository _profileRepository;
+  final ImagePickerService _imagePickerService;
 
   /// Ekranda gösterilen seçim taslağı — kaydedilene kadar yereldir.
   final Map<OnboardingField, Set<String>> _draft =
@@ -31,7 +34,17 @@ class ProfileViewModel extends ChangeNotifier {
 
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _isUploadingAvatar = false;
   String? _errorMessage;
+
+  /// Kayıtlı ad. Taslak DEĞİL: kutu kapanır kapanmaz veritabanına yazılır.
+  String? _displayName;
+
+  bool _isSavingName = false;
+
+  /// Fotoğraf URL'i taslak DEĞİL: yükleme başarılı olur olmaz kaydedilir,
+  /// çünkü dosya o an zaten bucket'a gitmiş olur.
+  String? _avatarUrl;
 
   /// Son [load] başarısız mı — View bunu tam ekran "tekrar dene" ile gösterir,
   /// kaydetme hatasını ise formun altındaki satırda.
@@ -46,8 +59,20 @@ class ProfileViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
+  bool get isUploadingAvatar => _isUploadingAvatar;
   String? get errorMessage => _errorMessage;
   bool get loadFailed => _loadFailed;
+
+  /// Kutuya ön değer olarak konur — yedek (e-posta) isim değil, gerçek ad.
+  String get displayNameDraft => _displayName ?? '';
+  String? get avatarUrl => _avatarUrl;
+  bool get isSavingName => _isSavingName;
+
+  /// Başlıkta gösterilecek ad: girilen ad, yoksa e-posta kullanıcı adı.
+  String get resolvedDisplayName => resolveDisplayName(
+        displayName: _displayName,
+        email: _email,
+      );
 
   /// Oturumdaki e-posta — [load] sırasında okunup saklanır ki build tarafı
   /// Supabase'e hiç dokunmasın.
@@ -55,11 +80,8 @@ class ProfileViewModel extends ChangeNotifier {
   UserProfile? get profile => _profile;
 
   /// Sabit katalog + profilden gelen/kullanıcının eklediği seçenekler.
-  /// Diyet için yalnızca veritabanına yazılabilen etiketler döner.
   List<String> optionsFor(OnboardingField field) => <String>[
-        ...(field == OnboardingField.diet
-            ? profileDietOptions
-            : profileOptions[field]!),
+        ...profileOptions[field]!,
         ..._extraOptions[field]!,
       ];
 
@@ -69,6 +91,9 @@ class ProfileViewModel extends ChangeNotifier {
       _draft[field]!.contains(option);
 
   /// Kaydedilmemiş değişiklik var mı — "Kaydet" butonu buna bakar.
+  ///
+  /// Yalnızca çip seçimlerine bakar: ad ve fotoğraf kendi akışlarında anında
+  /// kaydedilir, bu butonu beklemezler.
   bool get hasChanges {
     final profile = _profile;
     if (profile == null) {
@@ -82,25 +107,141 @@ class ProfileViewModel extends ChangeNotifier {
           _draft[OnboardingField.health],
           profile.healthConditions.toSet(),
         ) ||
-        _draftDietPreference != profile.dietPreference;
+        !setEquals(
+          _draft[OnboardingField.diet],
+          profile.dietPreferences.toSet(),
+        );
   }
 
   // --- Yazma ---
 
-  /// Diyet tek seçimlidir: yeni seçim öncekinin yerine geçer (veritabanındaki
-  /// tekil enum ile birebir olsun diye). Diğer alanlar çoklu seçim.
+  /// Adı hemen kaydeder — alttaki "Kaydet" butonunu beklemez.
+  /// Boş/whitespace girdi "ad yok" demektir ve kabul edilir; ad zorunlu değil.
+  ///
+  /// Kaydedilmemiş çip taslağını yazmaz: satırın diğer alanları en son
+  /// kaydedilmiş hâlinden kopyalanır.
+  Future<bool> saveDisplayName(String value) async {
+    final trimmed = value.trim();
+    final normalized = trimmed.isEmpty ? null : trimmed;
+    if (normalized == _displayName) return true;
+
+    final String? userId;
+    try {
+      userId = _profileRepository.currentUserId;
+    } catch (error, stackTrace) {
+      _failWith('Ad kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      notifyListeners();
+      return false;
+    }
+    if (userId == null) {
+      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      notifyListeners();
+      return false;
+    }
+
+    _isSavingName = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updated = _profileWith(
+        userId: userId,
+        displayName: normalized,
+        avatarUrl: _avatarUrl,
+      );
+      await _profileRepository.saveProfile(updated);
+      _profile = updated;
+      _displayName = normalized;
+      _isSavingName = false;
+      notifyListeners();
+      return true;
+    } catch (error, stackTrace) {
+      _isSavingName = false;
+      _failWith('Ad kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// En son kaydedilmiş satırın kopyası, verilen alan(lar) değiştirilmiş hâlde.
+  ///
+  /// Her iki alan da zorunlu: burada null "değiştirme" değil "temizle" demek,
+  /// o yüzden çağıran taraf ikisini de açıkça vermek zorunda. `copyWith` tarzı
+  /// bir yardımcı adı temizlemeye izin vermezdi.
+  UserProfile _profileWith({
+    required String userId,
+    required String? displayName,
+    required String? avatarUrl,
+  }) {
+    final base = _profile;
+    return UserProfile(
+      userId: userId,
+      allergies: base?.allergies ?? const <String>[],
+      dietPreferences: base?.dietPreferences ?? const <String>[],
+      healthConditions: base?.healthConditions ?? const <String>[],
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+    );
+  }
+
+  /// Galeriden fotoğraf seçtirir, bucket'a yükler ve profile hemen yazar.
+  ///
+  /// Seçimlerin aksine beklemeye alınmaz: dosya yüklendiği anda bucket'ta olur,
+  /// URL'i sadece bellekte tutmak "Kaydet"e basılmazsa onu kaybettirirdi.
+  /// Kaydedilmemiş seçim taslağı bundan etkilenmez — yazılan satır en son
+  /// kaydedilmiş hâlin üstüne yalnızca yeni URL'i ekler.
+  Future<void> pickAndUploadAvatar() async {
+    final String? userId;
+    try {
+      userId = _profileRepository.currentUserId;
+    } catch (error, stackTrace) {
+      _failWith('Fotoğraf yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
+      notifyListeners();
+      return;
+    }
+    if (userId == null) {
+      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      notifyListeners();
+      return;
+    }
+
+    try {
+      final picked = await _imagePickerService.pickFromGallery();
+      // Kullanıcı vazgeçti — hata değil, sessizce çık.
+      if (picked == null) return;
+
+      _isUploadingAvatar = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final url = await _profileRepository.uploadAvatar(
+        userId: userId,
+        bytes: picked.bytes,
+        fileExtension: picked.extension,
+      );
+
+      final updated = _profileWith(
+        userId: userId,
+        displayName: _displayName,
+        avatarUrl: url,
+      );
+
+      await _profileRepository.saveProfile(updated);
+      _profile = updated;
+      _avatarUrl = url;
+    } catch (error, stackTrace) {
+      _failWith('Fotoğraf yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
+    }
+
+    _isUploadingAvatar = false;
+    notifyListeners();
+  }
+
+  /// Üç alan da çoklu seçim — `diet_preference` `text[]` olduğundan diyet de
+  /// artık diğerleri gibi davranıyor.
   void toggleOption(OnboardingField field, String option) {
     final selected = _draft[field]!;
-    final wasSelected = selected.contains(option);
-
-    if (field == OnboardingField.diet) {
-      selected.clear();
-      if (!wasSelected) selected.add(option);
-    } else if (wasSelected) {
-      selected.remove(option);
-    } else {
-      selected.add(option);
-    }
+    if (!selected.remove(option)) selected.add(option);
     notifyListeners();
   }
 
@@ -108,15 +249,9 @@ class ProfileViewModel extends ChangeNotifier {
   /// Boş/whitespace ve mevcut seçenekle (case-insensitive) çakışan girdi
   /// reddedilir.
   ///
-  /// Diyet tek seçimli olduğu için yalnızca hiçbir şey seçili değilken izin
-  /// verilir; aksi hâlde eklenen seçenek mevcut tercihin yerine geçerdi.
-  ///
-  /// TODO(backend-pod): katalog dışı bir diyet etiketinin `DietPreference`
-  /// karşılığı yok, kaydedilince `standard` olarak gidiyor. `diet_preference`
-  /// `text[]`e genişleyince (bkz. dietPreferenceByLabel) burası düzelir.
+  /// Üç alanda da açık: `diet_preference` de `text[]` olduğu için özel diyet
+  /// değerleri diğer alanlardaki gibi olduğu gibi kaydedilir.
   void addCustomOption(OnboardingField field, String option) {
-    if (field == OnboardingField.diet && _draft[field]!.isNotEmpty) return;
-
     final trimmed = option.trim();
     if (trimmed.isEmpty) return;
 
@@ -128,6 +263,17 @@ class ProfileViewModel extends ChangeNotifier {
     _extraOptions[field]!.add(trimmed);
     _draft[field]!.add(trimmed);
     notifyListeners();
+  }
+
+  /// Kullanıcıya gösterilecek mesajı yazar, teknik detayı geliştirici
+  /// konsoluna bırakır. Sessiz `catch (_)` bir backend değişikliğini (kolon
+  /// tipi, RLS) fark edilmez hâle getiriyordu.
+  void _failWith(String message, Object error, StackTrace stackTrace) {
+    _errorMessage = message;
+    if (kDebugMode) {
+      debugPrint('ProfileViewModel: $message <- $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   void clearError() {
@@ -158,10 +304,12 @@ class ProfileViewModel extends ChangeNotifier {
       }
       _email = _profileRepository.currentUserEmail;
       _profile = await _profileRepository.getProfile(userId);
+      _displayName = _profile?.displayName;
+      _avatarUrl = _profile?.avatarUrl;
       _applyToDraft(_profile);
-    } catch (_) {
+    } catch (error, stackTrace) {
       _loadFailed = true;
-      _errorMessage = 'Profil yüklenemedi. Lütfen tekrar dene.';
+      _failWith('Profil yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
     }
 
     _isLoading = false;
@@ -173,8 +321,8 @@ class ProfileViewModel extends ChangeNotifier {
     final String? userId;
     try {
       userId = _profileRepository.currentUserId;
-    } catch (_) {
-      _errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
+    } catch (error, stackTrace) {
+      _failWith('Profil kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
       notifyListeners();
       return false;
     }
@@ -189,33 +337,30 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Tüm alanlar açıkça veriliyor: saveProfile satırın tamamını upsert eder,
+      // eksik bırakılan alan veritabanında null'lanırdı.
       final updated = UserProfile(
         userId: userId,
         allergies: _draft[OnboardingField.allergies]!.toList(),
-        dietPreference: _draftDietPreference,
+        dietPreferences: _draft[OnboardingField.diet]!.toList(),
         healthConditions: _draft[OnboardingField.health]!.toList(),
+        displayName: _displayName,
+        avatarUrl: _avatarUrl,
       );
       await _profileRepository.saveProfile(updated);
       _profile = updated;
       _isSaving = false;
       notifyListeners();
       return true;
-    } catch (_) {
+    } catch (error, stackTrace) {
       _isSaving = false;
-      _errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
+      _failWith('Profil kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
       notifyListeners();
       return false;
     }
   }
 
   // --- Yardımcılar ---
-
-  /// Taslaktaki tekil diyet seçimi; seçim yoksa `standard`.
-  DietPreference get _draftDietPreference {
-    final selected = _draft[OnboardingField.diet]!;
-    if (selected.isEmpty) return DietPreference.standard;
-    return dietPreferenceByLabel[selected.first] ?? DietPreference.standard;
-  }
 
   void _applyToDraft(UserProfile? profile) {
     for (final selected in _draft.values) {
@@ -224,15 +369,8 @@ class ProfileViewModel extends ChangeNotifier {
     if (profile == null) return;
 
     _selectAll(OnboardingField.allergies, profile.allergies);
+    _selectAll(OnboardingField.diet, profile.dietPreferences);
     _selectAll(OnboardingField.health, profile.healthConditions);
-
-    // Enum → etiket; `standard` bir seçenek değil, "seçim yok" demek.
-    final dietLabel = dietPreferenceByLabel.entries
-        .where((MapEntry<String, DietPreference> e) =>
-            e.value == profile.dietPreference)
-        .map((MapEntry<String, DietPreference> e) => e.key)
-        .firstOrNull;
-    if (dietLabel != null) _draft[OnboardingField.diet]!.add(dietLabel);
   }
 
   /// Kayıtlı değerleri seçili yapar; katalogda olmayanları (kullanıcının
@@ -249,5 +387,8 @@ class ProfileViewModel extends ChangeNotifier {
 
 final profileViewModelProvider =
     ChangeNotifierProvider.autoDispose<ProfileViewModel>(
-  (ref) => ProfileViewModel(ref.watch(profileRepositoryProvider)),
+  (ref) => ProfileViewModel(
+    ref.watch(profileRepositoryProvider),
+    ref.watch(imagePickerServiceProvider),
+  ),
 );

@@ -72,7 +72,7 @@ class ProductDetailViewModel extends ChangeNotifier {
     userProfile ??= UserProfile(
       userId: userId ?? 'guest',
       allergies: const [],
-      dietPreference: DietPreference.standard,
+      dietPreferences: const [],
       healthConditions: const [],
     );
 

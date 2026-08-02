@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants/profile_options.dart';
 import '../../core/models/user_profile.dart';
 import '../../data/repositories/profile_repository.dart';
 import 'onboarding_steps.dart';
@@ -167,9 +166,7 @@ class OnboardingViewModel extends ChangeNotifier {
         final profile = UserProfile(
           userId: userId,
           allergies: _selections[OnboardingField.allergies]!.toList(),
-          dietPreference: _mapDietPreference(
-            _selections[OnboardingField.diet]!,
-          ),
+          dietPreferences: _selections[OnboardingField.diet]!.toList(),
           healthConditions: _selections[OnboardingField.health]!.toList(),
         );
         await _profileRepository.saveProfile(profile);
@@ -185,20 +182,6 @@ class OnboardingViewModel extends ChangeNotifier {
     }
   }
 
-  /// Çoklu diyet seçimini sözleşmedeki tekil `diet_preference` enum'una indirger.
-  ///
-  /// UYARI — bilinçli veri kaybı: seçilen ilk eşleşen değer alınır, kalanlar
-  /// düşer. Sözleşme `diet_preference`'ı tekil enum tanımlıyor
-  /// (docs/architecture.md).
-  /// TODO(backend-pod): `diet_preference` alanının `text[]`e genişletilmesi ya
-  /// da `diet_tags text[]` eklenmesi konuşulacak; genişlerse burası tek
-  /// satırlık değişir.
-  DietPreference _mapDietPreference(Set<String> selections) {
-    for (final entry in dietPreferenceByLabel.entries) {
-      if (selections.contains(entry.key)) return entry.value;
-    }
-    return DietPreference.standard;
-  }
 }
 
 final onboardingViewModelProvider =

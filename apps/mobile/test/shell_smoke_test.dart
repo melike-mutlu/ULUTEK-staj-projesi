@@ -1,4 +1,7 @@
 import 'package:akilli_sepet/app.dart';
+import 'package:akilli_sepet/core/providers.dart';
+import 'package:akilli_sepet/data/repositories/profile_repository.dart';
+import 'package:akilli_sepet/data/repositories/scan_history_repository.dart';
 import 'package:akilli_sepet/features/auth/auth_view.dart';
 import 'package:akilli_sepet/features/onboarding/onboarding_view.dart';
 import 'package:akilli_sepet/features/profile/profile_view.dart';
@@ -6,6 +9,7 @@ import 'package:akilli_sepet/features/shell/shell_view.dart';
 import 'package:akilli_sepet/features/shell/shell_viewmodel.dart';
 import 'package:akilli_sepet/features/shell/widgets/glass_bottom_nav.dart';
 import 'package:akilli_sepet/features/startup/startup_gate.dart';
+import 'package:akilli_sepet/shared/widgets/user_avatar_circle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +20,30 @@ Finder _navLabel(String label) => find.descendant(
       of: find.byType(GlassBottomNav),
       matching: find.text(label),
     );
+
+/// `implements` ile: gercek kurucu Supabase.instance'i istiyor, testte ise
+/// Supabase hic baslatilmiyor.
+class _FakeScanHistoryRepository implements ScanHistoryRepository {
+  @override
+  Future<void> saveScanHistory(String barcode) async {}
+
+  @override
+  Future<List<Map<String, dynamic>>> getScanHistory({int limit = 10}) async =>
+      <Map<String, dynamic>>[];
+}
+
+/// Kabuk, sekmeleri araciligiyla veri katmanina dokunuyor; testte hepsi
+/// Supabase'siz sahtelerle degistiriliyor.
+Widget _shellUnderTest() {
+  return ProviderScope(
+    overrides: <Override>[
+      scanHistoryRepositoryProvider
+          .overrideWithValue(_FakeScanHistoryRepository()),
+      profileRepositoryProvider.overrideWithValue(InMemoryProfileRepository()),
+    ],
+    child: const MaterialApp(home: ShellView()),
+  );
+}
 
 void main() {
   testWidgets('oturum yoksa StartupGate auth ekranina yonlendiriyor',
@@ -43,11 +71,7 @@ void main() {
   // yuzeyinde tasiyor (RenderFlex overflow). Layout duzeltilince geri gelecek.
 
   testWidgets('shell 4 sekmeyi cizer ve sekme degistirir', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: ShellView()),
-      ),
-    );
+    await tester.pumpWidget(_shellUnderTest());
     await tester.pumpAndSettle();
 
     expect(_navLabel('Ana Sayfa'), findsOneWidget);
@@ -65,7 +89,10 @@ void main() {
 
     await tester.tap(_navLabel('Chatbot'));
     await tester.pumpAndSettle();
-    expect(container.read(shellViewModelProvider).currentTab, ShellTab.chatbot);
+    expect(
+      container.read(shellViewModelProvider).currentTab,
+      ShellTab.chatbot,
+    );
 
     await tester.tap(_navLabel('Tara'));
     await tester.pumpAndSettle();
@@ -73,11 +100,7 @@ void main() {
   });
 
   testWidgets('ekrani kaydirinca sekme degisiyor', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: ShellView()),
-      ),
-    );
+    await tester.pumpWidget(_shellUnderTest());
     await tester.pumpAndSettle();
 
     final container = ProviderScope.containerOf(
@@ -103,11 +126,7 @@ void main() {
   });
 
   testWidgets('bardan secince sayfa da o sekmeye geliyor', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: ShellView()),
-      ),
-    );
+    await tester.pumpWidget(_shellUnderTest());
     await tester.pumpAndSettle();
 
     await tester.tap(_navLabel('Profil'));
@@ -119,13 +138,30 @@ void main() {
     expect(controller.page, 3.0);
   });
 
+  testWidgets('profil dairesine dokununca profil sekmesi aciliyor',
+      (tester) async {
+    await tester.pumpWidget(_shellUnderTest());
+    await tester.pumpAndSettle();
+
+    // Ana Sayfa sekmesindeki daire; Chatbot sekmesininki de agacta oldugu icin
+    // ilki aliniyor.
+    await tester.tap(find.byType(UserAvatarCircle).first);
+    await tester.pumpAndSettle();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ShellView)),
+    );
+    expect(container.read(shellViewModelProvider).currentTab, ShellTab.profile);
+
+    // Sekme state'i degismekle kalmiyor, sayfa da gercekten oraya kayiyor.
+    final controller =
+        tester.widget<PageView>(find.byType(PageView)).controller!;
+    expect(controller.page, 3.0);
+  });
+
   testWidgets('secili gosterge her sekmede ayni boyutta ve kayiyor',
       (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: ShellView()),
-      ),
-    );
+    await tester.pumpWidget(_shellUnderTest());
     await tester.pumpAndSettle();
 
     // Gosterge, bar icindeki tek DecoratedBox'tir (ikon/etiket kendi arka

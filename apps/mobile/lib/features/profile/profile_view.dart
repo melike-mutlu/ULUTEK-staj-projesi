@@ -9,14 +9,16 @@ import '../../shared/widgets/error_state_view.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
 import 'profile_viewmodel.dart';
+import 'widgets/name_edit_dialog.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_section_card.dart';
 
 /// Profil — alt navigasyonun 4. sekmesi.
 /// Onboarding'de verilen alerji/diyet/sağlık seçimlerini düzenleme ekranı.
 ///
-/// Selections are edited locally and written to Supabase in one go with the
-/// "Kaydet" button — not on every chip tap.
+/// Chip selections are edited locally and written to Supabase in one go with
+/// the "Kaydet" button. Name and photo do not go through it — each saves as
+/// soon as it is changed.
 class ProfileView extends ConsumerStatefulWidget {
   const ProfileView({super.key});
 
@@ -32,6 +34,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   /// Breathing room under the save button, added on top of the bar inset.
   static const double _bottomPadding = 24;
 
+  /// Long enough for real names, short enough to keep the header on one line.
+  static const int _nameMaxLength = 50;
+
   /// Cards the user opened with "Tümünü gör".
   final Set<OnboardingField> _expanded = <OnboardingField>{};
 
@@ -43,6 +48,29 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ref.read(profileViewModelProvider).load();
     });
+  }
+
+  /// Adı düzenleme kutusu. Çiplerin aksine anında kaydeder — alttaki "Kaydet"
+  /// butonunu beklemez.
+  Future<void> _editName(ProfileViewModel viewModel) async {
+    // Kutuda kayıtlı ad durur — e-posta'dan türetilen yedek isim değil, yoksa
+    // kullanıcı hiç yazmadığı bir adı kaydetmiş olurdu.
+    final String? result = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => NameEditDialog(
+        initialName: viewModel.displayNameDraft,
+        maxLength: _nameMaxLength,
+      ),
+    );
+
+    // null = vazgeçildi; boş string geçerli bir girdi ("adı kaldır").
+    if (result == null) return;
+
+    final saved = await viewModel.saveDisplayName(result);
+    if (!mounted || !saved) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Adın güncellendi.')),
+    );
   }
 
   Future<void> _save(ProfileViewModel viewModel) async {
@@ -113,7 +141,15 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              ProfileHeader(email: viewModel.email),
+              ProfileHeader(
+                email: viewModel.email,
+                name: viewModel.resolvedDisplayName,
+                avatarUrl: viewModel.avatarUrl,
+                isUploadingPhoto: viewModel.isUploadingAvatar,
+                onEditName:
+                    viewModel.isSavingName ? null : () => _editName(viewModel),
+                onEditPhoto: viewModel.pickAndUploadAvatar,
+              ),
               const SizedBox(height: 24),
               for (final field in OnboardingField.values) ...<Widget>[
                 ProfileSectionCard(
@@ -124,10 +160,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       viewModel.toggleOption(field, option),
                   onAddCustom: (String option) =>
                       viewModel.addCustomOption(field, option),
-                  // Diet is single-select: adding a custom option only makes
-                  // sense while nothing is chosen.
-                  canAddCustom: field != OnboardingField.diet ||
-                      viewModel.selectionsFor(field).isEmpty,
                   isExpanded: _expanded.contains(field),
                   onShowAll: () => setState(() => _expanded.add(field)),
                 ),

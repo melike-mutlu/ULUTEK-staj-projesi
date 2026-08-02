@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/models/user_profile.dart';
 import '../../core/supabase_client.dart';
@@ -17,10 +19,28 @@ abstract class ProfileRepository {
 
   Future<UserProfile?> getProfile(String userId);
   Future<void> saveProfile(UserProfile profile);
+
+  /// Fotoğrafı "avatars" bucket'ına yükler ve profile yazılacak URL'i döner.
+  /// Yükleme başarısızsa exception fırlatır — çağıran taraf yakalar.
+  Future<String> uploadAvatar({
+    required String userId,
+    required Uint8List bytes,
+    required String fileExtension,
+  });
 }
 
 /// docs/architecture.md — profil için ayrı API yok, Supabase "profiles" tablosu.
 class SupabaseProfileRepository implements ProfileRepository {
+  static const String _avatarBucket = 'avatars';
+
+  /// Storage explicit bir MIME tipi bekler; dosya uzantısı tek başına yetmez.
+  static const Map<String, String> _avatarContentTypes = <String, String>{
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'webp': 'image/webp',
+  };
+
   @override
   String? get currentUserId => supabase.auth.currentUser?.id;
 
@@ -43,6 +63,32 @@ class SupabaseProfileRepository implements ProfileRepository {
   Future<void> saveProfile(UserProfile profile) async {
     await supabase.from('profiles').upsert(profile.toJson());
   }
+
+  @override
+  Future<String> uploadAvatar({
+    required String userId,
+    required Uint8List bytes,
+    required String fileExtension,
+  }) async {
+    final ext = fileExtension.toLowerCase();
+    // Kullanıcı başına tek dosya: upsert ile üzerine yazılır, eski fotoğraflar
+    // bucket'ta birikmez.
+    final path = '$userId/avatar.$ext';
+
+    await supabase.storage.from(_avatarBucket).uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(
+            upsert: true,
+            contentType: _avatarContentTypes[ext] ?? 'image/jpeg',
+          ),
+        );
+
+    // Public URL sabit olduğu için, değişen fotoğraf cache-buster olmadan eski
+    // hâliyle servis edilir.
+    final url = supabase.storage.from(_avatarBucket).getPublicUrl(path);
+    return '$url?v=${DateTime.now().millisecondsSinceEpoch}';
+  }
 }
 
 /// Backend + auth hazır olana kadar kullanılan bellek içi karşılık.
@@ -62,6 +108,18 @@ class InMemoryProfileRepository implements ProfileRepository {
   @override
   Future<void> saveProfile(UserProfile profile) async {
     _profile = profile;
+  }
+
+  @override
+  Future<String> uploadAvatar({
+    required String userId,
+    required Uint8List bytes,
+    required String fileExtension,
+  }) async {
+    // example.invalid asla çözülmez (RFC 2606): sahte URL gerçek bir
+    // NetworkImage'a sızarsa sessizce beklemek yerine hemen hata verir.
+    final url = 'https://example.invalid/avatars/$userId.$fileExtension';
+    return '$url?v=${DateTime.now().millisecondsSinceEpoch}';
   }
 }
 
