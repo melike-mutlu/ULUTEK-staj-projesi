@@ -44,9 +44,20 @@ class _ShellViewState extends ConsumerState<ShellView> {
     super.dispose();
   }
 
-  /// Bardaki sekmeye dokunuldu.
+  /// Bardaki sekmeye dokunuldu. Sayfayı burada kaydırmıyoruz: tek doğru kaynak
+  /// ViewModel, sayfa onu [_syncPageToTab] ile takip ediyor.
   void _onTabSelected(ShellTab tab) {
     ref.read(shellViewModelProvider).selectTab(tab);
+  }
+
+  /// Brings the PageView to whichever tab the ViewModel is on.
+  ///
+  /// Lets any screen request a tab (e.g. the profile avatar in the header)
+  /// without knowing that a [PageController] exists.
+  void _syncPageToTab(ShellTab tab) {
+    if (!_pageController.hasClients) return;
+    // Already there — a swipe moves the page first and only then the state.
+    if (_pageController.page?.round() == tab.index) return;
     _pageController.animateToPage(
       tab.index,
       duration: _pageTransition,
@@ -70,6 +81,14 @@ class _ShellViewState extends ConsumerState<ShellView> {
 
   @override
   Widget build(BuildContext context) {
+    // selectTab yalnızca sekme gerçekten değişince notify eder, o yüzden bu
+    // dinleyici her build'de değil sadece geçişlerde çalışır.
+    ref.listen<ShellViewModel>(
+      shellViewModelProvider,
+      (ShellViewModel? previous, ShellViewModel next) =>
+          _syncPageToTab(next.currentTab),
+    );
+
     final viewModel = ref.watch(shellViewModelProvider);
 
     return Scaffold(

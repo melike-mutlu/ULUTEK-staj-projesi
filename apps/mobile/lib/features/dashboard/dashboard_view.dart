@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../core/providers.dart';
-import '../home/home_viewmodel.dart'; // Tüm listeyi çekmek için Geçmiş beynine ihtiyacımız var
+import '../../shared/widgets/user_avatar_circle.dart';
+import '../shell/shell_viewmodel.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -147,23 +148,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                             ),
                           ],
                         ),
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            color: AkilliSepetColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              viewModel.userName.isNotEmpty ? viewModel.userName[0].toUpperCase() : 'U',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                        UserAvatarCircle(
+                          name: viewModel.userName,
+                          onTap: () => ref
+                              .read(shellViewModelProvider)
+                              .selectTab(ShellTab.profile),
                         ),
                       ],
                     ),
