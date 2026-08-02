@@ -75,7 +75,9 @@ class PendingProductRepository {
       final errStr = e.toString();
       final userMsg = (errStr.contains('SocketException') || errStr.contains('failed host lookup'))
           ? 'Sunucuya ulaşılamadı. Lütfen .env dosyasındaki Supabase URL bilgilerini veya internet bağlantınızı kontrol edin.'
-          : 'Bildirim gönderilirken hata oluştu: $errStr';
+          : errStr.startsWith('Fotoğraf yüklenemedi')
+              ? errStr
+              : 'Bildirim gönderilirken hata oluştu: $errStr';
       return PendingProductResult(
         isSuccess: false,
         errorMessage: userMsg,
@@ -83,7 +85,11 @@ class PendingProductRepository {
     }
   }
 
-  Future<String?> _uploadImage(XFile file, String storagePath) async {
+  /// Yükleme başarısız olursa hatayı yutup yerel dosya yolunu URL gibi
+  /// döndürmez — bu, submit-pending-product'a asla açılamayacak bozuk bir
+  /// link kaydedilmesine yol açardı. Bunun yerine hatayı fırlatır, çağıran
+  /// (submitPendingProduct) bunu yakalayıp kullanıcıya gösterir.
+  Future<String> _uploadImage(XFile file, String storagePath) async {
     try {
       final bytes = await file.readAsBytes();
       await supabase.storage.from('pending_products').uploadBinary(
@@ -92,8 +98,8 @@ class PendingProductRepository {
           );
       return supabase.storage.from('pending_products').getPublicUrl(storagePath);
     } catch (e) {
-      debugPrint('[PendingProductRepository] Photo upload warning: $e');
-      return file.path;
+      debugPrint('[PendingProductRepository] Photo upload error: $e');
+      throw Exception('Fotoğraf yüklenemedi: $e');
     }
   }
 }

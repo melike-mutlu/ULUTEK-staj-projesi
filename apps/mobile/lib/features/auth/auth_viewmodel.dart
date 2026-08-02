@@ -48,11 +48,7 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      try {
-        await supabase.auth.signInAnonymously();
-      } catch (e) {
-        debugPrint('[AuthViewModel] Anonymous sign in fallback: $e');
-      }
+      await supabase.auth.signInAnonymously();
       isLoading = false;
       notifyListeners();
       return true;
