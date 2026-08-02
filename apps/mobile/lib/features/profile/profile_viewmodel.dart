@@ -168,7 +168,10 @@ class ProfileViewModel extends ChangeNotifier {
       await _profileRepository.saveProfile(updated);
       _profile = updated;
       _avatarUrl = url;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      // DEBUG(profile-trace): geçici — yutulan hatanın kendisi.
+      debugPrint('[profile-trace] pickAndUploadAvatar FAILED error=$error');
+      debugPrintStack(stackTrace: stackTrace);
       _errorMessage = 'Fotoğraf yüklenemedi. Lütfen tekrar dene.';
     }
 
@@ -249,8 +252,16 @@ class ProfileViewModel extends ChangeNotifier {
       _profile = await _profileRepository.getProfile(userId);
       _displayNameDraft = _profile?.displayName ?? '';
       _avatarUrl = _profile?.avatarUrl;
+      // DEBUG(profile-trace): geçici — ViewModel'e hidratlanan değerler.
+      debugPrint(
+        '[profile-trace] load hydrated displayName=$_displayNameDraft '
+        'avatarUrl=$_avatarUrl resolved=$resolvedDisplayName',
+      );
       _applyToDraft(_profile);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      // DEBUG(profile-trace): geçici — yutulan hatanın kendisi.
+      debugPrint('[profile-trace] load FAILED error=$error');
+      debugPrintStack(stackTrace: stackTrace);
       _loadFailed = true;
       _errorMessage = 'Profil yüklenemedi. Lütfen tekrar dene.';
     }
@@ -295,7 +306,10 @@ class ProfileViewModel extends ChangeNotifier {
       _isSaving = false;
       notifyListeners();
       return true;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      // DEBUG(profile-trace): geçici — yutulan hatanın kendisi.
+      debugPrint('[profile-trace] save FAILED error=$error');
+      debugPrintStack(stackTrace: stackTrace);
       _isSaving = false;
       _errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
       notifyListeners();
