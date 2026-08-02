@@ -99,6 +99,12 @@ class _ProductDetailViewState extends State<ProductDetailView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 0. Topluluk Ürünü / Doğrulanmadı Uyarısı
+              if (product.isPending) ...[
+                _buildPendingWarningCard(),
+                const SizedBox(height: 16),
+              ],
+
               // 1. Uygunluk Sonucu (Yeşil / Sarı / Kırmızı Bandı)
               WarningBanner(explanation: explanation),
               const SizedBox(height: 16),
@@ -162,6 +168,39 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     }
   }
 
+  Widget _buildPendingWarningCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFCD34D), width: 1.5),
+      ),
+      child: const Row(
+        children: [
+          Icon(
+            Icons.gpp_maybe_rounded,
+            color: Color(0xFFD97706),
+            size: 24,
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı.',
+              style: TextStyle(
+                color: Color(0xFFB45309),
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMockTesterBar() {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -188,14 +227,21 @@ class _ProductDetailViewState extends State<ProductDetailView> {
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildMockChip('🔴 Kırmızı', () => _viewModel.loadMockState('red')),
-              _buildMockChip('🟡 Sarı', () => _viewModel.loadMockState('yellow')),
-              _buildMockChip('🟢 Yeşil', () => _viewModel.loadMockState('green')),
-              _buildMockChip('❌ Yok', () => _viewModel.setStatusFromFetch('not_found')),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildMockChip('🔴 Kırmızı', () => _viewModel.loadMockState('red')),
+                const SizedBox(width: 4),
+                _buildMockChip('🟡 Sarı', () => _viewModel.loadMockState('yellow')),
+                const SizedBox(width: 4),
+                _buildMockChip('🟢 Yeşil', () => _viewModel.loadMockState('green')),
+                const SizedBox(width: 4),
+                _buildMockChip('⏳ Pending', () => _viewModel.loadMockState('pending')),
+                const SizedBox(width: 4),
+                _buildMockChip('❌ Yok', () => _viewModel.setStatusFromFetch('not_found')),
+              ],
+            ),
           ),
         ],
       ),

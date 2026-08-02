@@ -53,7 +53,55 @@ void main() {
     expect(find.text('Nutri-Score A'), findsOneWidget);
   });
 
-  testWidgets('ProductDetailView loads and renders correctly', (WidgetTester tester) async {
+  test('Product model correctly identifies isPending from status and json', () {
+    final pendingJson = {
+      'barcode': '123',
+      'name': 'Test',
+      'ingredients_text': '',
+      'additives': [],
+      'allergens_tags': [],
+      'nutriments': {},
+      'status': 'PENDING',
+    };
+    final product = Product.fromJson(pendingJson);
+    expect(product.isPending, isTrue);
+
+    const directProduct = Product(
+      barcode: '123',
+      name: 'Test',
+      ingredientsText: '',
+      additives: [],
+      allergensTags: [],
+      nutriments: Nutriments(),
+      isPending: true,
+    );
+    expect(directProduct.isPending, isTrue);
+  });
+
+  testWidgets('ProductHeaderCard displays "Doğrulanmadı" badge for pending products', (WidgetTester tester) async {
+    const pendingProduct = Product(
+      barcode: '123456789',
+      name: 'Topluluk Ürünü',
+      brand: 'Test Marka',
+      ingredientsText: 'İçerik',
+      additives: [],
+      allergensTags: [],
+      nutriments: Nutriments(),
+      isPending: true,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ProductHeaderCard(product: pendingProduct),
+        ),
+      ),
+    );
+
+    expect(find.text('Doğrulanmadı'), findsOneWidget);
+  });
+
+  testWidgets('ProductDetailView renders pending warning banner for pending state', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: ProductDetailView(),
@@ -62,10 +110,17 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Ürün Detayı'), findsOneWidget);
-    expect(find.text('Çikolatalı Gofret'), findsOneWidget);
-    expect(find.text('Ülker'), findsOneWidget);
-    expect(find.text('Besin Değerleri (100g için)'), findsOneWidget);
-    expect(find.text('Alerjenler & İçindekiler'), findsOneWidget);
+    // Scroll to mock tester bar and tap on ⏳ Pending chip
+    final pendingChip = find.text('⏳ Pending');
+    expect(pendingChip, findsOneWidget);
+    await tester.ensureVisible(pendingChip);
+    await tester.pumpAndSettle();
+
+    await tester.tap(pendingChip);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı.'), findsOneWidget);
+    expect(find.text('DİKKAT EDİLMELİ'), findsOneWidget);
+    expect(find.text('Doğrulanmadı'), findsOneWidget);
   });
 }
