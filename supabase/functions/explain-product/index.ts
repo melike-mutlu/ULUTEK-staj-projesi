@@ -15,9 +15,8 @@ import {
   type ProfileSchema,
 } from "./profile_parser.ts";
 
-//import { jsonResponse, handleCorsPreflight } from "../../services/shared/http.ts";
+import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 
-import { jsonResponse } from "../_shared/http.ts";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return handleCorsPreflight();

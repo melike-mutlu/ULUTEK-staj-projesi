@@ -21,7 +21,6 @@ Deno.serve(async (req) => {
     }
 
     const supabase = getServiceClient();
-
     const userClient = getUserClient(req);
     const { data: { user } } = await userClient.auth.getUser();
 
