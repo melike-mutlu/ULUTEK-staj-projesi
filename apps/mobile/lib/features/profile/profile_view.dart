@@ -16,8 +16,9 @@ import 'widgets/profile_section_card.dart';
 /// Profil — alt navigasyonun 4. sekmesi.
 /// Onboarding'de verilen alerji/diyet/sağlık seçimlerini düzenleme ekranı.
 ///
-/// Selections are edited locally and written to Supabase in one go with the
-/// "Kaydet" button — not on every chip tap.
+/// Chip selections are edited locally and written to Supabase in one go with
+/// the "Kaydet" button. Name and photo do not go through it — each saves as
+/// soon as it is changed.
 class ProfileView extends ConsumerStatefulWidget {
   const ProfileView({super.key});
 
@@ -49,8 +50,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     });
   }
 
-  /// Adı düzenleme kutusu. Seçimler gibi yalnızca taslağa yazar; kalıcı olması
-  /// için "Kaydet" gerekir.
+  /// Adı düzenleme kutusu. Çiplerin aksine anında kaydeder — alttaki "Kaydet"
+  /// butonunu beklemez.
   Future<void> _editName(ProfileViewModel viewModel) async {
     // Kutuda kayıtlı ad durur — e-posta'dan türetilen yedek isim değil, yoksa
     // kullanıcı hiç yazmadığı bir adı kaydetmiş olurdu.
@@ -64,7 +65,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
     // null = vazgeçildi; boş string geçerli bir girdi ("adı kaldır").
     if (result == null) return;
-    viewModel.setDisplayName(result);
+
+    final saved = await viewModel.saveDisplayName(result);
+    if (!mounted || !saved) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Adın güncellendi.')),
+    );
   }
 
   Future<void> _save(ProfileViewModel viewModel) async {
@@ -140,7 +146,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 name: viewModel.resolvedDisplayName,
                 avatarUrl: viewModel.avatarUrl,
                 isUploadingPhoto: viewModel.isUploadingAvatar,
-                onEditName: () => _editName(viewModel),
+                onEditName:
+                    viewModel.isSavingName ? null : () => _editName(viewModel),
                 onEditPhoto: viewModel.pickAndUploadAvatar,
               ),
               const SizedBox(height: 24),
@@ -153,10 +160,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       viewModel.toggleOption(field, option),
                   onAddCustom: (String option) =>
                       viewModel.addCustomOption(field, option),
-                  // Diet is single-select: adding a custom option only makes
-                  // sense while nothing is chosen.
-                  canAddCustom: field != OnboardingField.diet ||
-                      viewModel.selectionsFor(field).isEmpty,
+                  // Diet values must map to the enum the rule engine expects,
+                  // so free-text entries cannot be persisted there.
+                  canAddCustom: field != OnboardingField.diet,
                   isExpanded: _expanded.contains(field),
                   onShowAll: () => setState(() => _expanded.add(field)),
                 ),

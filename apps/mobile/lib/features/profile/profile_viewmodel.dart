@@ -37,9 +37,10 @@ class ProfileViewModel extends ChangeNotifier {
   bool _isUploadingAvatar = false;
   String? _errorMessage;
 
-  /// Ad taslağı — seçimler gibi "Kaydet"e kadar yerel. Boş string "ad girilmedi"
-  /// demek; kaydederken null'a çevrilir.
-  String _displayNameDraft = '';
+  /// Kayıtlı ad. Taslak DEĞİL: kutu kapanır kapanmaz veritabanına yazılır.
+  String? _displayName;
+
+  bool _isSavingName = false;
 
   /// Fotoğraf URL'i taslak DEĞİL: yükleme başarılı olur olmaz kaydedilir,
   /// çünkü dosya o an zaten bucket'a gitmiş olur.
@@ -62,12 +63,14 @@ class ProfileViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get loadFailed => _loadFailed;
 
-  String get displayNameDraft => _displayNameDraft;
+  /// Kutuya ön değer olarak konur — yedek (e-posta) isim değil, gerçek ad.
+  String get displayNameDraft => _displayName ?? '';
   String? get avatarUrl => _avatarUrl;
+  bool get isSavingName => _isSavingName;
 
   /// Başlıkta gösterilecek ad: girilen ad, yoksa e-posta kullanıcı adı.
   String get resolvedDisplayName => resolveDisplayName(
-        displayName: _displayNameDraft,
+        displayName: _displayName,
         email: _email,
       );
 
@@ -91,14 +94,15 @@ class ProfileViewModel extends ChangeNotifier {
       _draft[field]!.contains(option);
 
   /// Kaydedilmemiş değişiklik var mı — "Kaydet" butonu buna bakar.
+  ///
+  /// Yalnızca çip seçimlerine bakar: ad ve fotoğraf kendi akışlarında anında
+  /// kaydedilir, bu butonu beklemezler.
   bool get hasChanges {
     final profile = _profile;
     if (profile == null) {
-      return _displayNameDraft.isNotEmpty ||
-          _draft.values.any((Set<String> selected) => selected.isNotEmpty);
+      return _draft.values.any((Set<String> selected) => selected.isNotEmpty);
     }
-    return _displayNameDraft != (profile.displayName ?? '') ||
-        !setEquals(
+    return !setEquals(
           _draft[OnboardingField.allergies],
           profile.allergies.toSet(),
         ) ||
@@ -106,18 +110,82 @@ class ProfileViewModel extends ChangeNotifier {
           _draft[OnboardingField.health],
           profile.healthConditions.toSet(),
         ) ||
-        _draftDietPreference != profile.dietPreference;
+        !setEquals(_draftDietLabels, profile.dietPreferences.toSet());
   }
 
   // --- Yazma ---
 
-  /// Adı taslağa yazar; kalıcı olması için "Kaydet" gerekir.
-  /// Boş/whitespace girdi "ad yok" demektir ve kabul edilir — ad zorunlu değil.
-  void setDisplayName(String value) {
+  /// Adı hemen kaydeder — alttaki "Kaydet" butonunu beklemez.
+  /// Boş/whitespace girdi "ad yok" demektir ve kabul edilir; ad zorunlu değil.
+  ///
+  /// Kaydedilmemiş çip taslağını yazmaz: satırın diğer alanları en son
+  /// kaydedilmiş hâlinden kopyalanır.
+  Future<bool> saveDisplayName(String value) async {
     final trimmed = value.trim();
-    if (trimmed == _displayNameDraft) return;
-    _displayNameDraft = trimmed;
+    final normalized = trimmed.isEmpty ? null : trimmed;
+    if (normalized == _displayName) return true;
+
+    final String? userId;
+    try {
+      userId = _profileRepository.currentUserId;
+    } catch (_) {
+      _errorMessage = 'Ad kaydedilemedi. Lütfen tekrar dene.';
+      notifyListeners();
+      return false;
+    }
+    if (userId == null) {
+      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      notifyListeners();
+      return false;
+    }
+
+    _isSavingName = true;
+    _errorMessage = null;
     notifyListeners();
+
+    try {
+      final updated = _profileWith(
+        userId: userId,
+        displayName: normalized,
+        avatarUrl: _avatarUrl,
+      );
+      await _profileRepository.saveProfile(updated);
+      _profile = updated;
+      _displayName = normalized;
+      _isSavingName = false;
+      notifyListeners();
+      return true;
+    } catch (error, stackTrace) {
+      // DEBUG(profile-trace): geçici — yutulan hatanın kendisi.
+      debugPrint('[profile-trace] saveDisplayName FAILED error=$error');
+      debugPrintStack(stackTrace: stackTrace);
+      _isSavingName = false;
+      _errorMessage = 'Ad kaydedilemedi. Lütfen tekrar dene.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// En son kaydedilmiş satırın kopyası, verilen alan(lar) değiştirilmiş hâlde.
+  ///
+  /// Alanlar tek tek veriliyor: `copyWith` tarzı bir yardımcıda null "değiştirme"
+  /// anlamına gelir ve adı temizlemeye izin vermezdi.
+  /// Her iki alan da zorunlu: null "değiştirme" değil "temizle" demek, o yüzden
+  /// çağıran taraf ikisini de açıkça vermek zorunda.
+  UserProfile _profileWith({
+    required String userId,
+    required String? displayName,
+    required String? avatarUrl,
+  }) {
+    final base = _profile;
+    return UserProfile(
+      userId: userId,
+      allergies: base?.allergies ?? const <String>[],
+      dietPreferences: base?.dietPreferences ?? const <DietPreference>[],
+      healthConditions: base?.healthConditions ?? const <String>[],
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+    );
   }
 
   /// Galeriden fotoğraf seçtirir, bucket'a yükler ve profile hemen yazar.
@@ -156,14 +224,11 @@ class ProfileViewModel extends ChangeNotifier {
         fileExtension: picked.extension,
       );
 
-      final updated = (_profile ??
-              UserProfile(
-                userId: userId,
-                allergies: const <String>[],
-                dietPreference: DietPreference.standard,
-                healthConditions: const <String>[],
-              ))
-          .copyWith(avatarUrl: url);
+      final updated = _profileWith(
+        userId: userId,
+        displayName: _displayName,
+        avatarUrl: url,
+      );
 
       await _profileRepository.saveProfile(updated);
       _profile = updated;
@@ -179,20 +244,11 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Diyet tek seçimlidir: yeni seçim öncekinin yerine geçer (veritabanındaki
-  /// tekil enum ile birebir olsun diye). Diğer alanlar çoklu seçim.
+  /// Üç alan da çoklu seçim — `diet_preference` `text[]` olduğundan diyet de
+  /// artık diğerleri gibi davranıyor.
   void toggleOption(OnboardingField field, String option) {
     final selected = _draft[field]!;
-    final wasSelected = selected.contains(option);
-
-    if (field == OnboardingField.diet) {
-      selected.clear();
-      if (!wasSelected) selected.add(option);
-    } else if (wasSelected) {
-      selected.remove(option);
-    } else {
-      selected.add(option);
-    }
+    if (!selected.remove(option)) selected.add(option);
     notifyListeners();
   }
 
@@ -200,14 +256,10 @@ class ProfileViewModel extends ChangeNotifier {
   /// Boş/whitespace ve mevcut seçenekle (case-insensitive) çakışan girdi
   /// reddedilir.
   ///
-  /// Diyet tek seçimli olduğu için yalnızca hiçbir şey seçili değilken izin
-  /// verilir; aksi hâlde eklenen seçenek mevcut tercihin yerine geçerdi.
-  ///
-  /// TODO(backend-pod): katalog dışı bir diyet etiketinin `DietPreference`
-  /// karşılığı yok, kaydedilince `standard` olarak gidiyor. `diet_preference`
-  /// `text[]`e genişleyince (bkz. dietPreferenceByLabel) burası düzelir.
+  /// Diyette kapalı: katalog dışı bir etiketin `DietPreference` karşılığı yok,
+  /// kaydedilse sessizce kaybolurdu (bkz. dietPreferenceByLabel).
   void addCustomOption(OnboardingField field, String option) {
-    if (field == OnboardingField.diet && _draft[field]!.isNotEmpty) return;
+    if (field == OnboardingField.diet) return;
 
     final trimmed = option.trim();
     if (trimmed.isEmpty) return;
@@ -250,12 +302,13 @@ class ProfileViewModel extends ChangeNotifier {
       }
       _email = _profileRepository.currentUserEmail;
       _profile = await _profileRepository.getProfile(userId);
-      _displayNameDraft = _profile?.displayName ?? '';
+      _displayName = _profile?.displayName;
       _avatarUrl = _profile?.avatarUrl;
       // DEBUG(profile-trace): geçici — ViewModel'e hidratlanan değerler.
       debugPrint(
-        '[profile-trace] load hydrated displayName=$_displayNameDraft '
-        'avatarUrl=$_avatarUrl resolved=$resolvedDisplayName',
+        '[profile-trace] load hydrated displayName=$_displayName '
+        'avatarUrl=$_avatarUrl diet=${_profile?.dietPreferences} '
+        'resolved=$resolvedDisplayName',
       );
       _applyToDraft(_profile);
     } catch (error, stackTrace) {
@@ -296,9 +349,9 @@ class ProfileViewModel extends ChangeNotifier {
       final updated = UserProfile(
         userId: userId,
         allergies: _draft[OnboardingField.allergies]!.toList(),
-        dietPreference: _draftDietPreference,
+        dietPreferences: _draftDietPreferences,
         healthConditions: _draft[OnboardingField.health]!.toList(),
-        displayName: _displayNameDraft.isEmpty ? null : _displayNameDraft,
+        displayName: _displayName,
         avatarUrl: _avatarUrl,
       );
       await _profileRepository.saveProfile(updated);
@@ -319,12 +372,15 @@ class ProfileViewModel extends ChangeNotifier {
 
   // --- Yardımcılar ---
 
-  /// Taslaktaki tekil diyet seçimi; seçim yoksa `standard`.
-  DietPreference get _draftDietPreference {
-    final selected = _draft[OnboardingField.diet]!;
-    if (selected.isEmpty) return DietPreference.standard;
-    return dietPreferenceByLabel[selected.first] ?? DietPreference.standard;
-  }
+  /// Taslakta seçili diyet etiketlerinin enum karşılıkları. Sözlükte olmayan
+  /// etiket yazılamaz, sessizce elenir.
+  List<DietPreference> get _draftDietPreferences => _draft[OnboardingField.diet]!
+      .map((String label) => dietPreferenceByLabel[label])
+      .whereType<DietPreference>()
+      .toList();
+
+  /// [hasChanges] karşılaştırması için: taslak seçimlerin enum kümesi.
+  Set<DietPreference> get _draftDietLabels => _draftDietPreferences.toSet();
 
   void _applyToDraft(UserProfile? profile) {
     for (final selected in _draft.values) {
@@ -335,13 +391,14 @@ class ProfileViewModel extends ChangeNotifier {
     _selectAll(OnboardingField.allergies, profile.allergies);
     _selectAll(OnboardingField.health, profile.healthConditions);
 
-    // Enum → etiket; `standard` bir seçenek değil, "seçim yok" demek.
-    final dietLabel = dietPreferenceByLabel.entries
-        .where((MapEntry<String, DietPreference> e) =>
-            e.value == profile.dietPreference)
-        .map((MapEntry<String, DietPreference> e) => e.key)
-        .firstOrNull;
-    if (dietLabel != null) _draft[OnboardingField.diet]!.add(dietLabel);
+    // Enum listesi → etiketler; boş liste "seçim yok" demek.
+    for (final preference in profile.dietPreferences) {
+      final label = dietPreferenceByLabel.entries
+          .where((MapEntry<String, DietPreference> e) => e.value == preference)
+          .map((MapEntry<String, DietPreference> e) => e.key)
+          .firstOrNull;
+      if (label != null) _draft[OnboardingField.diet]!.add(label);
+    }
   }
 
   /// Kayıtlı değerleri seçili yapar; katalogda olmayanları (kullanıcının

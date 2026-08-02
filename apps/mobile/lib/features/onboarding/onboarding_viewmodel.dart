@@ -167,7 +167,7 @@ class OnboardingViewModel extends ChangeNotifier {
         final profile = UserProfile(
           userId: userId,
           allergies: _selections[OnboardingField.allergies]!.toList(),
-          dietPreference: _mapDietPreference(
+          dietPreferences: _mapDietPreferences(
             _selections[OnboardingField.diet]!,
           ),
           healthConditions: _selections[OnboardingField.health]!.toList(),
@@ -185,20 +185,15 @@ class OnboardingViewModel extends ChangeNotifier {
     }
   }
 
-  /// Çoklu diyet seçimini sözleşmedeki tekil `diet_preference` enum'una indirger.
-  ///
-  /// UYARI — bilinçli veri kaybı: seçilen ilk eşleşen değer alınır, kalanlar
-  /// düşer. Sözleşme `diet_preference`'ı tekil enum tanımlıyor
-  /// (docs/architecture.md).
-  /// TODO(backend-pod): `diet_preference` alanının `text[]`e genişletilmesi ya
-  /// da `diet_tags text[]` eklenmesi konuşulacak; genişlerse burası tek
-  /// satırlık değişir.
-  DietPreference _mapDietPreference(Set<String> selections) {
-    for (final entry in dietPreferenceByLabel.entries) {
-      if (selections.contains(entry.key)) return entry.value;
-    }
-    return DietPreference.standard;
-  }
+  /// Seçilen diyet etiketlerini `diet_preference` (`text[]`) karşılıklarına
+  /// çevirir. Sözlükte karşılığı olmayan etiketler yazılamaz, elenir
+  /// (bkz. dietPreferenceByLabel).
+  List<DietPreference> _mapDietPreferences(Set<String> selections) =>
+      dietPreferenceByLabel.entries
+          .where((MapEntry<String, DietPreference> e) =>
+              selections.contains(e.key))
+          .map((MapEntry<String, DietPreference> e) => e.value)
+          .toList();
 }
 
 final onboardingViewModelProvider =

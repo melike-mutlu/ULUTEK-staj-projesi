@@ -8,11 +8,40 @@ const _dietPreferenceDbNames = {
   DietPreference.sporcu: 'sporcu',
 };
 
+/// `diet_preference` artık `text[]` — çoklu seçim serbest.
+///
+/// Okuma tarafı hem diziyi hem de eski tekil string'i kabul eder: sütun
+/// dönüştürülmeden önce yazılmış satırlar hâlâ okunabilsin diye.
+/// `standard` "tercih yok" demek, listeye alınmaz — karşılığı boş listedir.
+List<DietPreference> _parseDietPreferences(dynamic value) {
+  final List<dynamic> raw;
+  if (value == null) {
+    return const <DietPreference>[];
+  } else if (value is List) {
+    raw = value;
+  } else {
+    raw = <dynamic>[value];
+  }
+
+  final result = <DietPreference>[];
+  for (final entry in raw) {
+    for (final pair in _dietPreferenceDbNames.entries) {
+      if (pair.value == entry && pair.key != DietPreference.standard) {
+        result.add(pair.key);
+      }
+    }
+  }
+  return result;
+}
+
 /// Supabase "profiles" tablosunun Dart karşılığı (bkz. docs/architecture.md).
 class UserProfile {
   final String userId;
   final List<String> allergies;
-  final DietPreference dietPreference;
+
+  /// Seçili diyet tercihleri; boş liste "özel bir diyetim yok" demek.
+  final List<DietPreference> dietPreferences;
+
   final List<String> healthConditions;
 
   /// Kullanıcının kendi girdiği ad. Boş bırakılabilir — gösterimde e-posta
@@ -25,41 +54,19 @@ class UserProfile {
   const UserProfile({
     required this.userId,
     required this.allergies,
-    required this.dietPreference,
+    required this.dietPreferences,
     required this.healthConditions,
     this.displayName,
     this.avatarUrl,
   });
 
-  /// saveProfile satırın TAMAMINI upsert eder; tek bir alanı değiştirirken
-  /// diğerlerinin null'lanmaması için profil sıfırdan kurulmaz, bununla
-  /// kopyalanır.
-  ///
-  /// Note: a null argument means "keep", not "clear" — clearing a field needs
-  /// a different mechanism if that is ever required.
-  UserProfile copyWith({
-    String? userId,
-    List<String>? allergies,
-    DietPreference? dietPreference,
-    List<String>? healthConditions,
-    String? displayName,
-    String? avatarUrl,
-  }) {
-    return UserProfile(
-      userId: userId ?? this.userId,
-      allergies: allergies ?? this.allergies,
-      dietPreference: dietPreference ?? this.dietPreference,
-      healthConditions: healthConditions ?? this.healthConditions,
-      displayName: displayName ?? this.displayName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-    );
-  }
-
   Map<String, dynamic> toJson() {
     return {
       'user_id': userId,
       'allergies': allergies,
-      'diet_preference': _dietPreferenceDbNames[dietPreference],
+      'diet_preference': dietPreferences
+          .map((DietPreference e) => _dietPreferenceDbNames[e])
+          .toList(),
       'health_conditions': healthConditions,
       'display_name': displayName,
       'avatar_url': avatarUrl,
@@ -72,12 +79,7 @@ class UserProfile {
       allergies: (json['allergies'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList(),
-      dietPreference: _dietPreferenceDbNames.entries
-          .firstWhere(
-            (e) => e.value == json['diet_preference'],
-            orElse: () => const MapEntry(DietPreference.standard, 'standard'),
-          )
-          .key,
+      dietPreferences: _parseDietPreferences(json['diet_preference']),
       healthConditions: (json['health_conditions'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList(),
@@ -85,4 +87,4 @@ class UserProfile {
       avatarUrl: json['avatar_url'] as String?,
     );
   }
-} 
+}

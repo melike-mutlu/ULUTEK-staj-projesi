@@ -117,7 +117,10 @@ void main() {
     expect(repository.savedProfile, isNotNull);
     expect(repository.savedProfile!.allergies, <String>['Gluten']);
     expect(repository.savedProfile!.healthConditions, <String>['Tansiyon']);
-    expect(repository.savedProfile!.dietPreference, DietPreference.vejetaryen);
+    expect(
+      repository.savedProfile!.dietPreferences,
+      <DietPreference>[DietPreference.vejetaryen],
+    );
   });
 
   test('submit() currentUserId null ise kaydetmeyi atlar ama basarili doner',
