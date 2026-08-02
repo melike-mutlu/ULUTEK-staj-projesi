@@ -4,6 +4,8 @@ import { fetchFromOpenFoodFacts } from "../_shared/openFoodFacts/openFoodFacts.s
 import { runRuleEngine, findMissingFields } from "../_shared/ruleEngine/ruleEngine.service.ts";
 import { jsonResponse } from "../_shared/http.ts";
 
+Deno.serve(async (req) => {
+
   try {
     const { barcode } = await req.json();
     if (!barcode) {
@@ -45,3 +47,4 @@ import { jsonResponse } from "../_shared/http.ts";
     return jsonResponse({ status: "error", message: "beklenmeyen hata" }, 500);
   }
 });
+
