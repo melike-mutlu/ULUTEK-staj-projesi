@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../dashboard/dashboard_view.dart';
+import '../chatbot/chatbot_view.dart';
 import '../home/home_view.dart';
 import '../profile/profile_view.dart';
 import '../scan/scan_view.dart';
@@ -44,9 +44,20 @@ class _ShellViewState extends ConsumerState<ShellView> {
     super.dispose();
   }
 
-  /// Bardaki sekmeye dokunuldu.
+  /// Bardaki sekmeye dokunuldu. Sayfayı burada kaydırmıyoruz: tek doğru kaynak
+  /// ViewModel, sayfa onu [_syncPageToTab] ile takip ediyor.
   void _onTabSelected(ShellTab tab) {
     ref.read(shellViewModelProvider).selectTab(tab);
+  }
+
+  /// Brings the PageView to whichever tab the ViewModel is on.
+  ///
+  /// Lets any screen request a tab (e.g. the profile avatar in the header)
+  /// without knowing that a [PageController] exists.
+  void _syncPageToTab(ShellTab tab) {
+    if (!_pageController.hasClients) return;
+    // Already there — a swipe moves the page first and only then the state.
+    if (_pageController.page?.round() == tab.index) return;
     _pageController.animateToPage(
       tab.index,
       duration: _pageTransition,
@@ -70,23 +81,33 @@ class _ShellViewState extends ConsumerState<ShellView> {
 
   @override
   Widget build(BuildContext context) {
+    // selectTab yalnızca sekme gerçekten değişince notify eder, o yüzden bu
+    // dinleyici her build'de değil sadece geçişlerde çalışır.
+    ref.listen<ShellViewModel>(
+      shellViewModelProvider,
+      (ShellViewModel? previous, ShellViewModel next) =>
+          _syncPageToTab(next.currentTab),
+    );
+
     final viewModel = ref.watch(shellViewModelProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       // Bar içeriğin üstünde yüzsün diye gövde bar alanına kadar uzatılır.
       extendBody: true,
-      body: _TabContentInset(
-        child: PageView(
-          controller: _pageController,
-          onPageChanged: _onPageChanged,
-          children: const <Widget>[
-            _KeepAlivePage(child: DashboardView()),
-            _KeepAlivePage(child: ScanView()),
-            _KeepAlivePage(child: HomeView()),
-            _KeepAlivePage(child: ProfileView()),
-          ],
-        ),
+      // Sekme ekranlarının alt bar için ayıracağı boşluğu elle eklemiyoruz:
+      // `extendBody` + `bottomNavigationBar` varken Scaffold, body'nin
+      // MediaQuery.padding.bottom'ını barın GERÇEK yüksekliği kadar zaten
+      // artırıyor. Elle eklemek boşluğu iki kere saydırıyordu.
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        children: const <Widget>[
+          _KeepAlivePage(child: HomeView()),
+          _KeepAlivePage(child: ScanView()),
+          _KeepAlivePage(child: ChatbotView()),
+          _KeepAlivePage(child: ProfileView()),
+        ],
       ),
       bottomNavigationBar: AnimatedBuilder(
         animation: _pageController,
@@ -122,35 +143,5 @@ class _KeepAlivePageState extends State<_KeepAlivePage>
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
-  }
-}
-
-/// Sekme ekranlarına, yüzen barın kapladığı kadar alt boşluk tanıtır.
-///
-/// Boşluğu ekranlara tek tek `Padding` olarak dağıtmak yerine [MediaQuery]'nin
-/// alt güvenli alanına eklenir: sekme ekranları içeriğini `SafeArea` ile ya da
-/// `MediaQuery.of(context).padding.bottom` okuyarak sarmaladığında (liste
-/// `padding`'i, son buton vb.) içerik barın arkasında kalmaz.
-class _TabContentInset extends StatelessWidget {
-  const _TabContentInset({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    const extra = GlassBottomNav.reservedHeight;
-
-    return MediaQuery(
-      data: mediaQuery.copyWith(
-        padding: mediaQuery.padding.copyWith(
-          bottom: mediaQuery.padding.bottom + extra,
-        ),
-        viewPadding: mediaQuery.viewPadding.copyWith(
-          bottom: mediaQuery.viewPadding.bottom + extra,
-        ),
-      ),
-      child: child,
-    );
   }
 }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
-import '../../core/providers.dart'; 
+import '../../core/providers.dart';
+import '../../shared/widgets/user_avatar_circle.dart';
+import '../shell/shell_viewmodel.dart';
 
-// Dinamik veri çekeceğimiz için ConsumerStatefulWidget yapıyoruz
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
@@ -16,20 +17,103 @@ class _HomeViewState extends ConsumerState<HomeView> {
   @override
   void initState() {
     super.initState();
-    // Ekran açıldığında "verileri yükle" emrini veriyoruz
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(dashboardViewModelProvider).loadDashboardData();
+      ref.read(homeViewModelProvider).loadDashboardData();
     });
+  }
+
+  // --- YENİ: TÜM GEÇMİŞİ GÖSTEREN AŞAĞIDAN KAYARAK AÇILAN PANEL ---
+  void _showAllHistoryBottomSheet(BuildContext context, WidgetRef ref) {
+    // Butona basıldığı an veritabanından 50'lik tüm listeyi çekmeye başlıyoruz
+    ref.read(chatbotViewModelProvider).loadHistory();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Panelin ekranın büyük kısmını kaplamasına izin verir
+      backgroundColor: Colors.transparent, // Köşelerin yuvarlak olabilmesi için
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white, // Kendi temana göre AkilliSepetColors.surface da yapabilirsin
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.6, // İlk açıldığında ekranın %60'ını kaplasın
+            minChildSize: 0.4,     // En az %40'a kadar küçülebilmesin
+            maxChildSize: 0.9,     // Yukarı kaydırınca ekranın %90'ını kaplasın
+            expand: false,
+            builder: (context, scrollController) {
+              return Consumer(
+                builder: (context, ref, child) {
+                  // Tüm listenin olduğu beyni anlık dinliyoruz
+                  final historyVm = ref.watch(chatbotViewModelProvider);
+
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // En üstteki gri minik tutma çubuğu (Tasarım detayı)
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 5,
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Tüm Taramalarım',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AkilliSepetColors.textPrimary,
+                              ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Liste Kısmı
+                        Expanded(
+                          child: historyVm.isLoading
+                              ? const Center(child: CircularProgressIndicator(color: AkilliSepetColors.primary))
+                              : historyVm.historyItems.isEmpty
+                                  ? const Center(child: Text('Geçmiş bulunamadı.', style: TextStyle(color: Colors.grey)))
+                                  : ListView.builder(
+                                      controller: scrollController, // Parmağınla paneli kaydırmanı sağlar
+                                      itemCount: historyVm.historyItems.length,
+                                      itemBuilder: (context, index) {
+                                        final item = historyVm.historyItems[index];
+                                        return Padding(
+                                          padding: const EdgeInsets.only(bottom: 12.0),
+                                          child: _buildRecentScanCard(
+                                            context,
+                                            title: 'Barkod: ${item['barcode']}',
+                                            note: 'İçerik Analizi',
+                                            noteColor: AkilliSepetColors.success,
+                                            backgroundColor: const Color(0xFFE8F5E9),
+                                            time: 'Kayıt', // İleride tarih yazdırırız
+                                          ),
+                                        );
+                                      },
+                                    ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Room for the shell's floating nav bar (see shell_view.dart
-    // `_TabContentInset`); the tab draws no bar of its own.
     final bottomInset = MediaQuery.of(context).padding.bottom;
-
-    // ViewModeldeki verilere ulaşıyoruz
-    final viewModel = ref.watch(dashboardViewModelProvider);
+    final viewModel = ref.watch(homeViewModelProvider);
 
     return Scaffold(
       body: viewModel.isLoading
@@ -41,7 +125,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                    // Hoşgeldiniz Başlığı
+                    
+                    // --- 1. KULLANICI SELAMLAMA VE PROFİL ---
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -55,8 +140,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                   ),
                             ),
                             Text(
-                              //GERÇEK KULLANICI ADI
-                              viewModel.userName.isNotEmpty ? viewModel.userName : 'Kullanıcı',
+                              viewModel.displayName.isNotEmpty ? viewModel.displayName : 'Kullanıcı',
                               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: AkilliSepetColors.textPrimary,
@@ -64,33 +148,78 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             ),
                           ],
                         ),
-                        // Profil Butonu
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            color: AkilliSepetColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              // İsim "E" yerine kullanıcının baş harfi olsun
-                              viewModel.userName.isNotEmpty ? viewModel.userName[0].toUpperCase() : 'U',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                        UserAvatarCircle(
+                          name: viewModel.displayName,
+                          avatarUrl: viewModel.avatarUrl,
+                          onTap: () => ref
+                              .read(shellViewModelProvider)
+                              .selectTab(ShellTab.profile),
                         ),
                       ],
                     ),
                     
-                    // NOT: TARA BUTONU BURADAN KALDIRILDI!
-                    
                     const SizedBox(height: 40),
-                    // Son Taramaların Başlığı
+
+                    // --- 2. TARA BUTONU ---
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/scan').then((_) {
+                            ref.read(homeViewModelProvider).loadDashboardData();
+                            ref.read(chatbotViewModelProvider).loadHistory(); 
+                          });
+                        },
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: AkilliSepetColors.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AkilliSepetColors.primary.withAlpha(100),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.qr_code_2,
+                                color: Colors.white,
+                                size: 64,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Tara',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Alt Açıklama
+                    Center(
+                      child: Text(
+                        'Bir ürünün barkodunu okut, içeriğini ve\nsana uygunluğunu öğren',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AkilliSepetColors.textSecondary,
+                            ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 20),
+
+                    // --- 3. SON TARAMALAR LİSTESİ ---
                     Text(
                       'Son Taramaların',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -100,7 +229,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     ),
                     const SizedBox(height: 16),
                     
-                    //GERÇEK TARAMA GEÇMİŞİ LİSTESİ
                     if (viewModel.recentScans.isEmpty)
                       const Center(
                         child: Padding(
@@ -111,21 +239,38 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           ),
                         ),
                       )
-                    else
-                      // Veritabanındaki liste kadar kart oluşturuyoruz
+                    else ...[
+                      // Sadece son 3 taramayı çiz
                       ...viewModel.recentScans.map((item) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: _buildRecentScanCard(
                             context,
                             title: 'Barkod: ${item['barcode']}',
-                            note: 'İçerik Analizi', // İleride uyarı rengine göre değişebilir
+                            note: 'İçerik Analizi',
                             noteColor: AkilliSepetColors.success,
                             backgroundColor: const Color(0xFFE8F5E9),
-                            time: 'Yeni', // İleride saati gösterebiliriz
+                            time: 'Yeni',
                           ),
                         );
                       }),
+                      
+                      // --- YENİ EKLENEN: TÜMÜNÜ GÖR BUTONU ---
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: () => _showAllHistoryBottomSheet(context, ref),
+                          icon: const Icon(Icons.keyboard_arrow_down, color: AkilliSepetColors.primary),
+                          label: const Text(
+                            'Tüm Geçmişi Gör',
+                            style: TextStyle(
+                              color: AkilliSepetColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 32),
                   ],
@@ -135,7 +280,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  //orjinal kart tasarımı
+  // Orijinal Kart Tasarımı Yardımcı Fonksiyonu
   Widget _buildRecentScanCard(
     BuildContext context, {
     required String title,
@@ -152,7 +297,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          // Renkli Nokta
           Container(
             width: 48,
             height: 48,
@@ -163,7 +307,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
             ),
           ),
           const SizedBox(width: 12),
-          // İçerik
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +337,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
               ],
             ),
           ),
-          // Zaman
           Text(
             time,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -206,5 +348,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 }
+
+
+
+
 
 

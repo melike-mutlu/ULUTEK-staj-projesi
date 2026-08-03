@@ -21,7 +21,7 @@ import '../shell_viewmodel.dart';
 /// anlık takip eder (bkz. `ShellView`).
 ///
 /// Bar içeriğin ÜSTÜNDE yüzdüğü için sekme ekranlarının altında yer ayrılması
-/// gerekir — bunu [reservedHeight] üzerinden `ShellView` hallediyor.
+/// gerekir; bunu Scaffold `extendBody` ile kendisi yapıyor (bkz. `ShellView`).
 class GlassBottomNav extends StatelessWidget {
   const GlassBottomNav({
     super.key,
@@ -42,13 +42,6 @@ class GlassBottomNav extends StatelessWidget {
 
   /// Blur şiddeti — bilinçli olarak hafif tutuldu, arkadaki içerik seçilebilsin.
   static const double blurSigma = 12;
-
-  /// Sekme ekranlarının altında bırakılması gereken boşluk: içerik barın
-  /// arkasında kalmasın diye. Sistem güvenli alanı buna ayrıca eklenir.
-  ///
-  /// [bottomMargin] negatifken bilerek düşülmüyor: birkaç piksel fazla boşluk
-  /// zararsız, eksik boşluk ise içeriği barın altında bırakır.
-  static const double reservedHeight = barHeight;
 
   /// Göstergenin bardan HER YÖNDE eşit boşluğu.
   ///
@@ -75,7 +68,7 @@ class GlassBottomNav extends StatelessWidget {
 
   static const List<_NavItem> _items = <_NavItem>[
     _NavItem(
-      tab: ShellTab.dashboard,
+      tab: ShellTab.home,
       label: 'Ana Sayfa',
       icon: Icons.home_outlined,
       activeIcon: Icons.home_rounded,
@@ -87,10 +80,10 @@ class GlassBottomNav extends StatelessWidget {
       activeIcon: Icons.qr_code_scanner_rounded,
     ),
     _NavItem(
-      tab: ShellTab.home,
-      label: 'Geçmiş',
-      icon: Icons.history_outlined,
-      activeIcon: Icons.history_rounded,
+      tab: ShellTab.chatbot,
+      label: 'Chatbot',
+      icon: Icons.chat_bubble_outline_rounded,
+      activeIcon: Icons.chat_bubble_rounded,
     ),
     _NavItem(
       tab: ShellTab.profile,
