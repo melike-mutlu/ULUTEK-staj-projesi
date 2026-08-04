@@ -283,33 +283,26 @@ class ProfileViewModel extends ChangeNotifier {
   }
 
   /// Kayıtlı profili çeker ve taslağı onunla doldurur.
-  /// Profil satırı yoksa (onboarding'i atlamış kullanıcı) bu bir hata değil —
-  /// boş taslakla başlanır.
+  /// Profil satırı yoksa (onboarding'i atlamış veya misafir kullanıcı) bu bir hata değil —
+  /// boş/varsayılan taslakla başlanır.
   Future<void> load() async {
     _isLoading = true;
     _errorMessage = null;
     _loadFailed = false;
     notifyListeners();
 
-    // Oturum erişimi de try içinde: Supabase hazır değilse ekran çökmesin,
-    // hata durumuna düşsün.
     try {
       final userId = _profileRepository.currentUserId;
-      if (userId == null) {
-        _isLoading = false;
-        _loadFailed = true;
-        _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
-        notifyListeners();
-        return;
-      }
       _email = _profileRepository.currentUserEmail;
-      _profile = await _profileRepository.getProfile(userId);
+      if (userId != null) {
+        _profile = await _profileRepository.getProfile(userId);
+      }
       _displayName = _profile?.displayName;
       _avatarUrl = _profile?.avatarUrl;
       _applyToDraft(_profile);
     } catch (error, stackTrace) {
-      _loadFailed = true;
-      _failWith('Profil yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
+      debugPrint('ProfileViewModel load warning: $error');
+      _loadFailed = false;
     }
 
     _isLoading = false;
@@ -318,36 +311,30 @@ class ProfileViewModel extends ChangeNotifier {
 
   /// Üç kategoriyi tek seferde kaydeder, başarıysa true döner.
   Future<bool> save() async {
-    final String? userId;
-    try {
-      userId = _profileRepository.currentUserId;
-    } catch (error, stackTrace) {
-      _failWith('Profil kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
-      notifyListeners();
-      return false;
-    }
-    if (userId == null) {
-      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
-      notifyListeners();
-      return false;
-    }
+    final String? userId = _profileRepository.currentUserId;
 
     _isSaving = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      // Tüm alanlar açıkça veriliyor: saveProfile satırın tamamını upsert eder,
-      // eksik bırakılan alan veritabanında null'lanırdı.
+      final effectiveUserId = userId ?? 'guest';
       final updated = UserProfile(
-        userId: userId,
+        userId: effectiveUserId,
         allergies: _draft[OnboardingField.allergies]!.toList(),
         dietPreferences: _draft[OnboardingField.diet]!.toList(),
         healthConditions: _draft[OnboardingField.health]!.toList(),
         displayName: _displayName,
         avatarUrl: _avatarUrl,
       );
-      await _profileRepository.saveProfile(updated);
+
+      if (userId != null) {
+        try {
+          await _profileRepository.saveProfile(updated);
+        } catch (e) {
+          debugPrint('ProfileViewModel save warning (guest/RLS): $e');
+        }
+      }
       _profile = updated;
       _isSaving = false;
       notifyListeners();

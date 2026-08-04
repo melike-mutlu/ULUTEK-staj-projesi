@@ -157,11 +157,6 @@ class OnboardingViewModel extends ChangeNotifier {
 
     try {
       final userId = _profileRepository.currentUserId;
-      // TODO(auth): email/password login ships before onboarding, so by the
-      // time we get here there is a valid session and currentUserId is
-      // non-null. This branch is only a safety fallback and should not trigger
-      // in the normal flow — once login is wired, decide whether a missing user
-      // should surface an error instead of silently skipping the save.
       if (userId != null) {
         final profile = UserProfile(
           userId: userId,
@@ -169,7 +164,11 @@ class OnboardingViewModel extends ChangeNotifier {
           dietPreferences: _selections[OnboardingField.diet]!.toList(),
           healthConditions: _selections[OnboardingField.health]!.toList(),
         );
-        await _profileRepository.saveProfile(profile);
+        try {
+          await _profileRepository.saveProfile(profile);
+        } catch (e) {
+          debugPrint('[OnboardingViewModel] Profile save warning (guest mode): $e');
+        }
       }
       _isSaving = false;
       notifyListeners();

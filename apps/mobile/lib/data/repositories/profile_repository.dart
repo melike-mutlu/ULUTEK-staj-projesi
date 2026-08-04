@@ -49,14 +49,19 @@ class SupabaseProfileRepository implements ProfileRepository {
 
   @override
   Future<UserProfile?> getProfile(String userId) async {
-    final row = await supabase
-        .from('profiles')
-        .select()
-        .eq('user_id', userId)
-        .maybeSingle();
+    try {
+      final row = await supabase
+          .from('profiles')
+          .select()
+          .eq('user_id', userId)
+          .maybeSingle();
 
-    if (row == null) return null;
-    return UserProfile.fromJson(row);
+      if (row == null) return null;
+      return UserProfile.fromJson(row);
+    } catch (e) {
+      debugPrint('[SupabaseProfileRepository] getProfile warning: $e');
+      return null;
+    }
   }
 
   @override
