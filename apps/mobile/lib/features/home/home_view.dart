@@ -5,6 +5,7 @@ import '../../core/theme/akilli_sepet_colors.dart';
 import '../../core/utils/relative_date.dart';
 import '../../core/providers.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
+import 'widgets/recent_scan_card.dart';
 import '../shell/shell_viewmodel.dart';
 
 class HomeView extends ConsumerStatefulWidget {
@@ -88,8 +89,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                         final entry = historyVm.historyItems[index];
                                         return Padding(
                                           padding: const EdgeInsets.only(bottom: 12.0),
-                                          child: _buildRecentScanCard(
-                                            context,
+                                          child: RecentScanCard(
                                             title: entry.productName ?? 'Barkod: ${entry.barcode}',
                                             note: 'İçerik Analizi',
                                             noteColor: AkilliSepetColors.success,
@@ -251,8 +251,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ...viewModel.recentScans.map((entry) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
-                          child: _buildRecentScanCard(
-                            context,
+                          child: RecentScanCard(
                             title: entry.productName ?? 'Barkod: ${entry.barcode}',
                             note: 'İçerik Analizi',
                             noteColor: AkilliSepetColors.success,
@@ -292,91 +291,4 @@ class _HomeViewState extends ConsumerState<HomeView> {
     Navigator.pushNamed(context, AppRoutes.productDetail, arguments: barcode);
   }
 
-  // Orijinal Kart Tasarımı Yardımcı Fonksiyonu
-  Widget _buildRecentScanCard(
-    BuildContext context, {
-    required String title,
-    required String note,
-    required Color noteColor,
-    required Color backgroundColor,
-    required String time,
-    VoidCallback? onTap,
-  }) {
-    final card = Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: noteColor, width: 2),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AkilliSepetColors.textPrimary,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.circle, size: 6, color: noteColor),
-                    const SizedBox(width: 6),
-                    Text(
-                      note,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: noteColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Text(
-            time,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AkilliSepetColors.textSecondary,
-                ),
-          ),
-        ],
-      ),
-    );
-
-    if (onTap == null) return card;
-
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: card,
-      ),
-    );
-  }
 }
-
-
-
-
-
-
