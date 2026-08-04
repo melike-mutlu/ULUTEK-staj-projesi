@@ -84,24 +84,21 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       controller: scrollController, // Parmağınla paneli kaydırmanı sağlar
                                       itemCount: historyVm.historyItems.length,
                                       itemBuilder: (context, index) {
-                                        final item = historyVm.historyItems[index];
-                                        final barcode = _barcodeOf(item);
+                                        final entry = historyVm.historyItems[index];
                                         return Padding(
                                           padding: const EdgeInsets.only(bottom: 12.0),
                                           child: _buildRecentScanCard(
                                             context,
-                                            title: 'Barkod: ${item['barcode']}',
+                                            title: 'Barkod: ${entry.barcode}',
                                             note: 'İçerik Analizi',
                                             noteColor: AkilliSepetColors.success,
                                             backgroundColor: const Color(0xFFE8F5E9),
                                             time: 'Kayıt', // İleride tarih yazdırırız
-                                            onTap: barcode == null
-                                                ? null
-                                                : () {
-                                                    // Close the sheet first so detail opens on the page below.
-                                                    Navigator.pop(sheetContext);
-                                                    _openProductDetail(barcode);
-                                                  },
+                                            onTap: () {
+                                              // Close the sheet first so detail opens on the page below.
+                                              Navigator.pop(sheetContext);
+                                              _openProductDetail(entry.barcode);
+                                            },
                                           ),
                                         );
                                       },
@@ -250,20 +247,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       )
                     else ...[
                       // Sadece son 3 taramayı çiz
-                      ...viewModel.recentScans.map((item) {
-                        final barcode = _barcodeOf(item);
+                      ...viewModel.recentScans.map((entry) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: _buildRecentScanCard(
                             context,
-                            title: 'Barkod: ${item['barcode']}',
+                            title: 'Barkod: ${entry.barcode}',
                             note: 'İçerik Analizi',
                             noteColor: AkilliSepetColors.success,
                             backgroundColor: const Color(0xFFE8F5E9),
                             time: 'Yeni',
-                            onTap: barcode == null
-                                ? null
-                                : () => _openProductDetail(barcode),
+                            onTap: () => _openProductDetail(entry.barcode),
                           ),
                         );
                       }),
@@ -291,12 +285,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
               ),
             ),
     );
-  }
-
-  /// Reads the barcode of a scan history row; null when missing or empty.
-  String? _barcodeOf(Map<String, dynamic> item) {
-    final barcode = item['barcode']?.toString().trim();
-    return (barcode == null || barcode.isEmpty) ? null : barcode;
   }
 
   void _openProductDetail(String barcode) {

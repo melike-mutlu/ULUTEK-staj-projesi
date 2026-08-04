@@ -31,9 +31,10 @@ void main() {
 
     final unique = await repository.getUniqueScanHistory(limit: 3);
 
-    expect(unique.map((r) => r['barcode']), equals(['111', '222']));
+    expect(unique.map((e) => e.barcode), equals(['111', '222']));
     // The kept row is the most recent scan of that barcode, not the older one.
-    expect(unique.first['scanned_at'], equals('2026-08-04T10:00:00Z'));
+    expect(unique.first.scannedAt,
+        equals(DateTime.parse('2026-08-04T10:00:00Z').toLocal()));
   });
 
   test('en son taranan en üstte, diğerlerinin sırası bozulmaz', () async {
@@ -46,7 +47,7 @@ void main() {
 
     final unique = await repository.getUniqueScanHistory(limit: 10);
 
-    expect(unique.map((r) => r['barcode']), equals(['333', '111', '222']));
+    expect(unique.map((e) => e.barcode), equals(['333', '111', '222']));
   });
 
   test('limit kadar tekil ürün döner, fazlası kesilir', () async {
@@ -59,7 +60,7 @@ void main() {
 
     final unique = await repository.getUniqueScanHistory(limit: 3);
 
-    expect(unique.map((r) => r['barcode']), equals(['111', '222', '333']));
+    expect(unique.map((e) => e.barcode), equals(['111', '222', '333']));
   });
 
   test('pencere yeterli tekil ürün içermezse eldeki kadarıyla döner', () async {
@@ -70,7 +71,7 @@ void main() {
 
     final unique = await repository.getUniqueScanHistory(limit: 3);
 
-    expect(unique.map((r) => r['barcode']), equals(['111', '222']));
+    expect(unique.map((e) => e.barcode), equals(['111', '222']));
   });
 
   test('tekilleştirme için limitten daha geniş bir pencere okunur', () async {
@@ -92,7 +93,19 @@ void main() {
 
     final unique = await repository.getUniqueScanHistory(limit: 5);
 
-    expect(unique.map((r) => r['barcode']), equals(['111']));
+    expect(unique.map((e) => e.barcode), equals(['111']));
+  });
+
+  test('tarihi bozuk veya eksik satırlar atlanır, liste çökmez', () async {
+    final repository = _FakeScanHistoryRepository([
+      <String, dynamic>{'barcode': '111'}, // scanned_at yok
+      _scan('222', 'tarih-degil'), // parse edilemiyor
+      _scan('333', '2026-08-04T10:00:00Z'),
+    ]);
+
+    final unique = await repository.getUniqueScanHistory(limit: 5);
+
+    expect(unique.map((e) => e.barcode), equals(['333']));
   });
 
   test('limit sıfır veya negatifse sorgu yapılmaz', () async {

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/models/scan_history_entry.dart';
 import '../../core/utils/display_name.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../data/repositories/scan_history_repository.dart';
@@ -16,7 +17,7 @@ class HomeViewModel extends ChangeNotifier {
   final ProfileRepository _profileRepository;
 
   bool isLoading = false;
-  List<Map<String, dynamic>> recentScans = [];
+  List<ScanHistoryEntry> recentScans = [];
 
   String _displayName = '';
   String? _avatarUrl;

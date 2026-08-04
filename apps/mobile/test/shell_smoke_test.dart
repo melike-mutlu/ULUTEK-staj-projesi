@@ -1,4 +1,5 @@
 import 'package:akilli_sepet/app.dart';
+import 'package:akilli_sepet/core/models/scan_history_entry.dart';
 import 'package:akilli_sepet/core/providers.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 import 'package:akilli_sepet/data/repositories/scan_history_repository.dart';
@@ -32,8 +33,8 @@ class _FakeScanHistoryRepository implements ScanHistoryRepository {
       <Map<String, dynamic>>[];
 
   @override
-  Future<List<Map<String, dynamic>>> getUniqueScanHistory({int limit = 10}) async =>
-      <Map<String, dynamic>>[];
+  Future<List<ScanHistoryEntry>> getUniqueScanHistory({int limit = 10}) async =>
+      <ScanHistoryEntry>[];
 }
 
 /// Kabuk, sekmeleri araciligiyla veri katmanina dokunuyor; testte hepsi

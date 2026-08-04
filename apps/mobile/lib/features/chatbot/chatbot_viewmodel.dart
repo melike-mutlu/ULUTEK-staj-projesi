@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../core/models/scan_history_entry.dart';
 import '../../data/repositories/scan_history_repository.dart';
 
 class ChatbotViewModel extends ChangeNotifier {
@@ -7,7 +8,7 @@ class ChatbotViewModel extends ChangeNotifier {
   final ScanHistoryRepository _scanHistoryRepository;
 
   bool isLoading = false;
-  List<Map<String, dynamic>> historyItems = [];
+  List<ScanHistoryEntry> historyItems = [];
 
   // Geçmiş ekranı açıldığında bu fonksiyon çağrılacak
   Future<void> loadHistory() async {

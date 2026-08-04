@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/models/scan_history_entry.dart';
 import '../../core/supabase_client.dart';
 
 class ScanHistoryRepository {
@@ -53,7 +54,7 @@ class ScanHistoryRepository {
   /// collapses them for display. Reads a bounded window of recent rows, so if
   /// the user keeps scanning the same few products the list can be shorter than
   /// [limit] — that is the real number of distinct products, not an error.
-  Future<List<Map<String, dynamic>>> getUniqueScanHistory({int limit = 10}) async {
+  Future<List<ScanHistoryEntry>> getUniqueScanHistory({int limit = 10}) async {
     if (limit <= 0) return [];
 
     final window = (limit * _windowFactor).clamp(_minWindow, _maxWindow);
@@ -61,13 +62,13 @@ class ScanHistoryRepository {
 
     // Rows arrive newest first, so the first row of a barcode is its last scan.
     final seenBarcodes = <String>{};
-    final unique = <Map<String, dynamic>>[];
+    final unique = <ScanHistoryEntry>[];
     for (final row in rows) {
-      final barcode = row['barcode']?.toString();
-      if (barcode == null || barcode.isEmpty) continue;
-      if (!seenBarcodes.add(barcode)) continue;
+      final entry = ScanHistoryEntry.tryFromJson(row);
+      if (entry == null) continue;
+      if (!seenBarcodes.add(entry.barcode)) continue;
 
-      unique.add(row);
+      unique.add(entry);
       if (unique.length == limit) break;
     }
 
