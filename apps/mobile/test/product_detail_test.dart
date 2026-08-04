@@ -11,6 +11,39 @@ import 'package:akilli_sepet/core/models/rule_engine_result.dart';
 import 'package:akilli_sepet/data/repositories/product_repository.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 
+const _foundFetchResult = ProductFetchResult(
+  status: 'found',
+  product: Product(
+    barcode: '8690504041502',
+    name: 'Rota Argumanli Urun',
+    brand: 'Test Marka',
+    ingredientsText: 'Test icerik',
+    additives: [],
+    allergensTags: [],
+    nutriments: Nutriments(energyKcal100g: 400),
+  ),
+  ruleEngineResult: RuleEngineResult(
+    matchedAllergens: [],
+    hasConflict: false,
+    veganCompatible: true,
+  ),
+);
+
+/// Opens the screen with a route argument; profile layer is faked (no Supabase).
+Widget _productDetailUnderTest(Object? arguments) {
+  return ProviderScope(
+    overrides: <Override>[
+      profileRepositoryProvider.overrideWithValue(InMemoryProfileRepository()),
+    ],
+    child: MaterialApp(
+      onGenerateRoute: (_) => MaterialPageRoute<void>(
+        builder: (_) => const ProductDetailView(),
+        settings: RouteSettings(arguments: arguments),
+      ),
+    ),
+  );
+}
+
 void main() {
   testWidgets('WarningBanner displays status, warning message and disclaimer', (WidgetTester tester) async {
     const explanation = Explanation(
@@ -107,13 +140,9 @@ void main() {
   });
 
   testWidgets('ProductDetailView renders pending warning banner for pending state', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          home: ProductDetailView(),
-        ),
-      ),
-    );
+    // The mock bar only renders in the "found" state, so open the screen with
+    // a real fetch result and tap the chip from there.
+    await tester.pumpWidget(_productDetailUnderTest(_foundFetchResult));
 
     await tester.pumpAndSettle();
 
