@@ -1,7 +1,7 @@
 // Akıllı Sepet — chat Edge Function
 // Kimlik doğrulama: sadece giriş yapmış kullanıcılar erişebilir.
-import { createUserClient } from "../../services/supabase/supabaseClient.ts";
-import { jsonResponse, handleCorsPreflight } from "../../services/shared/http.ts";
+import { getUserClient } from "../_shared/lib/supabaseClient.ts";
+import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts"; 
 
 Deno.serve(async (req) => {
   // CORS Preflight istekleri için
@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const userClient = createUserClient(req.headers.get("Authorization") ?? "");
+    const userClient = getUserClient(req); 
     const { data: { user }, error } = await userClient.auth.getUser();
 
     if (error || !user) {
