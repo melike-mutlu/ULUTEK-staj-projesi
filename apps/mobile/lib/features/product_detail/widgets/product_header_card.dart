@@ -157,42 +157,48 @@ class ProductHeaderCard extends StatelessWidget {
             ),
           ],
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Marka Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      brandText,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF4B5563),
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    // Marka Badge
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 180),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        brandText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF4B5563),
+                        ),
                       ),
                     ),
-                  ),
-                  if (product.isPending) ...[
-                    const SizedBox(width: 8),
-                    _buildPendingBadge(),
+                    if (product.isPending) _buildPendingBadge(),
                   ],
-                ],
+                ),
               ),
-              // Nutri-Score (Eğer varsa)
-              if (product.nutriscore != null && product.nutriscore!.isNotEmpty)
+              if (product.nutriscore != null && product.nutriscore!.isNotEmpty) ...[
+                const SizedBox(width: 8),
                 _buildNutriScoreBadge(product.nutriscore!),
+              ],
             ],
           ),
           const SizedBox(height: 10),
           // Ürün Adı
           Text(
             product.name,
+            softWrap: true,
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -205,12 +211,16 @@ class ProductHeaderCard extends StatelessWidget {
             children: [
               const Icon(Icons.qr_code_2_rounded, size: 16, color: Color(0xFF9CA3AF)),
               const SizedBox(width: 4),
-              Text(
-                'Barkod: ${product.barcode}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF6B7280),
-                  fontFamily: 'monospace',
+              Expanded(
+                child: Text(
+                  'Barkod: ${product.barcode}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF6B7280),
+                    fontFamily: 'monospace',
+                  ),
                 ),
               ),
             ],

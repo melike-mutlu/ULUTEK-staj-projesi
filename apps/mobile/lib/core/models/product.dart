@@ -64,7 +64,11 @@ class Product {
       barcode: json['barcode'] as String,
       name: json['name'] as String,
       brand: json['brand'] as String? ?? json['brands'] as String?,
-      imageUrl: json['image_url'] as String? ?? json['imageUrl'] as String?,
+      imageUrl: json['image_url'] as String? ??
+          json['imageUrl'] as String? ??
+          json['image_front_url'] as String? ??
+          json['image_url_small'] as String? ??
+          json['image_front_small_url'] as String?,
       ingredientsText: json['ingredients_text'] as String? ?? '',
       additives: (json['additives'] as List<dynamic>? ?? [])
           .map((e) => e as String)

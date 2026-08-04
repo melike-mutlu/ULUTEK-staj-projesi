@@ -170,6 +170,7 @@ class ProductDetailViewModel extends ChangeNotifier {
           barcode: '8690504112233',
           name: 'Süzme Yoğurt 500g',
           brand: 'Sütaş',
+          imageUrl: 'https://images.openfoodfacts.org/images/products/869/050/411/2233/front_tr.3.400.jpg',
           ingredientsText: 'Pastörize inek sütü, yoğurt kültürü.',
           additives: [],
           allergensTags: ['en:milk'],
