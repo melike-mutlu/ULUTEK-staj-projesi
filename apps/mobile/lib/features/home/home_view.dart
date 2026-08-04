@@ -119,7 +119,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final mediaPadding = MediaQuery.of(context).padding;
+    final bottomInset = mediaPadding.bottom;
+    // Keep the greeting and avatar clear of the status bar / notch, like the
+    // other screens do with SafeArea. Device driven, not a fixed offset.
+    final topInset = mediaPadding.top;
     final viewModel = ref.watch(homeViewModelProvider);
 
     return Scaffold(
@@ -127,12 +131,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ? const Center(child: CircularProgressIndicator(color: AkilliSepetColors.primary))
           : SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+                padding: EdgeInsets.fromLTRB(16, 16 + topInset, 16, 16 + bottomInset),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 16),
-                    
                     // --- 1. KULLANICI SELAMLAMA VE PROFİL ---
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
