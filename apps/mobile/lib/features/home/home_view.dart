@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
+import '../../core/utils/relative_date.dart';
 import '../../core/providers.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
 import '../shell/shell_viewmodel.dart';
@@ -93,7 +94,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             note: 'İçerik Analizi',
                                             noteColor: AkilliSepetColors.success,
                                             backgroundColor: const Color(0xFFE8F5E9),
-                                            time: 'Kayıt', // İleride tarih yazdırırız
+                                            time: formatScanDate(entry.scannedAt),
                                             onTap: () {
                                               // Close the sheet first so detail opens on the page below.
                                               Navigator.pop(sheetContext);
@@ -256,7 +257,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             note: 'İçerik Analizi',
                             noteColor: AkilliSepetColors.success,
                             backgroundColor: const Color(0xFFE8F5E9),
-                            time: 'Yeni',
+                            time: formatScanDate(entry.scannedAt),
                             onTap: () => _openProductDetail(entry.barcode),
                           ),
                         );
