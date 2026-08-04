@@ -47,7 +47,8 @@ class HomeViewModel extends ChangeNotifier {
       _avatarUrl = null;
     }
 
-    recentScans = await _scanHistoryRepository.getScanHistory(limit: 3);
+    // Unique per barcode: a product scanned twice must not fill two cards.
+    recentScans = await _scanHistoryRepository.getUniqueScanHistory(limit: 3);
     isLoading = false;
     notifyListeners();
   }

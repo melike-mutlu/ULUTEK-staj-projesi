@@ -15,7 +15,8 @@ class ChatbotViewModel extends ChangeNotifier {
     notifyListeners();
 
     //geçmişi getir diyoruz (Geçmiş sayfası olduğu için örneğin son 50 taneyi çekebiliriz)
-    historyItems = await _scanHistoryRepository.getScanHistory(limit: 50);
+    // Same source as the home cards, so both lists stay consistent.
+    historyItems = await _scanHistoryRepository.getUniqueScanHistory(limit: 50);
 
     isLoading = false;
     notifyListeners();
