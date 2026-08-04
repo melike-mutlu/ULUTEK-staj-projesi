@@ -30,6 +30,10 @@ class _FakeScanHistoryRepository implements ScanHistoryRepository {
   @override
   Future<List<Map<String, dynamic>>> getScanHistory({int limit = 10}) async =>
       <Map<String, dynamic>>[];
+
+  @override
+  Future<List<Map<String, dynamic>>> getUniqueScanHistory({int limit = 10}) async =>
+      <Map<String, dynamic>>[];
 }
 
 /// Kabuk, sekmeleri araciligiyla veri katmanina dokunuyor; testte hepsi
