@@ -29,6 +29,7 @@ class Product {
   final String barcode;
   final String name;
   final String? brand;
+  final String? imageUrl;
   final String ingredientsText;
   final List<String> additives;
   final List<String> allergensTags;
@@ -43,6 +44,7 @@ class Product {
     required this.barcode,
     required this.name,
     this.brand,
+    this.imageUrl,
     required this.ingredientsText,
     required this.additives,
     required this.allergensTags,
@@ -62,6 +64,7 @@ class Product {
       barcode: json['barcode'] as String,
       name: json['name'] as String,
       brand: json['brand'] as String? ?? json['brands'] as String?,
+      imageUrl: json['image_url'] as String? ?? json['imageUrl'] as String?,
       ingredientsText: json['ingredients_text'] as String? ?? '',
       additives: (json['additives'] as List<dynamic>? ?? [])
           .map((e) => e as String)
@@ -84,6 +87,7 @@ class Product {
       'barcode': barcode,
       'name': name,
       'brand': brand,
+      if (imageUrl != null) 'image_url': imageUrl,
       'ingredients_text': ingredientsText,
       'additives': additives,
       'allergens_tags': allergensTags,

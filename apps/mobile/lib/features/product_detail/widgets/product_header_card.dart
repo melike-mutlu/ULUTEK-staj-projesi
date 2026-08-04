@@ -119,6 +119,43 @@ class ProductHeaderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (product.imageUrl != null && product.imageUrl!.trim().isNotEmpty) ...[
+            Container(
+              height: 180,
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFF3F4F6)),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  product.imageUrl!,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF10B981),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        size: 44,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

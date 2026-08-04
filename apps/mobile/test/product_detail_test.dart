@@ -211,4 +211,33 @@ void main() {
     expect(viewModel.explanation?.level, isNot(equals(WarningLevel.ok)));
     expect(viewModel.explanation?.warningMessage, contains('doğrulanmadı'));
   });
+
+  test('Product model correctly parses and serializes imageUrl', () {
+    final json = {
+      'barcode': '123456789',
+      'name': 'Test Ürün',
+      'image_url': 'https://example.com/test.jpg',
+      'ingredients_text': '',
+      'additives': [],
+      'allergens_tags': [],
+      'nutriments': {},
+    };
+    final product = Product.fromJson(json);
+    expect(product.imageUrl, equals('https://example.com/test.jpg'));
+    expect(product.toJson()['image_url'], equals('https://example.com/test.jpg'));
+  });
+
+  testWidgets('ProductDetailView does not display Sepete Ekle button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: ProductDetailView(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.text('Sepete Ekle'), findsNothing);
+    expect(find.text('Ana Sayfa'), findsOneWidget);
+  });
 }
