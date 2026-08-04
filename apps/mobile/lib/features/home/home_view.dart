@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/navigation/app_routes.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../core/providers.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
@@ -31,7 +32,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       context: context,
       isScrollControlled: true, // Panelin ekranın büyük kısmını kaplamasına izin verir
       backgroundColor: Colors.transparent, // Köşelerin yuvarlak olabilmesi için
-      builder: (context) {
+      builder: (sheetContext) {
         return Container(
           decoration: const BoxDecoration(
             color: Colors.white, // Kendi temana göre AkilliSepetColors.surface da yapabilirsin
@@ -84,6 +85,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       itemCount: historyVm.historyItems.length,
                                       itemBuilder: (context, index) {
                                         final item = historyVm.historyItems[index];
+                                        final barcode = _barcodeOf(item);
                                         return Padding(
                                           padding: const EdgeInsets.only(bottom: 12.0),
                                           child: _buildRecentScanCard(
@@ -93,6 +95,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             noteColor: AkilliSepetColors.success,
                                             backgroundColor: const Color(0xFFE8F5E9),
                                             time: 'Kayıt', // İleride tarih yazdırırız
+                                            onTap: barcode == null
+                                                ? null
+                                                : () {
+                                                    // Close the sheet first so detail opens on the page below.
+                                                    Navigator.pop(sheetContext);
+                                                    _openProductDetail(barcode);
+                                                  },
                                           ),
                                         );
                                       },
@@ -242,6 +251,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     else ...[
                       // Sadece son 3 taramayı çiz
                       ...viewModel.recentScans.map((item) {
+                        final barcode = _barcodeOf(item);
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: _buildRecentScanCard(
@@ -251,6 +261,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             noteColor: AkilliSepetColors.success,
                             backgroundColor: const Color(0xFFE8F5E9),
                             time: 'Yeni',
+                            onTap: barcode == null
+                                ? null
+                                : () => _openProductDetail(barcode),
                           ),
                         );
                       }),
@@ -280,6 +293,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
+  /// Reads the barcode of a scan history row; null when missing or empty.
+  String? _barcodeOf(Map<String, dynamic> item) {
+    final barcode = item['barcode']?.toString().trim();
+    return (barcode == null || barcode.isEmpty) ? null : barcode;
+  }
+
+  void _openProductDetail(String barcode) {
+    Navigator.pushNamed(context, AppRoutes.productDetail, arguments: barcode);
+  }
+
   // Orijinal Kart Tasarımı Yardımcı Fonksiyonu
   Widget _buildRecentScanCard(
     BuildContext context, {
@@ -288,8 +311,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
     required Color noteColor,
     required Color backgroundColor,
     required String time,
+    VoidCallback? onTap,
   }) {
-    return Container(
+    final card = Container(
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
@@ -344,6 +368,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
           ),
         ],
+      ),
+    );
+
+    if (onTap == null) return card;
+
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: card,
       ),
     );
   }
