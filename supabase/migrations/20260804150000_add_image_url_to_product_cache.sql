@@ -1,0 +1,2 @@
+ALTER TABLE product_cache
+ADD COLUMN IF NOT EXISTS image_url TEXT;

@@ -14,6 +14,7 @@ export interface OffProduct {
     salt_100g: number | null;
   };
   nutriscore: string | null;
+  image_url: string | null; //  1. Arayüze eklendi
 }
 
 export async function fetchFromOpenFoodFacts(barcode: string): Promise<OffProduct | null> {
@@ -38,5 +39,6 @@ export async function fetchFromOpenFoodFacts(barcode: string): Promise<OffProduc
       salt_100g: p.nutriments?.salt_100g ?? null,
     },
     nutriscore: p.nutriscore_grade ?? null,
+    image_url: p.image_front_url ?? p.image_url ?? null, //  2. Dönüş objesine eklendi
   };
 }
