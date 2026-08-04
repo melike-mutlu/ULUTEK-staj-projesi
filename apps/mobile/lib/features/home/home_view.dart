@@ -90,7 +90,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                           padding: const EdgeInsets.only(bottom: 12.0),
                                           child: _buildRecentScanCard(
                                             context,
-                                            title: 'Barkod: ${entry.barcode}',
+                                            title: entry.productName ?? 'Barkod: ${entry.barcode}',
                                             note: 'İçerik Analizi',
                                             noteColor: AkilliSepetColors.success,
                                             backgroundColor: const Color(0xFFE8F5E9),
@@ -253,7 +253,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: _buildRecentScanCard(
                             context,
-                            title: 'Barkod: ${entry.barcode}',
+                            title: entry.productName ?? 'Barkod: ${entry.barcode}',
                             note: 'İçerik Analizi',
                             noteColor: AkilliSepetColors.success,
                             backgroundColor: const Color(0xFFE8F5E9),
