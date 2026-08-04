@@ -1,3 +1,4 @@
+
 import 'package:flutter/foundation.dart';
 
 import '../../core/utils/display_name.dart';
@@ -5,10 +6,6 @@ import '../../data/repositories/profile_repository.dart';
 import '../../data/repositories/scan_history_repository.dart';
 
 /// Ana Sayfa'nın state'i — selamlama, profil özeti ve son tarama kısayolu.
-///
-/// Oturum bilgisi Supabase'den doğrudan değil [ProfileRepository] üzerinden
-/// okunur: hem UI/veri katmanı ayrımı korunur hem de ekran testte sahte bir
-/// repository ile ayağa kalkabilir.
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel(this._scanHistoryRepository, this._profileRepository);
 
@@ -17,6 +14,10 @@ class HomeViewModel extends ChangeNotifier {
 
   bool isLoading = false;
   List<Map<String, dynamic>> recentScans = [];
+
+  // --- YENİ EKLENENLER: TÜM GEÇMİŞ PANELİ İÇİN ---
+  bool isLoadingHistory = false;
+  List<Map<String, dynamic>> fullHistory = [];
 
   String _displayName = '';
   String? _avatarUrl;
@@ -31,7 +32,6 @@ class HomeViewModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    // Profil okunamazsa ekran düşmesin: ad boş kalır, geçmiş yine yüklenir.
     try {
       final userId = _profileRepository.currentUserId;
       final profile =
@@ -51,4 +51,19 @@ class HomeViewModel extends ChangeNotifier {
     isLoading = false;
     notifyListeners();
   }
+
+  // ALT PANEL AÇILINCA ÇAĞRILACAK
+  Future<void> loadFullHistory() async {
+    isLoadingHistory = true;
+    notifyListeners();
+
+    // Bottom sheet için daha fazla veri çekiyoruz
+    fullHistory = await _scanHistoryRepository.getScanHistory(limit: 50);
+
+    isLoadingHistory = false;
+    notifyListeners();
+  }
 }
+
+
+

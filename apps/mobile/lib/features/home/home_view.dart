@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
@@ -22,38 +23,37 @@ class _HomeViewState extends ConsumerState<HomeView> {
     });
   }
 
-  // --- YENİ: TÜM GEÇMİŞİ GÖSTEREN AŞAĞIDAN KAYARAK AÇILAN PANEL ---
+  // --- TÜM GEÇMİŞİ GÖSTEREN AŞAĞIDAN KAYARAK AÇILAN PANEL ---
   void _showAllHistoryBottomSheet(BuildContext context, WidgetRef ref) {
-    // Butona basıldığı an veritabanından 50'lik tüm listeyi çekmeye başlıyoruz
-    ref.read(chatbotViewModelProvider).loadHistory();
+    // 1. DÜZELTME: Artık kendi beynindeki (home) tam listeyi çekiyoruz
+    ref.read(homeViewModelProvider).loadFullHistory();
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Panelin ekranın büyük kısmını kaplamasına izin verir
-      backgroundColor: Colors.transparent, // Köşelerin yuvarlak olabilmesi için
+      isScrollControlled: true, 
+      backgroundColor: Colors.transparent, 
       builder: (context) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white, // Kendi temana göre AkilliSepetColors.surface da yapabilirsin
+            color: Colors.white, 
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: DraggableScrollableSheet(
-            initialChildSize: 0.6, // İlk açıldığında ekranın %60'ını kaplasın
-            minChildSize: 0.4,     // En az %40'a kadar küçülebilmesin
-            maxChildSize: 0.9,     // Yukarı kaydırınca ekranın %90'ını kaplasın
+            initialChildSize: 0.6, 
+            minChildSize: 0.4,     
+            maxChildSize: 0.9,     
             expand: false,
             builder: (context, scrollController) {
               return Consumer(
                 builder: (context, ref, child) {
-                  // Tüm listenin olduğu beyni anlık dinliyoruz
-                  final historyVm = ref.watch(chatbotViewModelProvider);
+                  // 2. DÜZELTME: Chatbot yerine kendi beynini dinliyoruz
+                  final homeVm = ref.watch(homeViewModelProvider);
 
                   return Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // En üstteki gri minik tutma çubuğu (Tasarım detayı)
                         Center(
                           child: Container(
                             width: 40,
@@ -75,15 +75,15 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         const SizedBox(height: 16),
                         // Liste Kısmı
                         Expanded(
-                          child: historyVm.isLoading
+                          child: homeVm.isLoadingHistory
                               ? const Center(child: CircularProgressIndicator(color: AkilliSepetColors.primary))
-                              : historyVm.historyItems.isEmpty
+                              : homeVm.fullHistory.isEmpty
                                   ? const Center(child: Text('Geçmiş bulunamadı.', style: TextStyle(color: Colors.grey)))
                                   : ListView.builder(
-                                      controller: scrollController, // Parmağınla paneli kaydırmanı sağlar
-                                      itemCount: historyVm.historyItems.length,
+                                      controller: scrollController, 
+                                      itemCount: homeVm.fullHistory.length,
                                       itemBuilder: (context, index) {
-                                        final item = historyVm.historyItems[index];
+                                        final item = homeVm.fullHistory[index];
                                         return Padding(
                                           padding: const EdgeInsets.only(bottom: 12.0),
                                           child: _buildRecentScanCard(
@@ -92,7 +92,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             note: 'İçerik Analizi',
                                             noteColor: AkilliSepetColors.success,
                                             backgroundColor: const Color(0xFFE8F5E9),
-                                            time: 'Kayıt', // İleride tarih yazdırırız
+                                            time: 'Kayıt', 
                                           ),
                                         );
                                       },
@@ -165,8 +165,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       child: GestureDetector(
                         onTap: () {
                           Navigator.pushNamed(context, '/scan').then((_) {
+                            // 3. DÜZELTME: Sadece kendi listemizi yeniliyoruz, chatbot'un geçmişi kalmadığı için o satırı sildik.
                             ref.read(homeViewModelProvider).loadDashboardData();
-                            ref.read(chatbotViewModelProvider).loadHistory(); 
                           });
                         },
                         child: Container(
@@ -255,7 +255,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         );
                       }),
                       
-                      // --- YENİ EKLENEN: TÜMÜNÜ GÖR BUTONU ---
+                      // --- TÜMÜNÜ GÖR BUTONU ---
                       Center(
                         child: TextButton.icon(
                           onPressed: () => _showAllHistoryBottomSheet(context, ref),
@@ -348,6 +348,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 }
+
+
+
 
 
 

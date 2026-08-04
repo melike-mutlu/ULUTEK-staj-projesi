@@ -14,92 +14,196 @@ class ChatbotView extends ConsumerStatefulWidget {
 }
 
 class _ChatbotViewState extends ConsumerState<ChatbotView> {
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  void _sendMessage() {
+    final text = _messageController.text;
+    if (text.trim().isNotEmpty) {
+      // Mesajı ViewModel'e gönder
+      ref.read(chatbotViewModelProvider).sendMessage(text);
+      
+      // Kutuyu temizle ve en alta in
+      _messageController.clear();
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent + 100,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Shell'in alt barı için gerekli boşluk hesabı
     final bottomInset = MediaQuery.of(context).padding.bottom;
-
-    // Kullanıcı adını göstermek için Ana Sayfa'nın ViewModel'inden bilgiyi alıyoruz
-    final viewModel = ref.watch(homeViewModelProvider);
+    
+    //Hem Home (Kullanıcı Adı) hem Chatbot (Mesajlar) beyinlerine ihtiyacımız var
+    final homeVm = ref.watch(homeViewModelProvider);
+    final chatVm = ref.watch(chatbotViewModelProvider);
 
     return Scaffold(
+      backgroundColor: AkilliSepetColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- HOŞGELDİNİZ BAŞLIĞI VE PROFİL ---
-              Row(
+        child: Column(
+          children: [
+            // --- ÜST BAŞLIK (Hoşgeldin & Profil) ---
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Merhaba,',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AkilliSepetColors.textSecondary,
-                            ),
-                      ),
-                      Text(
-                        viewModel.displayName.isNotEmpty ? viewModel.displayName : 'Kullanıcı',
+                        'Akıllı Asistan',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AkilliSepetColors.textPrimary,
                             ),
                       ),
+                      Text(
+                        'Size nasıl yardımcı olabilirim ${homeVm.displayName}?',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AkilliSepetColors.textSecondary,
+                            ),
+                      ),
                     ],
                   ),
                   UserAvatarCircle(
-                    name: viewModel.displayName,
-                    avatarUrl: viewModel.avatarUrl,
-                    onTap: () => ref
-                        .read(shellViewModelProvider)
-                        .selectTab(ShellTab.profile),
+                    name: homeVm.displayName,
+                    avatarUrl: homeVm.avatarUrl,
+                    onTap: () => ref.read(shellViewModelProvider).selectTab(ShellTab.profile),
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 40),
+            ),
+            
+            const Divider(height: 1, color: Color(0xFFE5E7EB)),
 
-              // --- CHATBOT İÇERİĞİ (GEÇİCİ YER TUTUCU) ---
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.smart_toy_outlined, // Chatbot ikonu
-                        size: 80,
-                        color: AkilliSepetColors.primary.withOpacity(0.5),
+            // --- ORTA: MESAJ LİSTESİ ---
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                itemCount: chatVm.messages.length,
+                itemBuilder: (context, index) {
+                  final msg = chatVm.messages[index];
+                  final isUser = msg.isUser;
+                  
+                  return Align(
+                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.75,
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Akıllı Asistan',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AkilliSepetColors.textPrimary,
-                            ),
+                      decoration: BoxDecoration(
+                        color: isUser ? AkilliSepetColors.primary : Colors.white,
+                        borderRadius: BorderRadius.circular(16).copyWith(
+                          bottomRight: isUser ? const Radius.circular(0) : const Radius.circular(16),
+                          bottomLeft: !isUser ? const Radius.circular(0) : const Radius.circular(16),
+                        ),
+                        border: isUser ? null : Border.all(color: const Color(0xFFE5E7EB)),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Sohbet arayüzü buraya eklenecek...',
+                      child: Text(
+                        msg.text,
                         style: TextStyle(
-                          color: AkilliSepetColors.textSecondary,
-                          fontSize: 16,
+                          color: isUser ? Colors.white : AkilliSepetColors.textPrimary,
+                          fontSize: 15,
+                          height: 1.3,
                         ),
                       ),
-                    ],
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // --- YAZIYOR ANİMASYONU ---
+            if (chatVm.isTyping)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Asistan yazıyor...',
+                    style: TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic),
                   ),
                 ),
               ),
-            ],
-          ),
+
+            // --- ALT: MESAJ YAZMA KUTUSU ---
+            Container(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomInset),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    offset: const Offset(0, -4),
+                    blurRadius: 10,
+                  )
+                ]
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _sendMessage(),
+                      decoration: InputDecoration(
+                        hintText: 'Bir şeyler sorun...',
+                        hintStyle: TextStyle(color: Colors.grey.shade400),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF3F4F6),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: AkilliSepetColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                      onPressed: _sendMessage,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+
+
+
 
