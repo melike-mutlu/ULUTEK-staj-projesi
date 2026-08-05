@@ -133,6 +133,28 @@ void main() {
     expect(find.text('Tıbbi tavsiye değildir.'), findsOneWidget);
   });
 
+  testWidgets('WarningBanner shows "Yetersiz veri" when data is insufficient',
+      (WidgetTester tester) async {
+    const explanation = Explanation(
+      summary: 'Ozet',
+      level: WarningLevel.ok,
+      warningMessage: 'Bu urun profilinize uygundur.',
+      disclaimer: 'Tibbi tavsiye degildir.',
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: WarningBanner(explanation: explanation, insufficientData: true),
+        ),
+      ),
+    );
+
+    expect(find.text('Yetersiz veri'), findsOneWidget);
+    expect(find.text('Uygun'), findsNothing);
+    expect(find.textContaining('güvenli olup'), findsOneWidget);
+  });
+
   testWidgets('PersonalRisksSection lists matched allergens only',
       (WidgetTester tester) async {
     const result = RuleEngineResult(

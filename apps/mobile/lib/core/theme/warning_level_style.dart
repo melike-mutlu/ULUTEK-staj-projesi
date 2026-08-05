@@ -54,6 +54,16 @@ class WarningLevelStyle {
     asset: 'assets/other/suitable.png',
   );
 
+  /// Not a [WarningLevel]: shown when the product lacks the allergen/ingredient
+  /// data to judge. Deliberately neutral grey — never green, never a claim.
+  static const WarningLevelStyle insufficient = WarningLevelStyle(
+    main: Color(0xFF6B7280),
+    background: Color(0xFFF3F4F6),
+    border: Color(0xFFE5E7EB),
+    icon: Icons.help_outline_rounded,
+    title: 'Yetersiz veri',
+  );
+
   static WarningLevelStyle of(WarningLevel level) => switch (level) {
         WarningLevel.warning => warning,
         WarningLevel.caution => caution,

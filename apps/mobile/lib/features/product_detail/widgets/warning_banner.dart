@@ -4,18 +4,33 @@ import '../../../core/models/explanation.dart';
 import '../../../core/theme/akilli_sepet_colors.dart';
 import '../../../core/theme/warning_level_style.dart';
 import '../profile_checks.dart';
-import 'status_dot.dart';
 
 /// Verdict — the anchor of the screen: the level on the left, the short verdict
 /// and the personal reason on the right. No box: the colour alone carries it.
 class WarningBanner extends StatelessWidget {
-  const WarningBanner({super.key, required this.explanation, this.reason});
+  const WarningBanner({
+    super.key,
+    required this.explanation,
+    this.reason,
+    this.insufficientData = false,
+  });
 
   final Explanation explanation;
 
   /// Personal warning composed from the profile; falls back to the backend
   /// explanation when the caller has none.
   final List<ReasonSpan>? reason;
+
+  /// When true the product has no allergen/ingredient data, so the verdict is
+  /// "Yetersiz veri" instead of a green/red claim.
+  final bool insufficientData;
+
+  static const List<ReasonSpan> _insufficientReason = [
+    ReasonSpan(
+      'Bu ürünün içerik ve alerjen bilgisi eksik olduğu için güvenli olup '
+      'olmadığını söyleyemiyoruz. Ambalajdaki etiketi kontrol et.',
+    ),
+  ];
 
   /// Sits next to the verdict when the product is suitable.
   static const String _starIcon = 'assets/other/star.png';
@@ -27,9 +42,11 @@ class WarningBanner extends StatelessWidget {
   /// How far the illustration reaches past the text's left edge.
   static const double _iconInset = 12;
 
-  bool get _isSuitable => explanation.level == WarningLevel.ok;
+  bool get _isSuitable =>
+      !insufficientData && explanation.level == WarningLevel.ok;
 
   List<ReasonSpan> get _reason {
+    if (insufficientData) return _insufficientReason;
     final personal = reason;
     if (personal != null && personal.isNotEmpty) return personal;
     return [
@@ -41,7 +58,9 @@ class WarningBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = WarningLevelStyle.of(explanation.level);
+    final style = insufficientData
+        ? WarningLevelStyle.insufficient
+        : WarningLevelStyle.of(explanation.level);
 
     return Row(
       // Top aligned: the verdict starts level with the top of the illustration
@@ -57,14 +76,13 @@ class WarningBanner extends StatelessWidget {
               style.asset!,
               width: _iconSize,
               height: _iconSize,
-              errorBuilder: (_, __, ___) =>
-                  StatusDot(level: explanation.level, size: 20),
+              errorBuilder: (_, __, ___) => _Dot(color: style.main),
             ),
           )
         else
           Padding(
             padding: const EdgeInsets.only(top: 13),
-            child: StatusDot(level: explanation.level, size: 20),
+            child: _Dot(color: style.main),
           ),
         const SizedBox(width: 2),
         Expanded(
@@ -149,6 +167,21 @@ class WarningBanner extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
