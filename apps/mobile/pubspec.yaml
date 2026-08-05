@@ -29,4 +29,5 @@ flutter:
     - assets/images/
     - assets/allergens/
     - assets/nutritional_values/
+    - assets/other/
     - .env
