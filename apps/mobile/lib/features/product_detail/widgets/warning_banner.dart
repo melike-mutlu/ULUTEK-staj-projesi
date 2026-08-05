@@ -19,6 +19,7 @@ class WarningBanner extends StatelessWidget {
 
   /// Sits next to the verdict when the product is suitable.
   static const String _starIcon = 'assets/other/star.png';
+  static const double _starSize = 78;
 
   /// The illustration spans the title and the reason standing next to it.
   static const double _iconSize = 130;
@@ -89,8 +90,8 @@ class WarningBanner extends StatelessWidget {
                       const SizedBox(width: 6),
                       Image.asset(
                         _starIcon,
-                        width: 26,
-                        height: 26,
+                        width: _starSize,
+                        height: _starSize,
                         errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                       ),
                     ],
