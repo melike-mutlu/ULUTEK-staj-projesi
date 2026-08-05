@@ -87,7 +87,6 @@ class WarningBanner extends StatelessWidget {
                       ),
                     ),
                     if (_isSuitable) ...[
-                      const SizedBox(width: 6),
                       Image.asset(
                         _starIcon,
                         width: _starSize,
