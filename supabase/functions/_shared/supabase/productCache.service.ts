@@ -5,6 +5,36 @@ export interface CachedProduct extends OffProduct {
   fetched_at: string;
 }
 
+/** Fresh window for a normally populated product. */
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Shorter window for records that came back without allergen data, so an OFF
+ * entry that was empty when first seen gets another chance soon instead of
+ * staying "yetersiz veri" forever. */
+const INSUFFICIENT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+/** Mirrors the rule engine: only allergen tags / ingredients count as evidence. */
+function hasAllergenEvidence(row: CachedProduct): boolean {
+  const tags = row.allergens_tags ?? [];
+  const ingredients = String(row.ingredients_text ?? "").trim();
+  return tags.length > 0 || ingredients.length > 0;
+}
+
+/**
+ * A stale cache row is treated as a miss so we re-fetch from OFF. Critical for
+ * safety: if OFF later adds an allergen, our old empty record must not keep
+ * reporting the product as safe.
+ */
+function isFresh(row: CachedProduct): boolean {
+  const fetchedAt = Date.parse(row.fetched_at ?? "");
+  if (Number.isNaN(fetchedAt)) return false; // unknown age -> refetch
+
+  const ttl = hasAllergenEvidence(row)
+    ? CACHE_TTL_MS
+    : INSUFFICIENT_CACHE_TTL_MS;
+  return Date.now() - fetchedAt < ttl;
+}
+
 export async function getFromCache(
   barcode: string,
 ): Promise<CachedProduct | null> {
@@ -17,8 +47,10 @@ export async function getFromCache(
     .maybeSingle();
 
   if (error) throw error;
+  if (!data) return null;
 
-  return data as CachedProduct | null;
+  const row = data as CachedProduct;
+  return isFresh(row) ? row : null; // stale -> caller re-fetches from OFF
 }
 
 export async function saveToCache(
