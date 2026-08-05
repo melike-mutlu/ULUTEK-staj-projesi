@@ -366,13 +366,7 @@ void main() {
   });
 
   testWidgets('ProductDetailView does not display Sepete Ekle button', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          home: ProductDetailView(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(_productDetailUnderTest(_foundFetchResult));
 
     await tester.pumpAndSettle();
     expect(find.text('Sepete Ekle'), findsNothing);
