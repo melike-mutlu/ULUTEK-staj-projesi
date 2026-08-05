@@ -17,11 +17,16 @@ class WarningBanner extends StatelessWidget {
   /// explanation when the caller has none.
   final List<ReasonSpan>? reason;
 
+  /// Sits next to the verdict when the product is suitable.
+  static const String _starIcon = 'assets/other/star.png';
+
   /// The illustration spans the title and the reason standing next to it.
   static const double _iconSize = 130;
 
   /// How far the illustration reaches past the text's left edge.
   static const double _iconInset = 12;
+
+  bool get _isSuitable => explanation.level == WarningLevel.ok;
 
   List<ReasonSpan> get _reason {
     final personal = reason;
@@ -67,14 +72,29 @@ class WarningBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  style.title,
-                  style: TextStyle(
-                    color: style.main,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        style.title,
+                        style: TextStyle(
+                          color: style.main,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    if (_isSuitable) ...[
+                      const SizedBox(width: 6),
+                      Image.asset(
+                        _starIcon,
+                        width: 26,
+                        height: 26,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Text.rich(
