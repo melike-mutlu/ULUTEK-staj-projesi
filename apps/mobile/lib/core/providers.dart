@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/repositories/product_cache_repository.dart';
 import '../data/repositories/product_repository.dart';
 import '../data/repositories/profile_repository.dart';
 import '../features/auth/auth_viewmodel.dart';
@@ -22,8 +23,14 @@ final authViewModelProvider = ChangeNotifierProvider<AuthViewModel>((ref) {
   return AuthViewModel();
 });
 
+final productCacheRepositoryProvider = Provider<ProductCacheRepository>((ref) {
+  return ProductCacheRepository();
+});
+
 final scanHistoryRepositoryProvider = Provider<ScanHistoryRepository>((ref) {
-  return ScanHistoryRepository();
+  return ScanHistoryRepository(
+    productCacheRepository: ref.watch(productCacheRepositoryProvider),
+  );
 });
 
 

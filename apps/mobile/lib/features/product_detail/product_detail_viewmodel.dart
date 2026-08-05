@@ -26,6 +26,25 @@ class ProductDetailViewModel extends ChangeNotifier {
     loadMockState(mockState);
   }
 
+  /// Fetches the barcode from the backend and hands the result to
+  /// [loadFromFetchResult]. Used when the screen is opened with a barcode
+  /// only (e.g. from scan history).
+  Future<void> loadFromBarcode(
+    String barcode,
+    ProductRepository productRepository,
+    ProfileRepository profileRepository,
+  ) async {
+    status = ProductDetailStatus.loading;
+    errorMessage = null;
+    product = null;
+    ruleEngineResult = null;
+    explanation = null;
+    notifyListeners();
+
+    final fetchResult = await productRepository.fetchProduct(barcode);
+    await loadFromFetchResult(fetchResult, profileRepository);
+  }
+
   /// Barkod arama sonucunu (ProductFetchResult) ve gerçek kullanıcı profilini (profileRepository) alıp işler.
   Future<void> loadFromFetchResult(
     ProductFetchResult fetchResult,

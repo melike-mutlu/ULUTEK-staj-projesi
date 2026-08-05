@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/navigation/app_routes.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
+import '../../core/utils/relative_date.dart';
 import '../../core/providers.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
+import 'widgets/recent_scan_card.dart';
 import '../shell/shell_viewmodel.dart';
 
 class HomeView extends ConsumerStatefulWidget {
@@ -31,7 +34,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       context: context,
       isScrollControlled: true, // Panelin ekranın büyük kısmını kaplamasına izin verir
       backgroundColor: Colors.transparent, // Köşelerin yuvarlak olabilmesi için
-      builder: (context) {
+      builder: (sheetContext) {
         return Container(
           decoration: const BoxDecoration(
             color: Colors.white, // Kendi temana göre AkilliSepetColors.surface da yapabilirsin
@@ -83,16 +86,20 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       controller: scrollController, // Parmağınla paneli kaydırmanı sağlar
                                       itemCount: historyVm.historyItems.length,
                                       itemBuilder: (context, index) {
-                                        final item = historyVm.historyItems[index];
+                                        final entry = historyVm.historyItems[index];
                                         return Padding(
                                           padding: const EdgeInsets.only(bottom: 12.0),
-                                          child: _buildRecentScanCard(
-                                            context,
-                                            title: 'Barkod: ${item['barcode']}',
+                                          child: RecentScanCard(
+                                            title: entry.productName ?? 'Barkod: ${entry.barcode}',
                                             note: 'İçerik Analizi',
                                             noteColor: AkilliSepetColors.success,
                                             backgroundColor: const Color(0xFFE8F5E9),
-                                            time: 'Kayıt', // İleride tarih yazdırırız
+                                            time: formatScanDate(entry.scannedAt),
+                                            onTap: () {
+                                              // Close the sheet first so detail opens on the page below.
+                                              Navigator.pop(sheetContext);
+                                              _openProductDetail(entry.barcode);
+                                            },
                                           ),
                                         );
                                       },
@@ -112,7 +119,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final mediaPadding = MediaQuery.of(context).padding;
+    final bottomInset = mediaPadding.bottom;
+    // Keep the greeting and avatar clear of the status bar / notch, like the
+    // other screens do with SafeArea. Device driven, not a fixed offset.
+    final topInset = mediaPadding.top;
     final viewModel = ref.watch(homeViewModelProvider);
 
     return Scaffold(
@@ -120,12 +131,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ? const Center(child: CircularProgressIndicator(color: AkilliSepetColors.primary))
           : SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+                padding: EdgeInsets.fromLTRB(16, 16 + topInset, 16, 16 + bottomInset),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 16),
-                    
                     // --- 1. KULLANICI SELAMLAMA VE PROFİL ---
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -241,16 +250,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       )
                     else ...[
                       // Sadece son 3 taramayı çiz
-                      ...viewModel.recentScans.map((item) {
+                      ...viewModel.recentScans.map((entry) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
-                          child: _buildRecentScanCard(
-                            context,
-                            title: 'Barkod: ${item['barcode']}',
+                          child: RecentScanCard(
+                            title: entry.productName ?? 'Barkod: ${entry.barcode}',
                             note: 'İçerik Analizi',
                             noteColor: AkilliSepetColors.success,
                             backgroundColor: const Color(0xFFE8F5E9),
-                            time: 'Yeni',
+                            time: formatScanDate(entry.scannedAt),
+                            onTap: () => _openProductDetail(entry.barcode),
                           ),
                         );
                       }),
@@ -280,77 +289,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  // Orijinal Kart Tasarımı Yardımcı Fonksiyonu
-  Widget _buildRecentScanCard(
-    BuildContext context, {
-    required String title,
-    required String note,
-    required Color noteColor,
-    required Color backgroundColor,
-    required String time,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: noteColor, width: 2),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AkilliSepetColors.textPrimary,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.circle, size: 6, color: noteColor),
-                    const SizedBox(width: 6),
-                    Text(
-                      note,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: noteColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Text(
-            time,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AkilliSepetColors.textSecondary,
-                ),
-          ),
-        ],
-      ),
-    );
+  void _openProductDetail(String barcode) {
+    Navigator.pushNamed(context, AppRoutes.productDetail, arguments: barcode);
   }
+
 }
-
-
-
-
-
-

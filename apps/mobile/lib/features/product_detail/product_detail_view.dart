@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/navigation/app_routes.dart';
+import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
@@ -34,21 +35,31 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialLoaded) {
-      final args = ModalRoute.of(context)?.settings.arguments;
-      if (args is ProductFetchResult) {
-        _scannedBarcode = args.product?.barcode;
-        _isInitialLoaded = true;
-        final profileRepo = ref.read(profileRepositoryProvider);
-        _viewModel.loadFromFetchResult(args, profileRepo);
-      } else if (args is String) {
-        _scannedBarcode = args;
-        _isInitialLoaded = true;
-        // Mock fallback if string barcode passed directly in mock tests
-        _viewModel.loadMockState('warning');
-      } else {
-        _isInitialLoaded = true;
-        _viewModel.loadMockState('warning');
-      }
+      _isInitialLoaded = true;
+      _loadFromRouteArguments();
+    }
+  }
+
+  /// Loads the screen from the route argument, which is either a ready
+  /// [ProductFetchResult] or a barcode to fetch. "Tekrar Dene" reuses this.
+  void _loadFromRouteArguments() {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    final profileRepo = ref.read(profileRepositoryProvider);
+
+    if (args is ProductFetchResult) {
+      _scannedBarcode = args.product?.barcode;
+      _viewModel.loadFromFetchResult(args, profileRepo);
+    } else if (args is String) {
+      _scannedBarcode = args;
+      _viewModel.loadFromBarcode(
+        args,
+        ref.read(productRepositoryProvider),
+        profileRepo,
+      );
+    } else {
+      // No barcode or result to work with: show "not found" instead of fake data.
+      _scannedBarcode = null;
+      _viewModel.setStatusFromFetch('not_found');
     }
   }
 
@@ -279,13 +290,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    final args = ModalRoute.of(context)?.settings.arguments;
-                    if (args is ProductFetchResult) {
-                      final profileRepo = ref.read(profileRepositoryProvider);
-                      _viewModel.loadFromFetchResult(args, profileRepo);
-                    }
-                  },
+                  onPressed: _loadFromRouteArguments,
                   icon: const Icon(Icons.refresh),
                   label: const Text('Tekrar Dene'),
                 ),
@@ -364,7 +369,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   }
 
   Widget _buildNotFoundState(BuildContext context) {
-    final barcodeText = _scannedBarcode ?? '8690504112233';
+    final barcodeText = _scannedBarcode ?? '—';
 
     return Padding(
       padding: const EdgeInsets.all(24),
