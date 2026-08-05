@@ -141,88 +141,28 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 0. Topluluk Ürünü / Doğrulanmadı Uyarısı
-              if (product.isPending) ...[
-                _buildPendingWarningCard(),
-                const SizedBox(height: 16),
-              ],
-
-              // 1. Uygunluk Sonucu (Yeşil / Sarı / Kırmızı Bandı)
-              WarningBanner(explanation: explanation),
-              const SizedBox(height: 16),
-
-              // 2. Ürün Adı, Marka, Barkod & Nutri-Score Kartı
+              // 1. Ürün kimliği (küçük görsel + ad, marka, barkod)
               ProductHeaderCard(product: product),
               const SizedBox(height: 16),
 
-              // 3. Besin Değerleri Kartı (100g)
+              // 2. Uygunluk sonucu — ekranın görsel çıpası
+              WarningBanner(explanation: explanation),
+              const SizedBox(height: 16),
+
+              // 3. Besin Değerleri (100g)
               NutrimentsCard(nutriments: product.nutriments),
               const SizedBox(height: 16),
 
-              // 4. Alerjen & İçindekiler Kartı
+              // 4. Alerjenler & İçindekiler
               AllergensCard(
                 product: product,
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
               const SizedBox(height: 24),
-
-              // Test & Mock Senaryo Seçici (Staj Değerlendirme & Test Kolaylığı İçin)
-              _buildMockTesterBar(),
-              const SizedBox(height: 20),
-
-              // Ana Buton (Ana Sayfa)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      AppRoutes.shell,
-                      (route) => false,
-                    );
-                  },
-                  icon: const Icon(Icons.home_outlined),
-                  label: const Text('Ana Sayfa'),
-                ),
-              ),
-              const SizedBox(height: 30),
             ],
           ),
         );
     }
-  }
-
-  Widget _buildPendingWarningCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFCD34D), width: 1.5),
-      ),
-      child: const Row(
-        children: [
-          Icon(
-            Icons.gpp_maybe_rounded,
-            color: Color(0xFFD97706),
-            size: 24,
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı.',
-              style: TextStyle(
-                color: Color(0xFFB45309),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                height: 1.3,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildErrorState(BuildContext context) {
@@ -279,72 +219,6 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMockTesterBar() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.bug_report_outlined, size: 16, color: Color(0xFF6B7280)),
-              SizedBox(width: 6),
-              Text(
-                'Mock Test Durumları (Demo):',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4B5563),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildMockChip('🔴 Kırmızı', () => _viewModel.loadMockState('red')),
-                const SizedBox(width: 6),
-                _buildMockChip('🟡 Sarı', () => _viewModel.loadMockState('yellow')),
-                const SizedBox(width: 6),
-                _buildMockChip('🟢 Yeşil', () => _viewModel.loadMockState('green')),
-                const SizedBox(width: 6),
-                _buildMockChip('⏳ Pending', () => _viewModel.loadMockState('pending')),
-                const SizedBox(width: 6),
-                _buildMockChip('❌ Yok', () => _viewModel.setStatusFromFetch('not_found')),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMockChip(String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFD1D5DB)),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
         ),
       ),
     );

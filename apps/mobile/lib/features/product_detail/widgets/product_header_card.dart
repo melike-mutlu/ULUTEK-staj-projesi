@@ -1,89 +1,164 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/product.dart';
 
-/// Ürün adı, marka, barkod ve Nutri-Score rozetini gösteren kart widget'ı.
+/// Nutri-Score values Open Food Facts sends when it has no grade.
+const _unknownNutriScores = <String>{'unknown', 'not-applicable'};
+
+/// Compact product identity: thumbnail + name, brand, badges and barcode.
+/// Kept deliberately small so the verdict below it stays the visual anchor.
 class ProductHeaderCard extends StatelessWidget {
   const ProductHeaderCard({super.key, required this.product});
 
   final Product product;
 
-  Widget _buildNutriScoreBadge(String score) {
-    final cleanScore = score.trim().toUpperCase();
-    
-    Color getScoreColor(String s) {
-      switch (s) {
-        case 'A':
-          return const Color(0xFF038141);
-        case 'B':
-          return const Color(0xFF85BB2F);
-        case 'C':
-          return const Color(0xFFFECB02);
-        case 'D':
-          return const Color(0xFFEE8100);
-        case 'E':
-          return const Color(0xFFE63E11);
-        default:
-          return const Color(0xFF9CA3AF);
-      }
-    }
+  static const double _thumbnailSize = 64;
 
-    final scoreColor = getScoreColor(cleanScore);
+  String? get _nutriScore {
+    final score = product.nutriscore?.trim().toLowerCase();
+    if (score == null || score.isEmpty || _unknownNutriScores.contains(score)) {
+      return null;
+    }
+    return score.toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = product.brand?.trim();
+    final score = _nutriScore;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _Thumbnail(imageUrl: product.imageUrl, size: _thumbnailSize),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                product.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF111827),
+                  height: 1.25,
+                ),
+              ),
+              if (brand != null && brand.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  brand,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF6B7280),
+                  ),
+                ),
+              ],
+              if (product.isPending || score != null) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    if (product.isPending) const _PendingBadge(),
+                    if (score != null) _NutriScoreBadge(score: score),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.qr_code_2_rounded,
+                      size: 14, color: Color(0xFF9CA3AF)),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      product.barcode,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF9CA3AF),
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Thumbnail extends StatelessWidget {
+  const _Thumbnail({required this.imageUrl, required this.size});
+
+  final String? imageUrl;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    // Some Open Food Facts URLs are http; iOS blocks those by default.
+    final url = imageUrl?.trim().replaceFirst(RegExp('^http://'), 'https://');
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      width: size,
+      height: size,
       decoration: BoxDecoration(
-        color: scoreColor.withValues(alpha: 0.12),
+        color: const Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: scoreColor, width: 1.5),
+        border: Border.all(color: const Color(0xFFF3F4F6)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: scoreColor,
-              shape: BoxShape.circle,
+      clipBehavior: Clip.antiAlias,
+      child: url == null || url.isEmpty
+          ? const _ThumbnailPlaceholder()
+          : Image.network(
+              url,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const _ThumbnailPlaceholder(),
             ),
-            child: Text(
-              cleanScore,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'Nutri-Score $cleanScore',
-            style: TextStyle(
-              color: scoreColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ],
+    );
+  }
+}
+
+class _ThumbnailPlaceholder extends StatelessWidget {
+  const _ThumbnailPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        size: 24,
+        color: Color(0xFF9CA3AF),
       ),
     );
   }
+}
 
-  Widget _buildPendingBadge() {
+class _PendingBadge extends StatelessWidget {
+  const _PendingBadge();
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFFEF3C7),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFF59E0B), width: 1),
+        border: Border.all(color: const Color(0xFFF59E0B)),
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.gpp_maybe_rounded,
-            size: 14,
-            color: Color(0xFFB45309),
-          ),
+          Icon(Icons.gpp_maybe_rounded, size: 13, color: Color(0xFFB45309)),
           SizedBox(width: 4),
           Text(
             'Doğrulanmadı',
@@ -97,166 +172,39 @@ class ProductHeaderCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildImageContainer(String? rawUrl) {
-    String? cleanUrl = rawUrl?.trim();
-    if (cleanUrl != null && cleanUrl.startsWith('http://')) {
-      cleanUrl = cleanUrl.replaceFirst('http://', 'https://');
-    }
-    final hasUrl = cleanUrl != null && cleanUrl.isNotEmpty;
+class _NutriScoreBadge extends StatelessWidget {
+  const _NutriScoreBadge({required this.score});
 
-    return Container(
-      height: 180,
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: hasUrl
-            ? Image.network(
-                cleanUrl,
-                fit: BoxFit.contain,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Color(0xFF10B981),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildImagePlaceholder('Görsel Yüklenemedi');
-                },
-              )
-            : _buildImagePlaceholder('Ürün Görseli Bulunamadı'),
-      ),
-    );
-  }
+  final String score;
 
-  Widget _buildImagePlaceholder(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.image_not_supported_outlined,
-            size: 44,
-            color: Color(0xFF9CA3AF),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            message,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF9CA3AF),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  static const _scoreColors = <String, Color>{
+    'A': Color(0xFF038141),
+    'B': Color(0xFF85BB2F),
+    'C': Color(0xFFFECB02),
+    'D': Color(0xFFEE8100),
+    'E': Color(0xFFE63E11),
+  };
 
   @override
   Widget build(BuildContext context) {
-    final brandText = product.brand?.isNotEmpty == true ? product.brand! : 'Genel Marka';
+    final color = _scoreColors[score] ?? const Color(0xFF9CA3AF);
 
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildImageContainer(product.imageUrl),
-          // Wrap instead of Row: on narrow screens the Nutri-Score badge moves to
-          // the next line rather than overflowing. Badges are never clipped.
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Marka Badge — only this one shrinks when space runs out.
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        brandText,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4B5563),
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (product.isPending) ...[
-                    const SizedBox(width: 8),
-                    _buildPendingBadge(),
-                  ],
-                ],
-              ),
-              // Nutri-Score (Eğer varsa)
-              if (product.nutriscore != null && product.nutriscore!.isNotEmpty)
-                _buildNutriScoreBadge(product.nutriscore!),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Ürün Adı
-          Text(
-            product.name,
-            softWrap: true,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF111827),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Barkod Bilgisi
-          Row(
-            children: [
-              const Icon(Icons.qr_code_2_rounded, size: 16, color: Color(0xFF9CA3AF)),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  'Barkod: ${product.barcode}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      child: Text(
+        'Nutri-Score $score',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
       ),
     );
   }

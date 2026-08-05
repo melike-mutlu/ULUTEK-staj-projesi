@@ -30,6 +30,25 @@ const _foundFetchResult = ProductFetchResult(
   ),
 );
 
+const _pendingFetchResult = ProductFetchResult(
+  status: 'found',
+  product: Product(
+    barcode: '9998887776655',
+    name: 'Topluluk Urunu',
+    brand: 'Topluluk Katkisi',
+    ingredientsText: 'Test icerik',
+    additives: [],
+    allergensTags: [],
+    nutriments: Nutriments(energyKcal100g: 400),
+    isPending: true,
+  ),
+  ruleEngineResult: RuleEngineResult(
+    matchedAllergens: [],
+    hasConflict: false,
+    veganCompatible: true,
+  ),
+);
+
 /// Returns a distinct product per barcode, so "always the same product"
 /// regressions surface immediately.
 class _FakeProductRepository implements ProductRepository {
@@ -182,25 +201,19 @@ void main() {
     expect(find.text('Doğrulanmadı'), findsOneWidget);
   });
 
-  testWidgets('ProductDetailView renders pending warning banner for pending state', (WidgetTester tester) async {
-    // The mock bar only renders in the "found" state, so open the screen with
-    // a real fetch result and tap the chip from there.
-    await tester.pumpWidget(_productDetailUnderTest(_foundFetchResult));
+  testWidgets('ProductDetailView shows the pending warning exactly once', (WidgetTester tester) async {
+    await tester.pumpWidget(_productDetailUnderTest(_pendingFetchResult));
 
     await tester.pumpAndSettle();
 
-    // Scroll to mock tester bar and tap on ⏳ Pending chip
-    final pendingChip = find.text('⏳ Pending');
-    expect(pendingChip, findsOneWidget);
-    await tester.ensureVisible(pendingChip);
-    await tester.pumpAndSettle();
-
-    await tester.tap(pendingChip);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı.'), findsOneWidget);
+    // A pending product can never read as safe.
     expect(find.text('DİKKAT EDİLMELİ'), findsOneWidget);
+    // The badge is the single pending indicator; the old standalone card is gone.
     expect(find.text('Doğrulanmadı'), findsOneWidget);
+    expect(
+      find.text('Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı.'),
+      findsNothing,
+    );
   });
 
   testWidgets('ProductDetailView fetches the barcode it was opened with, not a mock',
@@ -365,11 +378,13 @@ void main() {
     expect(product.toJson()['image_url'], equals('https://example.com/test.jpg'));
   });
 
-  testWidgets('ProductDetailView does not display Sepete Ekle button', (WidgetTester tester) async {
+  testWidgets('ProductDetailView does not display action buttons', (WidgetTester tester) async {
     await tester.pumpWidget(_productDetailUnderTest(_foundFetchResult));
 
     await tester.pumpAndSettle();
     expect(find.text('Sepete Ekle'), findsNothing);
-    expect(find.text('Ana Sayfa'), findsOneWidget);
+    // Removed with the redesign: the screen ends with the content, not a button.
+    expect(find.text('Ana Sayfa'), findsNothing);
+    expect(find.text('Mock Test Durumları (Demo):'), findsNothing);
   });
 }
