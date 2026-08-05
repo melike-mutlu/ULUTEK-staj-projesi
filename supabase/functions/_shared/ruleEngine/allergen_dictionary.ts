@@ -93,3 +93,37 @@ export function resolveAllergenKeys(value: string): string[] {
   if (!token) return [];
   return SYNONYM_INDEX.get(token) ?? [token];
 }
+
+/** Word tokens of a normalized text, split on anything that is not a letter. */
+function tokenize(text: string): string[] {
+  return normalize(text)
+    .split(/[^a-zçğıöşü0-9]+/)
+    .filter((token) => token.length > 0);
+}
+
+/** True when [phrase] appears as consecutive whole tokens inside [tokens]. */
+function containsPhrase(tokens: string[], phrase: string[]): boolean {
+  for (let i = 0; i + phrase.length <= tokens.length; i++) {
+    if (phrase.every((word, j) => tokens[i + j] === word)) return true;
+  }
+  return false;
+}
+
+/**
+ * Scans free-text ingredients for known allergen synonyms and returns the
+ * canonical keys found. Whole-word / whole-phrase only — "et" never matches
+ * inside "petit", so no substring false positives.
+ */
+export function resolveAllergenKeysFromText(text: string): string[] {
+  const tokens = tokenize(text);
+  if (tokens.length === 0) return [];
+
+  const found: string[] = [];
+  for (const [synonym, keys] of SYNONYM_INDEX) {
+    if (!containsPhrase(tokens, synonym.split(" "))) continue;
+    for (const key of keys) {
+      if (!found.includes(key)) found.push(key);
+    }
+  }
+  return found;
+}

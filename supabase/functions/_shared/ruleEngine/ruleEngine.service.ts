@@ -1,4 +1,8 @@
-import { normalize, resolveAllergenKeys } from "./allergen_dictionary.ts";
+import {
+  normalize,
+  resolveAllergenKeys,
+  resolveAllergenKeysFromText,
+} from "./allergen_dictionary.ts";
 
 /**
  * Diet keys the engine reacts to -> the labels the mobile app stores.
@@ -43,12 +47,18 @@ export function runRuleEngine(product: any, profile: any) {
   // 1. Alerjen Eşleşmesi Kontrolü
   // Both sides are resolved to canonical keys and intersected; no substring
   // matching, so "Süt/Laktoz" matches "en:milk" but never "en:milk-chocolate".
+  // Tags come first (authoritative), then anything found in the ingredients
+  // text — so milk written only in the ingredients is still caught.
   const productKeys: string[] = [];
+  const addKey = (key: string) => {
+    if (!productKeys.includes(key)) productKeys.push(key);
+  };
   for (const tag of product.allergens_tags ?? []) {
-    for (const key of resolveAllergenKeys(String(tag))) {
-      if (!productKeys.includes(key)) productKeys.push(key);
-    }
+    resolveAllergenKeys(String(tag)).forEach(addKey);
   }
+  resolveAllergenKeysFromText(String(product.ingredients_text ?? "")).forEach(
+    addKey,
+  );
   const productKeySet = new Set(productKeys);
 
   const profileKeys = new Set(

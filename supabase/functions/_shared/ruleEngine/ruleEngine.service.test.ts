@@ -170,3 +170,35 @@ Deno.test("veri yeterli ve ürün bitkiselse vegan uyumlu döner", () => {
   assertEquals(result.diet_flags.vegan_compatible, true);
   assertEquals(result.has_conflict, false);
 });
+
+Deno.test("içindekiler taranarak alerjen eşleşmesi bulunur (etiket yokken)", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Süt, tuz, maya, peynir kültürü" }),
+    { allergies: ["Süt/Laktoz"] },
+  );
+
+  assertEquals(result.matched_allergens, ["Süt/Laktoz"]);
+  assertEquals(result.allergens, [{ key: "milk", matched: true }]);
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("içindekiler taraması alt dize yanlış pozitifi üretmez", () => {
+  // "et" (meat is not a dictionary key anyway) — arpa vs şarap benzeri
+  // durumları kontrol et: "arpa" gluten sinonimi, "şarap" eşleşmemeli.
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Şarap sirkesi, su, tuz" }),
+    { allergies: ["Gluten"] },
+  );
+
+  assertEquals(result.matched_allergens, []);
+  assertEquals(result.allergens, []);
+});
+
+Deno.test("çok kelimeli sinonim ancak bitişik geçince eşleşir", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Antep fıstığı, şeker" }),
+    { allergies: [] },
+  );
+
+  assertEquals(result.allergens, [{ key: "nuts", matched: false }]);
+});
