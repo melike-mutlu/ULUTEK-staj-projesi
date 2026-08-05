@@ -267,3 +267,29 @@ Deno.test("Şeker hastalığı yüksek şekerli üründe çakışır", () => {
   assertEquals(result.health_conditions[0].status, "conflict");
   assertEquals(result.has_conflict, true);
 });
+
+Deno.test("Diyabet dostu diyeti yüksek şekerli üründe çakışır", () => {
+  const result = runRuleEngine(
+    product({
+      allergens_tags: ["en:milk"],
+      ingredients_text: "Süt, şeker",
+      nutriments: { sugars_100g: 38 },
+    }),
+    { allergies: [], diet_preference: ["Diyabet dostu"] },
+  );
+
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("Diyabet dostu diyeti düşük şekerli üründe çakışmaz", () => {
+  const result = runRuleEngine(
+    product({
+      allergens_tags: ["en:milk"],
+      ingredients_text: "Süt",
+      nutriments: { sugars_100g: 2 },
+    }),
+    { allergies: [], diet_preference: ["Diyabet dostu"] },
+  );
+
+  assertEquals(result.has_conflict, false);
+});

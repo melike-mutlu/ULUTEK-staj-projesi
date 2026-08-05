@@ -3,7 +3,10 @@ import {
   resolveAllergenKeys,
   resolveAllergenKeysFromText,
 } from "./allergen_dictionary.ts";
-import { healthImplication } from "./health_dictionary.ts";
+import {
+  DIABETES_SUGAR_LIMIT,
+  healthImplication,
+} from "./health_dictionary.ts";
 
 type Sufficiency = "sufficient" | "insufficient";
 type HealthStatus = "conflict" | "ok" | "not_evaluated";
@@ -45,6 +48,7 @@ function evaluateHealthCondition(
 const DIET_ALIASES: Record<string, string[]> = {
   vegan: ["Vegan"],
   sporcu: ["Sporcu / Yüksek protein"],
+  diyabet_dostu: ["Diyabet dostu"],
 };
 
 /** diet_preference is text[], but old rows may still hold a single string. */
@@ -166,6 +170,7 @@ export function runRuleEngine(product: any, profile: any) {
 
   const isVeganUser = hasDiet(profile, "vegan");
   const isAthleteUser = hasDiet(profile, "sporcu");
+  const isDiabeticDietUser = hasDiet(profile, "diyabet_dostu");
 
   if (isAthleteUser) {
     if (proteins < 5) {
@@ -183,10 +188,16 @@ export function runRuleEngine(product: any, profile: any) {
   // safety, so it never flips the verdict either way.
   const hasVeganConflict = isVeganUser && isVeganCompatible === false;
   const hasAthleteConflict = isLowProteinForAthlete;
+  // "Diyabet dostu" diet mirrors the "Şeker hastalığı" condition on the diet axis.
+  const hasDiabeticDietConflict = isDiabeticDietUser &&
+    sugars > DIABETES_SUGAR_LIMIT;
 
+  // The top verdict must reflect every red row the screen can show: allergen
+  // matches, diet conflicts (vegan/athlete/diabetic) and health conditions.
   const hasConflict = matched.length > 0 ||
     hasVeganConflict ||
     hasAthleteConflict ||
+    hasDiabeticDietConflict ||
     hasHealthConflict;
 
   return {

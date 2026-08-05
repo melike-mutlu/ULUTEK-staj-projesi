@@ -15,6 +15,10 @@ export interface HealthImplication {
   nutrient?: NutrientLimit;
 }
 
+/** Sugar per 100 g above which a diabetic profile should be warned. Shared by
+ * the "Şeker hastalığı" condition and the "Diyabet dostu" diet. */
+export const DIABETES_SUGAR_LIMIT = 15;
+
 /**
  * Canonical health-condition label (see profile_options.dart) -> implication.
  * Only medically clear mappings live here; a new condition is one entry.
@@ -23,7 +27,9 @@ export interface HealthImplication {
 export const HEALTH_IMPLICATIONS: Record<string, HealthImplication> = {
   "çölyak": { allergens: ["gluten"] },
   "laktoz intoleransı": { allergens: ["milk"] },
-  "şeker hastalığı": { nutrient: { field: "sugars_100g", max: 15 } },
+  "şeker hastalığı": {
+    nutrient: { field: "sugars_100g", max: DIABETES_SUGAR_LIMIT },
+  },
 };
 
 /** Exact-match lookup after TR-aware normalization; null when unmapped. */
