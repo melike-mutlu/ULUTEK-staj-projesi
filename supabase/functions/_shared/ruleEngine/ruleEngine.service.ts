@@ -7,6 +7,7 @@ import {
   DIABETES_SUGAR_LIMIT,
   healthImplication,
 } from "./health_dictionary.ts";
+import { dietImplication } from "./diet_dictionary.ts";
 
 type Sufficiency = "sufficient" | "insufficient";
 type HealthStatus = "conflict" | "ok" | "not_evaluated";
@@ -35,6 +36,35 @@ function evaluateHealthCondition(
     const value = nutriments?.[implication.nutrient.field];
     if (value == null) return "not_evaluated";
     return value > implication.nutrient.max ? "conflict" : "ok";
+  }
+
+  return "not_evaluated";
+}
+
+/**
+ * Evaluates a dictionary-driven diet ("Glutensiz yaşam tarzı", "Ketojenik",
+ * "Düşük karbonhidrat") against the product. Unknown diets and missing data
+ * yield "not_evaluated", never a silent "ok".
+ */
+function evaluateDietImplication(
+  diet: string,
+  productKeys: Set<string>,
+  nutriments: any,
+  sufficiency: Sufficiency,
+): HealthStatus {
+  const implication = dietImplication(diet);
+  if (!implication) return "not_evaluated";
+
+  if (implication.allergens) {
+    if (sufficiency === "insufficient") return "not_evaluated";
+    const hit = implication.allergens.some((key) => productKeys.has(key));
+    return hit ? "conflict" : "ok";
+  }
+
+  if (implication.maxNutrient) {
+    const value = nutriments?.[implication.maxNutrient.field];
+    if (value == null) return "not_evaluated";
+    return value > implication.maxNutrient.max ? "conflict" : "ok";
   }
 
   return "not_evaluated";
@@ -229,6 +259,31 @@ export function runRuleEngine(product: any, profile: any) {
 
   const hasHealthConflict = healthConditions.some((h) => h.status === "conflict");
 
+  // 2.6 Sözlük tabanlı diyetler (glutensiz / ketojenik / düşük karbonhidrat).
+  const rawDiets = profile?.diet_preference;
+  const dietInputs: string[] = (Array.isArray(rawDiets)
+    ? rawDiets
+    : rawDiets == null
+    ? []
+    : [rawDiets])
+    .map((diet: unknown) => String(diet ?? "").trim())
+    .filter((diet: string) => diet.length > 0);
+
+  const dietConditions = dietInputs
+    .map((diet) => ({
+      diet,
+      status: evaluateDietImplication(
+        diet,
+        productKeySet,
+        product.nutriments,
+        dataSufficiency,
+      ),
+    }))
+    // Only diets this dictionary actually knows; the rest keep their own logic.
+    .filter((d) => dietImplication(d.diet) !== null);
+
+  const hasDietConflict = dietConditions.some((d) => d.status === "conflict");
+
   // 3. Diyabet Değerlendirmesi (Şeker Oranına Göre, herkes için bilgilendirici)
   const sugars = product.nutriments?.sugars_100g ?? product.nutriments?.sugars ?? 0;
   let diabeticNote: string | null = null;
@@ -274,12 +329,14 @@ export function runRuleEngine(product: any, profile: any) {
     sugars > DIABETES_SUGAR_LIMIT;
 
   // The top verdict must reflect every red row the screen can show: allergen
-  // matches, diet conflicts (vegan/athlete/diabetic) and health conditions.
+  // matches, diet conflicts (vegan/vegetarian/athlete/diabetic/dictionary) and
+  // health conditions.
   const hasConflict = matched.length > 0 ||
     hasVeganConflict ||
     hasVegetarianConflict ||
     hasAthleteConflict ||
     hasDiabeticDietConflict ||
+    hasDietConflict ||
     hasHealthConflict;
 
   return {
@@ -291,6 +348,9 @@ export function runRuleEngine(product: any, profile: any) {
     // Per health condition: "conflict" | "ok" | "not_evaluated". Consumers must
     // treat "not_evaluated" as "kontrol edilemedi", never as safe.
     health_conditions: healthConditions,
+    // Dictionary-driven diets (glutensiz / ketojenik / düşük karbonhidrat),
+    // same status vocabulary as health_conditions.
+    diet_conditions: dietConditions,
     // "insufficient" means the product carries no allergen evidence at all.
     // The verdict then can neither be trusted as "uygun" nor as a conflict;
     // consumers must show "yetersiz veri" and ignore has_conflict.

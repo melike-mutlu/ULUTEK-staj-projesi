@@ -466,3 +466,67 @@ Deno.test("besin değeri yoksa tansiyon değerlendirilemez", () => {
 
   assertEquals(result.health_conditions[0].status, "not_evaluated");
 });
+
+Deno.test("Glutensiz yaşam tarzı glutenli üründe çakışır", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:gluten"], ingredients_text: "Buğday unu" }),
+    { allergies: [], diet_preference: ["Glutensiz yaşam tarzı"] },
+  );
+
+  assertEquals(result.diet_conditions[0].status, "conflict");
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("Glutensiz yaşam tarzı glutensiz üründe uygun", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt" }),
+    { allergies: [], diet_preference: ["Glutensiz yaşam tarzı"] },
+  );
+
+  assertEquals(result.diet_conditions[0].status, "ok");
+  assertEquals(result.has_conflict, false);
+});
+
+Deno.test("Ketojenik yüksek karbonhidratlı üründe çakışır", () => {
+  const result = runRuleEngine(
+    product({
+      allergens_tags: ["en:milk"],
+      ingredients_text: "Süt",
+      nutriments: { carbohydrates_100g: 40 },
+    }),
+    { allergies: [], diet_preference: ["Ketojenik"] },
+  );
+
+  assertEquals(result.diet_conditions[0].status, "conflict");
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("Düşük karbonhidrat orta karbonhidratta ketojenikten daha toleranslı", () => {
+  const p = { allergens_tags: ["en:milk"], ingredients_text: "Süt", nutriments: { carbohydrates_100g: 18 } };
+
+  const keto = runRuleEngine(product(p), { allergies: [], diet_preference: ["Ketojenik"] });
+  assertEquals(keto.diet_conditions[0].status, "conflict"); // 18 > 10
+
+  const lowCarb = runRuleEngine(product(p), { allergies: [], diet_preference: ["Düşük karbonhidrat"] });
+  assertEquals(lowCarb.diet_conditions[0].status, "ok"); // 18 < 25
+});
+
+Deno.test("veri yetersizken glutensiz diyeti değerlendirilemez", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "" }),
+    { allergies: [], diet_preference: ["Glutensiz yaşam tarzı"] },
+  );
+
+  assertEquals(result.diet_conditions[0].status, "not_evaluated");
+  assertEquals(result.has_conflict, false);
+});
+
+Deno.test("sözlükte olmayan diyet (Vegan) diet_conditions'a girmez", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt" }),
+    { allergies: [], diet_preference: ["Vegan", "Ketojenik"] },
+  );
+
+  assertEquals(result.diet_conditions.length, 1);
+  assertEquals(result.diet_conditions[0].diet, "Ketojenik");
+});
