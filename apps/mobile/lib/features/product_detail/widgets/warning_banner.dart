@@ -32,31 +32,35 @@ class WarningBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = WarningLevelStyle.of(explanation.level);
 
-    return Column(
+    return Row(
+      // Top aligned: the verdict starts level with the top of the illustration
+      // and every line of text stays to its right, never underneath it.
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Illustration and verdict share one line; the reason follows below.
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_isWarning)
-              Transform.translate(
-                // The png carries transparent padding, so it needs a nudge to
-                // sit flush with the text block below it.
-                offset: const Offset(-_iconInset, 0),
-                child: Image.asset(
-                  _warningIcon,
-                  width: _iconSize,
-                  height: _iconSize,
-                  errorBuilder: (_, __, ___) =>
-                      StatusDot(level: explanation.level, size: 20),
-                ),
-              )
-            else
-              StatusDot(level: explanation.level, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
+        if (_isWarning)
+          Transform.translate(
+            // The png carries transparent padding, so it needs a nudge to sit
+            // flush with the screen's left edge.
+            offset: const Offset(-_iconInset, 0),
+            child: Image.asset(
+              _warningIcon,
+              width: _iconSize,
+              height: _iconSize,
+              errorBuilder: (_, __, ___) =>
+                  StatusDot(level: explanation.level, size: 20),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: StatusDot(level: explanation.level, size: 20),
+          ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
                 style.title,
                 style: TextStyle(
                   color: style.main,
@@ -65,43 +69,43 @@ class WarningBanner extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(
-          _reason,
-          style: const TextStyle(
-            color: AkilliSepetColors.textSecondary,
-            fontSize: 16,
-            height: 1.4,
-          ),
-        ),
-        if (explanation.disclaimer.isNotEmpty) ...[
-          // One blank line, then the disclaimer right under the reason.
-          const SizedBox(height: 22),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                size: 13,
-                color: AkilliSepetColors.textSecondary,
-              ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  explanation.disclaimer,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AkilliSepetColors.textSecondary,
-                    height: 1.3,
-                  ),
+              const SizedBox(height: 6),
+              Text(
+                _reason,
+                style: const TextStyle(
+                  color: AkilliSepetColors.textSecondary,
+                  fontSize: 16,
+                  height: 1.4,
                 ),
               ),
+              if (explanation.disclaimer.isNotEmpty) ...[
+                // One blank line, then the disclaimer right under the reason.
+                const SizedBox(height: 22),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 13,
+                      color: AkilliSepetColors.textSecondary,
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        explanation.disclaimer,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AkilliSepetColors.textSecondary,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
-        ],
+        ),
       ],
     );
   }
