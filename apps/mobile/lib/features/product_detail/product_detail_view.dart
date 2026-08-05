@@ -135,11 +135,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Ürün kimliği (görsel + ad + marka)
-              ProductHeaderCard(product: product),
-              const SizedBox(height: 14),
-
-              // 2. Uygunluk sonucu — ekranın görsel çıpası
+              // 1. Uygunluk sonucu — ekranın görsel çıpası
               WarningBanner(
                 explanation: explanation,
                 reason: personalReasonSpans(
@@ -148,6 +144,10 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                   profile: _viewModel.userProfile,
                 ),
               ),
+              const SizedBox(height: 14),
+
+              // 2. Ürün kimliği (görsel + ad + marka)
+              ProductHeaderCard(product: product),
               const SizedBox(height: 32),
 
               // 3-6. Profil kategorileri: alerji, diyet, sağlık, besin değerleri

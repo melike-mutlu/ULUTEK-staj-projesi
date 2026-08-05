@@ -50,7 +50,7 @@ class WarningLevelStyle {
     background: Color(0xFFF0FDF4),
     border: Color(0xFF86EFAC),
     icon: Icons.verified_user_rounded,
-    title: 'Uygun',
+    title: 'Uygun!',
     asset: 'assets/other/suitable.png',
   );
 
