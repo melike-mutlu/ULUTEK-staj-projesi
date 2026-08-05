@@ -25,15 +25,29 @@ class RuleEngineResult {
   final List<DetectedAllergen> allergens;
 
   final bool hasConflict;
-  final bool veganCompatible;
+
+  /// null = bilinmiyor: ürünün bitkisel olup olmadığını söyleyecek veri yok.
+  /// Kanıt yokluğu uygunluk sayılmaz.
+  final bool? veganCompatible;
+
+  /// null = bilinmiyor. Vegandan ayrı: et/balık/jelatin dışlanır, süt/yumurta
+  /// serbesttir.
+  final bool? vegetarianCompatible;
+
   final String? diabeticNote;
+
+  /// false ise ürünün alerjen/içerik verisi yok; verdict "uygun" sayılamaz.
+  /// Eski yanıtlarda alan olmadığından varsayılan olarak yeterli kabul edilir.
+  final bool hasSufficientData;
 
   const RuleEngineResult({
     required this.matchedAllergens,
     required this.hasConflict,
     required this.veganCompatible,
+    this.vegetarianCompatible,
     this.allergens = const <DetectedAllergen>[],
     this.diabeticNote,
+    this.hasSufficientData = true,
   });
 
   /// Profille çakışan alerjenler — "Senin için riskler" bölümünü besler.
@@ -58,8 +72,12 @@ class RuleEngineResult {
               DetectedAllergen.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
       hasConflict: json['has_conflict'] as bool? ?? false,
-      veganCompatible: dietFlags['vegan_compatible'] as bool? ?? true,
+      // No `?? true`: null must stay null (unknown), not become "compatible".
+      veganCompatible: dietFlags['vegan_compatible'] as bool?,
+      vegetarianCompatible: dietFlags['vegetarian_compatible'] as bool?,
       diabeticNote: dietFlags['diabetic_note'] as String?,
+      hasSufficientData:
+          (json['data_sufficiency'] as String?) != 'insufficient',
     );
   }
 
@@ -68,8 +86,10 @@ class RuleEngineResult {
       'matched_allergens': matchedAllergens,
       'allergens': allergens.map((a) => a.toJson()).toList(),
       'has_conflict': hasConflict,
+      'data_sufficiency': hasSufficientData ? 'sufficient' : 'insufficient',
       'diet_flags': {
         'vegan_compatible': veganCompatible,
+        'vegetarian_compatible': vegetarianCompatible,
         'diabetic_note': diabeticNote,
       },
     };
