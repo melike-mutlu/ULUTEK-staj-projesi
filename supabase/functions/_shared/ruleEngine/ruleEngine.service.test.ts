@@ -293,3 +293,43 @@ Deno.test("Diyabet dostu diyeti düşük şekerli üründe çakışmaz", () => {
 
   assertEquals(result.has_conflict, false);
 });
+
+Deno.test("vejetaryen kullanıcıya sütlü ürün uygun (vegandan farklı)", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt, tuz, maya" }),
+    { allergies: [], diet_preference: ["Vejetaryen"] },
+  );
+
+  assertEquals(result.diet_flags.vegetarian_compatible, true);
+  assertEquals(result.has_conflict, false);
+});
+
+Deno.test("vejetaryen kullanıcıya etli ürün uygun değil", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Dana eti, tuz, baharat" }),
+    { allergies: [], diet_preference: ["Vejetaryen"] },
+  );
+
+  assertEquals(result.diet_flags.vegetarian_compatible, false);
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("aynı sütlü ürün vegan kullanıcıya uygun değil", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt, tuz, maya" }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, false);
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("vejetaryen taramasında 'et' alt dize yanlış pozitifi üretmez", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Beta karoten, petit beurre" }),
+    { allergies: [], diet_preference: ["Vejetaryen"] },
+  );
+
+  assertEquals(result.diet_flags.vegetarian_compatible, true);
+  assertEquals(result.has_conflict, false);
+});

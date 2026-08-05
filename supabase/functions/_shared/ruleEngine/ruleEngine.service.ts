@@ -47,6 +47,7 @@ function evaluateHealthCondition(
  */
 const DIET_ALIASES: Record<string, string[]> = {
   vegan: ["Vegan"],
+  vegetarian: ["Vejetaryen"],
   sporcu: ["Sporcu / Yüksek protein"],
   diyabet_dostu: ["Diyabet dostu"],
 };
@@ -134,6 +135,28 @@ export function runRuleEngine(product: any, profile: any) {
     ? null
     : !hasNonVeganIngredient && !hasNonVeganAllergen;
 
+  // Vejetaryen: yalnızca et/balık/jelatin dışlanır; süt ve yumurta serbesttir.
+  // Bare "et" is avoided on purpose so "petit"/"beta" are not false positives;
+  // meat is caught through its explicit forms instead.
+  const nonVegetarianKeywords = [
+    "et suyu", "kırmızı et", "dana eti", "kuzu eti", "tavuk eti", "hindi eti",
+    "sığır eti", "meat", "tavuk", "chicken", "hindi", "dana", "kuzu", "domuz",
+    "sosis", "salam", "sucuk", "jambon", "kıyma", "biftek", "balık", "fish",
+    "karides", "jelatin", "gelatin",
+  ];
+
+  const hasNonVegetarianIngredient = nonVegetarianKeywords.some((keyword) =>
+    ingredients.includes(keyword)
+  );
+  const hasNonVegetarianAllergen = allergensTags.some((tag: string) =>
+    ["fish", "meat", "crustaceans"].some((t) => tag.toLowerCase().includes(t))
+  );
+
+  const isVegetarianCompatible: boolean | null =
+    dataSufficiency === "insufficient"
+      ? null
+      : !hasNonVegetarianIngredient && !hasNonVegetarianAllergen;
+
   // 2.5 Sağlık Durumu Kontrolü — profildeki her koşul ürüne karşı değerlendirilir.
   const healthConditionInputs: string[] = (profile?.health_conditions ?? [])
     .map((condition: unknown) => String(condition ?? "").trim())
@@ -169,6 +192,7 @@ export function runRuleEngine(product: any, profile: any) {
   let isLowProteinForAthlete = false;
 
   const isVeganUser = hasDiet(profile, "vegan");
+  const isVegetarianUser = hasDiet(profile, "vegetarian");
   const isAthleteUser = hasDiet(profile, "sporcu");
   const isDiabeticDietUser = hasDiet(profile, "diyabet_dostu");
 
@@ -187,6 +211,8 @@ export function runRuleEngine(product: any, profile: any) {
   // Only a known incompatibility counts; unknown (null) is neither conflict nor
   // safety, so it never flips the verdict either way.
   const hasVeganConflict = isVeganUser && isVeganCompatible === false;
+  const hasVegetarianConflict = isVegetarianUser &&
+    isVegetarianCompatible === false;
   const hasAthleteConflict = isLowProteinForAthlete;
   // "Diyabet dostu" diet mirrors the "Şeker hastalığı" condition on the diet axis.
   const hasDiabeticDietConflict = isDiabeticDietUser &&
@@ -196,6 +222,7 @@ export function runRuleEngine(product: any, profile: any) {
   // matches, diet conflicts (vegan/athlete/diabetic) and health conditions.
   const hasConflict = matched.length > 0 ||
     hasVeganConflict ||
+    hasVegetarianConflict ||
     hasAthleteConflict ||
     hasDiabeticDietConflict ||
     hasHealthConflict;
@@ -213,6 +240,7 @@ export function runRuleEngine(product: any, profile: any) {
     has_conflict: hasConflict,
     diet_flags: {
       vegan_compatible: isVeganCompatible,
+      vegetarian_compatible: isVegetarianCompatible,
       diabetic_note: diabeticNote,
       athlete_note: athleteNote,
       protein_100g: proteins,
