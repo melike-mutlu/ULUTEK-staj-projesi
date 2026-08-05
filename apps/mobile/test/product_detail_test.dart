@@ -5,6 +5,7 @@ import 'package:akilli_sepet/features/product_detail/product_detail_view.dart';
 import 'package:akilli_sepet/features/product_detail/product_detail_viewmodel.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/warning_banner.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/product_header_card.dart';
+import 'package:akilli_sepet/features/product_detail/widgets/personal_risks_section.dart';
 import 'package:akilli_sepet/core/models/explanation.dart';
 import 'package:akilli_sepet/core/models/product.dart';
 import 'package:akilli_sepet/core/models/rule_engine_result.dart';
@@ -126,6 +127,49 @@ void main() {
     expect(find.text('Uygun değil'), findsOneWidget);
     expect(find.text('Bu üründe GLUTEN var!'), findsOneWidget);
     expect(find.text('Tıbbi tavsiye değildir.'), findsOneWidget);
+  });
+
+  testWidgets('PersonalRisksSection lists matched allergens only', (WidgetTester tester) async {
+    const result = RuleEngineResult(
+      matchedAllergens: ['Süt/Laktoz'],
+      hasConflict: true,
+      veganCompatible: false,
+      allergens: [
+        DetectedAllergen(key: 'milk', matched: true),
+        DetectedAllergen(key: 'nuts', matched: false),
+      ],
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: PersonalRisksSection(ruleEngineResult: result),
+        ),
+      ),
+    );
+
+    expect(find.text('Senin için riskler'), findsOneWidget);
+    expect(find.text('Süt / Laktoz'), findsOneWidget);
+    expect(find.text('Kabuklu yemişler'), findsNothing);
+  });
+
+  testWidgets('PersonalRisksSection renders nothing without a personal risk', (WidgetTester tester) async {
+    const result = RuleEngineResult(
+      matchedAllergens: [],
+      hasConflict: false,
+      veganCompatible: true,
+      allergens: [DetectedAllergen(key: 'nuts', matched: false)],
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: PersonalRisksSection(ruleEngineResult: result),
+        ),
+      ),
+    );
+
+    expect(find.text('Senin için riskler'), findsNothing);
   });
 
   testWidgets('ProductHeaderCard displays brand, name and Nutri-Score', (WidgetTester tester) async {

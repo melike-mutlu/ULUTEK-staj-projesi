@@ -9,6 +9,7 @@ import '../../data/repositories/profile_repository.dart';
 import 'product_detail_viewmodel.dart';
 import 'widgets/allergens_card.dart';
 import 'widgets/nutriments_card.dart';
+import 'widgets/personal_risks_section.dart';
 import 'widgets/product_header_card.dart';
 import 'widgets/warning_banner.dart';
 
@@ -149,7 +150,15 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               WarningBanner(explanation: explanation),
               const SizedBox(height: 16),
 
-              // 3. Besin Değerleri (100g)
+              // 3. Senin için riskler (profille çakışan alerjenler)
+              PersonalRisksSection(
+                ruleEngineResult: _viewModel.ruleEngineResult,
+              ),
+              if (_viewModel.ruleEngineResult?.personalRiskKeys.isNotEmpty ??
+                  false)
+                const SizedBox(height: 16),
+
+              // 4. Besin Değerleri (100g)
               NutrimentsCard(nutriments: product.nutriments),
               const SizedBox(height: 16),
 
