@@ -209,18 +209,17 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   /// Same destination as the "not found" flow: lets the user report a product
   /// whose data is missing so it can be completed.
   Widget _buildReportButton(BuildContext context, String barcode) {
+    // Content-sized and centred: hugs the label so it stays on one line at any
+    // width, instead of a fixed fraction that clips the text on narrow phones.
     return Center(
-      child: FractionallySizedBox(
-        widthFactor: 0.5,
-        child: ElevatedButton.icon(
-          onPressed: () => Navigator.pushNamed(
-            context,
-            AppRoutes.pendingProduct,
-            arguments: barcode,
-          ),
-          icon: const Icon(Icons.add_a_photo_outlined, size: 18),
-          label: const Text('Ürünü Bize Bildir'),
+      child: ElevatedButton.icon(
+        onPressed: () => Navigator.pushNamed(
+          context,
+          AppRoutes.pendingProduct,
+          arguments: barcode,
         ),
+        icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+        label: const Text('Ürünü Bize Bildir', maxLines: 1),
       ),
     );
   }
