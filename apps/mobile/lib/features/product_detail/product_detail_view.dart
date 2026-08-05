@@ -209,14 +209,19 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   /// Same destination as the "not found" flow: lets the user report a product
   /// whose data is missing so it can be completed.
   Widget _buildReportButton(BuildContext context, String barcode) {
-    // Content-sized and centred: hugs the label so it stays on one line at any
-    // width, instead of a fixed fraction that clips the text on narrow phones.
+    // The app theme forces buttons to full width (Size.fromHeight = infinite
+    // width). Override it here so the button hugs its label: one line, centred,
+    // and safe at any screen size — no fixed fraction that could clip.
     return Center(
       child: ElevatedButton.icon(
         onPressed: () => Navigator.pushNamed(
           context,
           AppRoutes.pendingProduct,
           arguments: barcode,
+        ),
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22),
         ),
         icon: const Icon(Icons.add_a_photo_outlined, size: 18),
         label: const Text('Ürünü Bize Bildir', maxLines: 1),
