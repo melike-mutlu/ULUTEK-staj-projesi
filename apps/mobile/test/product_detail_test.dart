@@ -123,7 +123,7 @@ void main() {
       ),
     );
 
-    expect(find.text('UYGUN DEĞİL / RİSKLİ'), findsOneWidget);
+    expect(find.text('Uygun değil'), findsOneWidget);
     expect(find.text('Bu üründe GLUTEN var!'), findsOneWidget);
     expect(find.text('Tıbbi tavsiye değildir.'), findsOneWidget);
   });
@@ -207,7 +207,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // A pending product can never read as safe.
-    expect(find.text('DİKKAT EDİLMELİ'), findsOneWidget);
+    expect(find.text('Dikkatli ol'), findsOneWidget);
     // The badge is the single pending indicator; the old standalone card is gone.
     expect(find.text('Doğrulanmadı'), findsOneWidget);
     expect(
