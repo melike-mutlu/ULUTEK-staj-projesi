@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/product.dart';
+import '../../../core/theme/akilli_sepet_colors.dart';
 
 /// Nutri-Score values Open Food Facts sends when it has no grade.
 const _unknownNutriScores = <String>{'unknown', 'not-applicable'};
@@ -12,7 +13,8 @@ class ProductHeaderCard extends StatelessWidget {
 
   final Product product;
 
-  static const double _thumbnailSize = 76;
+  /// The image takes 40% of the available width; the name gets the rest.
+  static const double _imageWidthFactor = 0.4;
 
   String? get _nutriScore {
     final score = product.nutriscore?.trim().toLowerCase();
@@ -27,63 +29,77 @@ class ProductHeaderCard extends StatelessWidget {
     final brand = product.brand?.trim();
     final score = _nutriScore;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _Thumbnail(imageUrl: product.imageUrl, size: _thumbnailSize),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    // LayoutBuilder, not MediaQuery: the card is also rendered inside narrower
+    // boxes (tests, future split layouts) and must scale with its parent.
+    return LayoutBuilder(
+      builder: (context, constraints) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                product.name,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF111827),
-                  height: 1.15,
-                  letterSpacing: -0.5,
-                ),
+              _Thumbnail(
+                imageUrl: product.imageUrl,
+                width: constraints.maxWidth * _imageWidthFactor,
               ),
-              if (brand != null && brand.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  brand,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF9CA3AF),
-                  ),
-                ),
-              ],
-              if (product.isPending || score != null) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (product.isPending) const _PendingBadge(),
-                    if (score != null) _NutriScoreBadge(score: score),
+                    Text(
+                      product.name,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF111827),
+                        height: 1.15,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    if (brand != null && brand.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        brand,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AkilliSepetColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-              ],
+              ),
             ],
           ),
-        ),
-      ],
+          // Badges sit under the row: next to the name they would have to
+          // shrink, and a safety badge must never be clipped.
+          if (product.isPending || score != null) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                if (product.isPending) const _PendingBadge(),
+                if (score != null) _NutriScoreBadge(score: score),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
 
 class _Thumbnail extends StatelessWidget {
-  const _Thumbnail({required this.imageUrl, required this.size});
+  const _Thumbnail({required this.imageUrl, required this.width});
 
   final String? imageUrl;
-  final double size;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
@@ -91,8 +107,8 @@ class _Thumbnail extends StatelessWidget {
     final url = imageUrl?.trim().replaceFirst(RegExp('^http://'), 'https://');
 
     return Container(
-      width: size,
-      height: size,
+      width: width,
+      height: width,
       decoration: BoxDecoration(
         color: const Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(10),
@@ -118,8 +134,8 @@ class _ThumbnailPlaceholder extends StatelessWidget {
     return const Center(
       child: Icon(
         Icons.image_not_supported_outlined,
-        size: 24,
-        color: Color(0xFF9CA3AF),
+        size: 32,
+        color: AkilliSepetColors.textSecondary,
       ),
     );
   }

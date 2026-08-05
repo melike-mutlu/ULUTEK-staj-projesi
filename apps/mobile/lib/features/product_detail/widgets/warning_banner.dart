@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/explanation.dart';
+import '../../../core/theme/akilli_sepet_colors.dart';
 import '../../../core/theme/warning_level_style.dart';
 import 'status_dot.dart';
 
@@ -47,7 +48,7 @@ class WarningBanner extends StatelessWidget {
           _reason,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Color(0xFF6B7280),
+            color: AkilliSepetColors.textSecondary,
             fontSize: 15,
             height: 1.4,
           ),
@@ -59,7 +60,7 @@ class WarningBanner extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFFC0C4CC),
+              color: AkilliSepetColors.textSecondary,
             ),
           ),
         ],

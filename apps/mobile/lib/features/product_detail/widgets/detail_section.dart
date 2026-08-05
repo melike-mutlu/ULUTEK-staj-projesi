@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/akilli_sepet_colors.dart';
+
 /// Flat, card-less section: a bold title and rows separated by hairlines.
 /// No borders or shadows — the screen reads as one list, not stacked cards.
 class DetailSection extends StatelessWidget {
@@ -18,7 +20,7 @@ class DetailSection extends StatelessWidget {
   final List<Widget> children;
 
   /// Dividers start after the leading icon, like a native list.
-  static const double dividerInset = 72;
+  static const double dividerInset = 76;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,7 @@ class DetailSection extends StatelessWidget {
                     meta!,
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF9CA3AF),
+                      color: AkilliSepetColors.textSecondary,
                     ),
                   ),
                 ],

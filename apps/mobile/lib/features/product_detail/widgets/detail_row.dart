@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/explanation.dart';
+import '../../../core/theme/akilli_sepet_colors.dart';
 import 'status_dot.dart';
 
 /// One list row: leading icon, title with an explanatory subtitle, an optional
@@ -23,12 +24,12 @@ class DetailRow extends StatelessWidget {
   final WarningLevel? level;
 
   /// Keeps the icon column the same width as the divider inset.
-  static const double leadingWidth = 60;
+  static const double leadingWidth = 64;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           SizedBox(
@@ -44,6 +45,7 @@ class DetailRow extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     fontSize: 17,
+                    fontWeight: FontWeight.w500,
                     color: Color(0xFF111827),
                     height: 1.2,
                   ),
@@ -54,7 +56,7 @@ class DetailRow extends StatelessWidget {
                     subtitle!,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF9CA3AF),
+                      color: AkilliSepetColors.textSecondary,
                       height: 1.25,
                     ),
                   ),
@@ -68,7 +70,8 @@ class DetailRow extends StatelessWidget {
               value!,
               style: const TextStyle(
                 fontSize: 16,
-                color: Color(0xFF6B7280),
+                fontWeight: FontWeight.w500,
+                color: AkilliSepetColors.textSecondary,
               ),
             ),
           ],

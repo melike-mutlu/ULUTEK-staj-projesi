@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/models/explanation.dart';
 import '../../../core/models/product.dart';
+import '../../../core/theme/akilli_sepet_colors.dart';
 import 'detail_row.dart';
 import 'detail_section.dart';
 import 'section_note.dart';
@@ -24,6 +25,7 @@ class _Nutrient {
     required this.label,
     required this.unit,
     required this.asset,
+    required this.iconSize,
     required this.valueOf,
     required this.low,
     required this.high,
@@ -35,8 +37,10 @@ class _Nutrient {
   final String label;
   final String unit;
 
-  /// Icon file under assets/nutritional_values/.
+  /// Icon file under assets/nutritional_values/ and its rendered size — the
+  /// drawings have different paddings, so each one is tuned separately.
   final String asset;
+  final double iconSize;
   final _ValueOf valueOf;
 
   /// At or below [low] the value is good; above [high] it is bad.
@@ -71,6 +75,7 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
     label: 'Enerji',
     unit: 'kcal',
     asset: '$_iconDir/energy.png',
+    iconSize: 34,
     valueOf: _energy,
     low: 150,
     high: 350,
@@ -85,6 +90,7 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
     label: 'Şeker',
     unit: 'g',
     asset: '$_iconDir/sugar.png',
+    iconSize: 37,
     valueOf: _sugars,
     low: 5,
     high: 22.5,
@@ -98,6 +104,7 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
     label: 'Yağ',
     unit: 'g',
     asset: '$_iconDir/oil.png',
+    iconSize: 40,
     valueOf: _fat,
     low: 3,
     high: 17.5,
@@ -111,6 +118,7 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
     label: 'Protein',
     unit: 'g',
     asset: '$_iconDir/protein.png',
+    iconSize: 62,
     valueOf: _proteins,
     low: 4,
     high: 8,
@@ -160,7 +168,7 @@ class _NutrientRow extends StatelessWidget {
     final level = amount == null ? null : nutrient.levelFor(amount);
 
     return DetailRow(
-      leading: _NutrientIcon(asset: nutrient.asset),
+      leading: _NutrientIcon(asset: nutrient.asset, size: nutrient.iconSize),
       title: nutrient.label,
       // Without a value there is nothing to judge, so no note and no dot.
       subtitle: level == null ? 'Bilgi yok' : nutrient.noteFor(level),
@@ -171,22 +179,21 @@ class _NutrientRow extends StatelessWidget {
 }
 
 class _NutrientIcon extends StatelessWidget {
-  const _NutrientIcon({required this.asset});
+  const _NutrientIcon({required this.asset, required this.size});
 
   final String asset;
-
-  static const double _size = 44;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return Image.asset(
       asset,
-      width: _size,
-      height: _size,
-      errorBuilder: (_, __, ___) => const Icon(
+      width: size,
+      height: size,
+      errorBuilder: (_, __, ___) => Icon(
         Icons.restaurant_outlined,
-        size: _size,
-        color: Color(0xFF9CA3AF),
+        size: size,
+        color: AkilliSepetColors.textSecondary,
       ),
     );
   }

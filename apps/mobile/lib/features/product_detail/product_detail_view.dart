@@ -91,16 +91,6 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Ürün Detayı'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ürün detayı paylaşıldı')),
-              );
-            },
-          ),
-        ],
       ),
       body: _buildBody(context),
     );

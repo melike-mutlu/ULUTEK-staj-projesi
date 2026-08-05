@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/akilli_sepet_colors.dart';
 import 'detail_section.dart';
 
 /// One quiet line inside a section: "nothing to report here".
@@ -20,7 +21,7 @@ class SectionNote extends StatelessWidget {
         text,
         style: const TextStyle(
           fontSize: 15,
-          color: Color(0xFF9CA3AF),
+          color: AkilliSepetColors.textSecondary,
           height: 1.35,
         ),
       ),
