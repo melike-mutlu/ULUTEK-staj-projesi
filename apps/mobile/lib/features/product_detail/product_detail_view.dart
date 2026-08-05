@@ -137,7 +137,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
             children: [
               // 1. Ürün kimliği (görsel + ad + marka)
               ProductHeaderCard(product: product),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
 
               // 2. Uygunluk sonucu — ekranın görsel çıpası
               WarningBanner(explanation: explanation),
