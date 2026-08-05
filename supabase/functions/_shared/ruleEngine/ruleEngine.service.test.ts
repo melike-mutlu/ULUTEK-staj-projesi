@@ -416,3 +416,53 @@ Deno.test("vegan kelime taramasında bare 'et' yanlış pozitifi üretmez", () =
 
   assertEquals(result.diet_flags.vegan_compatible, true);
 });
+
+Deno.test("Tansiyon yüksek tuzlu üründe çakışır", () => {
+  const result = runRuleEngine(
+    product({
+      allergens_tags: ["en:milk"],
+      ingredients_text: "Süt",
+      nutriments: { salt_100g: 2.0 },
+    }),
+    { allergies: [], health_conditions: ["Tansiyon"] },
+  );
+
+  assertEquals(result.health_conditions[0].status, "conflict");
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("Yüksek kolesterol yüksek doymuş yağlı üründe çakışır", () => {
+  const result = runRuleEngine(
+    product({
+      allergens_tags: ["en:milk"],
+      ingredients_text: "Süt",
+      nutriments: { saturated_fat_100g: 12 },
+    }),
+    { allergies: [], health_conditions: ["Yüksek kolesterol"] },
+  );
+
+  assertEquals(result.health_conditions[0].status, "conflict");
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("Kalp rahatsızlığı düşük doymuş yağlı üründe uygun", () => {
+  const result = runRuleEngine(
+    product({
+      allergens_tags: ["en:milk"],
+      ingredients_text: "Süt",
+      nutriments: { saturated_fat_100g: 1 },
+    }),
+    { allergies: [], health_conditions: ["Kalp rahatsızlığı"] },
+  );
+
+  assertEquals(result.health_conditions[0].status, "ok");
+});
+
+Deno.test("besin değeri yoksa tansiyon değerlendirilemez", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt", nutriments: {} }),
+    { allergies: [], health_conditions: ["Tansiyon"] },
+  );
+
+  assertEquals(result.health_conditions[0].status, "not_evaluated");
+});
