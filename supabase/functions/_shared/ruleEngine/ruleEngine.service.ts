@@ -115,6 +115,22 @@ export function runRuleEngine(product: any, profile: any) {
     matched: profileKeys.has(key),
   }));
 
+  // "May contain" — a weaker, separate signal. Kept distinct from confirmed
+  // allergens so the UI can show "iz içerebilir", never as a confirmed match.
+  // A key already confirmed above is not repeated here.
+  const traceKeys: string[] = [];
+  for (const tag of product.traces_tags ?? []) {
+    for (const key of resolveAllergenKeys(String(tag))) {
+      if (!productKeySet.has(key) && !traceKeys.includes(key)) {
+        traceKeys.push(key);
+      }
+    }
+  }
+  const traces = traceKeys.map((key) => ({
+    key,
+    matched: profileKeys.has(key),
+  }));
+
   // 2. Vegan Uyumluluk Kontrolü (ürünün kendisi vegan mı?)
   const ingredients = (product.ingredients_text || "").toLowerCase();
   const allergensTags = product.allergens_tags || [];
@@ -230,6 +246,9 @@ export function runRuleEngine(product: any, profile: any) {
   return {
     matched_allergens: matched,
     allergens,
+    // "May contain" allergens; weaker than `allergens`. Not folded into
+    // has_conflict — surfaced separately as a caution, not a confirmed verdict.
+    traces,
     // Per health condition: "conflict" | "ok" | "not_evaluated". Consumers must
     // treat "not_evaluated" as "kontrol edilemedi", never as safe.
     health_conditions: healthConditions,

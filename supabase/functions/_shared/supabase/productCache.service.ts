@@ -58,10 +58,20 @@ export async function saveToCache(
 ): Promise<OffProduct> {
   const supabase = getServiceClient();
 
+  // Only persist columns that exist today. New OFF fields (traces_tags,
+  // ingredients_analysis_tags, labels_tags) are used live per request but not
+  // written until their columns are added — spreading them would break upsert.
   const { error } = await supabase
     .from("product_cache")
     .upsert({
-      ...product,
+      barcode: product.barcode,
+      name: product.name,
+      ingredients_text: product.ingredients_text,
+      additives: product.additives,
+      allergens_tags: product.allergens_tags,
+      nutriments: product.nutriments,
+      nutriscore: product.nutriscore,
+      image_url: product.image_url,
       fetched_at: new Date().toISOString(),
     });
 

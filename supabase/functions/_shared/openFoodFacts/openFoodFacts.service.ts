@@ -6,6 +6,8 @@ export interface OffProduct {
   ingredients_text: string;
   additives: string[];
   allergens_tags: string[];
+  /** "May contain" tags — a weaker signal than allergens_tags. */
+  traces_tags: string[];
   nutriments: {
     energy_kcal_100g: number | null;
     sugars_100g: number | null;
@@ -31,6 +33,7 @@ export async function fetchFromOpenFoodFacts(barcode: string): Promise<OffProduc
     ingredients_text: p.ingredients_text ?? "",
     additives: p.additives_tags ?? [],
     allergens_tags: p.allergens_tags ?? [],
+    traces_tags: p.traces_tags ?? [],
     nutriments: {
       energy_kcal_100g: p.nutriments?.["energy-kcal_100g"] ?? null,
       sugars_100g: p.nutriments?.sugars_100g ?? null,

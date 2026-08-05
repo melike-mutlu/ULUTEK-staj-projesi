@@ -6,6 +6,7 @@ function product(overrides: Record<string, unknown> = {}) {
     barcode: "8690000000000",
     ingredients_text: "",
     allergens_tags: [] as string[],
+    traces_tags: [] as string[],
     nutriments: { sugars_100g: 0, proteins_100g: 0 },
     ...overrides,
   };
@@ -332,4 +333,27 @@ Deno.test("vejetaryen taramasında 'et' alt dize yanlış pozitifi üretmez", ()
 
   assertEquals(result.diet_flags.vegetarian_compatible, true);
   assertEquals(result.has_conflict, false);
+});
+
+Deno.test("iz (traces_tags) ayrı, zayıf sinyal olarak döner, çakışma üretmez", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], traces_tags: ["en:peanuts"] }),
+    { allergies: ["Fındık/Fıstık"] },
+  );
+
+  // Confirmed allergens untouched; peanut only in traces.
+  assertEquals(result.allergens, [{ key: "milk", matched: false }]);
+  assertEquals(result.traces, [{ key: "peanuts", matched: true }]);
+  // A may-contain trace must not flip the verdict to a confirmed conflict.
+  assertEquals(result.has_conflict, false);
+});
+
+Deno.test("onaylı alerjen iz listesinde tekrar edilmez", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], traces_tags: ["en:milk"] }),
+    { allergies: [] },
+  );
+
+  assertEquals(result.allergens, [{ key: "milk", matched: false }]);
+  assertEquals(result.traces, []);
 });
