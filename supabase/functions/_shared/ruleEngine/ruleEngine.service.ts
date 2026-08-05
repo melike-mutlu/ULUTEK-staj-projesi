@@ -1,7 +1,29 @@
-import { resolveAllergenKeys } from "./allergen_dictionary.ts";
+import { normalize, resolveAllergenKeys } from "./allergen_dictionary.ts";
+
+/**
+ * Diet keys the engine reacts to -> the labels the mobile app stores.
+ * Labels come from apps/mobile/lib/core/constants/profile_options.dart; the key
+ * itself is the legacy value written before diet_preference became text[].
+ */
+const DIET_ALIASES: Record<string, string[]> = {
+  vegan: ["Vegan"],
+  sporcu: ["Sporcu / Yüksek protein"],
+};
+
+/** diet_preference is text[], but old rows may still hold a single string. */
+function hasDiet(profile: any, diet: string): boolean {
+  const raw = profile?.diet_preference;
+  const selected = Array.isArray(raw) ? raw : raw == null ? [] : [raw];
+  const aliases = [diet, ...(DIET_ALIASES[diet] ?? [])].map(normalize);
+
+  return selected.some((value) => aliases.includes(normalize(String(value))));
+}
 
 export function runRuleEngine(product: any, profile: any) {
-  const userAllergies: string[] = profile?.allergies ?? [];
+  // Empty entries would resolve to nothing but must not reach the dictionary.
+  const userAllergies: string[] = (profile?.allergies ?? [])
+    .map((allergy: unknown) => String(allergy ?? "").trim())
+    .filter((allergy: string) => allergy.length > 0);
 
   // 1. Alerjen Eşleşmesi Kontrolü
   // Both sides are resolved to canonical keys and intersected; no substring
@@ -15,12 +37,12 @@ export function runRuleEngine(product: any, profile: any) {
   const productKeySet = new Set(productKeys);
 
   const profileKeys = new Set(
-    userAllergies.flatMap((allergy) => resolveAllergenKeys(String(allergy))),
+    userAllergies.flatMap((allergy) => resolveAllergenKeys(allergy)),
   );
 
   // Kept as the user's original profile strings — existing consumers read this.
   const matched = userAllergies.filter((allergy) =>
-    resolveAllergenKeys(String(allergy)).some((key) => productKeySet.has(key))
+    resolveAllergenKeys(allergy).some((key) => productKeySet.has(key))
   );
 
   // Every allergen found on the product, in tag order; matched=false means the
@@ -63,10 +85,8 @@ export function runRuleEngine(product: any, profile: any) {
   let athleteNote: string | null = null;
   let isLowProteinForAthlete = false;
 
-  // Gerçek şema: profiles.diet_preference — 'standard' | 'vegan' | 'vejetaryen' | 'diyabet_dostu' | 'sporcu'
-  const dietPreference: string | undefined = profile?.diet_preference;
-  const isVeganUser = dietPreference === "vegan";
-  const isAthleteUser = dietPreference === "sporcu";
+  const isVeganUser = hasDiet(profile, "vegan");
+  const isAthleteUser = hasDiet(profile, "sporcu");
 
   if (isAthleteUser) {
     if (proteins < 5) {
