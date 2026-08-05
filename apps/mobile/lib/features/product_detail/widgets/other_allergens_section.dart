@@ -83,7 +83,7 @@ class _AllergenItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           AllergenIcon(asset: allergen.asset, size: 44),
-          const SizedBox(width: 8),
+          const SizedBox(width: 3),
           Flexible(
             child: Text(
               allergen.label,
