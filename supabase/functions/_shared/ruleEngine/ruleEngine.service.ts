@@ -81,7 +81,11 @@ export function runRuleEngine(product: any, profile: any) {
     ["milk", "egg", "fish", "meat"].some((nonVeganTag) => tag.toLowerCase().includes(nonVeganTag))
   );
 
-  const isVeganCompatible = !hasNonVeganIngredient && !hasNonVeganAllergen;
+  // null = unknown. With no allergen evidence we cannot claim the product is
+  // plant based; absence of a match is not proof of compatibility.
+  const isVeganCompatible: boolean | null = dataSufficiency === "insufficient"
+    ? null
+    : !hasNonVeganIngredient && !hasNonVeganAllergen;
 
   // 3. Diyabet Değerlendirmesi (Şeker Oranına Göre, herkes için bilgilendirici)
   const sugars = product.nutriments?.sugars_100g ?? product.nutriments?.sugars ?? 0;
@@ -115,7 +119,9 @@ export function runRuleEngine(product: any, profile: any) {
   }
 
   // Çakışma Kontrolleri
-  const hasVeganConflict = isVeganUser && !isVeganCompatible;
+  // Only a known incompatibility counts; unknown (null) is neither conflict nor
+  // safety, so it never flips the verdict either way.
+  const hasVeganConflict = isVeganUser && isVeganCompatible === false;
   const hasAthleteConflict = isLowProteinForAthlete;
 
   const hasConflict = matched.length > 0 || hasVeganConflict || hasAthleteConflict;
@@ -123,8 +129,9 @@ export function runRuleEngine(product: any, profile: any) {
   return {
     matched_allergens: matched,
     allergens,
-    // "insufficient" means the product carries no allergen evidence at all, so
-    // a green verdict would be a guess rather than an answer.
+    // "insufficient" means the product carries no allergen evidence at all.
+    // The verdict then can neither be trusted as "uygun" nor as a conflict;
+    // consumers must show "yetersiz veri" and ignore has_conflict.
     data_sufficiency: dataSufficiency,
     has_conflict: hasConflict,
     diet_flags: {

@@ -139,3 +139,34 @@ Deno.test("findMissingFields alerjen ve içindekiler eksikliğini bildirir", () 
   assertEquals(complete.includes("allergens_tags"), false);
   assertEquals(complete.includes("ingredients_text"), false);
 });
+
+Deno.test("veri yetersizken vegan uyumu bilinmiyor (null) döner", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "" }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, null);
+  // Unknown must not surface as a conflict either.
+  assertEquals(result.has_conflict, false);
+});
+
+Deno.test("veri yeterliyken bilinen uyumsuzluk vegan çakışması üretir", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Süt, tuz, maya" }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, false);
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("veri yeterli ve ürün bitkiselse vegan uyumlu döner", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Nohut, zeytinyağı, tuz" }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, true);
+  assertEquals(result.has_conflict, false);
+});
