@@ -17,6 +17,15 @@ class Nutriments {
     this.carbohydrates100g,
   });
 
+  /// En az bir besin değeri var mı — "besin değerleri" bölümünü göstermeye değer.
+  bool get hasAny =>
+      energyKcal100g != null ||
+      sugars100g != null ||
+      fat100g != null ||
+      proteins100g != null ||
+      salt100g != null ||
+      carbohydrates100g != null;
+
   factory Nutriments.fromJson(Map<String, dynamic> json) {
     return Nutriments(
       energyKcal100g: (json['energy_kcal_100g'] as num?)?.toDouble(),

@@ -7,6 +7,8 @@ import 'detail_row.dart';
 import 'detail_section.dart';
 import 'section_note.dart';
 
+const String _assetDir = 'assets/allergens';
+
 /// "Alerjiler" — allergens that clash with the user's own profile.
 /// Always visible: when there is no clash it says so in one line.
 class PersonalRisksSection extends StatelessWidget {
@@ -25,9 +27,24 @@ class PersonalRisksSection extends StatelessWidget {
       return const DetailSection(
         title: 'Alerjiler',
         children: [
-          SectionNote(
-            text: 'Bu ürünün içerik bilgisi eksik, alerjen kontrolü '
-                'yapılamadı. Ambalajdaki etiketi kontrol et.',
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                AllergenIcon(asset: '$_assetDir/nope.png'),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'İçerik bilgisi eksik, alerjen kontrolü yapılamadı.',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF6B7280),
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       );

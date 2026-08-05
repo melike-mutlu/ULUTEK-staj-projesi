@@ -25,12 +25,7 @@ class WarningBanner extends StatelessWidget {
   /// "Yetersiz veri" instead of a green/red claim.
   final bool insufficientData;
 
-  static const List<ReasonSpan> _insufficientReason = [
-    ReasonSpan(
-      'Bu ürünün içerik ve alerjen bilgisi eksik olduğu için güvenli olup '
-      'olmadığını söyleyemiyoruz. Ambalajdaki etiketi kontrol et.',
-    ),
-  ];
+  static const String _insufficientReason = 'Bu ürünün içerik bilgisi eksik.';
 
   /// Sits next to the verdict when the product is suitable.
   static const String _starIcon = 'assets/other/star.png';
@@ -46,7 +41,6 @@ class WarningBanner extends StatelessWidget {
       !insufficientData && explanation.level == WarningLevel.ok;
 
   List<ReasonSpan> get _reason {
-    if (insufficientData) return _insufficientReason;
     final personal = reason;
     if (personal != null && personal.isNotEmpty) return personal;
     return [
@@ -58,9 +52,9 @@ class WarningBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = insufficientData
-        ? WarningLevelStyle.insufficient
-        : WarningLevelStyle.of(explanation.level);
+    if (insufficientData) return _buildInsufficient();
+
+    final style = WarningLevelStyle.of(explanation.level);
 
     return Row(
       // Top aligned: the verdict starts level with the top of the illustration
@@ -164,6 +158,34 @@ class WarningBanner extends StatelessWidget {
                 ],
               ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// No dot, no illustration, no disclaimer — a plain left-aligned notice.
+  Widget _buildInsufficient() {
+    const style = WarningLevelStyle.insufficient;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          style.title,
+          style: TextStyle(
+            color: style.main,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          _insufficientReason,
+          style: TextStyle(
+            color: AkilliSepetColors.textSecondary,
+            fontSize: 16,
+            height: 1.4,
           ),
         ),
       ],

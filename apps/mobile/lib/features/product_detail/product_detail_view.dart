@@ -129,6 +129,15 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           return _buildNotFoundState(context);
         }
 
+        final insufficient =
+            _viewModel.ruleEngineResult?.hasSufficientData == false;
+        final nutrimentsCard = NutrimentsCard(
+          nutriments: product.nutriments,
+          dietNote: explanation.dietNote,
+        );
+        // Only worth surfacing early if there is actually something to show.
+        final showNutrimentsFirst = insufficient && product.nutriments.hasAny;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           physics: const BouncingScrollPhysics(),
@@ -138,21 +147,29 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               // 1. Uygunluk sonucu — ekranın görsel çıpası
               WarningBanner(
                 explanation: explanation,
-                insufficientData:
-                    _viewModel.ruleEngineResult?.hasSufficientData == false,
+                insufficientData: insufficient,
                 reason: personalReasonSpans(
                   explanation: explanation,
                   rule: _viewModel.ruleEngineResult,
                   profile: _viewModel.userProfile,
                 ),
               ),
+              // Veri eksikse kullanıcı ürünü bize bildirerek katkı yapabilir.
+              if (insufficient) ...[
+                const SizedBox(height: 16),
+                _buildReportButton(context, product.barcode),
+              ],
               const SizedBox(height: 14),
 
               // 2. Ürün kimliği (görsel + ad + marka)
               ProductHeaderCard(product: product),
               const SizedBox(height: 32),
 
-              // 3-6. Profil kategorileri: alerji, diyet, sağlık, besin değerleri
+              // Veri eksik ama besin değerleri varsa, kullanıcı hiç değilse
+              // onları görsün diye kimliğin hemen altına alınır.
+              if (showNutrimentsFirst) nutrimentsCard,
+
+              // 3-6. Profil kategorileri: alerji, diyet, sağlık
               PersonalRisksSection(
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
@@ -174,10 +191,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 ),
                 emptyMessage: 'Kayıtlı bir sağlık durumun yok.',
               ),
-              NutrimentsCard(
-                nutriments: product.nutriments,
-                dietNote: explanation.dietNote,
-              ),
+              if (!showNutrimentsFirst) nutrimentsCard,
 
               // 7-8. Ürünün kendi bilgileri
               OtherAllergensSection(
@@ -190,6 +204,23 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           ),
         );
     }
+  }
+
+  /// Same destination as the "not found" flow: lets the user report a product
+  /// whose data is missing so it can be completed.
+  Widget _buildReportButton(BuildContext context, String barcode) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => Navigator.pushNamed(
+          context,
+          AppRoutes.pendingProduct,
+          arguments: barcode,
+        ),
+        icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+        label: const Text('Ürünü Bize Bildir'),
+      ),
+    );
   }
 
   Widget _buildErrorState(BuildContext context) {

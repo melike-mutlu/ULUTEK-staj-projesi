@@ -152,7 +152,7 @@ void main() {
 
     expect(find.text('Yetersiz veri'), findsOneWidget);
     expect(find.text('Uygun'), findsNothing);
-    expect(find.textContaining('güvenli olup'), findsOneWidget);
+    expect(find.text('Bu ürünün içerik bilgisi eksik.'), findsOneWidget);
   });
 
   testWidgets('PersonalRisksSection lists matched allergens only',
