@@ -31,7 +31,7 @@ class ProfileCheckSection extends StatelessWidget {
           : [
               for (final check in checks)
                 DetailRow(
-                  leading: Icon(icon, size: 26, color: const Color(0xFF6B7280)),
+                  leading: Icon(icon, size: 34, color: const Color(0xFF6B7280)),
                   title: check.label,
                   subtitle: check.note,
                   level: check.level,

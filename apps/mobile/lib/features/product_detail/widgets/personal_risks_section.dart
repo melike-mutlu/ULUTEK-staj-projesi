@@ -43,7 +43,7 @@ class PersonalRisksSection extends StatelessWidget {
 
 /// Allergen png with a graceful fallback when the asset is missing.
 class AllergenIcon extends StatelessWidget {
-  const AllergenIcon({super.key, required this.asset, this.size = 30});
+  const AllergenIcon({super.key, required this.asset, this.size = 60});
 
   final String asset;
   final double size;

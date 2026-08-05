@@ -18,7 +18,7 @@ class DetailSection extends StatelessWidget {
   final List<Widget> children;
 
   /// Dividers start after the leading icon, like a native list.
-  static const double dividerInset = 46;
+  static const double dividerInset = 72;
 
   @override
   Widget build(BuildContext context) {

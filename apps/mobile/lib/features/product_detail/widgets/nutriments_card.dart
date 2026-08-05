@@ -9,6 +9,8 @@ import 'section_note.dart';
 typedef _ValueOf = double? Function(Nutriments nutriments);
 typedef _Notes = ({String ok, String caution, String warning});
 
+const String _iconDir = 'assets/nutritional_values';
+
 double? _energy(Nutriments n) => n.energyKcal100g;
 double? _sugars(Nutriments n) => n.sugars100g;
 double? _fat(Nutriments n) => n.fat100g;
@@ -21,7 +23,7 @@ class _Nutrient {
   const _Nutrient({
     required this.label,
     required this.unit,
-    required this.icon,
+    required this.asset,
     required this.valueOf,
     required this.low,
     required this.high,
@@ -32,7 +34,9 @@ class _Nutrient {
 
   final String label;
   final String unit;
-  final IconData icon;
+
+  /// Icon file under assets/nutritional_values/.
+  final String asset;
   final _ValueOf valueOf;
 
   /// At or below [low] the value is good; above [high] it is bad.
@@ -66,7 +70,7 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
   _Nutrient(
     label: 'Enerji',
     unit: 'kcal',
-    icon: Icons.local_fire_department_outlined,
+    asset: '$_iconDir/energy.png',
     valueOf: _energy,
     low: 150,
     high: 350,
@@ -80,7 +84,7 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
   _Nutrient(
     label: 'Şeker',
     unit: 'g',
-    icon: Icons.cookie_outlined,
+    asset: '$_iconDir/sugar.png',
     valueOf: _sugars,
     low: 5,
     high: 22.5,
@@ -93,7 +97,7 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
   _Nutrient(
     label: 'Yağ',
     unit: 'g',
-    icon: Icons.water_drop_outlined,
+    asset: '$_iconDir/oil.png',
     valueOf: _fat,
     low: 3,
     high: 17.5,
@@ -106,7 +110,7 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
   _Nutrient(
     label: 'Protein',
     unit: 'g',
-    icon: Icons.fitness_center_outlined,
+    asset: '$_iconDir/protein.png',
     valueOf: _proteins,
     low: 4,
     high: 8,
@@ -156,12 +160,34 @@ class _NutrientRow extends StatelessWidget {
     final level = amount == null ? null : nutrient.levelFor(amount);
 
     return DetailRow(
-      leading: Icon(nutrient.icon, size: 26, color: const Color(0xFF6B7280)),
+      leading: _NutrientIcon(asset: nutrient.asset),
       title: nutrient.label,
       // Without a value there is nothing to judge, so no note and no dot.
       subtitle: level == null ? 'Bilgi yok' : nutrient.noteFor(level),
       value: amount == null ? '—' : nutrient.format(amount),
       level: level,
+    );
+  }
+}
+
+class _NutrientIcon extends StatelessWidget {
+  const _NutrientIcon({required this.asset});
+
+  final String asset;
+
+  static const double _size = 44;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      asset,
+      width: _size,
+      height: _size,
+      errorBuilder: (_, __, ___) => const Icon(
+        Icons.restaurant_outlined,
+        size: _size,
+        color: Color(0xFF9CA3AF),
+      ),
     );
   }
 }

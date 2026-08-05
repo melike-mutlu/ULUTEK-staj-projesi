@@ -23,7 +23,7 @@ class DetailRow extends StatelessWidget {
   final WarningLevel? level;
 
   /// Keeps the icon column the same width as the divider inset.
-  static const double leadingWidth = 34;
+  static const double leadingWidth = 60;
 
   @override
   Widget build(BuildContext context) {
