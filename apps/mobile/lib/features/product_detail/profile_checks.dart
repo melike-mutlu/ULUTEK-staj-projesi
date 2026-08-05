@@ -85,48 +85,76 @@ WarningLevel _diabeticLevel(String note) {
   return WarningLevel.ok;
 }
 
-/// Builds the one-paragraph personal warning shown under the verdict, from our
-/// own data instead of the LLM's free text: which allergens the product has,
-/// which diet it breaks and which health note applies.
+/// A piece of the personal warning. [highlight] marks the words that come
+/// straight from the user's own profile, so the UI can colour them.
+class ReasonSpan {
+  const ReasonSpan(this.text, {this.highlight = false});
+
+  final String text;
+  final bool highlight;
+}
+
+/// Builds the personal warning shown under the verdict from our own data
+/// instead of the LLM's free text: the allergens the user reacts to, the diet
+/// this product breaks and any health note that applies.
 ///
 /// Falls back to the backend explanation when the profile is empty, so an
 /// anonymous user still sees something meaningful.
-String personalReason({
+List<ReasonSpan> personalReasonSpans({
   required Explanation explanation,
   required RuleEngineResult? rule,
   required UserProfile? profile,
 }) {
-  final sentences = <String>[];
+  final spans = <ReasonSpan>[];
 
   final allergens = (rule?.personalRiskKeys ?? const <String>[])
       .map((key) => allergenInfo(key).label.toLowerCase())
       .toList();
   if (allergens.isNotEmpty) {
-    sentences.add('Bu ürün ${_join(allergens)} içerir.');
+    spans.add(const ReasonSpan('Sende alerji yapan '));
+    for (var i = 0; i < allergens.length; i++) {
+      if (i > 0) {
+        spans.add(ReasonSpan(i == allergens.length - 1 ? ' ve ' : ', '));
+      }
+      spans.add(ReasonSpan(allergens[i], highlight: true));
+    }
+    spans.add(const ReasonSpan(' içeriyor. '));
   }
 
   for (final check in dietChecks(profile, rule)) {
     if (check.level != WarningLevel.ok) {
-      sentences.add('${check.label} beslenmesine uygun değil.');
+      spans.add(ReasonSpan(check.label, highlight: true));
+      spans.add(const ReasonSpan(' beslenmene uygun değil. '));
     }
   }
 
   for (final check in healthChecks(profile, rule)) {
     if (check.level != WarningLevel.ok) {
-      sentences.add('${check.label}: ${check.note}.');
+      spans.add(const ReasonSpan('Profilindeki '));
+      spans.add(ReasonSpan(check.label, highlight: true));
+      spans.add(ReasonSpan(' için: ${check.note}. '));
     }
   }
 
-  if (sentences.isEmpty) {
+  if (spans.isEmpty) {
     final fallback = explanation.warningMessage.trim();
-    return fallback.isNotEmpty ? fallback : explanation.summary;
+    return [
+      ReasonSpan(fallback.isNotEmpty ? fallback : explanation.summary),
+    ];
   }
 
-  return sentences.join(' ');
+  return spans;
 }
 
-/// "a, b ve c"
-String _join(List<String> items) {
-  if (items.length == 1) return items.first;
-  return '${items.take(items.length - 1).join(', ')} ve ${items.last}';
+/// Plain-text form of [personalReasonSpans].
+String personalReason({
+  required Explanation explanation,
+  required RuleEngineResult? rule,
+  required UserProfile? profile,
+}) {
+  return personalReasonSpans(
+    explanation: explanation,
+    rule: rule,
+    profile: profile,
+  ).map((span) => span.text).join().trim();
 }

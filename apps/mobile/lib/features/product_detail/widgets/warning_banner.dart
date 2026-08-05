@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/explanation.dart';
 import '../../../core/theme/akilli_sepet_colors.dart';
 import '../../../core/theme/warning_level_style.dart';
+import '../profile_checks.dart';
 import 'status_dot.dart';
 
 /// Verdict — the anchor of the screen: the level on the left, the short verdict
@@ -14,7 +15,7 @@ class WarningBanner extends StatelessWidget {
 
   /// Personal warning composed from the profile; falls back to the backend
   /// explanation when the caller has none.
-  final String? reason;
+  final List<ReasonSpan>? reason;
 
   /// The illustration spans the title and the reason standing next to it.
   static const double _iconSize = 130;
@@ -22,12 +23,14 @@ class WarningBanner extends StatelessWidget {
   /// How far the illustration reaches past the text's left edge.
   static const double _iconInset = 12;
 
-  String get _reason {
-    final personal = reason?.trim();
+  List<ReasonSpan> get _reason {
+    final personal = reason;
     if (personal != null && personal.isNotEmpty) return personal;
-    return explanation.warningMessage.isNotEmpty
-        ? explanation.warningMessage
-        : explanation.summary;
+    return [
+      ReasonSpan(explanation.warningMessage.isNotEmpty
+          ? explanation.warningMessage
+          : explanation.summary),
+    ];
   }
 
   @override
@@ -54,13 +57,13 @@ class WarningBanner extends StatelessWidget {
           )
         else
           Padding(
-            padding: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 13),
             child: StatusDot(level: explanation.level, size: 20),
           ),
         const SizedBox(width: 2),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 13),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -74,8 +77,22 @@ class WarningBanner extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  _reason,
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      for (final span in _reason)
+                        TextSpan(
+                          text: span.text,
+                          // Words taken from the user's own profile stand out.
+                          style: span.highlight
+                              ? TextStyle(
+                                  color: style.main,
+                                  fontWeight: FontWeight.w600,
+                                )
+                              : null,
+                        ),
+                    ],
+                  ),
                   style: const TextStyle(
                     color: AkilliSepetColors.textSecondary,
                     fontSize: 16,

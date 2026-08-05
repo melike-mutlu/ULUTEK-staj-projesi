@@ -142,7 +142,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               // 2. Uygunluk sonucu — ekranın görsel çıpası
               WarningBanner(
                 explanation: explanation,
-                reason: personalReason(
+                reason: personalReasonSpans(
                   explanation: explanation,
                   rule: _viewModel.ruleEngineResult,
                   profile: _viewModel.userProfile,

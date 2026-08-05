@@ -40,7 +40,10 @@ void main() {
       profile: _profile(),
     );
 
-    expect(reason, 'Bu ürün gluten, süt / laktoz ve kabuklu yemişler içerir.');
+    expect(
+      reason,
+      'Sende alerji yapan gluten, süt / laktoz ve kabuklu yemişler içeriyor.',
+    );
   });
 
   test('diyet ve saglik cakismalarini ekler', () {
@@ -55,8 +58,11 @@ void main() {
       profile: _profile(diets: ['Vegan'], conditions: ['Şeker hastalığı']),
     );
 
-    expect(reason, contains('Vegan beslenmesine uygun değil.'));
-    expect(reason, contains('Şeker hastalığı: Yüksek şeker oranı.'));
+    expect(reason, contains('Vegan beslenmene uygun değil.'));
+    expect(
+      reason,
+      contains('Profilindeki Şeker hastalığı için: Yüksek şeker oranı.'),
+    );
   });
 
   test('kisisel bir sey yoksa backend mesajina duser', () {
