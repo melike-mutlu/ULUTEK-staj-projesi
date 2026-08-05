@@ -1,3 +1,4 @@
+import '../../core/constants/allergen_catalog.dart';
 import '../../core/models/explanation.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
@@ -82,4 +83,50 @@ WarningLevel _diabeticLevel(String note) {
   if (value.contains('yüksek')) return WarningLevel.warning;
   if (value.contains('orta')) return WarningLevel.caution;
   return WarningLevel.ok;
+}
+
+/// Builds the one-paragraph personal warning shown under the verdict, from our
+/// own data instead of the LLM's free text: which allergens the product has,
+/// which diet it breaks and which health note applies.
+///
+/// Falls back to the backend explanation when the profile is empty, so an
+/// anonymous user still sees something meaningful.
+String personalReason({
+  required Explanation explanation,
+  required RuleEngineResult? rule,
+  required UserProfile? profile,
+}) {
+  final sentences = <String>[];
+
+  final allergens = (rule?.personalRiskKeys ?? const <String>[])
+      .map((key) => allergenInfo(key).label.toLowerCase())
+      .toList();
+  if (allergens.isNotEmpty) {
+    sentences.add('Bu ürün ${_join(allergens)} içerir.');
+  }
+
+  for (final check in dietChecks(profile, rule)) {
+    if (check.level != WarningLevel.ok) {
+      sentences.add('${check.label} beslenmesine uygun değil.');
+    }
+  }
+
+  for (final check in healthChecks(profile, rule)) {
+    if (check.level != WarningLevel.ok) {
+      sentences.add('${check.label}: ${check.note}.');
+    }
+  }
+
+  if (sentences.isEmpty) {
+    final fallback = explanation.warningMessage.trim();
+    return fallback.isNotEmpty ? fallback : explanation.summary;
+  }
+
+  return sentences.join(' ');
+}
+
+/// "a, b ve c"
+String _join(List<String> items) {
+  if (items.length == 1) return items.first;
+  return '${items.take(items.length - 1).join(', ')} ve ${items.last}';
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/explanation.dart';
 
-/// Visual identity of a [WarningLevel]: colors, icon and short label.
+/// Visual identity of a [WarningLevel]: colors, artwork and short label.
 ///
 /// Single source of truth — the product detail verdict, scan history and any
 /// future list share it instead of repeating their own colour switches.
@@ -13,6 +13,7 @@ class WarningLevelStyle {
     required this.border,
     required this.icon,
     required this.title,
+    this.asset,
   });
 
   /// Text, icon and accent colour.
@@ -21,15 +22,19 @@ class WarningLevelStyle {
   final Color border;
   final IconData icon;
 
-  /// Short verdict shown to the user, e.g. "Uygun değil".
+  /// Short verdict shown to the user, e.g. "Uygun değil!".
   final String title;
 
+  /// Illustration for this level; levels without one fall back to the dot.
+  final String? asset;
+
   static const WarningLevelStyle warning = WarningLevelStyle(
-    main: Color(0xFFDC2626),
+    main: Color(0xFFBA473A),
     background: Color(0xFFFEF2F2),
     border: Color(0xFFFCA5A5),
     icon: Icons.gpp_bad_rounded,
     title: 'Uygun değil!',
+    asset: 'assets/other/warning.png',
   );
 
   static const WarningLevelStyle caution = WarningLevelStyle(
@@ -41,11 +46,12 @@ class WarningLevelStyle {
   );
 
   static const WarningLevelStyle ok = WarningLevelStyle(
-    main: Color(0xFF16A34A),
+    main: Color(0xFF78BF1C),
     background: Color(0xFFF0FDF4),
     border: Color(0xFF86EFAC),
     icon: Icons.verified_user_rounded,
-    title: 'Sana uygun',
+    title: 'Uygun',
+    asset: 'assets/other/suitable.png',
   );
 
   static WarningLevelStyle of(WarningLevel level) => switch (level) {

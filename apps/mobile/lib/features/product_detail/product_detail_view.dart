@@ -140,7 +140,14 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               const SizedBox(height: 14),
 
               // 2. Uygunluk sonucu — ekranın görsel çıpası
-              WarningBanner(explanation: explanation),
+              WarningBanner(
+                explanation: explanation,
+                reason: personalReason(
+                  explanation: explanation,
+                  rule: _viewModel.ruleEngineResult,
+                  profile: _viewModel.userProfile,
+                ),
+              ),
               const SizedBox(height: 32),
 
               // 3-6. Profil kategorileri: alerji, diyet, sağlık, besin değerleri

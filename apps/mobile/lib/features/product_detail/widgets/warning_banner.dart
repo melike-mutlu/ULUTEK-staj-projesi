@@ -5,16 +5,16 @@ import '../../../core/theme/akilli_sepet_colors.dart';
 import '../../../core/theme/warning_level_style.dart';
 import 'status_dot.dart';
 
-/// Only the "Uygun değil" verdict gets an illustration; the softer levels stay
-/// with the coloured dot.
-const String _warningIcon = 'assets/other/warning.png';
-
 /// Verdict — the anchor of the screen: the level on the left, the short verdict
 /// and the personal reason on the right. No box: the colour alone carries it.
 class WarningBanner extends StatelessWidget {
-  const WarningBanner({super.key, required this.explanation});
+  const WarningBanner({super.key, required this.explanation, this.reason});
 
   final Explanation explanation;
+
+  /// Personal warning composed from the profile; falls back to the backend
+  /// explanation when the caller has none.
+  final String? reason;
 
   /// The illustration spans the title and the reason standing next to it.
   static const double _iconSize = 130;
@@ -22,11 +22,13 @@ class WarningBanner extends StatelessWidget {
   /// How far the illustration reaches past the text's left edge.
   static const double _iconInset = 12;
 
-  String get _reason => explanation.warningMessage.isNotEmpty
-      ? explanation.warningMessage
-      : explanation.summary;
-
-  bool get _isWarning => explanation.level == WarningLevel.warning;
+  String get _reason {
+    final personal = reason?.trim();
+    if (personal != null && personal.isNotEmpty) return personal;
+    return explanation.warningMessage.isNotEmpty
+        ? explanation.warningMessage
+        : explanation.summary;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +39,13 @@ class WarningBanner extends StatelessWidget {
       // and every line of text stays to its right, never underneath it.
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_isWarning)
+        if (style.asset != null)
           Transform.translate(
             // The png carries transparent padding, so it needs a nudge to sit
             // flush with the screen's left edge.
             offset: const Offset(-_iconInset, 0),
             child: Image.asset(
-              _warningIcon,
+              style.asset!,
               width: _iconSize,
               height: _iconSize,
               errorBuilder: (_, __, ___) =>
@@ -58,7 +60,7 @@ class WarningBanner extends StatelessWidget {
         const SizedBox(width: 2),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
