@@ -21,10 +21,12 @@ const Map<String, AllergenInfo> allergenCatalog = <String, AllergenInfo>{
   'eggs': AllergenInfo('Yumurta', '$_assetDir/egg.png'),
   'soybeans': AllergenInfo('Soya', '$_assetDir/soy.png'),
   'peanuts': AllergenInfo('Yer fıstığı', '$_assetDir/peanut.png'),
-  'nuts': AllergenInfo('Kabuklu yemişler', '$_assetDir/nuts_and_dried_fruits.png'),
+  'nuts':
+      AllergenInfo('Kabuklu yemişler', '$_assetDir/nuts_and_dried_fruits.png'),
   'sesame-seeds': AllergenInfo('Susam', '$_assetDir/sesame.png'),
   'fish': AllergenInfo('Balık', '$_assetDir/fish.png'),
-  'crustaceans': AllergenInfo('Kabuklu deniz ürünleri', '$_assetDir/shellfish.png'),
+  'crustaceans':
+      AllergenInfo('Kabuklu deniz ürünleri', '$_assetDir/shellfish.png'),
   'molluscs': AllergenInfo('Yumuşakçalar', '$_assetDir/mollusks.png'),
   'celery': AllergenInfo('Kereviz', '$_assetDir/celery.png'),
   'mustard': AllergenInfo('Hardal', '$_assetDir/mustard.png'),

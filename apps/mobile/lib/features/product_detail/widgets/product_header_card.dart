@@ -4,14 +4,15 @@ import '../../../core/models/product.dart';
 /// Nutri-Score values Open Food Facts sends when it has no grade.
 const _unknownNutriScores = <String>{'unknown', 'not-applicable'};
 
-/// Compact product identity: thumbnail + name, brand, badges and barcode.
-/// Kept deliberately small so the verdict below it stays the visual anchor.
+/// Product identity: thumbnail, name, brand and badges.
+/// The barcode is not shown — it is a lookup key, not information the user
+/// needs while deciding.
 class ProductHeaderCard extends StatelessWidget {
   const ProductHeaderCard({super.key, required this.product});
 
   final Product product;
 
-  static const double _thumbnailSize = 64;
+  static const double _thumbnailSize = 76;
 
   String? get _nutriScore {
     final score = product.nutriscore?.trim().toLowerCase();
@@ -27,34 +28,35 @@ class ProductHeaderCard extends StatelessWidget {
     final score = _nutriScore;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _Thumbnail(imageUrl: product.imageUrl, size: _thumbnailSize),
-        const SizedBox(width: 12),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 product.name,
-                maxLines: 2,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF111827),
-                  height: 1.25,
+                  height: 1.15,
+                  letterSpacing: -0.5,
                 ),
               ),
               if (brand != null && brand.isNotEmpty) ...[
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   brand,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF6B7280),
+                    fontSize: 16,
+                    color: Color(0xFF9CA3AF),
                   ),
                 ),
               ],
@@ -69,26 +71,6 @@ class ProductHeaderCard extends StatelessWidget {
                   ],
                 ),
               ],
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.qr_code_2_rounded,
-                      size: 14, color: Color(0xFF9CA3AF)),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      product.barcode,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF9CA3AF),
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),

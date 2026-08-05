@@ -40,20 +40,21 @@ class OtherAllergensSection extends StatelessWidget {
     final others = _others();
     if (others.isEmpty) return const SizedBox.shrink();
 
-    // Carries its own bottom gap, like PersonalRisksSection.
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: DetailSection(
-        title: 'Diğer alerjenler',
-        subtitle: 'profilinde yok',
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final allergen in others) _AllergenChip(allergen: allergen),
-          ],
+    return DetailSection(
+      title: 'Diğer alerjenler',
+      meta: 'profilinde yok',
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 10, bottom: 4),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final allergen in others) _AllergenChip(allergen: allergen),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

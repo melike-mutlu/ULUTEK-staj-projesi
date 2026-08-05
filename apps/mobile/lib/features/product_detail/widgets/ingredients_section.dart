@@ -28,71 +28,77 @@ class _IngredientsSectionState extends State<IngredientsSection> {
 
     return DetailSection(
       title: 'İçindekiler',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (additives.isNotEmpty) ...[
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final additive in additives) _AdditiveChip(code: additive),
-              ],
-            ),
-            const SizedBox(height: 12),
-          ],
-          if (text.isEmpty)
-            const Text(
-              'Bu ürün için içindekiler bilgisi yok.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF9CA3AF),
-                fontStyle: FontStyle.italic,
-              ),
-            )
-          else ...[
-            Text(
-              text,
-              maxLines: _expanded ? null : _collapsedLines,
-              overflow: _expanded ? null : TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF4B5563),
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 4),
-            GestureDetector(
-              onTap: () => setState(() => _expanded = !_expanded),
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (additives.isNotEmpty) ...[
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
                   children: [
-                    Text(
-                      _expanded ? 'Daha az göster' : 'Tümünü göster',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF26B384),
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    Icon(
-                      _expanded
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
-                      size: 18,
-                      color: const Color(0xFF26B384),
-                    ),
+                    for (final additive in additives)
+                      _AdditiveChip(code: additive),
                   ],
                 ),
-              ),
-            ),
-          ],
-        ],
-      ),
+                const SizedBox(height: 12),
+              ],
+              if (text.isEmpty)
+                const Text(
+                  'Bu ürün için içindekiler bilgisi yok.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF9CA3AF),
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+              else ...[
+                Text(
+                  text,
+                  maxLines: _expanded ? null : _collapsedLines,
+                  overflow: _expanded ? null : TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF4B5563),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () => setState(() => _expanded = !_expanded),
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _expanded ? 'Daha az göster' : 'Tümünü göster',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF26B384),
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(
+                          _expanded
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.keyboard_arrow_down_rounded,
+                          size: 18,
+                          color: const Color(0xFF26B384),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

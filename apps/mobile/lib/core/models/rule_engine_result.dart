@@ -54,8 +54,8 @@ class RuleEngineResult {
           .map((e) => e as String)
           .toList(),
       allergens: (json['allergens'] as List<dynamic>? ?? [])
-          .map((e) => DetectedAllergen.fromJson(
-              Map<String, dynamic>.from(e as Map)))
+          .map((e) =>
+              DetectedAllergen.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
       hasConflict: json['has_conflict'] as bool? ?? false,
       veganCompatible: dietFlags['vegan_compatible'] as bool? ?? true,

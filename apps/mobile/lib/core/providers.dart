@@ -15,7 +15,8 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {
   return ScanViewModel(
     ref.watch(productRepositoryProvider), // Ürünü getiren
-    ref.watch(scanHistoryRepositoryProvider), // Yeni eklediğimiz geçmişe kaydeden
+    ref.watch(
+        scanHistoryRepositoryProvider), // Yeni eklediğimiz geçmişe kaydeden
   );
 });
 
@@ -33,7 +34,6 @@ final scanHistoryRepositoryProvider = Provider<ScanHistoryRepository>((ref) {
   );
 });
 
-
 final homeViewModelProvider = ChangeNotifierProvider<HomeViewModel>((ref) {
   return HomeViewModel(
     ref.watch(scanHistoryRepositoryProvider),
@@ -41,6 +41,7 @@ final homeViewModelProvider = ChangeNotifierProvider<HomeViewModel>((ref) {
   );
 });
 
-final chatbotViewModelProvider = ChangeNotifierProvider<ChatbotViewModel>((ref) {
+final chatbotViewModelProvider =
+    ChangeNotifierProvider<ChatbotViewModel>((ref) {
   return ChatbotViewModel();
 });

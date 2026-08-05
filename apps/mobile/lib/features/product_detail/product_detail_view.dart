@@ -7,10 +7,12 @@ import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
 import 'product_detail_viewmodel.dart';
+import 'profile_checks.dart';
 import 'widgets/ingredients_section.dart';
 import 'widgets/nutriments_card.dart';
 import 'widgets/other_allergens_section.dart';
 import 'widgets/personal_risks_section.dart';
+import 'widgets/profile_check_section.dart';
 import 'widgets/product_header_card.dart';
 import 'widgets/warning_banner.dart';
 
@@ -143,33 +145,46 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Ürün kimliği (küçük görsel + ad, marka, barkod)
+              // 1. Ürün kimliği (görsel + ad + marka)
               ProductHeaderCard(product: product),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // 2. Uygunluk sonucu — ekranın görsel çıpası
               WarningBanner(explanation: explanation),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
 
-              // 3. Senin için riskler (profille çakışan alerjenler)
+              // 3-6. Profil kategorileri: alerji, diyet, sağlık, besin değerleri
               PersonalRisksSection(
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
-
-              // 4. Besin Değerleri (100g)
+              ProfileCheckSection(
+                title: 'Diyet türü',
+                icon: Icons.eco_outlined,
+                checks: dietChecks(
+                  _viewModel.userProfile,
+                  _viewModel.ruleEngineResult,
+                ),
+                emptyMessage: 'Kayıtlı bir diyet tercihin yok.',
+              ),
+              ProfileCheckSection(
+                title: 'Sağlık durumu',
+                icon: Icons.favorite_outline_rounded,
+                checks: healthChecks(
+                  _viewModel.userProfile,
+                  _viewModel.ruleEngineResult,
+                ),
+                emptyMessage: 'Kayıtlı bir sağlık durumun yok.',
+              ),
               NutrimentsCard(
                 nutriments: product.nutriments,
                 dietNote: explanation.dietNote,
               ),
-              const SizedBox(height: 16),
 
-              // 5. Diğer alerjenler (üründe var, profilde yok)
+              // 7-8. Ürünün kendi bilgileri
               OtherAllergensSection(
                 product: product,
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
-
-              // 6. İçindekiler (varsayılan olarak kapalı)
               IngredientsSection(product: product),
               const SizedBox(height: 24),
             ],
@@ -208,7 +223,8 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
             ),
             const SizedBox(height: 12),
             Text(
-              _viewModel.errorMessage ?? 'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.',
+              _viewModel.errorMessage ??
+                  'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AkilliSepetColors.textSecondary,
@@ -265,7 +281,8 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 ),
                 const SizedBox(height: 24),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF0F0F0),
                     borderRadius: BorderRadius.circular(8),

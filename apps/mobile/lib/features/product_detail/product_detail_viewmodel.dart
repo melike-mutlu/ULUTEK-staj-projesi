@@ -19,6 +19,10 @@ class ProductDetailViewModel extends ChangeNotifier {
   Product? product;
   RuleEngineResult? ruleEngineResult;
   Explanation? explanation;
+
+  /// Diyet/sağlık kategorilerini beslemek için tutulur.
+  UserProfile? userProfile;
+
   String? errorMessage;
 
   ProductDetailViewModel.withMock({String mockState = 'warning'})
@@ -56,8 +60,8 @@ class ProductDetailViewModel extends ChangeNotifier {
 
     if (fetchResult.status == 'error') {
       status = ProductDetailStatus.error;
-      errorMessage =
-          fetchResult.errorMessage ?? 'Ürün bilgileri alınırken bir hata oluştu.';
+      errorMessage = fetchResult.errorMessage ??
+          'Ürün bilgileri alınırken bir hata oluştu.';
       notifyListeners();
       return;
     }
@@ -150,7 +154,8 @@ class ProductDetailViewModel extends ChangeNotifier {
           barcode: '8690504041502',
           name: 'Çikolatalı Gofret',
           brand: 'Ülker',
-          imageUrl: 'https://images.openfoodfacts.org/images/products/869/050/404/1502/front_tr.3.400.jpg',
+          imageUrl:
+              'https://images.openfoodfacts.org/images/products/869/050/404/1502/front_tr.3.400.jpg',
           ingredientsText:
               'Buğday unu, şeker, bitkisel yağ (palm), kakao kitlesi, tam yağlı süt tozu, fındık püresi, emülgatör (soya lesitini), kabartıcı (sodyum hidrojen karbonat), tuz.',
           additives: ['E322', 'E500'],
@@ -189,7 +194,8 @@ class ProductDetailViewModel extends ChangeNotifier {
           barcode: '8690504112233',
           name: 'Süzme Yoğurt 500g',
           brand: 'Sütaş',
-          imageUrl: 'https://images.openfoodfacts.org/images/products/869/050/411/2233/front_tr.3.400.jpg',
+          imageUrl:
+              'https://images.openfoodfacts.org/images/products/869/050/411/2233/front_tr.3.400.jpg',
           ingredientsText: 'Pastörize inek sütü, yoğurt kültürü.',
           additives: [],
           allergensTags: ['en:milk'],
@@ -228,7 +234,8 @@ class ProductDetailViewModel extends ChangeNotifier {
           barcode: '8681234567890',
           name: 'Fındık & Kakao Meyve Barı',
           brand: 'Zuber',
-          ingredientsText: 'Hurma, fındık (%20), kakao kitlesi (%10), deniz tuzu.',
+          ingredientsText:
+              'Hurma, fındık (%20), kakao kitlesi (%10), deniz tuzu.',
           additives: [],
           allergensTags: ['en:nuts'],
           nutriments: Nutriments(
@@ -272,6 +279,7 @@ class ProductDetailViewModel extends ChangeNotifier {
   }) async {
     this.product = product;
     this.ruleEngineResult = ruleEngineResult;
+    this.userProfile = userProfile;
     status = ProductDetailStatus.loading;
     notifyListeners();
 

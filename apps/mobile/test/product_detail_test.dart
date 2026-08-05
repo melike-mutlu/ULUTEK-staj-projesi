@@ -111,7 +111,8 @@ Widget _productDetailUnderTest(
 }
 
 void main() {
-  testWidgets('WarningBanner displays status, warning message and disclaimer', (WidgetTester tester) async {
+  testWidgets('WarningBanner displays status, warning message and disclaimer',
+      (WidgetTester tester) async {
     const explanation = Explanation(
       summary: 'Test özeti',
       level: WarningLevel.warning,
@@ -132,7 +133,8 @@ void main() {
     expect(find.text('Tıbbi tavsiye değildir.'), findsOneWidget);
   });
 
-  testWidgets('PersonalRisksSection lists matched allergens only', (WidgetTester tester) async {
+  testWidgets('PersonalRisksSection lists matched allergens only',
+      (WidgetTester tester) async {
     const result = RuleEngineResult(
       matchedAllergens: ['Süt/Laktoz'],
       hasConflict: true,
@@ -151,12 +153,14 @@ void main() {
       ),
     );
 
-    expect(find.text('Senin için riskler'), findsOneWidget);
+    expect(find.text('Alerjiler'), findsOneWidget);
     expect(find.text('Süt / Laktoz'), findsOneWidget);
     expect(find.text('Kabuklu yemişler'), findsNothing);
   });
 
-  testWidgets('PersonalRisksSection renders nothing without a personal risk', (WidgetTester tester) async {
+  testWidgets(
+      'PersonalRisksSection reports an all-clear without a personal risk',
+      (WidgetTester tester) async {
     const result = RuleEngineResult(
       matchedAllergens: [],
       hasConflict: false,
@@ -172,10 +176,15 @@ void main() {
       ),
     );
 
-    expect(find.text('Senin için riskler'), findsNothing);
+    expect(find.text('Alerjiler'), findsOneWidget);
+    expect(
+      find.text('Profilindeki alerjenlerin hiçbiri bu üründe yok.'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('OtherAllergensSection shows detected-only allergens', (WidgetTester tester) async {
+  testWidgets('OtherAllergensSection shows detected-only allergens',
+      (WidgetTester tester) async {
     const product = Product(
       barcode: '123',
       name: 'Test',
@@ -210,7 +219,8 @@ void main() {
     expect(find.text('Süt / Laktoz'), findsNothing);
   });
 
-  testWidgets('IngredientsSection starts collapsed and expands on tap', (WidgetTester tester) async {
+  testWidgets('IngredientsSection starts collapsed and expands on tap',
+      (WidgetTester tester) async {
     const product = Product(
       barcode: '123',
       name: 'Test',
@@ -235,7 +245,8 @@ void main() {
     expect(find.text('Daha az göster'), findsOneWidget);
   });
 
-  testWidgets('NutrimentsCard renders rows and marks missing values', (WidgetTester tester) async {
+  testWidgets('NutrimentsCard renders rows and marks missing values',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -254,12 +265,12 @@ void main() {
 
     expect(find.text('495 kcal'), findsOneWidget);
     expect(find.text('38.2 g'), findsOneWidget);
-    // Karbonhidrat is not sent by the backend yet.
-    expect(find.text('—'), findsOneWidget);
+    expect(find.text('Çok şekerli'), findsOneWidget);
     expect(find.text('Yüksek protein desteği sağlar.'), findsOneWidget);
   });
 
-  testWidgets('ProductHeaderCard displays brand, name and Nutri-Score', (WidgetTester tester) async {
+  testWidgets('ProductHeaderCard displays brand, name and Nutri-Score',
+      (WidgetTester tester) async {
     const product = Product(
       barcode: '123456789',
       name: 'Test Çikolata',
@@ -309,7 +320,9 @@ void main() {
     expect(directProduct.isPending, isTrue);
   });
 
-  testWidgets('ProductHeaderCard displays "Doğrulanmadı" badge for pending products', (WidgetTester tester) async {
+  testWidgets(
+      'ProductHeaderCard displays "Doğrulanmadı" badge for pending products',
+      (WidgetTester tester) async {
     const pendingProduct = Product(
       barcode: '123456789',
       name: 'Topluluk Ürünü',
@@ -332,7 +345,8 @@ void main() {
     expect(find.text('Doğrulanmadı'), findsOneWidget);
   });
 
-  testWidgets('ProductDetailView shows the pending warning exactly once', (WidgetTester tester) async {
+  testWidgets('ProductDetailView shows the pending warning exactly once',
+      (WidgetTester tester) async {
     await tester.pumpWidget(_productDetailUnderTest(_pendingFetchResult));
 
     await tester.pumpAndSettle();
@@ -347,7 +361,8 @@ void main() {
     );
   });
 
-  testWidgets('ProductDetailView fetches the barcode it was opened with, not a mock',
+  testWidgets(
+      'ProductDetailView fetches the barcode it was opened with, not a mock',
       (WidgetTester tester) async {
     final repository = _FakeProductRepository({
       '1111111111111': 'Birinci Urun',
@@ -379,7 +394,8 @@ void main() {
     expect(find.text('Çikolatalı Gofret'), findsNothing);
   });
 
-  test('loadFromBarcode returns a different product for a different barcode', () async {
+  test('loadFromBarcode returns a different product for a different barcode',
+      () async {
     final repository = _FakeProductRepository({
       '1111111111111': 'Birinci Urun',
       '2222222222222': 'Ikinci Urun',
@@ -399,7 +415,9 @@ void main() {
         equals(['1111111111111', '2222222222222']));
   });
 
-  test('loadFromBarcode reports not found without falling back to a mock product', () async {
+  test(
+      'loadFromBarcode reports not found without falling back to a mock product',
+      () async {
     final repository = _FakeProductRepository(const {});
     final viewModel = ProductDetailViewModel();
 
@@ -413,7 +431,9 @@ void main() {
     expect(viewModel.product, isNull);
   });
 
-  test('ProductDetailViewModel loadFromFetchResult processes real user profile correctly', () async {
+  test(
+      'ProductDetailViewModel loadFromFetchResult processes real user profile correctly',
+      () async {
     final viewModel = ProductDetailViewModel();
     final profileRepo = InMemoryProfileRepository();
 
@@ -445,7 +465,9 @@ void main() {
     expect(viewModel.explanation, isNotNull);
   });
 
-  test('ProductDetailViewModel loadFromFetchResult handles error status without mock fallback', () async {
+  test(
+      'ProductDetailViewModel loadFromFetchResult handles error status without mock fallback',
+      () async {
     final viewModel = ProductDetailViewModel();
     final profileRepo = InMemoryProfileRepository();
 
@@ -461,7 +483,9 @@ void main() {
     expect(viewModel.product, isNull);
   });
 
-  test('ProductDetailViewModel overrides level to caution for unverified community products', () async {
+  test(
+      'ProductDetailViewModel overrides level to caution for unverified community products',
+      () async {
     final viewModel = ProductDetailViewModel();
     final profileRepo = InMemoryProfileRepository();
 
@@ -506,10 +530,12 @@ void main() {
     };
     final product = Product.fromJson(json);
     expect(product.imageUrl, equals('https://example.com/test.jpg'));
-    expect(product.toJson()['image_url'], equals('https://example.com/test.jpg'));
+    expect(
+        product.toJson()['image_url'], equals('https://example.com/test.jpg'));
   });
 
-  testWidgets('ProductDetailView does not display action buttons', (WidgetTester tester) async {
+  testWidgets('ProductDetailView does not display action buttons',
+      (WidgetTester tester) async {
     await tester.pumpWidget(_productDetailUnderTest(_foundFetchResult));
 
     await tester.pumpAndSettle();
