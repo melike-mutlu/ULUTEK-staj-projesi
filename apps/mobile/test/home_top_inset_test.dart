@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:akilli_sepet/core/models/scan_history_entry.dart';
 import 'package:akilli_sepet/core/providers.dart';
+import 'package:akilli_sepet/data/repositories/chatbot_repository.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 import 'package:akilli_sepet/data/repositories/scan_history_repository.dart';
 import 'package:akilli_sepet/features/chatbot/chatbot_view.dart';
@@ -22,12 +23,20 @@ class _FakeScanHistoryRepository implements ScanHistoryRepository {
       <ScanHistoryEntry>[];
 }
 
+/// ChatbotView de bu ekranlarla ayni Shell/PageView icinde inşa edildiginden
+/// gercek kurucu Supabase istemcisi ister; testte Supabase hic baslatilmiyor.
+class _FakeChatbotRepository implements ChatbotRepository {
+  @override
+  Future<String> sendMessage(String userMessage) async => 'test yaniti';
+}
+
 /// A screen rendered with a device-like status bar inset.
 Widget _screenWithTopInset(Widget screen, double topInset) {
   return ProviderScope(
     overrides: <Override>[
       profileRepositoryProvider.overrideWithValue(InMemoryProfileRepository()),
       scanHistoryRepositoryProvider.overrideWithValue(_FakeScanHistoryRepository()),
+      chatbotRepositoryProvider.overrideWithValue(_FakeChatbotRepository()),
     ],
     child: MaterialApp(
       home: MediaQuery(

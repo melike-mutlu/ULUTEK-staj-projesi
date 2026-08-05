@@ -1,6 +1,7 @@
 import 'package:akilli_sepet/app.dart';
 import 'package:akilli_sepet/core/models/scan_history_entry.dart';
 import 'package:akilli_sepet/core/providers.dart';
+import 'package:akilli_sepet/data/repositories/chatbot_repository.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 import 'package:akilli_sepet/data/repositories/scan_history_repository.dart';
 import 'package:akilli_sepet/features/auth/auth_view.dart';
@@ -37,6 +38,13 @@ class _FakeScanHistoryRepository implements ScanHistoryRepository {
       <ScanHistoryEntry>[];
 }
 
+/// Chatbot sekmesi de PageView icinde inşa ediliyor; gercek kurucu Supabase
+/// istemcisi istiyor, testte ise Supabase hic baslatilmiyor.
+class _FakeChatbotRepository implements ChatbotRepository {
+  @override
+  Future<String> sendMessage(String userMessage) async => 'test yaniti';
+}
+
 /// Kabuk, sekmeleri araciligiyla veri katmanina dokunuyor; testte hepsi
 /// Supabase'siz sahtelerle degistiriliyor.
 Widget _shellUnderTest() {
@@ -45,6 +53,7 @@ Widget _shellUnderTest() {
       scanHistoryRepositoryProvider
           .overrideWithValue(_FakeScanHistoryRepository()),
       profileRepositoryProvider.overrideWithValue(InMemoryProfileRepository()),
+      chatbotRepositoryProvider.overrideWithValue(_FakeChatbotRepository()),
     ],
     child: const MaterialApp(home: ShellView()),
   );
