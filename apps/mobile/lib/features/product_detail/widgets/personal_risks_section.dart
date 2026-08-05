@@ -20,6 +20,19 @@ class PersonalRisksSection extends StatelessWidget {
         .map(allergenInfo)
         .toList();
 
+    // Without allergen data an empty risk list is not proof of safety.
+    if (risks.isEmpty && ruleEngineResult?.hasSufficientData == false) {
+      return const DetailSection(
+        title: 'Alerjiler',
+        children: [
+          SectionNote(
+            text: 'Bu ürünün içerik bilgisi eksik, alerjen kontrolü '
+                'yapılamadı. Ambalajdaki etiketi kontrol et.',
+          ),
+        ],
+      );
+    }
+
     return DetailSection(
       title: 'Alerjiler',
       meta: risks.isEmpty ? null : '${risks.length} uyarı',

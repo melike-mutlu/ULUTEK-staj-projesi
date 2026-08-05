@@ -4,7 +4,8 @@ import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
 
 /// One profile entry checked against the product: what the user selected and
-/// how this product relates to it.
+/// how this product relates to it. [level] null = "değerlendirilemedi": we
+/// could not judge it, which must never read as safe.
 class ProfileCheck {
   const ProfileCheck({
     required this.label,
@@ -15,60 +16,98 @@ class ProfileCheck {
   /// The user's own wording, e.g. "Vegan" or "Şeker hastalığı".
   final String label;
   final String note;
-  final WarningLevel level;
+  final WarningLevel? level;
 }
 
-/// Diet preferences vs. the product. The rule engine only decides whether the
-/// product itself is plant based, so that is the only conflict we can claim.
+const _notEvaluatedNote = 'Bu ürün için değerlendirilemedi';
+
+/// Diet preferences vs. the product. Only vegan/vegetarian have a backend
+/// compatibility flag; every other diet is reported "not evaluated" rather than
+/// falsely marked compatible.
 List<ProfileCheck> dietChecks(UserProfile? profile, RuleEngineResult? rule) {
   final preferences = profile?.dietPreferences ?? const <String>[];
-  final isPlantBased = rule?.veganCompatible ?? true;
-
-  return [
-    for (final preference in preferences)
-      if (_needsPlantBased(preference) && !isPlantBased)
-        ProfileCheck(
-          label: preference,
-          note: 'Bu üründe hayvansal içerik var',
-          level: WarningLevel.warning,
-        )
-      else
-        ProfileCheck(
-          label: preference,
-          note: 'Bu ürün tercihinle uyumlu',
-          level: WarningLevel.ok,
-        ),
-  ];
+  return [for (final preference in preferences) _dietCheck(preference, rule)];
 }
 
-/// Health conditions vs. the product. Only diabetes has a backend note today;
-/// the rest are listed as "no specific warning" instead of a fake verdict.
+ProfileCheck _dietCheck(String preference, RuleEngineResult? rule) {
+  final compatible = _dietCompatibility(preference, rule);
+  if (compatible == null) {
+    return ProfileCheck(
+        label: preference, note: _notEvaluatedNote, level: null);
+  }
+  if (!compatible) {
+    return ProfileCheck(
+      label: preference,
+      note: 'Bu üründe uygun olmayan içerik var',
+      level: WarningLevel.warning,
+    );
+  }
+  return ProfileCheck(
+    label: preference,
+    note: 'Bu ürün tercihinle uyumlu',
+    level: WarningLevel.ok,
+  );
+}
+
+/// null = couldn't evaluate (unknown flag, or a diet the engine doesn't judge).
+bool? _dietCompatibility(String preference, RuleEngineResult? rule) {
+  final value = preference.toLowerCase();
+  if (value.contains('vegan')) return rule?.veganCompatible;
+  if (value.contains('vejetaryen')) return rule?.vegetarianCompatible;
+  return null;
+}
+
+/// Health conditions vs. the product, driven by the rule engine's per-condition
+/// result. Diabetes keeps its descriptive sugar note; unmapped or unjudged
+/// conditions are "not evaluated", never a fake all-clear.
 List<ProfileCheck> healthChecks(UserProfile? profile, RuleEngineResult? rule) {
   final conditions = profile?.healthConditions ?? const <String>[];
+  final statuses = <String, String>{
+    for (final h in rule?.healthConditions ?? const <HealthConditionResult>[])
+      h.condition.toLowerCase(): h.status,
+  };
   final diabeticNote = rule?.diabeticNote?.trim();
 
   return [
     for (final condition in conditions)
-      if (_isDiabetes(condition) &&
-          diabeticNote != null &&
-          diabeticNote.isNotEmpty)
-        ProfileCheck(
-          label: condition,
-          note: diabeticNote,
-          level: _diabeticLevel(diabeticNote),
-        )
-      else
-        ProfileCheck(
-          label: condition,
-          note: 'Bu ürün için özel bir uyarı yok',
-          level: WarningLevel.ok,
-        ),
+      _healthCheck(condition, statuses[condition.toLowerCase()], diabeticNote),
   ];
 }
 
-bool _needsPlantBased(String preference) {
-  final value = preference.toLowerCase();
-  return value.contains('vegan') || value.contains('vejetaryen');
+ProfileCheck _healthCheck(
+    String condition, String? status, String? diabeticNote) {
+  // Diabetes carries a descriptive note; keep it when the backend flagged it.
+  if (_isDiabetes(condition) &&
+      diabeticNote != null &&
+      diabeticNote.isNotEmpty &&
+      status != 'not_evaluated') {
+    return ProfileCheck(
+      label: condition,
+      note: diabeticNote,
+      level: _diabeticLevel(diabeticNote),
+    );
+  }
+
+  switch (status) {
+    case 'conflict':
+      return ProfileCheck(
+        label: condition,
+        note: 'Bu üründe durumun için riskli içerik var',
+        level: WarningLevel.warning,
+      );
+    case 'ok':
+      return ProfileCheck(
+        label: condition,
+        note: 'Bu ürün için özel bir uyarı yok',
+        level: WarningLevel.ok,
+      );
+    default:
+      return ProfileCheck(
+        label: condition,
+        note: _notEvaluatedNote,
+        level: null,
+      );
+  }
 }
 
 bool _isDiabetes(String condition) {
@@ -121,15 +160,16 @@ List<ReasonSpan> personalReasonSpans({
     spans.add(const ReasonSpan(' içeriyor. '));
   }
 
+  // Only real conflicts feed the warning; "not evaluated" (null) never does.
   for (final check in dietChecks(profile, rule)) {
-    if (check.level != WarningLevel.ok) {
+    if (check.level == WarningLevel.warning) {
       spans.add(ReasonSpan(check.label, highlight: true));
       spans.add(const ReasonSpan(' beslenmene uygun değil. '));
     }
   }
 
   for (final check in healthChecks(profile, rule)) {
-    if (check.level != WarningLevel.ok) {
+    if (check.level == WarningLevel.warning) {
       spans.add(const ReasonSpan('Profilindeki '));
       spans.add(ReasonSpan(check.label, highlight: true));
       spans.add(ReasonSpan(' için: ${check.note}. '));

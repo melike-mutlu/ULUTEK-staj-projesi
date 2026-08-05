@@ -16,6 +16,27 @@ class DetectedAllergen {
   Map<String, dynamic> toJson() => {'key': key, 'matched': matched};
 }
 
+/// Kural motorunun bir sağlık durumu için verdiği sonuç.
+/// [status]: "conflict" | "ok" | "not_evaluated".
+class HealthConditionResult {
+  final String condition;
+  final String status;
+
+  const HealthConditionResult({required this.condition, required this.status});
+
+  bool get isConflict => status == 'conflict';
+  bool get isEvaluated => status != 'not_evaluated';
+
+  factory HealthConditionResult.fromJson(Map<String, dynamic> json) {
+    return HealthConditionResult(
+      condition: json['condition'] as String? ?? '',
+      status: json['status'] as String? ?? 'not_evaluated',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {'condition': condition, 'status': status};
+}
+
 /// docs/architecture.md — Sözleşme 1 (`fetch-product`) yanıtındaki "rule_engine_result".
 class RuleEngineResult {
   final List<String> matchedAllergens;
@@ -36,6 +57,9 @@ class RuleEngineResult {
 
   final String? diabeticNote;
 
+  /// Profildeki her sağlık durumu için kural motoru sonucu.
+  final List<HealthConditionResult> healthConditions;
+
   /// false ise ürünün alerjen/içerik verisi yok; verdict "uygun" sayılamaz.
   /// Eski yanıtlarda alan olmadığından varsayılan olarak yeterli kabul edilir.
   final bool hasSufficientData;
@@ -47,6 +71,7 @@ class RuleEngineResult {
     this.vegetarianCompatible,
     this.allergens = const <DetectedAllergen>[],
     this.diabeticNote,
+    this.healthConditions = const <HealthConditionResult>[],
     this.hasSufficientData = true,
   });
 
@@ -76,6 +101,10 @@ class RuleEngineResult {
       veganCompatible: dietFlags['vegan_compatible'] as bool?,
       vegetarianCompatible: dietFlags['vegetarian_compatible'] as bool?,
       diabeticNote: dietFlags['diabetic_note'] as String?,
+      healthConditions: (json['health_conditions'] as List<dynamic>? ?? [])
+          .map((e) => HealthConditionResult.fromJson(
+              Map<String, dynamic>.from(e as Map)))
+          .toList(),
       hasSufficientData:
           (json['data_sufficiency'] as String?) != 'insufficient',
     );
@@ -87,6 +116,7 @@ class RuleEngineResult {
       'allergens': allergens.map((a) => a.toJson()).toList(),
       'has_conflict': hasConflict,
       'data_sufficiency': hasSufficientData ? 'sufficient' : 'insufficient',
+      'health_conditions': healthConditions.map((h) => h.toJson()).toList(),
       'diet_flags': {
         'vegan_compatible': veganCompatible,
         'vegetarian_compatible': vegetarianCompatible,
