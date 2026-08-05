@@ -200,3 +200,70 @@ Deno.test("çok kelimeli sinonim ancak bitişik geçince eşleşir", () => {
 
   assertEquals(result.allergens, [{ key: "nuts", matched: false }]);
 });
+
+Deno.test("Çölyak + glutenli ürün sağlık çakışması üretir", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:gluten"], ingredients_text: "Buğday unu" }),
+    { allergies: [], health_conditions: ["Çölyak"] },
+  );
+
+  assertEquals(result.health_conditions, [
+    { condition: "Çölyak", status: "conflict" },
+  ]);
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("Çölyak + glutensiz ürün uygun döner", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt" }),
+    { allergies: [], health_conditions: ["Çölyak"] },
+  );
+
+  assertEquals(result.health_conditions, [{ condition: "Çölyak", status: "ok" }]);
+  assertEquals(result.has_conflict, false);
+});
+
+Deno.test("Laktoz intoleransı sütlü üründe çakışır", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Süt, tuz" }),
+    { allergies: [], health_conditions: ["Laktoz intoleransı"] },
+  );
+
+  assertEquals(result.health_conditions[0].status, "conflict");
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("bilinmeyen sağlık durumu 'not_evaluated' döner, güvenli sayılmaz", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt" }),
+    { allergies: [], health_conditions: ["Tansiyon"] },
+  );
+
+  assertEquals(result.health_conditions, [
+    { condition: "Tansiyon", status: "not_evaluated" },
+  ]);
+  assertEquals(result.has_conflict, false);
+});
+
+Deno.test("veri yetersizken sağlık alerjen kontrolü değerlendirilemez", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "" }),
+    { allergies: [], health_conditions: ["Çölyak"] },
+  );
+
+  assertEquals(result.health_conditions[0].status, "not_evaluated");
+});
+
+Deno.test("Şeker hastalığı yüksek şekerli üründe çakışır", () => {
+  const result = runRuleEngine(
+    product({
+      allergens_tags: ["en:milk"],
+      ingredients_text: "Süt, şeker",
+      nutriments: { sugars_100g: 38 },
+    }),
+    { allergies: [], health_conditions: ["Şeker hastalığı"] },
+  );
+
+  assertEquals(result.health_conditions[0].status, "conflict");
+  assertEquals(result.has_conflict, true);
+});

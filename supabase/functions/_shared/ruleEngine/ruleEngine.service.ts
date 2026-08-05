@@ -3,6 +3,39 @@ import {
   resolveAllergenKeys,
   resolveAllergenKeysFromText,
 } from "./allergen_dictionary.ts";
+import { healthImplication } from "./health_dictionary.ts";
+
+type Sufficiency = "sufficient" | "insufficient";
+type HealthStatus = "conflict" | "ok" | "not_evaluated";
+
+/**
+ * Evaluates one health condition against the product. Unknown conditions and
+ * anything we lack the data to judge return "not_evaluated" — never "ok", so a
+ * condition is never silently reported as safe.
+ */
+function evaluateHealthCondition(
+  condition: string,
+  productKeys: Set<string>,
+  nutriments: any,
+  sufficiency: Sufficiency,
+): HealthStatus {
+  const implication = healthImplication(condition);
+  if (!implication) return "not_evaluated";
+
+  if (implication.allergens) {
+    if (sufficiency === "insufficient") return "not_evaluated";
+    const hit = implication.allergens.some((key) => productKeys.has(key));
+    return hit ? "conflict" : "ok";
+  }
+
+  if (implication.nutrient) {
+    const value = nutriments?.[implication.nutrient.field];
+    if (value == null) return "not_evaluated";
+    return value > implication.nutrient.max ? "conflict" : "ok";
+  }
+
+  return "not_evaluated";
+}
 
 /**
  * Diet keys the engine reacts to -> the labels the mobile app stores.
@@ -35,7 +68,7 @@ function hasAllergenEvidence(product: any): boolean {
 }
 
 export function runRuleEngine(product: any, profile: any) {
-  const dataSufficiency = hasAllergenEvidence(product)
+  const dataSufficiency: Sufficiency = hasAllergenEvidence(product)
     ? "sufficient"
     : "insufficient";
 
@@ -97,6 +130,23 @@ export function runRuleEngine(product: any, profile: any) {
     ? null
     : !hasNonVeganIngredient && !hasNonVeganAllergen;
 
+  // 2.5 Sağlık Durumu Kontrolü — profildeki her koşul ürüne karşı değerlendirilir.
+  const healthConditionInputs: string[] = (profile?.health_conditions ?? [])
+    .map((condition: unknown) => String(condition ?? "").trim())
+    .filter((condition: string) => condition.length > 0);
+
+  const healthConditions = healthConditionInputs.map((condition) => ({
+    condition,
+    status: evaluateHealthCondition(
+      condition,
+      productKeySet,
+      product.nutriments,
+      dataSufficiency,
+    ),
+  }));
+
+  const hasHealthConflict = healthConditions.some((h) => h.status === "conflict");
+
   // 3. Diyabet Değerlendirmesi (Şeker Oranına Göre, herkes için bilgilendirici)
   const sugars = product.nutriments?.sugars_100g ?? product.nutriments?.sugars ?? 0;
   let diabeticNote: string | null = null;
@@ -134,11 +184,17 @@ export function runRuleEngine(product: any, profile: any) {
   const hasVeganConflict = isVeganUser && isVeganCompatible === false;
   const hasAthleteConflict = isLowProteinForAthlete;
 
-  const hasConflict = matched.length > 0 || hasVeganConflict || hasAthleteConflict;
+  const hasConflict = matched.length > 0 ||
+    hasVeganConflict ||
+    hasAthleteConflict ||
+    hasHealthConflict;
 
   return {
     matched_allergens: matched,
     allergens,
+    // Per health condition: "conflict" | "ok" | "not_evaluated". Consumers must
+    // treat "not_evaluated" as "kontrol edilemedi", never as safe.
+    health_conditions: healthConditions,
     // "insufficient" means the product carries no allergen evidence at all.
     // The verdict then can neither be trusted as "uygun" nor as a conflict;
     // consumers must show "yetersiz veri" and ignore has_conflict.
