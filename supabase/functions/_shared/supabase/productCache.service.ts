@@ -58,9 +58,7 @@ export async function saveToCache(
 ): Promise<OffProduct> {
   const supabase = getServiceClient();
 
-  // Only persist columns that exist today. New OFF fields (traces_tags,
-  // ingredients_analysis_tags, labels_tags) are used live per request but not
-  // written until their columns are added — spreading them would break upsert.
+  // Explicit column allowlist rather than spreading the product object.
   const { error } = await supabase
     .from("product_cache")
     .upsert({
@@ -69,6 +67,9 @@ export async function saveToCache(
       ingredients_text: product.ingredients_text,
       additives: product.additives,
       allergens_tags: product.allergens_tags,
+      traces_tags: product.traces_tags,
+      ingredients_analysis_tags: product.ingredients_analysis_tags,
+      labels_tags: product.labels_tags,
       nutriments: product.nutriments,
       nutriscore: product.nutriscore,
       image_url: product.image_url,
