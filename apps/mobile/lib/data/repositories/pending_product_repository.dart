@@ -16,7 +16,7 @@ class PendingProductResult {
 }
 
 class PendingProductRepository {
-  /// Fotoğrafları Supabase Storage ("pending_products" bucket) içine yükler,
+  /// Fotoğrafları Supabase Storage ("product-images" bucket) içine yükler,
   /// ardından `submit-pending-product` Edge Function'ını çağırır.
   Future<PendingProductResult> submitPendingProduct({
     required String barcode,
@@ -92,11 +92,11 @@ class PendingProductRepository {
   Future<String> _uploadImage(XFile file, String storagePath) async {
     try {
       final bytes = await file.readAsBytes();
-      await supabase.storage.from('pending_products').uploadBinary(
+      await supabase.storage.from('product-images').uploadBinary(
             storagePath,
             bytes,
           );
-      return supabase.storage.from('pending_products').getPublicUrl(storagePath);
+      return supabase.storage.from('product-images').getPublicUrl(storagePath);
     } catch (e) {
       debugPrint('[PendingProductRepository] Photo upload error: $e');
       throw Exception('Fotoğraf yüklenemedi: $e');
