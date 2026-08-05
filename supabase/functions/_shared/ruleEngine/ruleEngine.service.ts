@@ -19,7 +19,22 @@ function hasDiet(profile: any, diet: string): boolean {
   return selected.some((value) => aliases.includes(normalize(String(value))));
 }
 
+/**
+ * Whether the product carries anything we can judge allergens with. Nutriments
+ * do not count: this app answers "can I eat this", not "how caloric is it".
+ */
+function hasAllergenEvidence(product: any): boolean {
+  const tags = product?.allergens_tags ?? [];
+  const ingredients = String(product?.ingredients_text ?? "").trim();
+
+  return tags.length > 0 || ingredients.length > 0;
+}
+
 export function runRuleEngine(product: any, profile: any) {
+  const dataSufficiency = hasAllergenEvidence(product)
+    ? "sufficient"
+    : "insufficient";
+
   // Empty entries would resolve to nothing but must not reach the dictionary.
   const userAllergies: string[] = (profile?.allergies ?? [])
     .map((allergy: unknown) => String(allergy ?? "").trim())
@@ -108,6 +123,9 @@ export function runRuleEngine(product: any, profile: any) {
   return {
     matched_allergens: matched,
     allergens,
+    // "insufficient" means the product carries no allergen evidence at all, so
+    // a green verdict would be a guess rather than an answer.
+    data_sufficiency: dataSufficiency,
     has_conflict: hasConflict,
     diet_flags: {
       vegan_compatible: isVeganCompatible,
@@ -120,7 +138,15 @@ export function runRuleEngine(product: any, profile: any) {
 
 export function findMissingFields(product: any) {
   const missing: string[] = [];
+
   const n = product.nutriments;
   if (!n || Object.values(n).every((v) => v == null)) missing.push("nutriments");
+
+  // Both feed the allergen verdict, so their absence has to be visible.
+  if ((product.allergens_tags ?? []).length === 0) missing.push("allergens_tags");
+  if (!String(product.ingredients_text ?? "").trim()) {
+    missing.push("ingredients_text");
+  }
+
   return missing;
 }

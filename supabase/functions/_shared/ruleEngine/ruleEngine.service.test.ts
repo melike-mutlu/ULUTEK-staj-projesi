@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert@^1";
-import { runRuleEngine } from "./ruleEngine.service.ts";
+import { findMissingFields, runRuleEngine } from "./ruleEngine.service.ts";
 
 function product(overrides: Record<string, unknown> = {}) {
   return {
@@ -96,4 +96,46 @@ Deno.test("allergens alanı matched ve detected-only alerjenleri ayırır", () =
     { key: "milk", matched: true },
     { key: "nuts", matched: false },
   ]);
+});
+
+Deno.test("alerjen kanıtı yoksa veri yetersiz sayılır", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "" }),
+    { allergies: ["Süt/Laktoz"] },
+  );
+
+  assertEquals(result.data_sufficiency, "insufficient");
+});
+
+Deno.test("besin değerleri tek başına veriyi yeterli yapmaz", () => {
+  const result = runRuleEngine(
+    product({ nutriments: { sugars_100g: 1.4, proteins_100g: 13.5 } }),
+    { allergies: [] },
+  );
+
+  assertEquals(result.data_sufficiency, "insufficient");
+});
+
+Deno.test("sadece içindekiler bile veriyi yeterli yapar", () => {
+  const result = runRuleEngine(
+    product({ allergens_tags: [], ingredients_text: "Süt, tuz, maya" }),
+    { allergies: [] },
+  );
+
+  assertEquals(result.data_sufficiency, "sufficient");
+});
+
+Deno.test("findMissingFields alerjen ve içindekiler eksikliğini bildirir", () => {
+  const missing = findMissingFields(
+    product({ allergens_tags: [], ingredients_text: "  " }),
+  );
+
+  assertEquals(missing.includes("allergens_tags"), true);
+  assertEquals(missing.includes("ingredients_text"), true);
+
+  const complete = findMissingFields(
+    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt" }),
+  );
+  assertEquals(complete.includes("allergens_tags"), false);
+  assertEquals(complete.includes("ingredients_text"), false);
 });
