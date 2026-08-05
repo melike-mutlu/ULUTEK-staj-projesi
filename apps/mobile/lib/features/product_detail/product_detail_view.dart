@@ -153,6 +153,10 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                   rule: _viewModel.ruleEngineResult,
                   profile: _viewModel.userProfile,
                 ),
+                reasonLines: personalReasonLines(
+                  rule: _viewModel.ruleEngineResult,
+                  profile: _viewModel.userProfile,
+                ),
               ),
               // Veri eksikse kullanıcı ürünü bize bildirerek katkı yapabilir.
               if (insufficient) ...[

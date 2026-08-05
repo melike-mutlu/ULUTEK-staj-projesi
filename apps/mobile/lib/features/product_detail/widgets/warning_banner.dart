@@ -12,6 +12,7 @@ class WarningBanner extends StatelessWidget {
     super.key,
     required this.explanation,
     this.reason,
+    this.reasonLines,
     this.insufficientData = false,
   });
 
@@ -20,6 +21,10 @@ class WarningBanner extends StatelessWidget {
   /// Personal warning composed from the profile; falls back to the backend
   /// explanation when the caller has none.
   final List<ReasonSpan>? reason;
+
+  /// One bullet per conflicting category. When non-empty the reason is shown as
+  /// a bulleted list instead of the flat [reason] paragraph.
+  final List<List<ReasonSpan>>? reasonLines;
 
   /// When true the product has no allergen/ingredient data, so the verdict is
   /// "Yetersiz veri" instead of a green/red claim.
@@ -109,28 +114,10 @@ class WarningBanner extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      for (final span in _reason)
-                        TextSpan(
-                          text: span.text,
-                          // Words taken from the user's own profile stand out.
-                          style: span.highlight
-                              ? TextStyle(
-                                  color: style.main,
-                                  fontWeight: FontWeight.w600,
-                                )
-                              : null,
-                        ),
-                    ],
-                  ),
-                  style: const TextStyle(
-                    color: AkilliSepetColors.textSecondary,
-                    fontSize: 16,
-                    height: 1.4,
-                  ),
-                ),
+                if (reasonLines != null && reasonLines!.isNotEmpty)
+                  for (final line in reasonLines!) _bullet(line, style.main)
+                else
+                  _reasonText(_reason, style.main),
                 if (explanation.disclaimer.isNotEmpty) ...[
                   // One blank line, then the disclaimer right under the reason.
                   const SizedBox(height: 22),
@@ -161,6 +148,45 @@ class WarningBanner extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  static const TextStyle _reasonStyle = TextStyle(
+    color: AkilliSepetColors.textSecondary,
+    fontSize: 16,
+    height: 1.4,
+  );
+
+  TextSpan _spans(List<ReasonSpan> spans, Color highlight) {
+    return TextSpan(
+      children: [
+        for (final span in spans)
+          TextSpan(
+            text: span.text,
+            // Words taken from the user's own profile stand out.
+            style: span.highlight
+                ? TextStyle(color: highlight, fontWeight: FontWeight.w600)
+                : null,
+          ),
+      ],
+    );
+  }
+
+  Widget _reasonText(List<ReasonSpan> spans, Color highlight) {
+    return Text.rich(_spans(spans, highlight), style: _reasonStyle);
+  }
+
+  /// A single "• …" line; the bullet stays clear of the wrapped text.
+  Widget _bullet(List<ReasonSpan> spans, Color highlight) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('•  ', style: _reasonStyle),
+          Expanded(child: _reasonText(spans, highlight)),
+        ],
+      ),
     );
   }
 

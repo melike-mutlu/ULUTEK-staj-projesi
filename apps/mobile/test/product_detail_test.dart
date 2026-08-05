@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:akilli_sepet/features/product_detail/product_detail_view.dart';
 import 'package:akilli_sepet/features/product_detail/product_detail_viewmodel.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/warning_banner.dart';
+import 'package:akilli_sepet/features/product_detail/profile_checks.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/product_header_card.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/personal_risks_section.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/nutriments_card.dart';
@@ -131,6 +132,38 @@ void main() {
     expect(find.text('Uygun değil!'), findsOneWidget);
     expect(find.text('Bu üründe GLUTEN var!'), findsOneWidget);
     expect(find.text('Tıbbi tavsiye değildir.'), findsOneWidget);
+  });
+
+  testWidgets('WarningBanner çakışmaları madde madde gösterir',
+      (WidgetTester tester) async {
+    const explanation = Explanation(
+      summary: 'Ozet',
+      level: WarningLevel.warning,
+      warningMessage: 'x',
+      disclaimer: 'Tibbi tavsiye degildir.',
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: WarningBanner(
+            explanation: explanation,
+            reasonLines: [
+              [ReasonSpan('gluten', highlight: true), ReasonSpan(' içeriyor.')],
+              [
+                ReasonSpan('Vegan', highlight: true),
+                ReasonSpan(' beslenmene uygun değil.')
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.textContaining('gluten'), findsOneWidget);
+    expect(find.textContaining('beslenmene uygun değil'), findsOneWidget);
+    // Two bullets for two categories.
+    expect(find.text('•  '), findsNWidgets(2));
   });
 
   testWidgets('WarningBanner shows "Yetersiz veri" when data is insufficient',

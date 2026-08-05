@@ -186,6 +186,52 @@ List<ReasonSpan> personalReasonSpans({
   return spans;
 }
 
+/// One bullet per category for the "uygun değil" verdict: allergens, then each
+/// conflicting diet, then each conflicting health condition. Each line is a
+/// short span list with the profile keywords highlighted. Empty when there is
+/// no conflict — the caller then shows the flat reason instead.
+List<List<ReasonSpan>> personalReasonLines({
+  required RuleEngineResult? rule,
+  required UserProfile? profile,
+}) {
+  final lines = <List<ReasonSpan>>[];
+
+  final allergens = (rule?.personalRiskKeys ?? const <String>[])
+      .map((key) => allergenInfo(key).label.toLowerCase())
+      .toList();
+  if (allergens.isNotEmpty) {
+    final line = <ReasonSpan>[];
+    for (var i = 0; i < allergens.length; i++) {
+      if (i > 0) {
+        line.add(ReasonSpan(i == allergens.length - 1 ? ' ve ' : ', '));
+      }
+      line.add(ReasonSpan(allergens[i], highlight: true));
+    }
+    line.add(const ReasonSpan(' içeriyor.'));
+    lines.add(line);
+  }
+
+  for (final check in dietChecks(profile, rule)) {
+    if (check.level == WarningLevel.warning) {
+      lines.add([
+        ReasonSpan(check.label, highlight: true),
+        const ReasonSpan(' beslenmene uygun değil.'),
+      ]);
+    }
+  }
+
+  for (final check in healthChecks(profile, rule)) {
+    if (check.level == WarningLevel.warning) {
+      lines.add([
+        ReasonSpan(check.label, highlight: true),
+        const ReasonSpan(' durumu için uygun değil.'),
+      ]);
+    }
+  }
+
+  return lines;
+}
+
 /// Plain-text form of [personalReasonSpans].
 String personalReason({
   required Explanation explanation,
