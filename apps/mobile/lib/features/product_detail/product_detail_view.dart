@@ -212,7 +212,8 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
     // The app theme forces buttons to full width (Size.fromHeight = infinite
     // width). Override it here so the button hugs its label: one line, centred,
     // and safe at any screen size — no fixed fraction that could clip.
-    return Center(
+    return Align(
+      alignment: Alignment.centerLeft,
       child: ElevatedButton.icon(
         onPressed: () => Navigator.pushNamed(
           context,
@@ -222,6 +223,8 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(0, 48),
           padding: const EdgeInsets.symmetric(horizontal: 22),
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
         ),
         icon: const Icon(Icons.add_a_photo_outlined, size: 18),
         label: const Text('Ürünü Bize Bildir', maxLines: 1),
