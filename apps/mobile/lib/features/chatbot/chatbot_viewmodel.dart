@@ -1,25 +1,47 @@
 import 'package:flutter/foundation.dart';
-import '../../core/models/scan_history_entry.dart';
-import '../../data/repositories/scan_history_repository.dart';
+
+class ChatMessage {
+  final String text;
+  final bool isUser;
+  final DateTime timestamp;
+
+  ChatMessage({required this.text, required this.isUser, required this.timestamp});
+}
 
 class ChatbotViewModel extends ChangeNotifier {
-  ChatbotViewModel(this._scanHistoryRepository);
+  bool isTyping = false;
 
-  final ScanHistoryRepository _scanHistoryRepository;
+  List<ChatMessage> messages = [
+    ChatMessage(
+      text: 'Merhaba! Ben Akıllı Sepet asistanın. Taradığın ürünler veya diyetin hakkında bana her şeyi sorabilirsin.',
+      isUser: false,
+      timestamp: DateTime.now(),
+    )
+  ];
 
-  bool isLoading = false;
-  List<ScanHistoryEntry> historyItems = [];
+  Future<void> sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
 
-  // Geçmiş ekranı açıldığında bu fonksiyon çağrılacak
-  Future<void> loadHistory() async {
-    isLoading = true;
+    messages.add(ChatMessage(
+      text: text.trim(),
+      isUser: true,
+      timestamp: DateTime.now(),
+    ));
     notifyListeners();
 
-    //geçmişi getir diyoruz (Geçmiş sayfası olduğu için örneğin son 50 taneyi çekebiliriz)
-    // Same source as the home cards, so both lists stay consistent.
-    historyItems = await _scanHistoryRepository.getUniqueScanHistory(limit: 50);
+    isTyping = true;
+    notifyListeners();
 
-    isLoading = false;
+    // TODO(backend): chatbot Edge Function'ına bağlanınca mock bekleme kaldırılacak.
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    messages.add(ChatMessage(
+      text: 'Henüz Geliştirme Aşamasındayım',
+      isUser: false,
+      timestamp: DateTime.now(),
+    ));
+
+    isTyping = false;
     notifyListeners();
   }
 }

@@ -42,5 +42,5 @@ final homeViewModelProvider = ChangeNotifierProvider<HomeViewModel>((ref) {
 });
 
 final chatbotViewModelProvider = ChangeNotifierProvider<ChatbotViewModel>((ref) {
-  return ChatbotViewModel(ref.watch(scanHistoryRepositoryProvider));
+  return ChatbotViewModel();
 });

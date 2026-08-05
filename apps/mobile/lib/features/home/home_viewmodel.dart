@@ -19,6 +19,9 @@ class HomeViewModel extends ChangeNotifier {
   bool isLoading = false;
   List<ScanHistoryEntry> recentScans = [];
 
+  bool isLoadingFullHistory = false;
+  List<ScanHistoryEntry> fullHistory = [];
+
   String _displayName = '';
   String? _avatarUrl;
 
@@ -51,6 +54,17 @@ class HomeViewModel extends ChangeNotifier {
     // Unique per barcode: a product scanned twice must not fill two cards.
     recentScans = await _scanHistoryRepository.getUniqueScanHistory(limit: 3);
     isLoading = false;
+    notifyListeners();
+  }
+
+  /// "Tüm Geçmişi Gör" panelinde gösterilen tam liste — ayrı bir yükleme
+  /// bayrağı kullanır, panel açılmadan ana sayfa yükleniyor gibi görünmesin.
+  Future<void> loadFullHistory() async {
+    isLoadingFullHistory = true;
+    notifyListeners();
+
+    fullHistory = await _scanHistoryRepository.getUniqueScanHistory(limit: 50);
+    isLoadingFullHistory = false;
     notifyListeners();
   }
 }

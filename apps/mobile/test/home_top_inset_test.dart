@@ -70,12 +70,15 @@ void main() {
 
     await tester.pumpWidget(_screenWithTopInset(const ChatbotView(), inset));
     await tester.pumpAndSettle();
-    final chatbotTop = tester.getTopLeft(find.text('Merhaba,')).dy;
+    final chatbotTop = tester.getTopLeft(find.byKey(const Key('screenHeaderRow'))).dy;
 
-    final homeTop = await _greetingTop(tester, inset);
+    await tester.pumpWidget(_homeWithTopInset(inset));
+    await tester.pumpAndSettle();
+    final homeTop = tester.getTopLeft(find.byKey(const Key('screenHeaderRow'))).dy;
 
-    // Both screens put the greeting at the same height, so switching tabs does
-    // not shift the header.
+    // Both screens put the header row at the same height, so switching tabs
+    // does not shift it — even though the copy inside differs (chatbot no
+    // longer shows the "Merhaba," placeholder now that it has a real UI).
     expect(homeTop, closeTo(chatbotTop, 0.5));
   });
 

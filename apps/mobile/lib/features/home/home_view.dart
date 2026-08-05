@@ -28,7 +28,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   // --- YENİ: TÜM GEÇMİŞİ GÖSTEREN AŞAĞIDAN KAYARAK AÇILAN PANEL ---
   void _showAllHistoryBottomSheet(BuildContext context, WidgetRef ref) {
     // Butona basıldığı an veritabanından 50'lik tüm listeyi çekmeye başlıyoruz
-    ref.read(chatbotViewModelProvider).loadHistory();
+    ref.read(homeViewModelProvider).loadFullHistory();
 
     showModalBottomSheet(
       context: context,
@@ -49,7 +49,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               return Consumer(
                 builder: (context, ref, child) {
                   // Tüm listenin olduğu beyni anlık dinliyoruz
-                  final historyVm = ref.watch(chatbotViewModelProvider);
+                  final historyVm = ref.watch(homeViewModelProvider);
 
                   return Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -78,15 +78,15 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         const SizedBox(height: 16),
                         // Liste Kısmı
                         Expanded(
-                          child: historyVm.isLoading
+                          child: historyVm.isLoadingFullHistory
                               ? const Center(child: CircularProgressIndicator(color: AkilliSepetColors.primary))
-                              : historyVm.historyItems.isEmpty
+                              : historyVm.fullHistory.isEmpty
                                   ? const Center(child: Text('Geçmiş bulunamadı.', style: TextStyle(color: Colors.grey)))
                                   : ListView.builder(
                                       controller: scrollController, // Parmağınla paneli kaydırmanı sağlar
-                                      itemCount: historyVm.historyItems.length,
+                                      itemCount: historyVm.fullHistory.length,
                                       itemBuilder: (context, index) {
-                                        final entry = historyVm.historyItems[index];
+                                        final entry = historyVm.fullHistory[index];
                                         return Padding(
                                           padding: const EdgeInsets.only(bottom: 12.0),
                                           child: RecentScanCard(
@@ -137,6 +137,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   children: [
                     // --- 1. KULLANICI SELAMLAMA VE PROFİL ---
                     Row(
+                      key: const Key('screenHeaderRow'),
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Column(
@@ -175,7 +176,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         onTap: () {
                           Navigator.pushNamed(context, '/scan').then((_) {
                             ref.read(homeViewModelProvider).loadDashboardData();
-                            ref.read(chatbotViewModelProvider).loadHistory(); 
+                            ref.read(homeViewModelProvider).loadFullHistory();
                           });
                         },
                         child: Container(
