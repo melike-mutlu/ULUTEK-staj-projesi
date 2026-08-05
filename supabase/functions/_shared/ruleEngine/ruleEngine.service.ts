@@ -153,17 +153,14 @@ export function runRuleEngine(product: any, profile: any) {
   };
 }
 
+/**
+ * Drives the "partial" status: only nutriments here, on purpose. Missing
+ * allergen data is a separate concern carried by `data_sufficiency`, so a
+ * product with full nutriments but no allergen tags stays status=found.
+ */
 export function findMissingFields(product: any) {
   const missing: string[] = [];
-
   const n = product.nutriments;
   if (!n || Object.values(n).every((v) => v == null)) missing.push("nutriments");
-
-  // Both feed the allergen verdict, so their absence has to be visible.
-  if ((product.allergens_tags ?? []).length === 0) missing.push("allergens_tags");
-  if (!String(product.ingredients_text ?? "").trim()) {
-    missing.push("ingredients_text");
-  }
-
   return missing;
 }

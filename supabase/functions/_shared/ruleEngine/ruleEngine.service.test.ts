@@ -125,19 +125,17 @@ Deno.test("sadece içindekiler bile veriyi yeterli yapar", () => {
   assertEquals(result.data_sufficiency, "sufficient");
 });
 
-Deno.test("findMissingFields alerjen ve içindekiler eksikliğini bildirir", () => {
+Deno.test("findMissingFields yalnızca nutriments eksikliğini bildirir", () => {
+  // Alerjen/içindekiler eksikliği status'ü değil, data_sufficiency'yi etkiler.
   const missing = findMissingFields(
-    product({ allergens_tags: [], ingredients_text: "  " }),
+    product({ allergens_tags: [], ingredients_text: "  ", nutriments: { sugars_100g: 5 } }),
   );
+  assertEquals(missing, []);
 
-  assertEquals(missing.includes("allergens_tags"), true);
-  assertEquals(missing.includes("ingredients_text"), true);
-
-  const complete = findMissingFields(
-    product({ allergens_tags: ["en:milk"], ingredients_text: "Süt" }),
+  const noNutriments = findMissingFields(
+    product({ nutriments: {} }),
   );
-  assertEquals(complete.includes("allergens_tags"), false);
-  assertEquals(complete.includes("ingredients_text"), false);
+  assertEquals(noNutriments, ["nutriments"]);
 });
 
 Deno.test("veri yetersizken vegan uyumu bilinmiyor (null) döner", () => {
