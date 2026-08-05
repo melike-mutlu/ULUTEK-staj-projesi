@@ -29,7 +29,7 @@ class WarningLevelStyle {
     background: Color(0xFFFEF2F2),
     border: Color(0xFFFCA5A5),
     icon: Icons.gpp_bad_rounded,
-    title: 'Uygun değil',
+    title: 'Uygun değil!',
   );
 
   static const WarningLevelStyle caution = WarningLevelStyle(

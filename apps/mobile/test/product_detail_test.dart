@@ -128,7 +128,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Uygun değil'), findsOneWidget);
+    expect(find.text('Uygun değil!'), findsOneWidget);
     expect(find.text('Bu üründe GLUTEN var!'), findsOneWidget);
     expect(find.text('Tıbbi tavsiye değildir.'), findsOneWidget);
   });
