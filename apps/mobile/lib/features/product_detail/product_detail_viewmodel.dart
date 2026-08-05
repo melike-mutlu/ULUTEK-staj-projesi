@@ -314,7 +314,9 @@ class ProductDetailViewModel extends ChangeNotifier {
         warningMessage: exp.level == WarningLevel.ok
             ? 'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı. Bilgiler resmi onay beklemektedir.'
             : exp.warningMessage,
-        dietNote: exp.dietNote ?? 'Topluluk verisi — Doğrulanmamış içerik',
+        // Pending is shown by the "Doğrulanmadı" badge only; injecting it here
+        // as well repeated the same warning three times on one screen.
+        dietNote: exp.dietNote,
         disclaimer: exp.disclaimer,
       );
     }

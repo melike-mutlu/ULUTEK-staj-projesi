@@ -159,7 +159,10 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 const SizedBox(height: 16),
 
               // 4. Besin Değerleri (100g)
-              NutrimentsCard(nutriments: product.nutriments),
+              NutrimentsCard(
+                nutriments: product.nutriments,
+                dietNote: explanation.dietNote,
+              ),
               const SizedBox(height: 16),
 
               // 4. Alerjenler & İçindekiler

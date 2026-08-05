@@ -5,12 +5,16 @@ class Nutriments {
   final double? proteins100g;
   final double? salt100g;
 
+  /// fetch-product bu alani henuz gondermiyor; gelene kadar "—" gosterilir.
+  final double? carbohydrates100g;
+
   const Nutriments({
     this.energyKcal100g,
     this.sugars100g,
     this.fat100g,
     this.proteins100g,
     this.salt100g,
+    this.carbohydrates100g,
   });
 
   factory Nutriments.fromJson(Map<String, dynamic> json) {
@@ -20,6 +24,7 @@ class Nutriments {
       fat100g: (json['fat_100g'] as num?)?.toDouble(),
       proteins100g: (json['proteins_100g'] as num?)?.toDouble(),
       salt100g: (json['salt_100g'] as num?)?.toDouble(),
+      carbohydrates100g: (json['carbohydrates_100g'] as num?)?.toDouble(),
     );
   }
 }
@@ -101,6 +106,7 @@ class Product {
         'fat_100g': nutriments.fat100g,
         'proteins_100g': nutriments.proteins100g,
         'salt_100g': nutriments.salt100g,
+        'carbohydrates_100g': nutriments.carbohydrates100g,
       },
       'nutriscore': nutriscore,
       if (status != null) 'status': status,

@@ -6,6 +6,7 @@ import 'package:akilli_sepet/features/product_detail/product_detail_viewmodel.da
 import 'package:akilli_sepet/features/product_detail/widgets/warning_banner.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/product_header_card.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/personal_risks_section.dart';
+import 'package:akilli_sepet/features/product_detail/widgets/nutriments_card.dart';
 import 'package:akilli_sepet/core/models/explanation.dart';
 import 'package:akilli_sepet/core/models/product.dart';
 import 'package:akilli_sepet/core/models/rule_engine_result.dart';
@@ -170,6 +171,30 @@ void main() {
     );
 
     expect(find.text('Senin için riskler'), findsNothing);
+  });
+
+  testWidgets('NutrimentsCard renders rows and marks missing values', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: NutrimentsCard(
+            nutriments: Nutriments(
+              energyKcal100g: 495,
+              sugars100g: 38.2,
+              fat100g: 27.1,
+              proteins100g: 6.5,
+            ),
+            dietNote: 'Yüksek protein desteği sağlar.',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('495 kcal'), findsOneWidget);
+    expect(find.text('38.2 g'), findsOneWidget);
+    // Karbonhidrat is not sent by the backend yet.
+    expect(find.text('—'), findsOneWidget);
+    expect(find.text('Yüksek protein desteği sağlar.'), findsOneWidget);
   });
 
   testWidgets('ProductHeaderCard displays brand, name and Nutri-Score', (WidgetTester tester) async {
