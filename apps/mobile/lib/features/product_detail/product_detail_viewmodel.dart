@@ -150,6 +150,7 @@ class ProductDetailViewModel extends ChangeNotifier {
           barcode: '8690504041502',
           name: 'Çikolatalı Gofret',
           brand: 'Ülker',
+          imageUrl: 'https://images.openfoodfacts.org/images/products/869/050/404/1502/front_tr.3.400.jpg',
           ingredientsText:
               'Buğday unu, şeker, bitkisel yağ (palm), kakao kitlesi, tam yağlı süt tozu, fındık püresi, emülgatör (soya lesitini), kabartıcı (sodyum hidrojen karbonat), tuz.',
           additives: ['E322', 'E500'],
@@ -188,6 +189,7 @@ class ProductDetailViewModel extends ChangeNotifier {
           barcode: '8690504112233',
           name: 'Süzme Yoğurt 500g',
           brand: 'Sütaş',
+          imageUrl: 'https://images.openfoodfacts.org/images/products/869/050/411/2233/front_tr.3.400.jpg',
           ingredientsText: 'Pastörize inek sütü, yoğurt kültürü.',
           additives: [],
           allergensTags: ['en:milk'],

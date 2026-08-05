@@ -98,6 +98,70 @@ class ProductHeaderCard extends StatelessWidget {
     );
   }
 
+  Widget _buildImageContainer(String? rawUrl) {
+    String? cleanUrl = rawUrl?.trim();
+    if (cleanUrl != null && cleanUrl.startsWith('http://')) {
+      cleanUrl = cleanUrl.replaceFirst('http://', 'https://');
+    }
+    final hasUrl = cleanUrl != null && cleanUrl.isNotEmpty;
+
+    return Container(
+      height: 180,
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFF3F4F6)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: hasUrl
+            ? Image.network(
+                cleanUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFF10B981),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return _buildImagePlaceholder('Görsel Yüklenemedi');
+                },
+              )
+            : _buildImagePlaceholder('Ürün Görseli Bulunamadı'),
+      ),
+    );
+  }
+
+  Widget _buildImagePlaceholder(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.image_not_supported_outlined,
+            size: 44,
+            color: Color(0xFF9CA3AF),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF9CA3AF),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final brandText = product.brand?.isNotEmpty == true ? product.brand! : 'Genel Marka';
@@ -119,6 +183,7 @@ class ProductHeaderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildImageContainer(product.imageUrl),
           // Wrap instead of Row: on narrow screens the Nutri-Score badge moves to
           // the next line rather than overflowing. Badges are never clipped.
           Wrap(
@@ -164,6 +229,7 @@ class ProductHeaderCard extends StatelessWidget {
           // Ürün Adı
           Text(
             product.name,
+            softWrap: true,
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,

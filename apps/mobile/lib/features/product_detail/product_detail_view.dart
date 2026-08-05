@@ -170,38 +170,20 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               _buildMockTesterBar(),
               const SizedBox(height: 20),
 
-              // Ana Butonlar (Sepete Ekle & Ana Sayfa)
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          AppRoutes.shell,
-                          (route) => false,
-                        );
-                      },
-                      icon: const Icon(Icons.home_outlined),
-                      label: const Text('Ana Sayfa'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${product.name} sepete eklendi!'),
-                            backgroundColor: AkilliSepetColors.primary,
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.shopping_cart_outlined),
-                      label: const Text('Sepete Ekle'),
-                    ),
-                  ),
-                ],
+              // Ana Buton (Ana Sayfa)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      AppRoutes.shell,
+                      (route) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.home_outlined),
+                  label: const Text('Ana Sayfa'),
+                ),
               ),
               const SizedBox(height: 30),
             ],
