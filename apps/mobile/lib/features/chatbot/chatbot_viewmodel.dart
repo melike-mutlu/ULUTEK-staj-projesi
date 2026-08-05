@@ -1,47 +1,48 @@
-import 'package:flutter/foundation.dart';
 
+// lib/features/chatbot/chatbot_viewmodel.dart
+import 'package:flutter/foundation.dart';
+import '../../data/repositories/chatbot_repository.dart';
+
+// Basit bir mesaj modeli (UI ile uyumlu olması için)
 class ChatMessage {
+  ChatMessage({required this.text, required this.isUser});
   final String text;
   final bool isUser;
-  final DateTime timestamp;
-
-  ChatMessage({required this.text, required this.isUser, required this.timestamp});
 }
 
 class ChatbotViewModel extends ChangeNotifier {
-  bool isTyping = false;
+  ChatbotViewModel(this._chatbotRepository);
 
-  List<ChatMessage> messages = [
-    ChatMessage(
-      text: 'Merhaba! Ben Akıllı Sepet asistanın. Taradığın ürünler veya diyetin hakkında bana her şeyi sorabilirsin.',
-      isUser: false,
-      timestamp: DateTime.now(),
-    )
-  ];
+  final ChatbotRepository _chatbotRepository;
 
-  Future<void> sendMessage(String text) async {
-    if (text.trim().isEmpty) return;
+  bool isLoading = false;
+  bool isTyping = false; // Arayüzün aradığı alan
+  String? errorMessage;
+  
+  // Arayüzün okumasını beklediği mesajlar listesi
+  final List<ChatMessage> messages = [];
 
-    messages.add(ChatMessage(
-      text: text.trim(),
-      isUser: true,
-      timestamp: DateTime.now(),
-    ));
-    notifyListeners();
+  Future<void> sendMessage(String userMessage) async {
+    if (userMessage.trim().isEmpty) return;
 
+    // Kullanıcının mesajını listeye ekle ve ekrarı yenile
+    messages.add(ChatMessage(text: userMessage, isUser: true));
+    errorMessage = null;
     isTyping = true;
     notifyListeners();
 
-    // TODO(backend): chatbot Edge Function'ına bağlanınca mock bekleme kaldırılacak.
-    await Future.delayed(const Duration(milliseconds: 1500));
-
-    messages.add(ChatMessage(
-      text: 'Henüz Geliştirme Aşamasındayım',
-      isUser: false,
-      timestamp: DateTime.now(),
-    ));
-
-    isTyping = false;
-    notifyListeners();
+    try {
+      // Repository üzerinden Edge Function'a git
+      final reply = await _chatbotRepository.sendMessage(userMessage);
+      
+      // Botun cevabını listeye ekle
+      messages.add(ChatMessage(text: reply, isUser: false));
+    } catch (error) {
+      errorMessage = error.toString();
+      messages.add(ChatMessage(text: "Bir hata oluştu: $errorMessage", isUser: false));
+    } finally {
+      isTyping = false;
+      notifyListeners();
+    }
   }
 }

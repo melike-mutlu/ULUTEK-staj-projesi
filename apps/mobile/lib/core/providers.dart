@@ -7,6 +7,8 @@ import '../features/scan/scan_viewmodel.dart';
 import '../data/repositories/scan_history_repository.dart';
 import '../features/home/home_viewmodel.dart';
 import '../features/chatbot/chatbot_viewmodel.dart';
+import '../data/repositories/chatbot_repository.dart';
+import '../core/supabase_client.dart';
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepository();
@@ -41,6 +43,18 @@ final homeViewModelProvider = ChangeNotifierProvider<HomeViewModel>((ref) {
   );
 });
 
-final chatbotViewModelProvider = ChangeNotifierProvider<ChatbotViewModel>((ref) {
-  return ChatbotViewModel();
+// lib/core/providers.dart içine eklenecekler:
+
+// 1. ChatbotRepository'yi Riverpod ile sunan provider
+final chatbotRepositoryProvider = Provider<ChatbotRepository>((ref) {
+  // Projede global olarak tanımlanan 'supabase' değişkenini veriyoruz
+  return ChatbotRepository(supabase);
 });
+
+// 2. ChatbotViewModel'i ekranlara sağlayan provider
+final chatbotViewModelProvider = ChangeNotifierProvider<ChatbotViewModel>((ref) {
+  final repository = ref.watch(chatbotRepositoryProvider);
+  return ChatbotViewModel(repository);
+});
+
+
