@@ -7,6 +7,8 @@ function product(overrides: Record<string, unknown> = {}) {
     ingredients_text: "",
     allergens_tags: [] as string[],
     traces_tags: [] as string[],
+    ingredients_analysis_tags: [] as string[],
+    labels_tags: [] as string[],
     nutriments: { sugars_100g: 0, proteins_100g: 0 },
     ...overrides,
   };
@@ -356,4 +358,61 @@ Deno.test("onaylı alerjen iz listesinde tekrar edilmez", () => {
 
   assertEquals(result.allergens, [{ key: "milk", matched: false }]);
   assertEquals(result.traces, []);
+});
+
+Deno.test("OFF en:non-vegan etiketi kelime tahminini ezer", () => {
+  const result = runRuleEngine(
+    product({
+      ingredients_text: "Nohut, zeytinyağı, tuz",
+      ingredients_analysis_tags: ["en:non-vegan"],
+    }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, false);
+  assertEquals(result.has_conflict, true);
+});
+
+Deno.test("OFF en:maybe-vegan bilinmiyor (null) verir, kelimeye düşmez", () => {
+  const result = runRuleEngine(
+    product({
+      ingredients_text: "Nohut, aroma",
+      ingredients_analysis_tags: ["en:maybe-vegan"],
+    }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, null);
+  assertEquals(result.has_conflict, false);
+});
+
+Deno.test("OFF en:vegan etiketi süt içeren üründe bile birincil kaynak", () => {
+  // labels_tags producer claim wins over keyword scan.
+  const result = runRuleEngine(
+    product({
+      ingredients_text: "Bitkisel süt tozu",
+      labels_tags: ["en:vegan"],
+    }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, true);
+});
+
+Deno.test("OFF diyet tag'i yoksa kelime tahminine düşer", () => {
+  const result = runRuleEngine(
+    product({ ingredients_text: "Süt, tuz" }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, false);
+});
+
+Deno.test("vegan kelime taramasında bare 'et' yanlış pozitifi üretmez", () => {
+  const result = runRuleEngine(
+    product({ ingredients_text: "Petit beurre, beta karoten, buğday unu" }),
+    { allergies: [], diet_preference: ["Vegan"] },
+  );
+
+  assertEquals(result.diet_flags.vegan_compatible, true);
 });

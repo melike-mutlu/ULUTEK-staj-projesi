@@ -72,6 +72,30 @@ function hasAllergenEvidence(product: any): boolean {
   return tags.length > 0 || ingredients.length > 0;
 }
 
+/**
+ * Diet compatibility for [diet] ("vegan" | "vegetarian").
+ * OFF is authoritative: explicit non-X → false, X (analysis or label) → true,
+ * maybe-X → null (unknown). Only when OFF says nothing do we fall back to the
+ * keyword guess. Insufficient allergen data always yields null.
+ */
+function resolveDietCompatibility(
+  diet: string,
+  analysisTags: string[],
+  labelsTags: string[],
+  sufficiency: Sufficiency,
+  keywordCompatible: boolean,
+): boolean | null {
+  if (sufficiency === "insufficient") return null;
+
+  if (analysisTags.includes(`en:non-${diet}`)) return false;
+  if (analysisTags.includes(`en:${diet}`) || labelsTags.includes(`en:${diet}`)) {
+    return true;
+  }
+  if (analysisTags.includes(`en:maybe-${diet}`)) return null;
+
+  return keywordCompatible;
+}
+
 export function runRuleEngine(product: any, profile: any) {
   const dataSufficiency: Sufficiency = hasAllergenEvidence(product)
     ? "sufficient"
@@ -131,47 +155,62 @@ export function runRuleEngine(product: any, profile: any) {
     matched: profileKeys.has(key),
   }));
 
-  // 2. Vegan Uyumluluk Kontrolü (ürünün kendisi vegan mı?)
+  // 2. Vegan / Vejetaryen Uyumluluğu
+  // OFF's own analysis/labels are authoritative; our keyword lists are only a
+  // fallback when OFF has no diet tag at all.
   const ingredients = (product.ingredients_text || "").toLowerCase();
   const allergensTags = product.allergens_tags || [];
+  const analysisTags: string[] = (product.ingredients_analysis_tags ?? [])
+    .map((t: string) => String(t).toLowerCase());
+  const labelsTags: string[] = (product.labels_tags ?? [])
+    .map((t: string) => String(t).toLowerCase());
 
+  // "et" alone would match "petit"/"beta"; meat is caught via explicit forms.
   const nonVeganKeywords = [
     "süt", "milk", "peynir", "cheese", "yoğurt", "yogurt", "tereyağı", "butter",
-    "yumurta", "egg", "bal", "honey", "et", "meat", "tavuk", "chicken", "jelatin", "gelatin"
+    "yumurta", "egg", "bal", "honey", "meat", "tavuk", "chicken", "hindi",
+    "dana", "kuzu", "domuz", "sosis", "salam", "sucuk", "jambon", "kıyma",
+    "biftek", "balık", "fish", "karides", "jelatin", "gelatin",
   ];
-
-  const hasNonVeganIngredient = nonVeganKeywords.some((keyword) => ingredients.includes(keyword));
+  const hasNonVeganIngredient = nonVeganKeywords.some((k) =>
+    ingredients.includes(k)
+  );
   const hasNonVeganAllergen = allergensTags.some((tag: string) =>
-    ["milk", "egg", "fish", "meat"].some((nonVeganTag) => tag.toLowerCase().includes(nonVeganTag))
+    ["milk", "egg", "fish", "meat"].some((t) => tag.toLowerCase().includes(t))
+  );
+  const keywordVegan = !hasNonVeganIngredient && !hasNonVeganAllergen;
+
+  const isVeganCompatible = resolveDietCompatibility(
+    "vegan",
+    analysisTags,
+    labelsTags,
+    dataSufficiency,
+    keywordVegan,
   );
 
-  // null = unknown. With no allergen evidence we cannot claim the product is
-  // plant based; absence of a match is not proof of compatibility.
-  const isVeganCompatible: boolean | null = dataSufficiency === "insufficient"
-    ? null
-    : !hasNonVeganIngredient && !hasNonVeganAllergen;
-
   // Vejetaryen: yalnızca et/balık/jelatin dışlanır; süt ve yumurta serbesttir.
-  // Bare "et" is avoided on purpose so "petit"/"beta" are not false positives;
-  // meat is caught through its explicit forms instead.
   const nonVegetarianKeywords = [
     "et suyu", "kırmızı et", "dana eti", "kuzu eti", "tavuk eti", "hindi eti",
     "sığır eti", "meat", "tavuk", "chicken", "hindi", "dana", "kuzu", "domuz",
     "sosis", "salam", "sucuk", "jambon", "kıyma", "biftek", "balık", "fish",
     "karides", "jelatin", "gelatin",
   ];
-
-  const hasNonVegetarianIngredient = nonVegetarianKeywords.some((keyword) =>
-    ingredients.includes(keyword)
+  const hasNonVegetarianIngredient = nonVegetarianKeywords.some((k) =>
+    ingredients.includes(k)
   );
   const hasNonVegetarianAllergen = allergensTags.some((tag: string) =>
     ["fish", "meat", "crustaceans"].some((t) => tag.toLowerCase().includes(t))
   );
+  const keywordVegetarian = !hasNonVegetarianIngredient &&
+    !hasNonVegetarianAllergen;
 
-  const isVegetarianCompatible: boolean | null =
-    dataSufficiency === "insufficient"
-      ? null
-      : !hasNonVegetarianIngredient && !hasNonVegetarianAllergen;
+  const isVegetarianCompatible = resolveDietCompatibility(
+    "vegetarian",
+    analysisTags,
+    labelsTags,
+    dataSufficiency,
+    keywordVegetarian,
+  );
 
   // 2.5 Sağlık Durumu Kontrolü — profildeki her koşul ürüne karşı değerlendirilir.
   const healthConditionInputs: string[] = (profile?.health_conditions ?? [])

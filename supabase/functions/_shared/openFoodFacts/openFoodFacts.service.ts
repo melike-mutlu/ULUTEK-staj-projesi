@@ -8,6 +8,10 @@ export interface OffProduct {
   allergens_tags: string[];
   /** "May contain" tags — a weaker signal than allergens_tags. */
   traces_tags: string[];
+  /** OFF's own diet analysis: en:vegan / en:non-vegan / en:maybe-vegan, etc. */
+  ingredients_analysis_tags: string[];
+  /** Producer labels, e.g. en:vegan, en:vegetarian, en:gluten-free. */
+  labels_tags: string[];
   nutriments: {
     energy_kcal_100g: number | null;
     sugars_100g: number | null;
@@ -34,6 +38,8 @@ export async function fetchFromOpenFoodFacts(barcode: string): Promise<OffProduc
     additives: p.additives_tags ?? [],
     allergens_tags: p.allergens_tags ?? [],
     traces_tags: p.traces_tags ?? [],
+    ingredients_analysis_tags: p.ingredients_analysis_tags ?? [],
+    labels_tags: p.labels_tags ?? [],
     nutriments: {
       energy_kcal_100g: p.nutriments?.["energy-kcal_100g"] ?? null,
       sugars_100g: p.nutriments?.sugars_100g ?? null,
