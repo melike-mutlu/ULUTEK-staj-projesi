@@ -7,8 +7,9 @@ import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
 import 'product_detail_viewmodel.dart';
-import 'widgets/allergens_card.dart';
+import 'widgets/ingredients_section.dart';
 import 'widgets/nutriments_card.dart';
+import 'widgets/other_allergens_section.dart';
 import 'widgets/personal_risks_section.dart';
 import 'widgets/product_header_card.dart';
 import 'widgets/warning_banner.dart';
@@ -154,9 +155,6 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               PersonalRisksSection(
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
-              if (_viewModel.ruleEngineResult?.personalRiskKeys.isNotEmpty ??
-                  false)
-                const SizedBox(height: 16),
 
               // 4. Besin Değerleri (100g)
               NutrimentsCard(
@@ -165,11 +163,14 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               ),
               const SizedBox(height: 16),
 
-              // 4. Alerjenler & İçindekiler
-              AllergensCard(
+              // 5. Diğer alerjenler (üründe var, profilde yok)
+              OtherAllergensSection(
                 product: product,
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
+
+              // 6. İçindekiler (varsayılan olarak kapalı)
+              IngredientsSection(product: product),
               const SizedBox(height: 24),
             ],
           ),

@@ -21,13 +21,18 @@ class PersonalRisksSection extends StatelessWidget {
             .toList();
     if (risks.isEmpty) return const SizedBox.shrink();
 
-    return DetailSection(
-      title: 'Senin için riskler',
-      subtitle: '${risks.length} alerjen',
-      child: Column(
-        children: [
-          for (final risk in risks) _RiskRow(allergen: risk),
-        ],
+    // The section carries its own bottom gap: when it hides, the screen's
+    // column must not keep an empty space where it used to be.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DetailSection(
+        title: 'Senin için riskler',
+        subtitle: '${risks.length} alerjen',
+        child: Column(
+          children: [
+            for (final risk in risks) _RiskRow(allergen: risk),
+          ],
+        ),
       ),
     );
   }

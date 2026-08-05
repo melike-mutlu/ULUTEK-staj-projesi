@@ -43,9 +43,9 @@ class RuleEngineResult {
       ? allergens.where((a) => a.matched).map((a) => a.key).toList()
       : matchedAllergens;
 
-  /// Üründe var ama profilde yok.
-  List<DetectedAllergen> get detectedOnly =>
-      allergens.where((a) => !a.matched).toList();
+  /// Üründe var ama profilde yok — "Diğer alerjenler" bölümünü besler.
+  List<String> get detectedOnlyKeys =>
+      allergens.where((a) => !a.matched).map((a) => a.key).toList();
 
   factory RuleEngineResult.fromJson(Map<String, dynamic> json) {
     final dietFlags = json['diet_flags'] as Map<String, dynamic>? ?? {};

@@ -35,11 +35,16 @@ const Map<String, AllergenInfo> allergenCatalog = <String, AllergenInfo>{
 
 /// Looks up [key]; unknown keys keep their name readable and fall back to
 /// other.png so nothing disappears from the screen.
+///
+/// Raw Open Food Facts tags ("en:milk") are accepted too, so screens can still
+/// render before the backend starts sending canonical keys.
 AllergenInfo allergenInfo(String key) {
-  final known = allergenCatalog[key];
+  final canonical = key.trim().replaceFirst(RegExp('^[a-z]{2}:'), '');
+
+  final known = allergenCatalog[canonical];
   if (known != null) return known;
 
-  final label = key.replaceAll(RegExp('[-_]'), ' ').trim();
+  final label = canonical.replaceAll(RegExp('[-_]'), ' ').trim();
   if (label.isEmpty) return _unknownAllergen;
 
   return AllergenInfo(

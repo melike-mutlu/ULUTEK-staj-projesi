@@ -7,6 +7,8 @@ import 'package:akilli_sepet/features/product_detail/widgets/warning_banner.dart
 import 'package:akilli_sepet/features/product_detail/widgets/product_header_card.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/personal_risks_section.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/nutriments_card.dart';
+import 'package:akilli_sepet/features/product_detail/widgets/other_allergens_section.dart';
+import 'package:akilli_sepet/features/product_detail/widgets/ingredients_section.dart';
 import 'package:akilli_sepet/core/models/explanation.dart';
 import 'package:akilli_sepet/core/models/product.dart';
 import 'package:akilli_sepet/core/models/rule_engine_result.dart';
@@ -171,6 +173,66 @@ void main() {
     );
 
     expect(find.text('Senin için riskler'), findsNothing);
+  });
+
+  testWidgets('OtherAllergensSection shows detected-only allergens', (WidgetTester tester) async {
+    const product = Product(
+      barcode: '123',
+      name: 'Test',
+      ingredientsText: '',
+      additives: [],
+      allergensTags: ['en:milk', 'en:nuts'],
+      nutriments: Nutriments(),
+    );
+    const result = RuleEngineResult(
+      matchedAllergens: ['Süt/Laktoz'],
+      hasConflict: true,
+      veganCompatible: false,
+      allergens: [
+        DetectedAllergen(key: 'milk', matched: true),
+        DetectedAllergen(key: 'nuts', matched: false),
+      ],
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: OtherAllergensSection(
+            product: product,
+            ruleEngineResult: result,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Kabuklu yemişler'), findsOneWidget);
+    // The personal risk belongs to the risks section, not here.
+    expect(find.text('Süt / Laktoz'), findsNothing);
+  });
+
+  testWidgets('IngredientsSection starts collapsed and expands on tap', (WidgetTester tester) async {
+    const product = Product(
+      barcode: '123',
+      name: 'Test',
+      ingredientsText: 'Buğday unu, şeker, bitkisel yağ, kakao, süt tozu, tuz.',
+      additives: ['en:e322'],
+      allergensTags: [],
+      nutriments: Nutriments(),
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: IngredientsSection(product: product)),
+      ),
+    );
+
+    expect(find.text('E322'), findsOneWidget);
+    expect(find.text('Tümünü göster'), findsOneWidget);
+
+    await tester.tap(find.text('Tümünü göster'));
+    await tester.pump();
+
+    expect(find.text('Daha az göster'), findsOneWidget);
   });
 
   testWidgets('NutrimentsCard renders rows and marks missing values', (WidgetTester tester) async {
