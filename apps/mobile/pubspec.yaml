@@ -27,4 +27,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/allergens/
+    - assets/nutritional_values/
+    - assets/other/
     - .env

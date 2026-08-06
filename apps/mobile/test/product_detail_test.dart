@@ -4,7 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:akilli_sepet/features/product_detail/product_detail_view.dart';
 import 'package:akilli_sepet/features/product_detail/product_detail_viewmodel.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/warning_banner.dart';
+import 'package:akilli_sepet/features/product_detail/profile_checks.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/product_header_card.dart';
+import 'package:akilli_sepet/features/product_detail/widgets/personal_risks_section.dart';
+import 'package:akilli_sepet/features/product_detail/widgets/nutriments_card.dart';
+import 'package:akilli_sepet/features/product_detail/widgets/other_allergens_section.dart';
+import 'package:akilli_sepet/features/product_detail/widgets/ingredients_section.dart';
 import 'package:akilli_sepet/core/models/explanation.dart';
 import 'package:akilli_sepet/core/models/product.dart';
 import 'package:akilli_sepet/core/models/rule_engine_result.dart';
@@ -22,6 +27,25 @@ const _foundFetchResult = ProductFetchResult(
     additives: [],
     allergensTags: [],
     nutriments: Nutriments(energyKcal100g: 400),
+  ),
+  ruleEngineResult: RuleEngineResult(
+    matchedAllergens: [],
+    hasConflict: false,
+    veganCompatible: true,
+  ),
+);
+
+const _pendingFetchResult = ProductFetchResult(
+  status: 'found',
+  product: Product(
+    barcode: '9998887776655',
+    name: 'Topluluk Urunu',
+    brand: 'Topluluk Katkisi',
+    ingredientsText: 'Test icerik',
+    additives: [],
+    allergensTags: [],
+    nutriments: Nutriments(energyKcal100g: 400),
+    isPending: true,
   ),
   ruleEngineResult: RuleEngineResult(
     matchedAllergens: [],
@@ -88,7 +112,8 @@ Widget _productDetailUnderTest(
 }
 
 void main() {
-  testWidgets('WarningBanner displays status, warning message and disclaimer', (WidgetTester tester) async {
+  testWidgets('WarningBanner displays status, warning message and disclaimer',
+      (WidgetTester tester) async {
     const explanation = Explanation(
       summary: 'Test özeti',
       level: WarningLevel.warning,
@@ -104,12 +129,203 @@ void main() {
       ),
     );
 
-    expect(find.text('UYGUN DEĞİL / RİSKLİ'), findsOneWidget);
+    expect(find.text('Uygun değil!'), findsOneWidget);
     expect(find.text('Bu üründe GLUTEN var!'), findsOneWidget);
     expect(find.text('Tıbbi tavsiye değildir.'), findsOneWidget);
   });
 
-  testWidgets('ProductHeaderCard displays brand, name and Nutri-Score', (WidgetTester tester) async {
+  testWidgets('WarningBanner çakışmaları madde madde gösterir',
+      (WidgetTester tester) async {
+    const explanation = Explanation(
+      summary: 'Ozet',
+      level: WarningLevel.warning,
+      warningMessage: 'x',
+      disclaimer: 'Tibbi tavsiye degildir.',
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: WarningBanner(
+            explanation: explanation,
+            reasonLines: [
+              [ReasonSpan('gluten', highlight: true), ReasonSpan(' içeriyor.')],
+              [
+                ReasonSpan('Vegan', highlight: true),
+                ReasonSpan(' beslenmene uygun değil.')
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.textContaining('gluten'), findsOneWidget);
+    expect(find.textContaining('beslenmene uygun değil'), findsOneWidget);
+    // Two bullets for two categories.
+    expect(find.text('•  '), findsNWidgets(2));
+  });
+
+  testWidgets('WarningBanner shows "Yetersiz veri" when data is insufficient',
+      (WidgetTester tester) async {
+    const explanation = Explanation(
+      summary: 'Ozet',
+      level: WarningLevel.ok,
+      warningMessage: 'Bu urun profilinize uygundur.',
+      disclaimer: 'Tibbi tavsiye degildir.',
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: WarningBanner(explanation: explanation, insufficientData: true),
+        ),
+      ),
+    );
+
+    expect(find.text('Yetersiz veri'), findsOneWidget);
+    expect(find.text('Uygun'), findsNothing);
+    expect(find.text('Bu ürünün içerik bilgisi eksik.'), findsOneWidget);
+  });
+
+  testWidgets('PersonalRisksSection lists matched allergens only',
+      (WidgetTester tester) async {
+    const result = RuleEngineResult(
+      matchedAllergens: ['Süt/Laktoz'],
+      hasConflict: true,
+      veganCompatible: false,
+      allergens: [
+        DetectedAllergen(key: 'milk', matched: true),
+        DetectedAllergen(key: 'nuts', matched: false),
+      ],
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: PersonalRisksSection(ruleEngineResult: result),
+        ),
+      ),
+    );
+
+    expect(find.text('Alerjiler'), findsOneWidget);
+    expect(find.text('Süt / Laktoz'), findsOneWidget);
+    expect(find.text('Kabuklu yemişler'), findsNothing);
+  });
+
+  testWidgets(
+      'PersonalRisksSection reports an all-clear without a personal risk',
+      (WidgetTester tester) async {
+    const result = RuleEngineResult(
+      matchedAllergens: [],
+      hasConflict: false,
+      veganCompatible: true,
+      allergens: [DetectedAllergen(key: 'nuts', matched: false)],
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: PersonalRisksSection(ruleEngineResult: result),
+        ),
+      ),
+    );
+
+    expect(find.text('Alerjiler'), findsOneWidget);
+    expect(
+      find.text('Profilindeki alerjenlerin hiçbiri bu üründe yok.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('OtherAllergensSection shows detected-only allergens',
+      (WidgetTester tester) async {
+    const product = Product(
+      barcode: '123',
+      name: 'Test',
+      ingredientsText: '',
+      additives: [],
+      allergensTags: ['en:milk', 'en:nuts'],
+      nutriments: Nutriments(),
+    );
+    const result = RuleEngineResult(
+      matchedAllergens: ['Süt/Laktoz'],
+      hasConflict: true,
+      veganCompatible: false,
+      allergens: [
+        DetectedAllergen(key: 'milk', matched: true),
+        DetectedAllergen(key: 'nuts', matched: false),
+      ],
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: OtherAllergensSection(
+            product: product,
+            ruleEngineResult: result,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Kabuklu yemişler'), findsOneWidget);
+    // The personal risk belongs to the risks section, not here.
+    expect(find.text('Süt / Laktoz'), findsNothing);
+  });
+
+  testWidgets('IngredientsSection starts collapsed and expands on tap',
+      (WidgetTester tester) async {
+    const product = Product(
+      barcode: '123',
+      name: 'Test',
+      ingredientsText: 'Buğday unu, şeker, bitkisel yağ, kakao, süt tozu, tuz.',
+      additives: ['en:e322'],
+      allergensTags: [],
+      nutriments: Nutriments(),
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: IngredientsSection(product: product)),
+      ),
+    );
+
+    expect(find.text('E322'), findsOneWidget);
+    expect(find.text('Tümünü göster'), findsOneWidget);
+
+    await tester.tap(find.text('Tümünü göster'));
+    await tester.pump();
+
+    expect(find.text('Daha az göster'), findsOneWidget);
+  });
+
+  testWidgets('NutrimentsCard renders rows and marks missing values',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: NutrimentsCard(
+            nutriments: Nutriments(
+              energyKcal100g: 495,
+              sugars100g: 38.2,
+              fat100g: 27.1,
+              proteins100g: 6.5,
+            ),
+            dietNote: 'Yüksek protein desteği sağlar.',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('495 kcal'), findsOneWidget);
+    expect(find.text('38.2 g'), findsOneWidget);
+    expect(find.text('Çok şekerli'), findsOneWidget);
+    expect(find.text('Yüksek protein desteği sağlar.'), findsOneWidget);
+  });
+
+  testWidgets('ProductHeaderCard displays brand, name and Nutri-Score',
+      (WidgetTester tester) async {
     const product = Product(
       barcode: '123456789',
       name: 'Test Çikolata',
@@ -159,7 +375,9 @@ void main() {
     expect(directProduct.isPending, isTrue);
   });
 
-  testWidgets('ProductHeaderCard displays "Doğrulanmadı" badge for pending products', (WidgetTester tester) async {
+  testWidgets(
+      'ProductHeaderCard displays "Doğrulanmadı" badge for pending products',
+      (WidgetTester tester) async {
     const pendingProduct = Product(
       barcode: '123456789',
       name: 'Topluluk Ürünü',
@@ -182,28 +400,24 @@ void main() {
     expect(find.text('Doğrulanmadı'), findsOneWidget);
   });
 
-  testWidgets('ProductDetailView renders pending warning banner for pending state', (WidgetTester tester) async {
-    // The mock bar only renders in the "found" state, so open the screen with
-    // a real fetch result and tap the chip from there.
-    await tester.pumpWidget(_productDetailUnderTest(_foundFetchResult));
+  testWidgets('ProductDetailView shows the pending warning exactly once',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_productDetailUnderTest(_pendingFetchResult));
 
     await tester.pumpAndSettle();
 
-    // Scroll to mock tester bar and tap on ⏳ Pending chip
-    final pendingChip = find.text('⏳ Pending');
-    expect(pendingChip, findsOneWidget);
-    await tester.ensureVisible(pendingChip);
-    await tester.pumpAndSettle();
-
-    await tester.tap(pendingChip);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı.'), findsOneWidget);
-    expect(find.text('DİKKAT EDİLMELİ'), findsOneWidget);
+    // A pending product can never read as safe.
+    expect(find.text('Dikkatli ol'), findsOneWidget);
+    // The badge is the single pending indicator; the old standalone card is gone.
     expect(find.text('Doğrulanmadı'), findsOneWidget);
+    expect(
+      find.text('Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı.'),
+      findsNothing,
+    );
   });
 
-  testWidgets('ProductDetailView fetches the barcode it was opened with, not a mock',
+  testWidgets(
+      'ProductDetailView fetches the barcode it was opened with, not a mock',
       (WidgetTester tester) async {
     final repository = _FakeProductRepository({
       '1111111111111': 'Birinci Urun',
@@ -235,7 +449,8 @@ void main() {
     expect(find.text('Çikolatalı Gofret'), findsNothing);
   });
 
-  test('loadFromBarcode returns a different product for a different barcode', () async {
+  test('loadFromBarcode returns a different product for a different barcode',
+      () async {
     final repository = _FakeProductRepository({
       '1111111111111': 'Birinci Urun',
       '2222222222222': 'Ikinci Urun',
@@ -255,7 +470,9 @@ void main() {
         equals(['1111111111111', '2222222222222']));
   });
 
-  test('loadFromBarcode reports not found without falling back to a mock product', () async {
+  test(
+      'loadFromBarcode reports not found without falling back to a mock product',
+      () async {
     final repository = _FakeProductRepository(const {});
     final viewModel = ProductDetailViewModel();
 
@@ -269,7 +486,9 @@ void main() {
     expect(viewModel.product, isNull);
   });
 
-  test('ProductDetailViewModel loadFromFetchResult processes real user profile correctly', () async {
+  test(
+      'ProductDetailViewModel loadFromFetchResult processes real user profile correctly',
+      () async {
     final viewModel = ProductDetailViewModel();
     final profileRepo = InMemoryProfileRepository();
 
@@ -301,7 +520,9 @@ void main() {
     expect(viewModel.explanation, isNotNull);
   });
 
-  test('ProductDetailViewModel loadFromFetchResult handles error status without mock fallback', () async {
+  test(
+      'ProductDetailViewModel loadFromFetchResult handles error status without mock fallback',
+      () async {
     final viewModel = ProductDetailViewModel();
     final profileRepo = InMemoryProfileRepository();
 
@@ -317,7 +538,9 @@ void main() {
     expect(viewModel.product, isNull);
   });
 
-  test('ProductDetailViewModel overrides level to caution for unverified community products', () async {
+  test(
+      'ProductDetailViewModel overrides level to caution for unverified community products',
+      () async {
     final viewModel = ProductDetailViewModel();
     final profileRepo = InMemoryProfileRepository();
 
@@ -362,14 +585,18 @@ void main() {
     };
     final product = Product.fromJson(json);
     expect(product.imageUrl, equals('https://example.com/test.jpg'));
-    expect(product.toJson()['image_url'], equals('https://example.com/test.jpg'));
+    expect(
+        product.toJson()['image_url'], equals('https://example.com/test.jpg'));
   });
 
-  testWidgets('ProductDetailView does not display Sepete Ekle button', (WidgetTester tester) async {
+  testWidgets('ProductDetailView does not display action buttons',
+      (WidgetTester tester) async {
     await tester.pumpWidget(_productDetailUnderTest(_foundFetchResult));
 
     await tester.pumpAndSettle();
     expect(find.text('Sepete Ekle'), findsNothing);
-    expect(find.text('Ana Sayfa'), findsOneWidget);
+    // Removed with the redesign: the screen ends with the content, not a button.
+    expect(find.text('Ana Sayfa'), findsNothing);
+    expect(find.text('Mock Test Durumları (Demo):'), findsNothing);
   });
 }

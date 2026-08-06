@@ -17,7 +17,8 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {
   return ScanViewModel(
     ref.watch(productRepositoryProvider), // Ürünü getiren
-    ref.watch(scanHistoryRepositoryProvider), // Yeni eklediğimiz geçmişe kaydeden
+    ref.watch(
+        scanHistoryRepositoryProvider), // Yeni eklediğimiz geçmişe kaydeden
   );
 });
 
@@ -35,7 +36,6 @@ final scanHistoryRepositoryProvider = Provider<ScanHistoryRepository>((ref) {
   );
 });
 
-
 final homeViewModelProvider = ChangeNotifierProvider<HomeViewModel>((ref) {
   return HomeViewModel(
     ref.watch(scanHistoryRepositoryProvider),
@@ -43,18 +43,14 @@ final homeViewModelProvider = ChangeNotifierProvider<HomeViewModel>((ref) {
   );
 });
 
-// lib/core/providers.dart içine eklenecekler:
-
-// 1. ChatbotRepository'yi Riverpod ile sunan provider
+// ChatbotRepository'yi Riverpod ile sunan provider — global 'supabase'
+// değişkenini veriyor.
 final chatbotRepositoryProvider = Provider<ChatbotRepository>((ref) {
-  // Projede global olarak tanımlanan 'supabase' değişkenini veriyoruz
   return ChatbotRepository(supabase);
 });
 
-// 2. ChatbotViewModel'i ekranlara sağlayan provider
 final chatbotViewModelProvider = ChangeNotifierProvider<ChatbotViewModel>((ref) {
   final repository = ref.watch(chatbotRepositoryProvider);
   return ChatbotViewModel(repository);
 });
-
 

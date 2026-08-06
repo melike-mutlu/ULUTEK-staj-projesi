@@ -7,8 +7,12 @@ import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
 import 'product_detail_viewmodel.dart';
-import 'widgets/allergens_card.dart';
+import 'profile_checks.dart';
+import 'widgets/ingredients_section.dart';
 import 'widgets/nutriments_card.dart';
+import 'widgets/other_allergens_section.dart';
+import 'widgets/personal_risks_section.dart';
+import 'widgets/profile_check_section.dart';
 import 'widgets/product_header_card.dart';
 import 'widgets/warning_banner.dart';
 
@@ -87,16 +91,6 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Ürün Detayı'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ürün detayı paylaşıldı')),
-              );
-            },
-          ),
-        ],
       ),
       body: _buildBody(context),
     );
@@ -135,92 +129,109 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           return _buildNotFoundState(context);
         }
 
+        final insufficient =
+            _viewModel.ruleEngineResult?.hasSufficientData == false;
+        final nutrimentsCard = NutrimentsCard(
+          nutriments: product.nutriments,
+          dietNote: explanation.dietNote,
+        );
+        // Only worth surfacing early if there is actually something to show.
+        final showNutrimentsFirst = insufficient && product.nutriments.hasAny;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 0. Topluluk Ürünü / Doğrulanmadı Uyarısı
-              if (product.isPending) ...[
-                _buildPendingWarningCard(),
+              // 1. Uygunluk sonucu — ekranın görsel çıpası
+              WarningBanner(
+                explanation: explanation,
+                insufficientData: insufficient,
+                reason: personalReasonSpans(
+                  explanation: explanation,
+                  rule: _viewModel.ruleEngineResult,
+                  profile: _viewModel.userProfile,
+                ),
+                reasonLines: personalReasonLines(
+                  rule: _viewModel.ruleEngineResult,
+                  profile: _viewModel.userProfile,
+                ),
+              ),
+              // Veri eksikse kullanıcı ürünü bize bildirerek katkı yapabilir.
+              if (insufficient) ...[
                 const SizedBox(height: 16),
+                _buildReportButton(context, product.barcode),
               ],
+              const SizedBox(height: 14),
 
-              // 1. Uygunluk Sonucu (Yeşil / Sarı / Kırmızı Bandı)
-              WarningBanner(explanation: explanation),
-              const SizedBox(height: 16),
-
-              // 2. Ürün Adı, Marka, Barkod & Nutri-Score Kartı
+              // 2. Ürün kimliği (görsel + ad + marka)
               ProductHeaderCard(product: product),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
 
-              // 3. Besin Değerleri Kartı (100g)
-              NutrimentsCard(nutriments: product.nutriments),
-              const SizedBox(height: 16),
+              // Veri eksik ama besin değerleri varsa, kullanıcı hiç değilse
+              // onları görsün diye kimliğin hemen altına alınır.
+              if (showNutrimentsFirst) nutrimentsCard,
 
-              // 4. Alerjen & İçindekiler Kartı
-              AllergensCard(
+              // 3-6. Profil kategorileri: alerji, diyet, sağlık
+              PersonalRisksSection(
+                ruleEngineResult: _viewModel.ruleEngineResult,
+              ),
+              ProfileCheckSection(
+                title: 'Diyet türü',
+                icon: Icons.eco_outlined,
+                checks: dietChecks(
+                  _viewModel.userProfile,
+                  _viewModel.ruleEngineResult,
+                ),
+                emptyMessage: 'Kayıtlı bir diyet tercihin yok.',
+              ),
+              ProfileCheckSection(
+                title: 'Sağlık durumu',
+                icon: Icons.favorite_outline_rounded,
+                checks: healthChecks(
+                  _viewModel.userProfile,
+                  _viewModel.ruleEngineResult,
+                ),
+                emptyMessage: 'Kayıtlı bir sağlık durumun yok.',
+              ),
+              if (!showNutrimentsFirst) nutrimentsCard,
+
+              // 7-8. Ürünün kendi bilgileri
+              OtherAllergensSection(
                 product: product,
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
+              IngredientsSection(product: product),
               const SizedBox(height: 24),
-
-              // Test & Mock Senaryo Seçici (Staj Değerlendirme & Test Kolaylığı İçin)
-              _buildMockTesterBar(),
-              const SizedBox(height: 20),
-
-              // Ana Buton (Ana Sayfa)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      AppRoutes.shell,
-                      (route) => false,
-                    );
-                  },
-                  icon: const Icon(Icons.home_outlined),
-                  label: const Text('Ana Sayfa'),
-                ),
-              ),
-              const SizedBox(height: 30),
             ],
           ),
         );
     }
   }
 
-  Widget _buildPendingWarningCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFCD34D), width: 1.5),
-      ),
-      child: const Row(
-        children: [
-          Icon(
-            Icons.gpp_maybe_rounded,
-            color: Color(0xFFD97706),
-            size: 24,
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı.',
-              style: TextStyle(
-                color: Color(0xFFB45309),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                height: 1.3,
-              ),
-            ),
-          ),
-        ],
+  /// Same destination as the "not found" flow: lets the user report a product
+  /// whose data is missing so it can be completed.
+  Widget _buildReportButton(BuildContext context, String barcode) {
+    // The app theme forces buttons to full width (Size.fromHeight = infinite
+    // width). Override it here so the button hugs its label: one line, centred,
+    // and safe at any screen size — no fixed fraction that could clip.
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ElevatedButton.icon(
+        onPressed: () => Navigator.pushNamed(
+          context,
+          AppRoutes.pendingProduct,
+          arguments: barcode,
+        ),
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+        label: const Text('Ürünü Bize Bildir', maxLines: 1),
       ),
     );
   }
@@ -255,7 +266,8 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
             ),
             const SizedBox(height: 12),
             Text(
-              _viewModel.errorMessage ?? 'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.',
+              _viewModel.errorMessage ??
+                  'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AkilliSepetColors.textSecondary,
@@ -279,72 +291,6 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMockTesterBar() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.bug_report_outlined, size: 16, color: Color(0xFF6B7280)),
-              SizedBox(width: 6),
-              Text(
-                'Mock Test Durumları (Demo):',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4B5563),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildMockChip('🔴 Kırmızı', () => _viewModel.loadMockState('red')),
-                const SizedBox(width: 6),
-                _buildMockChip('🟡 Sarı', () => _viewModel.loadMockState('yellow')),
-                const SizedBox(width: 6),
-                _buildMockChip('🟢 Yeşil', () => _viewModel.loadMockState('green')),
-                const SizedBox(width: 6),
-                _buildMockChip('⏳ Pending', () => _viewModel.loadMockState('pending')),
-                const SizedBox(width: 6),
-                _buildMockChip('❌ Yok', () => _viewModel.setStatusFromFetch('not_found')),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMockChip(String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFD1D5DB)),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -378,7 +324,8 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 ),
                 const SizedBox(height: 24),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF0F0F0),
                     borderRadius: BorderRadius.circular(8),
