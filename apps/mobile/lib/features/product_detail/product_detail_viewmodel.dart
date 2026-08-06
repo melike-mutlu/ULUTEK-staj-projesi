@@ -283,28 +283,58 @@ class ProductDetailViewModel extends ChangeNotifier {
     status = ProductDetailStatus.loading;
     notifyListeners();
 
-    if (_explanationRepository != null) {
-      explanation = await _explanationRepository.explainProduct(
-        product: product,
-        ruleEngineResult: ruleEngineResult,
-        userProfile: userProfile,
-      );
+    final repo = _explanationRepository;
+    if (repo != null) {
+      try {
+        final llm = await repo.explainProduct(
+          product: product,
+          ruleEngineResult: ruleEngineResult,
+          userProfile: userProfile,
+        );
+        // The rule engine owns the verdict: keep the LLM text but never let its
+        // level fall below the deterministic floor.
+        explanation = _clampToRuleEngine(llm, ruleEngineResult);
+      } catch (e) {
+        debugPrint('[ProductDetailViewModel] explain-product failed: $e');
+        explanation = _deterministicExplanation(product, ruleEngineResult);
+      }
     } else {
-      explanation = Explanation(
-        summary: '${product.name} için ürün analizi tamamlandı.',
-        level: ruleEngineResult.hasConflict
-            ? WarningLevel.warning
-            : WarningLevel.ok,
-        warningMessage: ruleEngineResult.hasConflict
-            ? 'Bu üründe riskli içerik veya alerjen tespit edildi.'
-            : 'Bu ürün profilinize uygundur.',
-        disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
-      );
+      explanation = _deterministicExplanation(product, ruleEngineResult);
     }
 
     _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
+  }
+
+  /// The verdict when the LLM is unavailable: comes purely from the rule engine.
+  Explanation _deterministicExplanation(
+    Product product,
+    RuleEngineResult rule,
+  ) {
+    return Explanation(
+      summary: '${product.name} için ürün analizi tamamlandı.',
+      level: rule.hasConflict ? WarningLevel.warning : WarningLevel.ok,
+      warningMessage: rule.hasConflict
+          ? 'Bu üründe riskli içerik veya alerjen tespit edildi.'
+          : 'Bu ürün profilinize uygundur.',
+      disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+    );
+  }
+
+  /// Client-side guard mirroring the backend clamp: the LLM may raise severity
+  /// but can never lower the verdict below the rule engine floor.
+  Explanation _clampToRuleEngine(Explanation llm, RuleEngineResult rule) {
+    final floor = rule.hasConflict ? WarningLevel.warning : WarningLevel.ok;
+    final level = llm.level.index >= floor.index ? llm.level : floor;
+    if (level == llm.level) return llm;
+    return Explanation(
+      summary: llm.summary,
+      level: level,
+      warningMessage: llm.warningMessage,
+      dietNote: llm.dietNote,
+      disclaimer: llm.disclaimer,
+    );
   }
 
   /// Eğer ürün PENDING ise (topluluk tarafından eklenmiş, doğrulanmamış),
