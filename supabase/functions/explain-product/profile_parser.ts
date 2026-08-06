@@ -7,7 +7,7 @@
  * Çıktı şeması:
  * {
  *   "allergies": string[],   // bilinen alerjiler (gluten, fındık, süt...)
- *   "diet":      string,     // diyet tercihi (vegan, vejetaryen, standard...)
+ *   "diets":     string[],   // diyet tercihleri (vegan, ketojenik...)
  *   "goals":     string[],   // sağlık hedefleri (kilo ver, şeker kontrolü...)
  *   "avoid":     string[]    // kaçınılacak içerikler (şeker, tuz, kırmızı et...)
  * }
@@ -19,7 +19,8 @@
 
 export interface ProfileSchema {
   allergies: string[];
-  diet: string;
+  /** All selected diets — diet_preference is text[], so a user may have several. */
+  diets: string[];
   goals: string[];
   avoid: string[];
 }
@@ -76,13 +77,13 @@ export function parseProfile(raw: unknown): ProfileParseResult {
   const obj = raw as Record<string, unknown>;
 
   const allergies = parseStringList(obj["allergies"]);
-  const diet      = parseDiet(obj["diet"]);
+  const diets     = parseDietList(obj["diet"] ?? obj["diets"]);
   const goals     = parseStringList(obj["goals"]);
   const avoid     = parseStringList(obj["avoid"]);
 
   return {
     success: true,
-    profile: { allergies, diet, goals, avoid },
+    profile: { allergies, diets, goals, avoid },
   };
 }
 
@@ -118,20 +119,21 @@ function parseStringList(value: unknown): string[] {
 }
 
 /**
- * Diyet tercihini normalize eder.
- * Bilinmeyen degerlerde "standard" doner.
+ * Diyet listesini normalize eder. Dizi ya da virgüllü string kabul eder;
+ * "standard" (tercih yok) elenir. Bilinmeyen diyetler olduğu gibi korunur ki
+ * LLM onları da görsün.
  */
-function parseDiet(value: unknown): string {
-  if (value === null || value === undefined || value === "") return "standard";
+function parseDietList(value: unknown): string[] {
+  return parseStringList(value)
+    .map(normalizeDiet)
+    .filter((diet) => diet.length > 0 && diet !== "standard");
+}
 
-  const raw = normalizeTr(String(value));
-
+/** Tek bir diyet değerini bilinen kataloğa (yaklaşık) eşler. */
+function normalizeDiet(raw: string): string {
   if (KNOWN_DIETS.includes(raw)) return raw;
-
   const partial = KNOWN_DIETS.find((d) => d.includes(raw) || raw.includes(d));
-  if (partial) return partial;
-
-  return raw;
+  return partial ?? raw;
 }
 
 /**
@@ -155,7 +157,7 @@ function normalizeTr(s: string): string {
 // ─────────────────────────────────────────────
 
 export function emptyProfile(): ProfileSchema {
-  return { allergies: [], diet: "standard", goals: [], avoid: [] };
+  return { allergies: [], diets: [], goals: [], avoid: [] };
 }
 
 // ─────────────────────────────────────────────
@@ -171,11 +173,11 @@ export function emptyProfile(): ProfileSchema {
  *   { user_id, allergies, diet_preference, health_conditions }
  *
  * ProfileSchema formati:
- *   { allergies, diet, goals, avoid }
+ *   { allergies, diets, goals, avoid }
  */
 export function fromSupabaseProfile(supabase: Record<string, unknown>): ProfileSchema {
   const allergies = parseStringList(supabase["allergies"]);
-  const diet      = parseDiet(supabase["diet_preference"]);
+  const diets     = parseDietList(supabase["diet_preference"]);
 
   const conditions = parseStringList(supabase["health_conditions"]);
   const goals: string[] = [];
@@ -194,5 +196,5 @@ export function fromSupabaseProfile(supabase: Record<string, unknown>): ProfileS
     }
   }
 
-  return { allergies, diet, goals, avoid };
+  return { allergies, diets, goals, avoid };
 }

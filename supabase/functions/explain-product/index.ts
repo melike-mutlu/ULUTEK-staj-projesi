@@ -101,8 +101,8 @@ function buildPrompt(product: unknown, ruleResult: unknown, profile: ProfileSche
     profile.allergies.length > 0
       ? `Alerjiler: ${profile.allergies.join(", ")}`
       : "Bilinen alerji yok",
-    profile.diet !== "standard"
-      ? `Diyet: ${profile.diet}`
+    profile.diets.length > 0
+      ? `Diyet: ${profile.diets.join(", ")}`
       : "Standart diyet",
     profile.goals.length > 0
       ? `Saglik hedefleri: ${profile.goals.join(", ")}`

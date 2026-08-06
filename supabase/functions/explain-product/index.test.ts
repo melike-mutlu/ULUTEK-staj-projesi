@@ -5,6 +5,7 @@ import {
   ruleFloorLevel,
   validateLlmResponse,
 } from "./index.ts";
+import { fromSupabaseProfile, parseProfile } from "./profile_parser.ts";
 
 Deno.test("ruleFloorLevel: çakışma varsa warning", () => {
   assertEquals(ruleFloorLevel({ has_conflict: true }), "warning");
@@ -44,4 +45,30 @@ Deno.test("validateLlmResponse: eksik alanda placeholder, floor korunur", () => 
 Deno.test("callLlmPlaceholder: seviye floor'dan gelir, hardcoded 'ok' değil", () => {
   assertEquals(callLlmPlaceholder("test", "warning").personal_warning.level, "warning");
   assertEquals(callLlmPlaceholder("test", "ok").personal_warning.level, "ok");
+});
+
+Deno.test("fromSupabaseProfile birden çok diyeti korur (text[])", () => {
+  const profile = fromSupabaseProfile({
+    allergies: [],
+    diet_preference: ["Vegan", "Ketojenik"],
+    health_conditions: [],
+  });
+
+  assertEquals(profile.diets, ["vegan", "ketojenik"]);
+});
+
+Deno.test("fromSupabaseProfile eski tekil string diyeti de kabul eder", () => {
+  const profile = fromSupabaseProfile({
+    diet_preference: "vegan",
+    allergies: [],
+    health_conditions: [],
+  });
+
+  assertEquals(profile.diets, ["vegan"]);
+});
+
+Deno.test("parseDietList standard/boş değerleri eler, bilinmeyeni korur", () => {
+  const result = parseProfile({ diets: ["standard", "Sirke Diyeti", ""] });
+  if (!result.success) throw new Error("parse failed");
+  assertEquals(result.profile.diets, ["sirke diyeti"]);
 });
