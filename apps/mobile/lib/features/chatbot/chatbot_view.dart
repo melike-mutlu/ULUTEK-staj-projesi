@@ -179,7 +179,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 3),
                   Container(
                     decoration: const BoxDecoration(
                       color: AkilliSepetColors.primary,
