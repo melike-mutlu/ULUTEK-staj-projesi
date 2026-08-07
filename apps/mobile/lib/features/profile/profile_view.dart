@@ -9,7 +9,6 @@ import '../../core/theme/app_text_styles.dart';
 import '../../shared/widgets/error_state_view.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
-import '../../shared/widgets/suggestion_row.dart';
 import '../shell/shell_viewmodel.dart';
 import 'profile_viewmodel.dart';
 import 'widgets/name_edit_dialog.dart';
@@ -42,10 +41,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
   /// Cards the user opened with "Tümünü gör".
   final Set<OnboardingField> _expanded = <OnboardingField>{};
-
-  /// The custom allergen the user just added with "+", if the "chatbot'a danış"
-  /// suggestion is still showing. Null once acted on or dismissed.
-  String? _suggestedAllergen;
 
   @override
   void initState() {
@@ -80,14 +75,41 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     );
   }
 
+  /// Offers to clarify a just-added custom allergen with the chatbot. Runs
+  /// post-frame so the "add allergen" dialog is fully dismissed first and the
+  /// two dialogs never stack.
+  void _offerChatbotForCustomAllergen(String value) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final consult = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext dialogContext) => AlertDialog(
+          content: Text(
+            "'$value' özel bir alerjen. Doğru anlaşıldığından emin olmak için chatbot'a danışmak ister misin?",
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Gerek yok'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Chatbot\'a sor'),
+            ),
+          ],
+        ),
+      );
+      if (consult == true && mounted) _consultChatbot(value);
+    });
+  }
+
   /// Prefills the chatbot with a question about [value] and jumps to its tab.
-  /// The unsaved allergen stays in the draft; the suggestion closes.
+  /// The unsaved allergen stays in the draft; it saves with "Kaydet" as usual.
   void _consultChatbot(String value) {
     ref.read(chatbotViewModelProvider).setPendingInput(
           "Profilime '$value' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?",
         );
     ref.read(shellViewModelProvider).selectTab(ShellTab.chatbot);
-    setState(() => _suggestedAllergen = null);
   }
 
   Future<void> _save(ProfileViewModel viewModel) async {
@@ -182,7 +204,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                     final added = option.trim();
                     if (field == OnboardingField.allergies &&
                         viewModel.isCustomOption(field, added)) {
-                      setState(() => _suggestedAllergen = added);
+                      _offerChatbotForCustomAllergen(added);
                     }
                   },
                   isExpanded: _expanded.contains(field),
@@ -195,15 +217,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   message: viewModel.errorMessage!,
                   onRetry: () => _save(viewModel),
                   onDismiss: viewModel.clearError,
-                ),
-                const SizedBox(height: 12),
-              ],
-              if (_suggestedAllergen != null) ...<Widget>[
-                SuggestionRow(
-                  message:
-                      "'$_suggestedAllergen' alerjenini netleştirmek için chatbot'a danışabilirsin.",
-                  onAction: () => _consultChatbot(_suggestedAllergen!),
-                  onDismiss: () => setState(() => _suggestedAllergen = null),
                 ),
                 const SizedBox(height: 12),
               ],
