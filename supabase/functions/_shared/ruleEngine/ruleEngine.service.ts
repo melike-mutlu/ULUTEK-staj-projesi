@@ -26,21 +26,40 @@ function evaluateHealthCondition(
   const implication = healthImplication(condition);
   if (!implication) return "not_evaluated";
 
+  // Alerjen bazlı sağlık durumları (çölyak, laktoz intoleransı)
   if (implication.allergens) {
     if (sufficiency === "insufficient") return "not_evaluated";
     const hit = implication.allergens.some((key) => productKeys.has(key));
     return hit ? "conflict" : "ok";
   }
 
+  // Tekli nutrient kontrolü
   if (implication.nutrient) {
     const value = nutriments?.[implication.nutrient.field];
     if (value == null) return "not_evaluated";
     return value > implication.nutrient.max ? "conflict" : "ok";
   }
 
+  // Çoklu nutrient kontrolü (ör. kalp rahatsızlığı)
+  if (implication.nutrients) {
+    let evaluated = false;
+
+    for (const limit of implication.nutrients) {
+      const value = nutriments?.[limit.field];
+      if (value == null) continue;
+
+      evaluated = true;
+
+      if (value > limit.max) {
+        return "conflict";
+      }
+    }
+
+    return evaluated ? "ok" : "not_evaluated";
+  }
+
   return "not_evaluated";
 }
-
 /**
  * Evaluates a dictionary-driven diet ("Glutensiz yaşam tarzı", "Ketojenik",
  * "Düşük karbonhidrat") against the product. Unknown diets and missing data
