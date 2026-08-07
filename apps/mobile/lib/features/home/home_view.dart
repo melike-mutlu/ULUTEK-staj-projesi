@@ -5,6 +5,7 @@ import '../../core/theme/akilli_sepet_colors.dart';
 import '../../core/utils/relative_date.dart';
 import '../../core/providers.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
+import 'widgets/ad_placeholder_card.dart';
 import 'widgets/recent_scan_card.dart';
 import '../shell/shell_viewmodel.dart';
 
@@ -227,7 +228,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ),
                     ),
                     
-                    const SizedBox(height: 20),
+                    if (!viewModel.isPremium) ...<Widget>[
+                      const SizedBox(height: 24),
+                      const AdPlaceholderCard(),
+                    ],
+
+                    const SizedBox(height: 24),
 
                     // --- 3. SON TARAMALAR LİSTESİ ---
                     Text(

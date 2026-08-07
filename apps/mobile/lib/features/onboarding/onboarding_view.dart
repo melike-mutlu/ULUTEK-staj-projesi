@@ -7,18 +7,19 @@ import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
 import 'onboarding_steps.dart' as onboarding_steps;
 import 'onboarding_viewmodel.dart';
+import 'widgets/onboarding_name_step.dart';
 import 'widgets/onboarding_progress_bar.dart';
 import 'widgets/onboarding_selection_step.dart';
 import 'widgets/onboarding_welcome_step.dart';
 
-/// Onboarding akışının kabuğu: 2 karşılama + 3 seçim ekranı.
+/// Onboarding akışının kabuğu: 2 karşılama + 1 isim + 3 seçim ekranı.
 ///
 /// İki farklı navigasyon bilinçli olarak ayrılmıştır:
 ///  - **Karşılama ekranları** (0-1) kendi controller'ı olan izole bir
 ///    [_WelcomePager] içinde yaşar → parmak-takipli doğal kaydırma. Bu
 ///    PageView yalnızca 2 sayfa içerdiği için "2. ekrandan ileri kaydırma
 ///    yok, geri kaydırma var" kuralı doğal sınır olarak bedava gelir.
-///  - **Seçim ekranları** (2-4) yalnızca butonla/geri okuyla gezilir.
+///  - **İnteraktif ekranlar** (2-5) yalnızca butonla/geri okuyla gezilir.
 ///
 /// Gövde her zaman `ViewModel.currentIndex`'ten türetilir; PageController ile
 /// programatik `animateToPage` karışımı (state ↔ ekran ayrışmasına yol açan
@@ -81,6 +82,27 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
     if (success) OnboardingView.completeOnboarding(context);
   }
 
+  /// İsim ekranının gövdesi.
+  Widget _buildNameBody(
+    OnboardingViewModel viewModel,
+    onboarding_steps.OnboardingNameStep step,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
+          child: OnboardingNameStep(
+            step: step,
+            displayName: viewModel.displayName,
+            onNameChanged: viewModel.setDisplayName,
+            questionLeftInset: _questionLeftInset,
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Seçim ekranının gövdesi (soru kartı + çipler).
   Widget _buildSelectionBody(
     OnboardingViewModel viewModel,
@@ -115,21 +137,25 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
     _lastIndex = currentIndex;
 
     final currentStep = viewModel.currentStep;
-    final bool isSelectionStep =
-        currentStep is onboarding_steps.OnboardingSelectionStep;
     final bool isWelcomeStep =
         currentStep is onboarding_steps.OnboardingWelcomeStep;
-    final bool hasSelection = currentStep is onboarding_steps.OnboardingSelectionStep &&
-        viewModel.selectionsFor(currentStep.field).isNotEmpty;
-    final bool showSkipIcon = isSelectionStep && !hasSelection;
+    final bool isNameStep =
+        currentStep is onboarding_steps.OnboardingNameStep;
+    final bool isSelectionStep =
+        currentStep is onboarding_steps.OnboardingSelectionStep;
+    final bool isInteractiveStep = !isWelcomeStep;
+
+    final bool showSkipIcon = isNameStep
+        ? viewModel.displayName.trim().isEmpty
+        : (isSelectionStep &&
+            viewModel.selectionsFor(currentStep.field).isEmpty);
 
     final welcomeSteps = onboarding_steps.onboardingSteps
         .whereType<onboarding_steps.OnboardingWelcomeStep>()
         .toList();
 
-    // Gövde: karşılama bloğu (izole PageView, tek kimlik) ya da seçim ekranı
-    // (adım başına ayrı kimlik). Aynı kimlik boyunca AnimatedSwitcher geçiş
-    // yapmaz — karşılama ekranları arası kaydırmayı içerideki PageView yönetir.
+    // Gövde: karşılama bloğu (izole PageView, tek kimlik) ya da interaktif ekran
+    // (adım başına ayrı kimlik).
     final Widget body;
     final Key bodyKey;
     if (isWelcomeStep) {
@@ -142,6 +168,12 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
         onWelcomeIndexChanged: viewModel.goToStep,
         onSkip: viewModel.skipWelcome,
         onPrimaryPressed: () => _handlePrimaryPressed(viewModel),
+      );
+    } else if (isNameStep) {
+      bodyKey = ValueKey<int>(currentIndex);
+      body = _buildNameBody(
+        viewModel,
+        currentStep,
       );
     } else {
       bodyKey = ValueKey<int>(currentIndex);
@@ -161,7 +193,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
         body: SafeArea(
           child: Column(
             children: <Widget>[
-              if (isSelectionStep)
+              if (isInteractiveStep)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     _horizontalPadding,
@@ -213,10 +245,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                   child: KeyedSubtree(key: bodyKey, child: body),
                 ),
               ),
-              // Karşılama ekranlarının butonu artık adımın kendi içeriğinde
-              // (bkz. OnboardingWelcomeStep) — sayfayla birlikte kayar. Burada
-              // yalnızca seçim ekranlarının alt butonu çizilir.
-              if (isSelectionStep)
+              if (isInteractiveStep)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     _horizontalPadding,

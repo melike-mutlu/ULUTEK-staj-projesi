@@ -36,27 +36,27 @@ class OnboardingViewModel extends ChangeNotifier {
 
   bool _isSaving = false;
   String? _errorMessage;
+  String _displayName = '';
 
   // --- Okuma ---
 
   int get currentIndex => _currentIndex;
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
+  String get displayName => _displayName;
   OnboardingStep get currentStep => onboardingSteps[_currentIndex];
   int get stepCount => onboardingSteps.length;
   double get progress => (_currentIndex + 1) / stepCount;
   bool get canGoBack => _currentIndex > 0;
   bool get isLastStep => _currentIndex == stepCount - 1;
 
-  /// Sadece seçim ekranları için ilerleme oranı (3 adım, karşılama ekranları
-  /// sayılmaz). Karşılama adımlarında progress bar hiç çizilmediği için
-  /// (bkz. `onboarding_view.dart`) yalnızca bir seçim adımındayken çağrılır.
+  /// Karşılama ekranları dışındaki etkileşimli adımlar için ilerleme oranı.
   double get selectionProgress {
-    final selectionSteps =
-        onboardingSteps.whereType<OnboardingSelectionStep>().toList();
-    final index =
-        selectionSteps.indexOf(currentStep as OnboardingSelectionStep);
-    return (index + 1) / selectionSteps.length;
+    final interactiveSteps =
+        onboardingSteps.where((step) => step is! OnboardingWelcomeStep).toList();
+    final index = interactiveSteps.indexOf(currentStep);
+    if (index == -1) return 0.0;
+    return (index + 1) / interactiveSteps.length;
   }
 
   /// Sabit seçenekler + kullanıcının "+" ile eklediği seçenekler.
@@ -70,18 +70,25 @@ class OnboardingViewModel extends ChangeNotifier {
   bool isSelected(OnboardingField field, String option) =>
       _selections[field]!.contains(option);
 
-  /// Alt butonun metni: karşılama adımında `ctaLabel`, seçim adımında hiç
-  /// seçim yoksa `skipLabel`, varsa "Devam".
+  /// Alt butonun metni: karşılama adımında `ctaLabel`, isim adımında isim yoksa
+  /// `skipLabel`, seçim adımında hiç seçim yoksa `skipLabel`, aksi halde "Devam".
   String get primaryActionLabel {
     final step = currentStep;
     return switch (step) {
       OnboardingWelcomeStep(:final ctaLabel) => ctaLabel ?? '',
+      OnboardingNameStep(:final skipLabel) =>
+        _displayName.trim().isEmpty ? skipLabel : 'Devam',
       OnboardingSelectionStep() =>
         _selections[step.field]!.isEmpty ? step.skipLabel : 'Devam',
     };
   }
 
   // --- Yazma ---
+
+  void setDisplayName(String name) {
+    _displayName = name;
+    notifyListeners();
+  }
 
   void toggleOption(OnboardingField field, String option) {
     final selected = _selections[field]!;
@@ -165,6 +172,8 @@ class OnboardingViewModel extends ChangeNotifier {
       if (userId != null) {
         final profile = UserProfile(
           userId: userId,
+          displayName:
+              _displayName.trim().isEmpty ? null : _displayName.trim(),
           allergies: _selections[OnboardingField.allergies]!.toList(),
           dietPreferences: _selections[OnboardingField.diet]!.toList(),
           healthConditions: _selections[OnboardingField.health]!.toList(),

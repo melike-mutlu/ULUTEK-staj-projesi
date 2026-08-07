@@ -66,6 +66,21 @@ final class OnboardingSelectionStep extends OnboardingStep {
   final String skipLabel;
 }
 
+/// Kullanıcıdan adını almayı hedefleyen adım.
+final class OnboardingNameStep extends OnboardingStep {
+  const OnboardingNameStep({
+    required this.title,
+    required this.subtitle,
+    required this.placeholder,
+    required this.skipLabel,
+  });
+
+  final String title;
+  final String subtitle;
+  final String placeholder;
+  final String skipLabel;
+}
+
 /// Seçim adımını katalogdan kurar — soru/seçenek/skip metni tek kaynaktan
 /// (core/constants/profile_options.dart) gelir.
 OnboardingSelectionStep _selectionStep(OnboardingField field) =>
@@ -98,6 +113,12 @@ final List<OnboardingStep> onboardingSteps = <OnboardingStep>[
     imageScale: 3.5,
     imageTopOffset: 30,
     textTopOffset: 8,
+  ),
+  const OnboardingNameStep(
+    title: 'Sana nasıl hitap edelim?',
+    subtitle: 'İsmini girerek deneyimini kişiselleştirebilirsin.',
+    placeholder: 'Adınız',
+    skipLabel: 'Atla',
   ),
   _selectionStep(OnboardingField.allergies),
   _selectionStep(OnboardingField.diet),

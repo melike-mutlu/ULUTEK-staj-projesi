@@ -24,6 +24,7 @@ class HomeViewModel extends ChangeNotifier {
 
   String _displayName = '';
   String? _avatarUrl;
+  bool isPremium = false;
 
   /// Profildeki ad, yoksa e-posta kullanıcı adı; ikisi de yoksa boş.
   String get displayName => _displayName;
@@ -46,9 +47,11 @@ class HomeViewModel extends ChangeNotifier {
         email: _profileRepository.currentUserEmail,
       );
       _avatarUrl = profile?.avatarUrl;
+      isPremium = profile?.isPremium ?? false;
     } catch (_) {
       _displayName = '';
       _avatarUrl = null;
+      isPremium = false;
     }
 
     // Unique per barcode: a product scanned twice must not fill two cards.
