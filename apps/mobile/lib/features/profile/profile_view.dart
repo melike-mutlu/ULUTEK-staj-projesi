@@ -107,7 +107,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   /// The unsaved allergen stays in the draft; it saves with "Kaydet" as usual.
   void _consultChatbot(String value) {
     ref.read(chatbotViewModelProvider).setPendingInput(
-          "Profilime '$value' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?",
+          "Profilime alerjen olarak '$value' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?",
         );
     ref.read(shellViewModelProvider).selectTab(ShellTab.chatbot);
   }
