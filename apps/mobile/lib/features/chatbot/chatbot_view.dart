@@ -46,8 +46,6 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
-
     // Hem Home (Kullanıcı Adı) hem Chatbot (Mesajlar) beyinlerine ihtiyacımız var
     final homeVm = ref.watch(homeViewModelProvider);
     final chatVm = ref.watch(chatbotViewModelProvider);
@@ -157,9 +155,8 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                 ),
               ),
 
-            // --- ALT: MESAJ YAZMA KUTUSU ---
+            // --- ALT: MESAJ YAZMA KUTUSU VE YENİ SOHBET BUTONU ---
             Container(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomInset),
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
@@ -170,37 +167,64 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                   )
                 ],
               ),
-              child: Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _sendMessage(),
-                      decoration: InputDecoration(
-                        hintText: 'Bir şeyler sorun...',
-                        hintStyle: TextStyle(color: Colors.grey.shade400),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
+                  // 1. Mesaj Yazma Alanı (Çift padding yapan bottomInset silindi!)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _messageController,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (_) => _sendMessage(),
+                            decoration: InputDecoration(
+                              hintText: 'Bir şeyler sorun...',
+                              hintStyle: TextStyle(color: Colors.grey.shade400),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFF3F4F6),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            ),
+                          ),
                         ),
-                        filled: true,
-                        fillColor: const Color(0xFFF3F4F6),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        const SizedBox(width: 8),
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: AkilliSepetColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                            onPressed: _sendMessage,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // 2. Yeni Sohbet Butonu (Tam input'un altında, boşluğu dolduracak)
+                  if (chatVm.messages.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: TextButton.icon(
+                        onPressed: () {
+                          ref.read(chatbotViewModelProvider).clearMessages();
+                        },
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Yeni Sohbet Başlat'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AkilliSepetColors.textSecondary,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: AkilliSepetColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-                      onPressed: _sendMessage,
-                    ),
-                  ),
                 ],
               ),
             ),

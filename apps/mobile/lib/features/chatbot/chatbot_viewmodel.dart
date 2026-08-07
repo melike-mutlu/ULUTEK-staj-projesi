@@ -22,7 +22,7 @@ class ChatbotViewModel extends ChangeNotifier {
   // Arayüzün okumasını beklediği mesajlar listesi
   final List<ChatMessage> messages = [];
 
-  /// Text another screen wants prefilled into the input, e.g. the profile
+/// Text another screen wants prefilled into the input, e.g. the profile
   /// "danış" suggestion. The view writes it into its controller and calls
   /// [consumePendingInput] so it never re-appears on a later tab visit.
   String? pendingInput;
@@ -38,6 +38,12 @@ class ChatbotViewModel extends ChangeNotifier {
     pendingInput = null;
   }
 
+  // Yeni sohbet başlatma fonksiyonu
+  void clearMessages() {
+    messages.clear();
+    errorMessage = null;
+    notifyListeners();
+  }
   Future<void> sendMessage(String userMessage) async {
     if (userMessage.trim().isEmpty) return;
 

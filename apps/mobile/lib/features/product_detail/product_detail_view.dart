@@ -121,7 +121,6 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
 
       case ProductDetailStatus.found:
       case ProductDetailStatus.partial:
-      default:
         final product = _viewModel.product;
         final explanation = _viewModel.explanation;
 
