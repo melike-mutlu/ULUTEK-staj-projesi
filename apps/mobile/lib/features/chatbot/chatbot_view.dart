@@ -52,6 +52,17 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
     final homeVm = ref.watch(homeViewModelProvider);
     final chatVm = ref.watch(chatbotViewModelProvider);
 
+    // Başka bir ekran (ör. profil "danış") bir metin bıraktıysa input'a yaz ve
+    // tüket, böylece tekrar bu sekmeye girişte geri gelmesin.
+    final pending = chatVm.pendingInput;
+    if (pending != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _messageController.text = pending;
+        chatVm.consumePendingInput();
+      });
+    }
+
     return Scaffold(
       backgroundColor: AkilliSepetColors.background,
       body: SafeArea(

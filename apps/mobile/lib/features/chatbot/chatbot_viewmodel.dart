@@ -18,9 +18,25 @@ class ChatbotViewModel extends ChangeNotifier {
   bool isLoading = false;
   bool isTyping = false; // Arayüzün aradığı alan
   String? errorMessage;
-  
+
   // Arayüzün okumasını beklediği mesajlar listesi
   final List<ChatMessage> messages = [];
+
+  /// Text another screen wants prefilled into the input, e.g. the profile
+  /// "danış" suggestion. The view writes it into its controller and calls
+  /// [consumePendingInput] so it never re-appears on a later tab visit.
+  String? pendingInput;
+
+  void setPendingInput(String text) {
+    pendingInput = text;
+    notifyListeners();
+  }
+
+  /// Clears the prefill without notifying: the view already applied it, so a
+  /// rebuild here would only risk a loop.
+  void consumePendingInput() {
+    pendingInput = null;
+  }
 
   Future<void> sendMessage(String userMessage) async {
     if (userMessage.trim().isEmpty) return;
