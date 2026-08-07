@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     // 1) Kullanıcı profilini çek (alerji, diyet, sağlık durumu)
     const healthProfile = await getUserHealthProfile(serviceClient, user.id);
 
-    // 2) Önceki sohbet geçmişini çek (aynı oturumdan)
+    // 2) Önceki sohbet geçmişini çek (aynı oturumdan) — henüz bu mesajı içermiyor.
     const history = await getConversationHistory(serviceClient, user.id, sessionId);
 
     // 3) Kullanıcı mesajını kaydet
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
     const apiKey = Deno.env.get("LLM_API_KEY");
     const reply = apiKey
-      ? await callChatbotGemini(user_message.trim(), history, systemPrompt, apiKey)
+      ? await callChatbotLlm(user_message.trim(), history, systemPrompt, apiKey)
       : "Şu an yapay zeka asistanı yapılandırılmamış (LLM_API_KEY eksik). Lütfen daha sonra tekrar dene.";
 
     // 5) Asistan cevabını kaydet
@@ -64,57 +64,47 @@ Deno.serve(async (req) => {
   }
 });
 
-async function callChatbotGemini(
+async function callChatbotLlm(
   userMessage: string,
   history: ChatMessage[],
   systemPrompt: string,
   apiKey: string,
 ): Promise<string> {
-  const model = "gemini-2.0-flash"; 
-
-  // Geçmiş mesajları Gemini formatına çevir.
-  // Gemini'de rol adı "assistant" değil "model" olmalı.
-  const historyContents = history
+  // Geçmiş mesajları OpenAI formatına çevir (role: 'user' | 'assistant').
+  const historyMessages = history
     .filter((m) => m.role === "user" || m.role === "assistant")
-    .map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.message }],
-    }));
+    .map((m) => ({ role: m.role, content: m.message }));
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: systemPrompt }],
-        },
-        contents: [
-          ...historyContents,
-          { role: "user", parts: [{ text: userMessage }] },
-        ],
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 500,
-        },
-      }),
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
     },
-  );
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      temperature: 0.4,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...historyMessages,
+        { role: "user", content: userMessage },
+      ],
+      max_tokens: 500,
+    }),
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("Gemini API çağrısı başarısız oldu:", response.status, errorText);
+    console.error("Chatbot LLM çağrısı başarısız oldu:", response.status, errorText);
     return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
   }
 
   const payload = await response.json();
-  const content = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
-
+  const content = payload?.choices?.[0]?.message?.content;
   if (typeof content !== "string" || content.trim().length === 0) {
-    console.error("Gemini geçersiz içerik döndü:", payload);
+    console.error("Chatbot LLM geçersiz içerik döndü", payload);
     return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
   }
 
   return content.trim();
-} 
+}
