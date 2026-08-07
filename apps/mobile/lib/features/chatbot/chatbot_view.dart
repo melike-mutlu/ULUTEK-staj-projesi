@@ -46,8 +46,6 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
-
     // Hem Home (Kullanıcı Adı) hem Chatbot (Mesajlar) beyinlerine ihtiyacımız var
     final homeVm = ref.watch(homeViewModelProvider);
     final chatVm = ref.watch(chatbotViewModelProvider);
@@ -94,7 +92,6 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
             const Divider(height: 1, color: Color(0xFFE5E7EB)),
 
             // --- ORTA: MESAJ LİSTESİ ---
-// --- ORTA: MESAJ LİSTESİ (Eski temiz haline döndü) ---
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,

@@ -22,15 +22,12 @@ class ChatbotViewModel extends ChangeNotifier {
   // Arayüzün okumasını beklediği mesajlar listesi
   final List<ChatMessage> messages = [];
 
-
   // Yeni sohbet başlatma fonksiyonu
   void clearMessages() {
     messages.clear();
     errorMessage = null;
     notifyListeners();
   }
-
-
 
   Future<void> sendMessage(String userMessage) async {
     if (userMessage.trim().isEmpty) return;
