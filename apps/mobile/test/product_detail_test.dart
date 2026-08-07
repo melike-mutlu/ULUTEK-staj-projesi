@@ -635,6 +635,76 @@ void main() {
     expect(viewModel.explanation?.warningMessage, 'llm mesajı');
   });
 
+  test('load surfaces the LLM explanation text when the repo succeeds',
+      () async {
+    final viewModel = ProductDetailViewModel(
+      _FakeExplanationRepository(WarningLevel.caution),
+    );
+
+    await viewModel.load(
+      product: const Product(
+        barcode: '1',
+        name: 'Test',
+        ingredientsText: 'Nohut',
+        additives: [],
+        allergensTags: [],
+        nutriments: Nutriments(),
+      ),
+      ruleEngineResult: const RuleEngineResult(
+        matchedAllergens: [],
+        hasConflict: false,
+        veganCompatible: true,
+      ),
+      userProfile: const UserProfile(
+        userId: 'u1',
+        allergies: [],
+        dietPreferences: [],
+        healthConditions: [],
+      ),
+    );
+
+    expect(viewModel.status, ProductDetailStatus.found);
+    expect(viewModel.explanation?.summary, 'llm özet');
+    expect(viewModel.explanation?.warningMessage, 'llm mesajı');
+  });
+
+  test('load falls back to the deterministic explanation when the repo throws',
+      () async {
+    final viewModel = ProductDetailViewModel(
+      _ThrowingExplanationRepository(),
+    );
+
+    await viewModel.load(
+      product: const Product(
+        barcode: '1',
+        name: 'Test Ürünü',
+        ingredientsText: 'Nohut',
+        additives: [],
+        allergensTags: [],
+        nutriments: Nutriments(),
+      ),
+      ruleEngineResult: const RuleEngineResult(
+        matchedAllergens: [],
+        hasConflict: false,
+        veganCompatible: true,
+      ),
+      userProfile: const UserProfile(
+        userId: 'u1',
+        allergies: [],
+        dietPreferences: [],
+        healthConditions: [],
+      ),
+    );
+
+    // A repo failure must not surface as an error screen.
+    expect(viewModel.status, ProductDetailStatus.found);
+    expect(viewModel.explanation?.summary,
+        'Test Ürünü için ürün analizi tamamlandı.');
+    expect(viewModel.explanation?.level, WarningLevel.ok);
+    expect(
+        viewModel.explanation?.warningMessage, 'Bu ürün profilinize uygundur.');
+  });
+
   test('viewmodel keeps LLM level when it is not below the floor', () async {
     final viewModel = ProductDetailViewModel(
       _FakeExplanationRepository(WarningLevel.caution),
@@ -685,5 +755,17 @@ class _FakeExplanationRepository extends ExplanationRepository {
       warningMessage: 'llm mesajı',
       disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
     );
+  }
+}
+
+/// Fails like a network/Supabase error so the deterministic fallback is used.
+class _ThrowingExplanationRepository extends ExplanationRepository {
+  @override
+  Future<Explanation> explainProduct({
+    required Product product,
+    required RuleEngineResult ruleEngineResult,
+    required UserProfile userProfile,
+  }) async {
+    throw Exception('explain-product unavailable');
   }
 }

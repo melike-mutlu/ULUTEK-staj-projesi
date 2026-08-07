@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/profile_options.dart';
 import '../../core/navigation/app_routes.dart';
+import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../shared/widgets/error_state_view.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../shell/shell_viewmodel.dart';
 import 'profile_viewmodel.dart';
 import 'widgets/name_edit_dialog.dart';
 import 'widgets/profile_header.dart';
@@ -71,6 +73,43 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Adın güncellendi.')),
     );
+  }
+
+  /// Offers to clarify a just-added custom allergen with the chatbot. Runs
+  /// post-frame so the "add allergen" dialog is fully dismissed first and the
+  /// two dialogs never stack.
+  void _offerChatbotForCustomAllergen(String value) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final consult = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext dialogContext) => AlertDialog(
+          content: Text(
+            "'$value' özel bir alerjen. Doğru anlaşıldığından emin olmak için chatbot'a danışmak ister misin?",
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Gerek yok'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Chatbot\'a sor'),
+            ),
+          ],
+        ),
+      );
+      if (consult == true && mounted) _consultChatbot(value);
+    });
+  }
+
+  /// Prefills the chatbot with a question about [value] and jumps to its tab.
+  /// The unsaved allergen stays in the draft; it saves with "Kaydet" as usual.
+  void _consultChatbot(String value) {
+    ref.read(chatbotViewModelProvider).setPendingInput(
+          "Profilime alerjen olarak '$value' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?",
+        );
+    ref.read(shellViewModelProvider).selectTab(ShellTab.chatbot);
   }
 
   Future<void> _save(ProfileViewModel viewModel) async {
@@ -158,8 +197,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   selected: viewModel.selectionsFor(field),
                   onToggle: (String option) =>
                       viewModel.toggleOption(field, option),
-                  onAddCustom: (String option) =>
-                      viewModel.addCustomOption(field, option),
+                  onAddCustom: (String option) {
+                    viewModel.addCustomOption(field, option);
+                    // Only custom allergens get the "danış" nudge, and only
+                    // when the value was actually added (not a rejected dupe).
+                    final added = option.trim();
+                    if (field == OnboardingField.allergies &&
+                        viewModel.isCustomOption(field, added)) {
+                      _offerChatbotForCustomAllergen(added);
+                    }
+                  },
                   isExpanded: _expanded.contains(field),
                   onShowAll: () => setState(() => _expanded.add(field)),
                 ),
