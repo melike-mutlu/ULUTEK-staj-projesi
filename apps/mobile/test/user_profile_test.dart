@@ -77,4 +77,34 @@ void main() {
 
     expect(profile.dietPreferences, isEmpty);
   });
+
+  test('isPremium alani varsayilan olarak false, toJson/fromJson ile korunur', () {
+    const defaultProfile = UserProfile(
+      userId: 'u1',
+      allergies: <String>[],
+      dietPreferences: <String>[],
+      healthConditions: <String>[],
+    );
+    expect(defaultProfile.isPremium, isFalse);
+    expect(defaultProfile.toJson()['is_premium'], isFalse);
+
+    const premiumProfile = UserProfile(
+      userId: 'u1',
+      allergies: <String>[],
+      dietPreferences: <String>[],
+      healthConditions: <String>[],
+      isPremium: true,
+    );
+    expect(premiumProfile.isPremium, isTrue);
+    expect(premiumProfile.toJson()['is_premium'], isTrue);
+
+    final readProfile = UserProfile.fromJson(<String, dynamic>{
+      'user_id': 'u1',
+      'allergies': <String>[],
+      'diet_preference': <String>[],
+      'health_conditions': <String>[],
+      'is_premium': true,
+    });
+    expect(readProfile.isPremium, isTrue);
+  });
 }

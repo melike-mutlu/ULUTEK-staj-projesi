@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/models/user_profile.dart';
 import '../../core/navigation/app_routes.dart';
+import '../../core/providers.dart';
 import '../../core/supabase_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../data/repositories/profile_repository.dart';
 
 /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
-class SettingsView extends StatelessWidget {
+class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
 
   Future<void> _signOut(BuildContext context) async {
@@ -29,6 +33,48 @@ class SettingsView extends StatelessWidget {
       Navigator.pop(context);
     } else {
       Navigator.pushNamed(context, AppRoutes.profile);
+    }
+  }
+
+  Future<void> _togglePremium(BuildContext context, WidgetRef ref) async {
+    final repo = ref.read(profileRepositoryProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    final userId = repo.currentUserId;
+    if (userId == null) return;
+
+    try {
+      final currentProfile = await repo.getProfile(userId);
+      final isCurrentlyPremium = currentProfile?.isPremium ?? false;
+      final updatedProfile = UserProfile(
+        userId: userId,
+        allergies: currentProfile?.allergies ?? const <String>[],
+        dietPreferences: currentProfile?.dietPreferences ?? const <String>[],
+        healthConditions: currentProfile?.healthConditions ?? const <String>[],
+        displayName: currentProfile?.displayName,
+        avatarUrl: currentProfile?.avatarUrl,
+        isPremium: !isCurrentlyPremium,
+      );
+      await repo.saveProfile(updatedProfile);
+      await ref.read(homeViewModelProvider).loadDashboardData();
+
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              !isCurrentlyPremium
+                  ? 'Premium aktif edildi!'
+                  : 'Premium devre dışı bırakıldı.',
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Premium durumu güncellenemedi.')),
+        );
+      }
     }
   }
 
@@ -174,7 +220,9 @@ class SettingsView extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPremium = ref.watch(homeViewModelProvider).isPremium;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -195,6 +243,16 @@ class SettingsView extends StatelessWidget {
               icon: Icons.person_outline_rounded,
               label: 'Profil Bilgilerini Düzenle',
               onTap: () => _navigateToProfile(context),
+            ),
+            const SizedBox(height: 10),
+            _SettingsRow(
+              icon: isPremium
+                  ? Icons.workspace_premium_rounded
+                  : Icons.workspace_premium_outlined,
+              iconColor: isPremium ? const Color(0xFFFFB300) : null,
+              label: isPremium ? 'Premium\'dan Çık' : 'Premium\'a Geç',
+              subtitle: isPremium ? 'Aktif' : 'Test Amaçlı',
+              onTap: () => _togglePremium(context, ref),
             ),
             const SizedBox(height: 24),
             const _SettingsSectionHeader(title: 'UYGULAMA & YASAL'),
@@ -254,12 +312,14 @@ class _SettingsRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.iconColor,
     this.subtitle,
     this.isDestructive = false,
   });
 
   final IconData icon;
   final String label;
+  final Color? iconColor;
   final String? subtitle;
   final bool isDestructive;
   final VoidCallback onTap;
@@ -267,6 +327,7 @@ class _SettingsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isDestructive ? AppColors.warning : AppColors.textPrimary;
+    final effectiveIconColor = iconColor ?? color;
 
     return Material(
       color: AppColors.surface,
@@ -278,7 +339,7 @@ class _SettingsRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Row(
             children: <Widget>[
-              Icon(icon, size: 22, color: color),
+              Icon(icon, size: 22, color: effectiveIconColor),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(

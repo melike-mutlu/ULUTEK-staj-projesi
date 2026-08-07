@@ -48,6 +48,9 @@ class UserProfile {
   /// "avatars" storage bucket'ındaki fotoğrafın public URL'i.
   final String? avatarUrl;
 
+  /// Kullanıcının premium abonelik durumu.
+  final bool isPremium;
+
   const UserProfile({
     required this.userId,
     required this.allergies,
@@ -55,6 +58,7 @@ class UserProfile {
     required this.healthConditions,
     this.displayName,
     this.avatarUrl,
+    this.isPremium = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -65,6 +69,7 @@ class UserProfile {
       'health_conditions': healthConditions,
       'display_name': displayName,
       'avatar_url': avatarUrl,
+      'is_premium': isPremium,
     };
   }
 
@@ -80,6 +85,7 @@ class UserProfile {
           .toList(),
       displayName: json['display_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
+      isPremium: json['is_premium'] as bool? ?? false,
     );
   }
 }

@@ -41,27 +41,38 @@ void main() {
     viewModel = OnboardingViewModel(repository);
   });
 
-  test('baslangic durumu: ilk adim, geri gidilemez, ilerleme 1/5', () {
+  test('baslangic durumu: ilk adim, geri gidilemez, ilerleme 1/6', () {
     expect(viewModel.currentIndex, 0);
     expect(viewModel.canGoBack, isFalse);
-    expect(viewModel.progress, 1 / 5);
+    expect(viewModel.progress, 1 / 6);
   });
 
-  test('goNext 4 kez son adima getirir, 5. cagri siniri asmaz', () {
-    for (var i = 0; i < 4; i++) {
+  test('goNext 5 kez son adima getirir, 6. cagri siniri asmaz', () {
+    for (var i = 0; i < 5; i++) {
       viewModel.goNext();
     }
     expect(viewModel.isLastStep, isTrue);
     expect(viewModel.progress, 1.0);
 
     viewModel.goNext();
-    expect(viewModel.currentIndex, 4);
+    expect(viewModel.currentIndex, 5);
     expect(viewModel.isLastStep, isTrue);
   });
 
   test('goBack sinirin altina inmez', () {
     viewModel.goBack();
     expect(viewModel.currentIndex, 0);
+  });
+
+  test('isim adiminda (index 2) setDisplayName ve primaryActionLabel mantigi', () {
+    viewModel.goNext();
+    viewModel.goNext(); // Index 2: OnboardingNameStep
+    expect(viewModel.currentStep, isA<OnboardingNameStep>());
+    expect(viewModel.primaryActionLabel, 'Atla');
+
+    viewModel.setDisplayName('Ahmet');
+    expect(viewModel.displayName, 'Ahmet');
+    expect(viewModel.primaryActionLabel, 'Devam');
   });
 
   test('toggleOption secer/kaldirir, alanlar birbirini etkilemez', () {
@@ -94,6 +105,7 @@ void main() {
   test('primaryActionLabel: secim yokken skipLabel, secim varken Devam', () {
     viewModel.goNext();
     viewModel.goNext();
+    viewModel.goNext(); // Index 3: Allergies
     final step = viewModel.currentStep as OnboardingSelectionStep;
     expect(viewModel.primaryActionLabel, step.skipLabel);
 
@@ -101,20 +113,24 @@ void main() {
     expect(viewModel.primaryActionLabel, 'Devam');
   });
 
-  test('submit() UserProfile alanlarini dogru esler', () async {
+  test('submit() UserProfile alanlarini ve displayName\'i dogru esler', () async {
     viewModel.goNext();
-    viewModel.goNext();
+    viewModel.goNext(); // Index 2: Name step
+    viewModel.setDisplayName('Ahmet');
+
+    viewModel.goNext(); // Index 3: Allergies
     viewModel.toggleOption(OnboardingField.allergies, 'Gluten');
 
-    viewModel.goNext();
+    viewModel.goNext(); // Index 4: Diet
     viewModel.toggleOption(OnboardingField.diet, 'Vejetaryen');
 
-    viewModel.goNext();
+    viewModel.goNext(); // Index 5: Health
     viewModel.toggleOption(OnboardingField.health, 'Tansiyon');
 
     final success = await viewModel.submit();
     expect(success, isTrue);
     expect(repository.savedProfile, isNotNull);
+    expect(repository.savedProfile!.displayName, 'Ahmet');
     expect(repository.savedProfile!.allergies, <String>['Gluten']);
     expect(repository.savedProfile!.healthConditions, <String>['Tansiyon']);
     expect(
