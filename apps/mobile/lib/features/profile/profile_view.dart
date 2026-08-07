@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/profile_options.dart';
 import '../../core/navigation/app_routes.dart';
+import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../shared/widgets/error_state_view.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/suggestion_row.dart';
+import '../shell/shell_viewmodel.dart';
 import 'profile_viewmodel.dart';
 import 'widgets/name_edit_dialog.dart';
 import 'widgets/profile_header.dart';
@@ -40,6 +43,10 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   /// Cards the user opened with "Tümünü gör".
   final Set<OnboardingField> _expanded = <OnboardingField>{};
 
+  /// The custom allergen the user just added with "+", if the "chatbot'a danış"
+  /// suggestion is still showing. Null once acted on or dismissed.
+  String? _suggestedAllergen;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +78,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Adın güncellendi.')),
     );
+  }
+
+  /// Prefills the chatbot with a question about [value] and jumps to its tab.
+  /// The unsaved allergen stays in the draft; the suggestion closes.
+  void _consultChatbot(String value) {
+    ref.read(chatbotViewModelProvider).setPendingInput(
+          "Profilime '$value' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?",
+        );
+    ref.read(shellViewModelProvider).selectTab(ShellTab.chatbot);
+    setState(() => _suggestedAllergen = null);
   }
 
   Future<void> _save(ProfileViewModel viewModel) async {
@@ -158,8 +175,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   selected: viewModel.selectionsFor(field),
                   onToggle: (String option) =>
                       viewModel.toggleOption(field, option),
-                  onAddCustom: (String option) =>
-                      viewModel.addCustomOption(field, option),
+                  onAddCustom: (String option) {
+                    viewModel.addCustomOption(field, option);
+                    // Only custom allergens get the "danış" nudge, and only
+                    // when the value was actually added (not a rejected dupe).
+                    final added = option.trim();
+                    if (field == OnboardingField.allergies &&
+                        viewModel.isCustomOption(field, added)) {
+                      setState(() => _suggestedAllergen = added);
+                    }
+                  },
                   isExpanded: _expanded.contains(field),
                   onShowAll: () => setState(() => _expanded.add(field)),
                 ),
@@ -170,6 +195,15 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   message: viewModel.errorMessage!,
                   onRetry: () => _save(viewModel),
                   onDismiss: viewModel.clearError,
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (_suggestedAllergen != null) ...<Widget>[
+                SuggestionRow(
+                  message:
+                      "'$_suggestedAllergen' alerjenini netleştirmek için chatbot'a danışabilirsin.",
+                  onAction: () => _consultChatbot(_suggestedAllergen!),
+                  onDismiss: () => setState(() => _suggestedAllergen = null),
                 ),
                 const SizedBox(height: 12),
               ],

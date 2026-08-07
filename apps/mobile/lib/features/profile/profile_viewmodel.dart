@@ -90,6 +90,10 @@ class ProfileViewModel extends ChangeNotifier {
   bool isSelected(OnboardingField field, String option) =>
       _draft[field]!.contains(option);
 
+  /// Whether [option] is a user-added "+" value rather than a catalog entry.
+  bool isCustomOption(OnboardingField field, String option) =>
+      _extraOptions[field]!.contains(option);
+
   /// Kaydedilmemiş değişiklik var mı — "Kaydet" butonu buna bakar.
   ///
   /// Yalnızca çip seçimlerine bakar: ad ve fotoğraf kendi akışlarında anında
