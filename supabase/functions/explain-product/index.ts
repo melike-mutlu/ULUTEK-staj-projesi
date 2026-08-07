@@ -17,13 +17,47 @@ import {
 
 import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 
-Deno.serve(async (req) => {
+/** Swappable via Supabase secret; gpt-4o family is being retired. */
+const DEFAULT_MODEL = "gpt-4o-mini";
+
+type Level = "ok" | "caution" | "warning";
+const SEVERITY: Level[] = ["ok", "caution", "warning"];
+
+/**
+ * The deterministic floor: the rule engine owns the verdict, so the shown level
+ * can never be below this. A confirmed conflict/allergen match forces warning.
+ */
+export function ruleFloorLevel(ruleResult: unknown): Level {
+  const r = (ruleResult ?? {}) as {
+    has_conflict?: boolean;
+    matched_allergens?: unknown[];
+  };
+  const matched = Array.isArray(r.matched_allergens) &&
+    r.matched_allergens.length > 0;
+  return r.has_conflict === true || matched ? "warning" : "ok";
+}
+
+/** LLM may raise severity, never lower it below the rule engine floor. */
+export function clampToFloor(llmLevel: unknown, floor: Level): Level {
+  const llm = SEVERITY.includes(llmLevel as Level) ? llmLevel as Level : floor;
+  return SEVERITY.indexOf(llm) >= SEVERITY.indexOf(floor) ? llm : floor;
+}
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return handleCorsPreflight();
   }
 
   try {
     const { product, rule_engine_result, user_profile } = await req.json();
+
+    // Insufficient allergen data: the rule engine already says "yetersiz veri".
+    // Never ask the LLM for a verdict here — return the neutral state directly.
+    if (rule_engine_result?.data_sufficiency === "insufficient") {
+      return jsonResponse(insufficientResponse());
+    }
+
+    const floor = ruleFloorLevel(rule_engine_result);
 
     // ── Profil normalize ──────────────────────────────────────────────────
     // Gelen user_profile Supabase formatında (diet_preference, health_conditions)
@@ -44,16 +78,22 @@ Deno.serve(async (req) => {
 
     const prompt = buildPrompt(product, rule_engine_result, profile);
     const apiKey = Deno.env.get("LLM_API_KEY");
+    const model = Deno.env.get("LLM_MODEL") ?? DEFAULT_MODEL;
     const llmOutput = apiKey
-      ? await callLlm(prompt, apiKey)
-      : await callLlmPlaceholder("LLM_API_KEY tanimli degil.");
+      ? await callLlm(prompt, apiKey, model, floor)
+      : callLlmPlaceholder("LLM_API_KEY tanimli degil.", floor);
 
     return jsonResponse(llmOutput);
   } catch (error) {
     console.error(error);
     return jsonResponse({ status: "error", message: "beklenmeyen hata" }, 500);
   }
-});
+}
+
+// Only serve when run as the entrypoint, so tests can import the pure helpers.
+if (import.meta.main) {
+  Deno.serve(handleRequest);
+}
 
 function buildPrompt(product: unknown, ruleResult: unknown, profile: ProfileSchema) {
   // Profil özetini okunabilir hale getir
@@ -61,8 +101,8 @@ function buildPrompt(product: unknown, ruleResult: unknown, profile: ProfileSche
     profile.allergies.length > 0
       ? `Alerjiler: ${profile.allergies.join(", ")}`
       : "Bilinen alerji yok",
-    profile.diet !== "standard"
-      ? `Diyet: ${profile.diet}`
+    profile.diets.length > 0
+      ? `Diyet: ${profile.diets.join(", ")}`
       : "Standart diyet",
     profile.goals.length > 0
       ? `Saglik hedefleri: ${profile.goals.join(", ")}`
@@ -95,7 +135,12 @@ Profil JSON: ${JSON.stringify(profile, null, 2)}
   `.trim();
 }
 
-async function callLlm(prompt: string, apiKey: string) {
+async function callLlm(
+  prompt: string,
+  apiKey: string,
+  model: string,
+  floor: Level,
+) {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -103,7 +148,7 @@ async function callLlm(prompt: string, apiKey: string) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model,
       temperature: 0.2,
       messages: [
         {
@@ -123,18 +168,18 @@ async function callLlm(prompt: string, apiKey: string) {
   if (!response.ok) {
     const errorText = await response.text();
     console.error("LLM çağrısı başarısız oldu:", response.status, errorText);
-    return callLlmPlaceholder("LLM API çağrısı başarısız oldu.");
+    return callLlmPlaceholder("LLM API çağrısı başarısız oldu.", floor);
   }
 
   const payload = await response.json();
   const content = payload?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
     console.error("LLM geçersiz içerik döndü", payload);
-    return callLlmPlaceholder("LLM geçersiz içerik döndürdü.");
+    return callLlmPlaceholder("LLM geçersiz içerik döndürdü.", floor);
   }
 
   const parsed = parseLlmJson(content);
-  return validateLlmResponse(parsed);
+  return validateLlmResponse(parsed, floor);
 }
 
 function parseLlmJson(content: string) {
@@ -153,30 +198,30 @@ function parseLlmJson(content: string) {
   }
 }
 
-function validateLlmResponse(value: any) {
+export function validateLlmResponse(value: unknown, floor: Level) {
   if (!value || typeof value !== "object") {
-    return callLlmPlaceholder("LLM geçerli JSON döndürmedi.");
+    return callLlmPlaceholder("LLM geçerli JSON döndürmedi.", floor);
   }
 
-  const summary = typeof value.summary === "string" ? value.summary.trim() : null;
-  const personalWarning = value.personal_warning;
-  const level = personalWarning?.level;
-  const message = typeof personalWarning?.message === "string" ? personalWarning.message.trim() : null;
-  const dietNote = value.diet_note ?? null;
-  const disclaimer = typeof value.disclaimer === "string" ? value.disclaimer.trim() : null;
-
-  const allowedLevels = new Set(["ok", "caution", "warning"]);
-  const normalizedLevel = allowedLevels.has(level) ? level : "caution";
+  const v = value as Record<string, unknown>;
+  const personalWarning = (v.personal_warning ?? {}) as Record<string, unknown>;
+  const summary = typeof v.summary === "string" ? v.summary.trim() : null;
+  const message = typeof personalWarning.message === "string"
+    ? personalWarning.message.trim()
+    : null;
+  const dietNote = v.diet_note ?? null;
+  const disclaimer = typeof v.disclaimer === "string" ? v.disclaimer.trim() : null;
 
   if (!summary || !message || !disclaimer) {
     console.error("LLM yanıtı eksik alan içeriyor", { summary, message, disclaimer });
-    return callLlmPlaceholder("LLM yanıtı eksik alan içeriyor.");
+    return callLlmPlaceholder("LLM yanıtı eksik alan içeriyor.", floor);
   }
 
   return {
     summary,
     personal_warning: {
-      level: normalizedLevel,
+      // The rule engine floor wins; the LLM can only raise severity.
+      level: clampToFloor(personalWarning.level, floor),
       message,
     },
     diet_note: dietNote,
@@ -184,13 +229,32 @@ function validateLlmResponse(value: any) {
   };
 }
 
-function callLlmPlaceholder(reason: string) {
+/**
+ * Neutral fallback when the LLM is unavailable. Never asserts safety on its own:
+ * the level is the rule engine's verdict, not a hardcoded "ok".
+ */
+export function callLlmPlaceholder(reason: string, floor: Level) {
   console.warn("LLM placeholder döndü:", reason);
   return {
-    summary: "Ürün açıklaması henüz LLM entegrasyonu tamamlanmadığı için mevcut değil.",
+    summary: "Ürün açıklaması şu an oluşturulamadı.",
     personal_warning: {
-      level: "ok",
-      message: "Alerjen veya diyet uyarısı şu an placeholder olarak gösteriliyor.",
+      level: floor,
+      message: floor === "warning"
+        ? "Bu üründe profilinle çakışan içerik var; ayrıntılar aşağıda."
+        : "Açıklama şu an oluşturulamadı; ürün bilgileri aşağıda.",
+    },
+    diet_note: null,
+    disclaimer: "Bu bilgi tıbbi tavsiye niteliği taşımaz.",
+  };
+}
+
+/** data_sufficiency=insufficient: no verdict, no safety claim. */
+function insufficientResponse() {
+  return {
+    summary: "Bu ürünün içerik bilgisi eksik.",
+    personal_warning: {
+      level: "caution",
+      message: "İçerik bilgisi eksik olduğu için değerlendirme yapılamadı.",
     },
     diet_note: null,
     disclaimer: "Bu bilgi tıbbi tavsiye niteliği taşımaz.",

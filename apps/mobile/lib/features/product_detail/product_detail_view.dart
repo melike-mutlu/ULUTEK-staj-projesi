@@ -31,7 +31,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = ProductDetailViewModel();
+    _viewModel = ProductDetailViewModel(ref.read(explanationRepositoryProvider));
     _viewModel.addListener(_onViewModelChanged);
   }
 

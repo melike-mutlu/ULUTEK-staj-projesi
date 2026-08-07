@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/repositories/explanation_repository.dart';
 import '../data/repositories/product_cache_repository.dart';
 import '../data/repositories/product_repository.dart';
 import '../data/repositories/profile_repository.dart';
@@ -12,6 +13,12 @@ import '../core/supabase_client.dart';
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepository();
+});
+
+/// Feeds the LLM explanation into product detail. The verdict still comes from
+/// the rule engine; this only supplies the human-readable text.
+final explanationRepositoryProvider = Provider<ExplanationRepository>((ref) {
+  return ExplanationRepository();
 });
 
 final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {
@@ -49,8 +56,8 @@ final chatbotRepositoryProvider = Provider<ChatbotRepository>((ref) {
   return ChatbotRepository(supabase);
 });
 
-final chatbotViewModelProvider = ChangeNotifierProvider<ChatbotViewModel>((ref) {
+final chatbotViewModelProvider =
+    ChangeNotifierProvider<ChatbotViewModel>((ref) {
   final repository = ref.watch(chatbotRepositoryProvider);
   return ChatbotViewModel(repository);
 });
-

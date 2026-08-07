@@ -16,6 +16,8 @@ import 'package:akilli_sepet/core/models/rule_engine_result.dart';
 import 'package:akilli_sepet/core/providers.dart';
 import 'package:akilli_sepet/data/repositories/product_repository.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
+import 'package:akilli_sepet/data/repositories/explanation_repository.dart';
+import 'package:akilli_sepet/core/models/user_profile.dart';
 
 const _foundFetchResult = ProductFetchResult(
   status: 'found',
@@ -599,4 +601,89 @@ void main() {
     expect(find.text('Ana Sayfa'), findsNothing);
     expect(find.text('Mock Test Durumları (Demo):'), findsNothing);
   });
+
+  test('viewmodel clamps LLM level up to the rule engine floor', () async {
+    // LLM says "ok" but the rule engine found a conflict -> must show warning.
+    final viewModel = ProductDetailViewModel(
+      _FakeExplanationRepository(WarningLevel.ok),
+    );
+
+    await viewModel.load(
+      product: const Product(
+        barcode: '1',
+        name: 'Test',
+        ingredientsText: 'Süt',
+        additives: [],
+        allergensTags: ['en:milk'],
+        nutriments: Nutriments(),
+      ),
+      ruleEngineResult: const RuleEngineResult(
+        matchedAllergens: ['Süt/Laktoz'],
+        hasConflict: true,
+        veganCompatible: false,
+      ),
+      userProfile: const UserProfile(
+        userId: 'u1',
+        allergies: ['Süt/Laktoz'],
+        dietPreferences: [],
+        healthConditions: [],
+      ),
+    );
+
+    expect(viewModel.explanation?.level, WarningLevel.warning);
+    // LLM text is kept.
+    expect(viewModel.explanation?.warningMessage, 'llm mesajı');
+  });
+
+  test('viewmodel keeps LLM level when it is not below the floor', () async {
+    final viewModel = ProductDetailViewModel(
+      _FakeExplanationRepository(WarningLevel.caution),
+    );
+
+    await viewModel.load(
+      product: const Product(
+        barcode: '1',
+        name: 'Test',
+        ingredientsText: 'Nohut',
+        additives: [],
+        allergensTags: [],
+        nutriments: Nutriments(),
+      ),
+      ruleEngineResult: const RuleEngineResult(
+        matchedAllergens: [],
+        hasConflict: false,
+        veganCompatible: true,
+      ),
+      userProfile: const UserProfile(
+        userId: 'u1',
+        allergies: [],
+        dietPreferences: [],
+        healthConditions: [],
+      ),
+    );
+
+    // Floor is ok, LLM raised to caution -> caution stands.
+    expect(viewModel.explanation?.level, WarningLevel.caution);
+  });
+}
+
+/// Returns a fixed level so the clamp behaviour can be asserted.
+class _FakeExplanationRepository extends ExplanationRepository {
+  _FakeExplanationRepository(this._level);
+
+  final WarningLevel _level;
+
+  @override
+  Future<Explanation> explainProduct({
+    required Product product,
+    required RuleEngineResult ruleEngineResult,
+    required UserProfile userProfile,
+  }) async {
+    return Explanation(
+      summary: 'llm özet',
+      level: _level,
+      warningMessage: 'llm mesajı',
+      disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+    );
+  }
 }
