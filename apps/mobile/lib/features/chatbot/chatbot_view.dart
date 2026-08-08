@@ -1,3 +1,4 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
@@ -21,11 +22,10 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
   @override
   void initState() {
     super.initState();
-    // Chatbot ekranı açıldığında profil henüz yüklenmemişse yüklemeyi tetikliyoruz
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final profileVm = ref.read(profileViewModelProvider);
       if (profileVm.profile == null && !profileVm.isLoading) {
-        profileVm.load(); 
+        profileVm.load(); // Parametresiz çağrılıyor
       }
     });
   }
@@ -51,37 +51,57 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
     });
   }
 
-  // --- YENİ: KULLANICI ÖNERİYİ KABUL ETTİĞİNDE ÇALIŞACAK FONKSİYON ---
   Future<void> _acceptSuggestion(int index, String fieldStr, String value) async {
     final profileVm = ref.read(profileViewModelProvider);
     final chatVm = ref.read(chatbotViewModelProvider);
 
-    // 1. Gelen string değeri (diet, allergy, health) OnboardingField enum'una çevir
-    OnboardingField? targetField;
-    final f = fieldStr.toLowerCase();
-    if (f.contains('diet')) targetField = OnboardingField.diet;
-    else if (f.contains('allerg')) targetField = OnboardingField.allergies;
-    else if (f.contains('health')) targetField = OnboardingField.health;
+    final currentProfile = profileVm.profile;
+    final user = Supabase.instance.client.auth.currentUser;
 
-    if (targetField != null) {
-      // 2. ProfileViewModel'e özel seçenek olarak ekle (otomatik seçili yapar)
-      profileVm.addCustomOption(targetField, value);
+    if (currentProfile != null && user != null) {
+      final f = fieldStr.toLowerCase();
       
-      // 3. Veritabanına (Supabase) gerçekten kaydet!
-      final success = await profileVm.save();
-      
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$value profilinize eklendi!'), 
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+      // 1. Listeye ekle
+      if (f.contains('diet')) {
+        if (!currentProfile.dietPreferences.contains(value)) {
+          currentProfile.dietPreferences.add(value);
+        }
+      } 
+      else if (f.contains('allerg')) {
+        if (!currentProfile.allergies.contains(value)) {
+          currentProfile.allergies.add(value); 
+        }
+      } 
+      else if (f.contains('health')) {
+        if (!currentProfile.healthConditions.contains(value)) {
+          currentProfile.healthConditions.add(value);
+        }
+      }
+
+      // 2. Doğrudan Supabase tablosuna yaz
+      try {
+        await Supabase.instance.client
+            .from('profiles')
+            .update(currentProfile.toJson())
+            .eq('user_id', user.id);
+
+        // 3. Profili parametresiz yenile
+        await profileVm.load();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$value profilinize eklendi!'), 
+              backgroundColor: Colors.green.shade600,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        debugPrint('Kayıt Hatası: $e');
       }
     }
 
-    // 4. Sohbet ekranındaki kartı kaldırıp normal mesaja dönüştür
     chatVm.markSuggestionAsHandled(index);
   }
 
@@ -442,4 +462,5 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
     );
   }
 }
+
 
