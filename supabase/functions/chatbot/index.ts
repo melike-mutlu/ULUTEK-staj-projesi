@@ -70,39 +70,49 @@ async function callChatbotLlm(
   systemPrompt: string,
   apiKey: string,
 ): Promise<string> {
-  // Geçmiş mesajları OpenAI formatına çevir (role: 'user' | 'assistant').
-  const historyMessages = history
-    .filter((m) => m.role === "user" || m.role === "assistant")
-    .map((m) => ({ role: m.role, content: m.message }));
+  const model = "gemini-2.0-flash";
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+  // Geçmiş mesajları Gemini formatına çevir. Gemini'de rol adı "assistant"
+  // değil "model" olmalı.
+  const historyContents = history
+    .filter((m) => m.role === "user" || m.role === "assistant")
+    .map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.message }],
+    }));
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: systemPrompt }],
+        },
+        contents: [
+          ...historyContents,
+          { role: "user", parts: [{ text: userMessage }] },
+        ],
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: 500,
+        },
+      }),
     },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0.4,
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...historyMessages,
-        { role: "user", content: userMessage },
-      ],
-      max_tokens: 500,
-    }),
-  });
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("Chatbot LLM çağrısı başarısız oldu:", response.status, errorText);
+    console.error("Gemini API çağrısı başarısız oldu:", response.status, errorText);
     return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
   }
 
   const payload = await response.json();
-  const content = payload?.choices?.[0]?.message?.content;
+  const content = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
+
   if (typeof content !== "string" || content.trim().length === 0) {
-    console.error("Chatbot LLM geçersiz içerik döndü", payload);
+    console.error("Gemini geçersiz içerik döndü:", payload);
     return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
   }
 
