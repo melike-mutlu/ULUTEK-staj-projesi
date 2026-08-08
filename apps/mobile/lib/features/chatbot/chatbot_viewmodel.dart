@@ -48,6 +48,7 @@ class ChatbotViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
   }
+  
   Future<void> sendMessage(String userMessage) async {
     if (userMessage.trim().isEmpty) return;
 
