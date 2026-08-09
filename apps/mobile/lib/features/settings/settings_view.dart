@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../profile/profile_viewmodel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/user_profile.dart';
@@ -43,8 +44,14 @@ class SettingsView extends ConsumerWidget {
     if (userId == null) return;
 
     try {
+      // 1. Veritabanından her zaman EN GÜNCEL profili çek
       final currentProfile = await repo.getProfile(userId);
       final isCurrentlyPremium = currentProfile?.isPremium ?? false;
+      
+      // 2. Yeni durumu (tam tersi) belirle
+      final newPremiumStatus = !isCurrentlyPremium;
+
+      // 3. Yeni durumu kaydet
       final updatedProfile = UserProfile(
         userId: userId,
         allergies: currentProfile?.allergies ?? const <String>[],
@@ -52,27 +59,40 @@ class SettingsView extends ConsumerWidget {
         healthConditions: currentProfile?.healthConditions ?? const <String>[],
         displayName: currentProfile?.displayName,
         avatarUrl: currentProfile?.avatarUrl,
-        isPremium: !isCurrentlyPremium,
+        isPremium: newPremiumStatus, // YENİ DURUM BURADA
       );
+      
       await repo.saveProfile(updatedProfile);
+      
+      // 4. Arayüzün (ve Chat ekranının) haberi olması için HomeViewModel'i güncelle
       await ref.read(homeViewModelProvider).loadDashboardData();
 
+      // BURAYI EKLİYORUZ: ProfileViewModel'in de haberi olsun ki Chatbot kilidi açılsın!
+      await ref.read(profileViewModelProvider.notifier).load();
+
+      // 5. Doğru mesajı göster
       if (context.mounted) {
         messenger.showSnackBar(
           SnackBar(
             content: Text(
-              !isCurrentlyPremium
-                  ? 'Premium aktif edildi!'
-                  : 'Premium devre dışı bırakıldı.',
+              newPremiumStatus
+                  ? 'Premium aktif edildi! Chatbot kilidi açıldı. 🚀'
+                  : 'Premium devre dışı bırakıldı. Chatbot kilitlendi. 🔒',
             ),
             duration: const Duration(seconds: 2),
           ),
         );
       }
-    } catch (_) {
+    // ... try bloğunun sonu
+    } catch (e, stackTrace) {
+      // Hatayı konsola kırmızı kırmızı yazdıralım
+      debugPrint('--- PREMIUM GÜNCELLEME HATASI ---');
+      debugPrint(e.toString());
+      
       if (context.mounted) {
+        // Hatayı ekranda da görelim ki hemen anlayalım
         messenger.showSnackBar(
-          const SnackBar(content: Text('Premium durumu güncellenemedi.')),
+          SnackBar(content: Text('HATA: ${e.toString()}')),
         );
       }
     }
