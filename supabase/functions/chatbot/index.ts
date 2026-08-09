@@ -23,6 +23,20 @@ Deno.serve(async (req) => {
 
     const serviceClient = getServiceClient();
 
+    // Premium kontrolü — client tarafındaki paywall'a güvenilmez, sunucu tarafında da doğrulanır.
+    const { data: profileRow, error: profileError } = await serviceClient
+      .from("profiles")
+      .select("is_premium")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (profileError || !profileRow?.is_premium) {
+      return jsonResponse(
+        { status: "error", message: "Bu özellik yalnızca premium kullanıcılar içindir" },
+        403,
+      );
+    }  
+
     const { user_message, session_id } = await req.json();
     if (typeof user_message !== "string" || user_message.trim().length === 0) {
       return jsonResponse({ status: "error", message: "user_message zorunludur" }, 400);
@@ -70,7 +84,7 @@ async function callChatbotLlm(
   systemPrompt: string,
   apiKey: string,
 ): Promise<string> {
-  const model = "gemini-2.0-flash";
+  const model = "gemini-3.6-flash"; 
 
   // Geçmiş mesajları Gemini formatına çevir. Gemini'de rol adı "assistant"
   // değil "model" olmalı.
@@ -118,3 +132,4 @@ async function callChatbotLlm(
 
   return content.trim();
 }
+ 
