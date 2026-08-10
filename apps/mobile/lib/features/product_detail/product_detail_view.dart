@@ -14,6 +14,7 @@ import 'widgets/other_allergens_section.dart';
 import 'widgets/personal_risks_section.dart';
 import 'widgets/profile_check_section.dart';
 import 'widgets/product_header_card.dart';
+import 'widgets/recommendations_section.dart';
 import 'widgets/warning_banner.dart';
 
 class ProductDetailView extends ConsumerStatefulWidget {
@@ -205,6 +206,9 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
               IngredientsSection(product: product),
+
+              // Öneriler — içindekilerin hemen altında.
+              RecommendationsSection(alternatives: _viewModel.alternatives),
               const SizedBox(height: 24),
             ],
           ),
