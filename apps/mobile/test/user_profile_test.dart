@@ -107,4 +107,25 @@ void main() {
     });
     expect(readProfile.isPremium, isTrue);
   });
+
+  test('country alani toJson ve fromJson ile korunur', () {
+    const profile = UserProfile(
+      userId: 'u1',
+      allergies: <String>[],
+      dietPreferences: <String>[],
+      healthConditions: <String>[],
+      country: 'Türkiye',
+    );
+    expect(profile.country, 'Türkiye');
+    expect(profile.toJson()['country'], 'Türkiye');
+
+    final read = UserProfile.fromJson(<String, dynamic>{
+      'user_id': 'u1',
+      'allergies': <String>[],
+      'diet_preference': <String>[],
+      'health_conditions': <String>[],
+      'country': 'Almanya',
+    });
+    expect(read.country, 'Almanya');
+  });
 }
