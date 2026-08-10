@@ -153,6 +153,17 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (_profile == null) {
+        final existing = await _profileRepository.getProfile(userId);
+        if (existing != null) {
+          _profile = existing;
+          _displayName ??= existing.displayName;
+          _country ??= existing.country;
+          _avatarUrl ??= existing.avatarUrl;
+          _applyToDraft(existing);
+        }
+      }
+
       final updated = _profileWith(
         userId: userId,
         displayName: normalized,
@@ -177,7 +188,7 @@ class ProfileViewModel extends ChangeNotifier {
   Future<bool> saveCountry(String value) async {
     final trimmed = value.trim();
     final normalized = trimmed.isEmpty ? null : trimmed;
-    if (normalized == _country) return true;
+    if (normalized == _country && _profile != null) return true;
 
     final String? userId;
     try {
@@ -198,6 +209,17 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (_profile == null) {
+        final existing = await _profileRepository.getProfile(userId);
+        if (existing != null) {
+          _profile = existing;
+          _displayName ??= existing.displayName;
+          _country ??= existing.country;
+          _avatarUrl ??= existing.avatarUrl;
+          _applyToDraft(existing);
+        }
+      }
+
       final updated = _profileWith(
         userId: userId,
         displayName: _displayName,
