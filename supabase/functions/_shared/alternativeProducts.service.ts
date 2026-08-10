@@ -1,7 +1,9 @@
 // supabase/functions/_shared/alternativeProducts.service.ts
 
 import { runRuleEngine } from "./ruleEngine/ruleEngine.service.ts";
-import { UserProfile, ProductData } from "./ruleEngine/types.ts";
+
+type UserProfile = any;
+type ProductData = any;
 
 export interface AlternativeProduct {
   barcode: string;
