@@ -47,7 +47,7 @@ class RecommendationsSection extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 96,
+            height: RecommendationCard.heightFor(context),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
