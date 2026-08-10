@@ -185,6 +185,7 @@ class ProfileViewModel extends ChangeNotifier {
       healthConditions: base?.healthConditions ?? const <String>[],
       displayName: displayName,
       avatarUrl: avatarUrl,
+      isPremium: base?.isPremium ?? false,
     );
   }
 
@@ -350,6 +351,7 @@ class ProfileViewModel extends ChangeNotifier {
         healthConditions: _draft[OnboardingField.health]!.toList(),
         displayName: _displayName,
         avatarUrl: _avatarUrl,
+        isPremium: _profile?.isPremium ?? false,
       );
       await _profileRepository.saveProfile(updated);
       _profile = updated;

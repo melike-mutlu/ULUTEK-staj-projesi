@@ -8,6 +8,7 @@ import '../../core/supabase_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/repositories/profile_repository.dart';
+import '../profile/profile_viewmodel.dart';
 
 /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
 class SettingsView extends ConsumerWidget {
@@ -56,6 +57,9 @@ class SettingsView extends ConsumerWidget {
       );
       await repo.saveProfile(updatedProfile);
       await ref.read(homeViewModelProvider).loadDashboardData();
+      // ProfileViewModel de yenilenmeli — chatbot'un paywall kontrolü onun
+      // önbelleğindeki profile bakıyor, yoksa kilit hemen açılmaz.
+      await ref.read(profileViewModelProvider).load();
 
       if (context.mounted) {
         messenger.showSnackBar(
