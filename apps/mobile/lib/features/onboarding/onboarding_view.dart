@@ -7,19 +7,20 @@ import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
 import 'onboarding_steps.dart' as onboarding_steps;
 import 'onboarding_viewmodel.dart';
+import 'widgets/onboarding_country_step.dart';
 import 'widgets/onboarding_name_step.dart';
 import 'widgets/onboarding_progress_bar.dart';
 import 'widgets/onboarding_selection_step.dart';
 import 'widgets/onboarding_welcome_step.dart';
 
-/// Onboarding akışının kabuğu: 2 karşılama + 1 isim + 3 seçim ekranı.
+/// Onboarding akışının kabuğu: 2 karşılama + 1 isim + 1 ülke + 3 seçim ekranı.
 ///
 /// İki farklı navigasyon bilinçli olarak ayrılmıştır:
 ///  - **Karşılama ekranları** (0-1) kendi controller'ı olan izole bir
 ///    [_WelcomePager] içinde yaşar → parmak-takipli doğal kaydırma. Bu
 ///    PageView yalnızca 2 sayfa içerdiği için "2. ekrandan ileri kaydırma
 ///    yok, geri kaydırma var" kuralı doğal sınır olarak bedava gelir.
-///  - **İnteraktif ekranlar** (2-5) yalnızca butonla/geri okuyla gezilir.
+///  - **İnteraktif ekranlar** (2-6) yalnızca butonla/geri okuyla gezilir.
 ///
 /// Gövde her zaman `ViewModel.currentIndex`'ten türetilir; PageController ile
 /// programatik `animateToPage` karışımı (state ↔ ekran ayrışmasına yol açan
@@ -103,6 +104,27 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
     );
   }
 
+  /// Ülke ekranının gövdesi.
+  Widget _buildCountryBody(
+    OnboardingViewModel viewModel,
+    onboarding_steps.OnboardingCountryStep step,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
+          child: OnboardingCountryStep(
+            step: step,
+            country: viewModel.country,
+            onCountryChanged: viewModel.setCountry,
+            questionLeftInset: _questionLeftInset,
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Seçim ekranının gövdesi (soru kartı + çipler).
   Widget _buildSelectionBody(
     OnboardingViewModel viewModel,
@@ -141,14 +163,18 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
         currentStep is onboarding_steps.OnboardingWelcomeStep;
     final bool isNameStep =
         currentStep is onboarding_steps.OnboardingNameStep;
+    final bool isCountryStep =
+        currentStep is onboarding_steps.OnboardingCountryStep;
     final bool isSelectionStep =
         currentStep is onboarding_steps.OnboardingSelectionStep;
     final bool isInteractiveStep = !isWelcomeStep;
 
     final bool showSkipIcon = isNameStep
         ? viewModel.displayName.trim().isEmpty
-        : (isSelectionStep &&
-            viewModel.selectionsFor(currentStep.field).isEmpty);
+        : isCountryStep
+            ? viewModel.country.trim().isEmpty
+            : (isSelectionStep &&
+                viewModel.selectionsFor(currentStep.field).isEmpty);
 
     final welcomeSteps = onboarding_steps.onboardingSteps
         .whereType<onboarding_steps.OnboardingWelcomeStep>()
@@ -172,6 +198,12 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
     } else if (isNameStep) {
       bodyKey = ValueKey<int>(currentIndex);
       body = _buildNameBody(
+        viewModel,
+        currentStep,
+      );
+    } else if (isCountryStep) {
+      bodyKey = ValueKey<int>(currentIndex);
+      body = _buildCountryBody(
         viewModel,
         currentStep,
       );
