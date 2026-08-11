@@ -51,39 +51,64 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
     });
   }
 
-  // --- YENİ: KULLANICI ÖNERİYİ KABUL ETTİĞİNDE ÇALIŞACAK FONKSİYON ---
+  // --- KUSURSUZ ONAY FONKSİYONU ---
   Future<void> _acceptSuggestion(int index, String fieldStr, String value) async {
     final profileVm = ref.read(profileViewModelProvider);
     final chatVm = ref.read(chatbotViewModelProvider);
 
-    // 1. Gelen string değeri (diet, allergy, health) OnboardingField enum'una çevir
+    // 1. Gelen metni İngilizce veya Türkçe gelse bile yakalayacak şekilde OnboardingField'a çevir
     OnboardingField? targetField;
     final f = fieldStr.toLowerCase();
-    if (f.contains('diet')) targetField = OnboardingField.diet;
-    else if (f.contains('allerg')) targetField = OnboardingField.allergies;
-    else if (f.contains('health')) targetField = OnboardingField.health;
+    
+    if (f.contains('diet') || f.contains('diyet')) {
+      targetField = OnboardingField.diet;
+    } else if (f.contains('allerg') || f.contains('alerj')) {
+      targetField = OnboardingField.allergies;
+    } else if (f.contains('health') || f.contains('sağlık') || f.contains('hastalık')) {
+      targetField = OnboardingField.health;
+    }
 
     if (targetField != null) {
-      // 2. ProfileViewModel'e özel seçenek olarak ekle (otomatik seçili yapar)
-      profileVm.addCustomOption(targetField, value);
+      final trimmedValue = value.trim();
+      String actualValue = trimmedValue;
       
-      // 3. Veritabanına (Supabase) gerçekten kaydet!
+      // 2. Büyük/küçük harf eşleşmesini bul (örn: AI "yumurta" yolladı ama sistemde "Yumurta" kayıtlı)
+      for (final existingOption in profileVm.optionsFor(targetField)) {
+        if (existingOption.toLowerCase() == trimmedValue.toLowerCase()) {
+          actualValue = existingOption;
+          break;
+        }
+      }
+
+      // 3. Eğer kelime sistemde HİÇ YOKSA (örn: Kivi), listeye özel kelime olarak ekle
+      profileVm.addCustomOption(targetField, actualValue);
+      
+      // 4. ASIL ÇÖZÜM: Kelime sistemde zaten varsa addCustomOption onu seçmez. 
+      // Bu yüzden eğer henüz seçili değilse biz zorla seçili (toggle) hale getiriyoruz!
+      if (!profileVm.selectionsFor(targetField).contains(actualValue)) {
+        profileVm.toggleOption(targetField, actualValue);
+      }
+      
+      // 5. Artık taslakta kesinlikle var. Veritabanına kaydet!
       final success = await profileVm.save();
       
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$value profilinize eklendi!'), 
+            content: Text('$actualValue profilinize eklendi!'), 
             backgroundColor: Colors.green.shade600,
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
+    } else {
+      debugPrint("Chatbot Hatası: Bilinmeyen alan -> $fieldStr");
     }
 
-    // 4. Sohbet ekranındaki kartı kaldırıp normal mesaja dönüştür
+    // 6. Sohbet ekranındaki kartı kaldırıp normal mesaja dönüştür
     chatVm.markSuggestionAsHandled(index);
   }
+
 
   @override
   void dispose() {
