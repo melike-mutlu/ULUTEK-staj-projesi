@@ -209,6 +209,36 @@ class _AuthViewState extends ConsumerState<AuthView> {
             ),
             const SizedBox(height: 20),
 
+            // Google ile Giriş Butonu
+            SizedBox(
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: vm.isLoading ? null : () async{
+                  await vm.signInWithGoogle();
+                  // Web'de veya telefonda Google sayfası açılacağı için
+                  // anında yönlendirme (routing) yapmıyoruz, OAuth callback'i
+                  // bekliyoruz. Başarılı ise Supabase auth state değişecek
+                  // ve uygulama ana ekrana geçecektir.
+                },
+                icon: Image.asset(
+                  'assets/images/google_logo.webp',
+                  width: 20,
+                  height: 20,
+                ),
+                label: const Text(
+                  'Google ile Giriş Yap',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black87,
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
             // Misafir Girişi Butonu
             SizedBox(
               height: 48,

@@ -123,6 +123,31 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  // Google OAuth ile giriş yapma işlemi
+  //(Not: Bu fonksiyonun çalışması için Google Cloud
+  // ve Supabase panel ayarlarının yapılmış olması gerekir.)
+  Future<bool> signInWithGoogle() async{
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+    try{
+      //Supabase'in yerleşik OAuth fonksiyonunu çağırma
+      //RedirectTo parametresi, giriş yapıldıktan sonra uygulamanın geri açılmasını sağlar
+      final success = await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? null: 'io.supabase.akillisepet://login-callback/',
+      );
+      isLoading = false;
+      notifyListeners();
+      return success;
+    } catch (e){
+      errorMessage = 'Google ile giriş başarısız: $e';
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   bool _isEmailAlreadyRegistered(AuthException error) =>
       error.code == ErrorCode.userAlreadyExists.code ||
       error.code == ErrorCode.emailExists.code;
