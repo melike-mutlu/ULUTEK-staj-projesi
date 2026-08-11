@@ -42,6 +42,9 @@ class ProfileViewModel extends ChangeNotifier {
 
   bool _isSavingName = false;
 
+  /// Kayıtlı ülke. Taslak DEĞİL: hemen veritabanına yazılır.
+  String? _country;
+
   /// Fotoğraf URL'i taslak DEĞİL: yükleme başarılı olur olmaz kaydedilir,
   /// çünkü dosya o an zaten bucket'a gitmiş olur.
   String? _avatarUrl;
@@ -65,6 +68,8 @@ class ProfileViewModel extends ChangeNotifier {
 
   /// Kutuya ön değer olarak konur — yedek (e-posta) isim değil, gerçek ad.
   String get displayNameDraft => _displayName ?? '';
+  String get countryDraft => _country ?? '';
+  String? get country => _country;
   String? get avatarUrl => _avatarUrl;
   bool get isSavingName => _isSavingName;
 
@@ -148,9 +153,21 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (_profile == null) {
+        final existing = await _profileRepository.getProfile(userId);
+        if (existing != null) {
+          _profile = existing;
+          _displayName ??= existing.displayName;
+          _country ??= existing.country;
+          _avatarUrl ??= existing.avatarUrl;
+          _applyToDraft(existing);
+        }
+      }
+
       final updated = _profileWith(
         userId: userId,
         displayName: normalized,
+        country: _country,
         avatarUrl: _avatarUrl,
       );
       await _profileRepository.saveProfile(updated);
@@ -167,14 +184,67 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
+  /// Ülkeyi hemen kaydeder.
+  Future<bool> saveCountry(String value) async {
+    final trimmed = value.trim();
+    final normalized = trimmed.isEmpty ? null : trimmed;
+    if (normalized == _country && _profile != null) return true;
+
+    final String? userId;
+    try {
+      userId = _profileRepository.currentUserId;
+    } catch (error, stackTrace) {
+      _failWith('Ülke kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      notifyListeners();
+      return false;
+    }
+    if (userId == null) {
+      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      notifyListeners();
+      return false;
+    }
+
+    _isSaving = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      if (_profile == null) {
+        final existing = await _profileRepository.getProfile(userId);
+        if (existing != null) {
+          _profile = existing;
+          _displayName ??= existing.displayName;
+          _country ??= existing.country;
+          _avatarUrl ??= existing.avatarUrl;
+          _applyToDraft(existing);
+        }
+      }
+
+      final updated = _profileWith(
+        userId: userId,
+        displayName: _displayName,
+        country: normalized,
+        avatarUrl: _avatarUrl,
+      );
+      await _profileRepository.saveProfile(updated);
+      _profile = updated;
+      _country = normalized;
+      _isSaving = false;
+      notifyListeners();
+      return true;
+    } catch (error, stackTrace) {
+      _isSaving = false;
+      _failWith('Ülke kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// En son kaydedilmiş satırın kopyası, verilen alan(lar) değiştirilmiş hâlde.
-  ///
-  /// Her iki alan da zorunlu: burada null "değiştirme" değil "temizle" demek,
-  /// o yüzden çağıran taraf ikisini de açıkça vermek zorunda. `copyWith` tarzı
-  /// bir yardımcı adı temizlemeye izin vermezdi.
   UserProfile _profileWith({
     required String userId,
     required String? displayName,
+    required String? country,
     required String? avatarUrl,
   }) {
     final base = _profile;
@@ -184,6 +254,7 @@ class ProfileViewModel extends ChangeNotifier {
       dietPreferences: base?.dietPreferences ?? const <String>[],
       healthConditions: base?.healthConditions ?? const <String>[],
       displayName: displayName,
+      country: country,
       avatarUrl: avatarUrl,
       isPremium: base?.isPremium ?? false,
     );
@@ -228,6 +299,7 @@ class ProfileViewModel extends ChangeNotifier {
       final updated = _profileWith(
         userId: userId,
         displayName: _displayName,
+        country: _country,
         avatarUrl: url,
       );
 
@@ -310,6 +382,7 @@ class ProfileViewModel extends ChangeNotifier {
       _email = _profileRepository.currentUserEmail;
       _profile = await _profileRepository.getProfile(userId);
       _displayName = _profile?.displayName;
+      _country = _profile?.country;
       _avatarUrl = _profile?.avatarUrl;
       _applyToDraft(_profile);
     } catch (error, stackTrace) {
@@ -350,6 +423,7 @@ class ProfileViewModel extends ChangeNotifier {
         dietPreferences: _draft[OnboardingField.diet]!.toList(),
         healthConditions: _draft[OnboardingField.health]!.toList(),
         displayName: _displayName,
+        country: _country,
         avatarUrl: _avatarUrl,
         isPremium: _profile?.isPremium ?? false,
       );

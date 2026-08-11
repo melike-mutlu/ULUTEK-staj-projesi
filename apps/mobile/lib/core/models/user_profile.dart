@@ -51,6 +51,9 @@ class UserProfile {
   /// Kullanıcının premium abonelik durumu.
   final bool isPremium;
 
+  /// Kullanıcının seçtiği/girdiği ülke.
+  final String? country;
+
   const UserProfile({
     required this.userId,
     required this.allergies,
@@ -59,6 +62,7 @@ class UserProfile {
     this.displayName,
     this.avatarUrl,
     this.isPremium = false,
+    this.country,
   });
 
   Map<String, dynamic> toJson() {
@@ -70,6 +74,7 @@ class UserProfile {
       'display_name': displayName,
       'avatar_url': avatarUrl,
       'is_premium': isPremium,
+      'country': country,
     };
   }
 
@@ -86,6 +91,7 @@ class UserProfile {
       displayName: json['display_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       isPremium: json['is_premium'] as bool? ?? false,
+      country: json['country'] as String?,
     );
   }
 }

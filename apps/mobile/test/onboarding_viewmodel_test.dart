@@ -41,21 +41,21 @@ void main() {
     viewModel = OnboardingViewModel(repository);
   });
 
-  test('baslangic durumu: ilk adim, geri gidilemez, ilerleme 1/6', () {
+  test('baslangic durumu: ilk adim, geri gidilemez, ilerleme 1/7', () {
     expect(viewModel.currentIndex, 0);
     expect(viewModel.canGoBack, isFalse);
-    expect(viewModel.progress, 1 / 6);
+    expect(viewModel.progress, 1 / 7);
   });
 
-  test('goNext 5 kez son adima getirir, 6. cagri siniri asmaz', () {
-    for (var i = 0; i < 5; i++) {
+  test('goNext 6 kez son adima getirir, 7. cagri siniri asmaz', () {
+    for (var i = 0; i < 6; i++) {
       viewModel.goNext();
     }
     expect(viewModel.isLastStep, isTrue);
     expect(viewModel.progress, 1.0);
 
     viewModel.goNext();
-    expect(viewModel.currentIndex, 5);
+    expect(viewModel.currentIndex, 6);
     expect(viewModel.isLastStep, isTrue);
   });
 
@@ -72,6 +72,18 @@ void main() {
 
     viewModel.setDisplayName('Ahmet');
     expect(viewModel.displayName, 'Ahmet');
+    expect(viewModel.primaryActionLabel, 'Devam');
+  });
+
+  test('ulke adiminda (index 3) setCountry ve primaryActionLabel mantigi', () {
+    viewModel.goNext();
+    viewModel.goNext();
+    viewModel.goNext(); // Index 3: OnboardingCountryStep
+    expect(viewModel.currentStep, isA<OnboardingCountryStep>());
+    expect(viewModel.primaryActionLabel, 'Atla');
+
+    viewModel.setCountry('Türkiye');
+    expect(viewModel.country, 'Türkiye');
     expect(viewModel.primaryActionLabel, 'Devam');
   });
 
@@ -105,7 +117,8 @@ void main() {
   test('primaryActionLabel: secim yokken skipLabel, secim varken Devam', () {
     viewModel.goNext();
     viewModel.goNext();
-    viewModel.goNext(); // Index 3: Allergies
+    viewModel.goNext();
+    viewModel.goNext(); // Index 4: Allergies
     final step = viewModel.currentStep as OnboardingSelectionStep;
     expect(viewModel.primaryActionLabel, step.skipLabel);
 
@@ -113,24 +126,28 @@ void main() {
     expect(viewModel.primaryActionLabel, 'Devam');
   });
 
-  test('submit() UserProfile alanlarini ve displayName\'i dogru esler', () async {
+  test('submit() UserProfile alanlarini, displayName ve country\'yi dogru esler', () async {
     viewModel.goNext();
     viewModel.goNext(); // Index 2: Name step
     viewModel.setDisplayName('Ahmet');
 
-    viewModel.goNext(); // Index 3: Allergies
+    viewModel.goNext(); // Index 3: Country step
+    viewModel.setCountry('Türkiye');
+
+    viewModel.goNext(); // Index 4: Allergies
     viewModel.toggleOption(OnboardingField.allergies, 'Gluten');
 
-    viewModel.goNext(); // Index 4: Diet
+    viewModel.goNext(); // Index 5: Diet
     viewModel.toggleOption(OnboardingField.diet, 'Vejetaryen');
 
-    viewModel.goNext(); // Index 5: Health
+    viewModel.goNext(); // Index 6: Health
     viewModel.toggleOption(OnboardingField.health, 'Tansiyon');
 
     final success = await viewModel.submit();
     expect(success, isTrue);
     expect(repository.savedProfile, isNotNull);
     expect(repository.savedProfile!.displayName, 'Ahmet');
+    expect(repository.savedProfile!.country, 'Türkiye');
     expect(repository.savedProfile!.allergies, <String>['Gluten']);
     expect(repository.savedProfile!.healthConditions, <String>['Tansiyon']);
     expect(
