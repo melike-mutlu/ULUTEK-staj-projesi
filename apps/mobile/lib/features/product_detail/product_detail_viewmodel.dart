@@ -104,7 +104,12 @@ class ProductDetailViewModel extends ChangeNotifier {
     );
 
     // Alternatives ride inside the fetch response; no separate request needed.
-    alternatives = fetchResult.safeAlternatives;
+    // TODO(backend): drop the mock fallback once fetch-product returns
+    // safe_alternatives. Until then, real scans show mock data so the section
+    // stays visible during development.
+    alternatives = fetchResult.safeAlternatives.isNotEmpty
+        ? fetchResult.safeAlternatives
+        : _mockAlternatives;
 
     await load(
       product: product,
