@@ -65,12 +65,25 @@ class _AuthViewState extends ConsumerState<AuthView> {
   }
 
   Future<void> _continueAsGuest() async {
+    setState(() => _isResolvingRoute = true);
     final vm = ref.read(authViewModelProvider);
-    final success = await vm.signInAsGuest();
+    await vm.signInAsGuest();
 
-    if (success && mounted) {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.onboarding);
+    if (!mounted) return;
+
+    String route;
+    try {
+      route = await resolveStartupRoute(ref.read(profileRepositoryProvider));
+      if (route == AppRoutes.auth) {
+        route = AppRoutes.onboarding;
+      }
+    } catch (_) {
+      route = AppRoutes.onboarding;
     }
+
+    if (!mounted) return;
+    setState(() => _isResolvingRoute = false);
+    Navigator.of(context).pushReplacementNamed(route);
   }
 
   @override
@@ -293,7 +306,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
             SizedBox(
               height: 48,
               child: OutlinedButton.icon(
-                onPressed: vm.isLoading ? null : _continueAsGuest,
+                onPressed: isBusy ? null : _continueAsGuest,
                 icon: const Icon(Icons.person_outline_rounded),
                 label: const Text('Misafir Olarak Devam Et'),
                 style: OutlinedButton.styleFrom(
