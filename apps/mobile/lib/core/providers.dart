@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repositories/explanation_repository.dart';
+import '../data/repositories/product_search_repository.dart';
 import '../data/repositories/product_cache_repository.dart';
 import '../data/repositories/product_repository.dart';
 import '../data/repositories/profile_repository.dart';
@@ -19,6 +20,13 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 /// the rule engine; this only supplies the human-readable text.
 final explanationRepositoryProvider = Provider<ExplanationRepository>((ref) {
   return ExplanationRepository();
+});
+
+/// Product name search (Zeynep's OFF search). Mock data until the backend is
+/// ready; only this repository's [searchByName] body changes then.
+final productSearchRepositoryProvider =
+    Provider<ProductSearchRepository>((ref) {
+  return ProductSearchRepository();
 });
 
 final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {
