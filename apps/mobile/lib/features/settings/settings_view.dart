@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/models/user_profile.dart';
 import '../../core/navigation/app_routes.dart';
@@ -7,6 +8,7 @@ import '../../core/providers.dart';
 import '../../core/supabase_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/email_masker.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../profile/profile_viewmodel.dart';
 import 'widgets/country_edit_dialog.dart';
@@ -221,8 +223,241 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     );
   }
 
+  Future<void> _showChangePasswordDialog(BuildContext context) async {
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    bool isObscured = true;
+    bool isSubmitting = false;
+    String? dialogError;
+
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.lock_reset_rounded, color: AppColors.brand),
+                  SizedBox(width: 10),
+                  Text('Şifre Değiştir', style: AppTextStyles.title),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Yeni şifrenizi girin. Şifreniz en az 6 karakter olmalıdır.',
+                      style: AppTextStyles.caption,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: newPasswordController,
+                      obscureText: isObscured,
+                      decoration: InputDecoration(
+                        labelText: 'Yeni Şifre',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isObscured ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setDialogState(() {
+                              isObscured = !isObscured;
+                            });
+                          },
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: confirmPasswordController,
+                      obscureText: isObscured,
+                      decoration: InputDecoration(
+                        labelText: 'Yeni Şifre (Tekrar)',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    if (dialogError != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        dialogError!,
+                        style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () => Navigator.pop(dialogContext),
+                  child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary)),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          final pass = newPasswordController.text.trim();
+                          final confirmPass = confirmPasswordController.text.trim();
+
+                          if (pass.length < 6) {
+                            setDialogState(() {
+                              dialogError = 'Şifre en az 6 karakter olmalıdır.';
+                            });
+                            return;
+                          }
+                          if (pass != confirmPass) {
+                            setDialogState(() {
+                              dialogError = 'Şifreler birbiriyle eşleşmiyor.';
+                            });
+                            return;
+                          }
+
+                          setDialogState(() {
+                            isSubmitting = true;
+                            dialogError = null;
+                          });
+
+                          try {
+                            await supabase.auth.updateUser(
+                              UserAttributes(password: pass),
+                            );
+                            if (context.mounted) {
+                              Navigator.pop(dialogContext);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Şifreniz başarıyla güncellendi.'),
+                                  backgroundColor: AppColors.brand,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            setDialogState(() {
+                              isSubmitting = false;
+                              dialogError = 'Şifre güncellenemedi: ${e.toString()}';
+                            });
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brand,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text('Güncelle', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showDeleteAccountConfirmationDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
+              SizedBox(width: 10),
+              Text('Hesabı Sil', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hesabınızı silmek istediğinize emin misiniz?',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Bu işlem geri alınamaz. Tüm kayıtlı alerji, diyet tercihleriniz ve geçmiş verileriniz kalıcı olarak silinecektir.',
+                style: AppTextStyles.body,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Vazgeç', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'Evet, Hesabımı Sil',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      // Eda'nın hesap silme fonksiyonunun stub çağrısı yapılır
+      await ref.read(profileRepositoryProvider).deleteAccount();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Hesap silme talebi işlendi (Eda\'nın silme fonksiyonu bağlandığında işlem tamamlanacaktır).',
+            ),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+      await _signOut();
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Hesap silme işlemi gerçekleştirilemedi.')),
+        );
+      }
+    }
+  }
+
   Widget _buildUserCard() {
-    final email = supabase.auth.currentUser?.email ?? 'Kullanıcı Hesabı';
+    final rawEmail = supabase.auth.currentUser?.email;
+    final maskedEmail = EmailMasker.maskEmail(rawEmail);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -243,7 +478,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  email,
+                  maskedEmail,
                   style: AppTextStyles.title,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -264,6 +499,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   Widget build(BuildContext context) {
     final isPremium = ref.watch(homeViewModelProvider).isPremium;
     final country = ref.watch(profileViewModelProvider).country;
+    final rawEmail = supabase.auth.currentUser?.email;
+    final maskedEmail = EmailMasker.maskEmail(rawEmail);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -282,9 +519,22 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
             const _SettingsSectionHeader(title: 'HESAP & PROFİL'),
             const SizedBox(height: 8),
             _SettingsRow(
+              icon: Icons.email_outlined,
+              label: 'Kayıtlı E-posta',
+              subtitle: maskedEmail,
+              onTap: null,
+            ),
+            const SizedBox(height: 10),
+            _SettingsRow(
               icon: Icons.person_outline_rounded,
               label: 'Profil Bilgilerini Düzenle',
               onTap: _navigateToProfile,
+            ),
+            const SizedBox(height: 10),
+            _SettingsRow(
+              icon: Icons.lock_reset_rounded,
+              label: 'Şifre Değiştir',
+              onTap: () => _showChangePasswordDialog(context),
             ),
             const SizedBox(height: 10),
             _SettingsRow(
@@ -327,6 +577,13 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               isDestructive: true,
               onTap: _signOut,
             ),
+            const SizedBox(height: 10),
+            _SettingsRow(
+              icon: Icons.delete_forever_rounded,
+              label: 'Hesabı Sil',
+              isDestructive: true,
+              onTap: () => _showDeleteAccountConfirmationDialog(context),
+            ),
           ],
         ),
       ),
@@ -360,7 +617,7 @@ class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
     required this.icon,
     required this.label,
-    required this.onTap,
+    this.onTap,
     this.iconColor,
     this.subtitle,
     this.isDestructive = false,
@@ -371,7 +628,7 @@ class _SettingsRow extends StatelessWidget {
   final Color? iconColor;
   final String? subtitle;
   final bool isDestructive;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -403,10 +660,11 @@ class _SettingsRow extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-              Icon(
-                Icons.chevron_right_rounded,
-                color: isDestructive ? AppColors.warning : AppColors.textSecondary,
-              ),
+              if (onTap != null)
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDestructive ? AppColors.warning : AppColors.textSecondary,
+                ),
             ],
           ),
         ),

@@ -27,6 +27,10 @@ abstract class ProfileRepository {
     required Uint8List bytes,
     required String fileExtension,
   });
+
+  /// Eda'nın hesap silme fonksiyonu (Edge Function / RPC) hazır olduğunda çağrılır.
+  /// Şimdilik projede bu fonksiyon bulunmadığı için yer tutucu (stub) olarak durmaktadır.
+  Future<void> deleteAccount();
 }
 
 /// docs/architecture.md — profil için ayrı API yok, Supabase "profiles" tablosu.
@@ -100,6 +104,16 @@ class SupabaseProfileRepository implements ProfileRepository {
     final url = supabase.storage.from(_avatarBucket).getPublicUrl(path);
     return '$url?v=${DateTime.now().millisecondsSinceEpoch}';
   }
+
+  /// Eda'nın hesap silme fonksiyonu (Edge Function / RPC) yazıldığında burası güncellenecektir.
+  /// NOT: Şu an projede Eda'nın hesap silme fonksiyonu henüz bulunmamaktadır.
+  @override
+  Future<void> deleteAccount() async {
+    // TODO: Eda'nın Supabase Edge Function veya RPC hesap silme fonksiyonunu çağır:
+    // await supabase.functions.invoke('delete-user-account');
+    // veya
+    // await supabase.rpc('delete_user_account');
+  }
 }
 
 /// Backend + auth hazır olana kadar kullanılan bellek içi karşılık.
@@ -131,6 +145,11 @@ class InMemoryProfileRepository implements ProfileRepository {
     // NetworkImage'a sızarsa sessizce beklemek yerine hemen hata verir.
     final url = 'https://example.invalid/avatars/$userId.$fileExtension';
     return '$url?v=${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    _profile = null;
   }
 }
 
