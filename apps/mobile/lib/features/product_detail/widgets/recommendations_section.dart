@@ -47,25 +47,30 @@ class RecommendationsSection extends StatelessWidget {
             style: AppTextStyles.caption,
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            height: RecommendationCard.heightFor(context),
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: alternatives.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 20),
-              itemBuilder: (context, index) {
-                final alternative = alternatives[index];
-                return RecommendationCard(
-                  alternative: alternative,
-                  onTap: alternative.barcode.isEmpty
-                      ? null
-                      : () => Navigator.of(context).pushNamed(
-                            AppRoutes.productDetail,
-                            arguments: alternative.barcode,
-                          ),
-                );
-              },
+          // IntrinsicHeight lets every card stretch to the tallest one, so the
+          // list height follows its content (and the user's text scale) instead
+          // of a hard-coded value that can overflow.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < alternatives.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 20),
+                    RecommendationCard(
+                      alternative: alternatives[i],
+                      onTap: alternatives[i].barcode.isEmpty
+                          ? null
+                          : () => Navigator.of(context).pushNamed(
+                                AppRoutes.productDetail,
+                                arguments: alternatives[i].barcode,
+                              ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ],
