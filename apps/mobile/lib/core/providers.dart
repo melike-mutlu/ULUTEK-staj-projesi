@@ -5,6 +5,7 @@ import '../data/repositories/product_cache_repository.dart';
 import '../data/repositories/product_repository.dart';
 import '../data/repositories/profile_repository.dart';
 import '../features/auth/auth_viewmodel.dart';
+import '../features/search/search_viewmodel.dart';
 import '../features/scan/scan_viewmodel.dart';
 import '../data/repositories/scan_history_repository.dart';
 import '../features/home/home_viewmodel.dart';
@@ -39,6 +40,11 @@ final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {
 
 final authViewModelProvider = ChangeNotifierProvider<AuthViewModel>((ref) {
   return AuthViewModel();
+});
+
+/// Drives the product name search bar on the home screen.
+final searchViewModelProvider = ChangeNotifierProvider<SearchViewModel>((ref) {
+  return SearchViewModel(ref.watch(productSearchRepositoryProvider));
 });
 
 final productCacheRepositoryProvider = Provider<ProductCacheRepository>((ref) {
