@@ -22,3 +22,6 @@ Thumbs.db
 *.swp
 
 CLAUDE.md
+
+# Claude Code kişisel ayarlar (repoya girmemeli)
+.claude/settings.local.json

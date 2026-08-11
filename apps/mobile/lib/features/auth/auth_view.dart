@@ -27,7 +27,10 @@ class _AuthViewState extends ConsumerState<AuthView> {
   /// no intermediate loading screen is needed.
   bool _isResolvingRoute = false;
 
-  Future<void> _submit() async {
+  /// Kayıt modundayken kullanım şartları onaylanmadan hiçbir hesap yöntemiyle
+  /// (e-posta, Google, ...) devam edilemez. Onaylanmadıysa uyarı gösterip
+  /// `false` döner.
+  bool _hasAcceptedTermsOrWarn() {
     if (_isSignUpMode && !_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -37,8 +40,13 @@ class _AuthViewState extends ConsumerState<AuthView> {
           backgroundColor: Colors.redAccent,
         ),
       );
-      return;
+      return false;
     }
+    return true;
+  }
+
+  Future<void> _submit() async {
+    if (!_hasAcceptedTermsOrWarn()) return;
 
     final vm = ref.read(authViewModelProvider);
     final email = _emailController.text.trim();
@@ -62,6 +70,15 @@ class _AuthViewState extends ConsumerState<AuthView> {
 
     setState(() => _isResolvingRoute = false);
     Navigator.of(context).pushReplacementNamed(route);
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    if (!_hasAcceptedTermsOrWarn()) return;
+    final vm = ref.read(authViewModelProvider);
+    await vm.signInWithGoogle();
+    // Web'de veya telefonda Google sayfası açılacağı için anında yönlendirme
+    // (routing) yapmıyoruz, OAuth callback'i bekliyoruz. Başarılı ise
+    // Supabase auth state değişecek ve uygulama ana ekrana geçecektir.
   }
 
   Future<void> _continueAsGuest() async {
@@ -306,13 +323,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
             SizedBox(
               height: 48,
               child: ElevatedButton.icon(
-                onPressed: vm.isLoading ? null : () async{
-                  await vm.signInWithGoogle();
-                  // Web'de veya telefonda Google sayfası açılacağı için
-                  // anında yönlendirme (routing) yapmıyoruz, OAuth callback'i
-                  // bekliyoruz. Başarılı ise Supabase auth state değişecek
-                  // ve uygulama ana ekrana geçecektir.
-                },
+                onPressed: vm.isLoading ? null : _handleGoogleSignIn,
                 icon: Image.asset(
                   'assets/images/google_logo.webp',
                   width: 20,

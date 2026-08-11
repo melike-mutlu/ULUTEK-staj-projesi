@@ -431,6 +431,48 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
     if (confirmed != true || !mounted) return;
 
+    // İkinci ve son onay — yanlışlıkla tek dokunuşla hesap silinmesin.
+    final finalConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Son kez soruyoruz',
+            style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Bu son onaydır. Onaylarsan hesabın ve tüm verilerin kalıcı olarak silinecek.',
+            style: AppTextStyles.body,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Vazgeç', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'Evet, Eminim — Sil',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (finalConfirmed != true || !mounted) return;
+
     try {
       // Eda'nın hesap silme fonksiyonunun stub çağrısı yapılır
       await ref.read(profileRepositoryProvider).deleteAccount();
