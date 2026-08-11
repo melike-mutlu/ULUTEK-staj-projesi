@@ -48,6 +48,8 @@ class PendingProductViewModel extends ChangeNotifier {
         imageFront = picked;
       } else if (type == 'ingredients') {
         imageIngredients = picked;
+        notifyListeners(); //Fotoğrafın UI'da hemen görünmesi için
+        _extractIngredientsText(picked); //İçindekiler fotoğrafı seçilir seçilmez metni çıkarmaya başla
       } else if (type == 'nutrition') {
         imageNutrition = picked;
       }
@@ -55,6 +57,27 @@ class PendingProductViewModel extends ChangeNotifier {
     } catch (e) {
       debugPrint('[PendingProductViewModel] Pick image error: $e');
     }
+  }
+  // Yapay zeka ile metni çeker
+
+  bool isExtractingText = false; //Yükleniyor animasyonu için
+  Future<void> _extractIngredientsText(XFile image) async{
+    isExtractingText = true;
+    notifyListeners();
+
+    final extractedText = await _repository.extractTextFromImage(image);
+    isExtractingText = false;
+
+    //Eğer yapay zeka metin bulabildiyse, UI'daki metin kutusunu doldur
+    if (extractedText != null && extractedText.trim().isNotEmpty) {
+      //Eğer kullanıcı halihazırda birşeyler yazdıysa üstüne yazma, sonuna ekle
+      if (ingredientsText.trim().isEmpty) {
+        ingredientsText = extractedText;
+      } else {
+        ingredientsText = '$ingredientsText\n$extractedText';
+      }
+    }
+    notifyListeners();
   }
 
   void removeImage(String type) {

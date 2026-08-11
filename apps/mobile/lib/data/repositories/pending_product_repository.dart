@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -100,6 +101,38 @@ class PendingProductRepository {
     } catch (e) {
       debugPrint('[PendingProductRepository] Photo upload error: $e');
       throw Exception('Fotoğraf yüklenemedi: $e');
+    }
+  }
+
+
+  /// Görüntüden Metin Çıkarma için Eda'nın Edge Function'ını çağırır
+  Future<String?> extractTextFromImage(XFile imageFile) async {
+    try {
+      // 1. Görüntüyü base64'e çevir (Edge function'a doğrudan yollamak için)
+      final bytes = await imageFile.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      // 2. Edge Function'ı çağır
+      final response = await supabase.functions.invoke(
+        'extract-ingredients', // Eda'nın fonksiyonunun adı
+        body: {
+          'image_base64': base64Image,
+          'mime_type': 'image/jpeg', // veya image/png
+        },
+      );
+
+      if (response.status == 200) {
+        final data = response.data as Map<String, dynamic>?;
+        if (data != null && data['ingredients_text'] != null) {
+          return data['ingredients_text'] as String;
+        }
+      } else {
+        debugPrint('[PendingProductRepository] Extraction HTTP error: ${response.status}');
+      }
+      return null;
+    } catch (e) {
+      debugPrint('[PendingProductRepository] extractTextFromImage Hatası: $e');
+      return null;
     }
   }
 }
