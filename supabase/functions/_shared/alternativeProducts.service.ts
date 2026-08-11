@@ -1,5 +1,3 @@
-// supabase/functions/_shared/alternativeProducts.service.ts
-
 import { runRuleEngine } from "./ruleEngine/ruleEngine.service.ts";
 
 type UserProfile = any;
@@ -16,28 +14,15 @@ export interface AlternativeProduct {
 }
 
 /**
- * Kural motoru sonucunu değerlendirerek ürünün güvenli alternatif olup olmadığını belirler.
- *
- * Güvenli alternatif olabilmesi için:
- * - Hiçbir alerji kuralında conflict olmamalı.
- * - Hiçbir sağlık koşulunda conflict olmamalı.
- * - Hiçbir diyet uyumluluğunda conflict olmamalı.
- * - Hiçbir sağlık koşulu not_evaluated olmamalı.
+ * "Safe" mirrors the rule engine's own verdict directly — has_conflict already
+ * rolls up allergens, health conditions, and diet conflicts. Insufficient data
+ * is never "safe" either: an alternative with no evidence is not a real
+ * recommendation.
  */
 function isSafeAlternative(ruleResult: any): boolean {
   if (!ruleResult) return false;
-
-  const hasConflict =
-    (ruleResult.allergens?.some((a: any) => a.status === "conflict") ?? false) ||
-    (ruleResult.health_conditions?.some((h: any) => h.status === "conflict") ?? false) ||
-    (ruleResult.diet_compatibility?.some((d: any) => d.status === "conflict") ?? false);
-
-  const hasUnknown =
-    ruleResult.health_conditions?.some(
-      (h: any) => h.status === "not_evaluated"
-    ) ?? false;
-
-  return !hasConflict && !hasUnknown;
+  if (ruleResult.data_sufficiency === "insufficient") return false;
+  return !ruleResult.has_conflict;
 }
 
 /**
@@ -61,18 +46,13 @@ export async function findSafeAlternatives(
   supabaseClient: any,
   limit: number = 3,
 ): Promise<AlternativeProduct[]> {
-  // Ana kategoriyi veya ilk kategori etiketini belirle
-  const category =
-    scannedProduct.main_category?.trim() ||
-    scannedProduct.categories_tags?.[0];
-
+  const category = scannedProduct.categories_tags?.[0];
   if (!category) return [];
 
-  // 1. Öncelikle main_category ile ara
-  let { data: candidates, error } = await supabaseClient
+  const { data: candidates, error } = await supabaseClient
     .from("product_cache")
     .select("*")
-    .eq("main_category", category)
+    .contains("categories_tags", [category])
     .neq("barcode", scannedProduct.barcode)
     .limit(20);
 
@@ -81,25 +61,7 @@ export async function findSafeAlternatives(
     return [];
   }
 
-  // 2. Sonuç bulunamazsa categories_tags üzerinden ara
   if (!candidates || candidates.length === 0) {
-    const { data: fallbackCandidates, error: fallbackError } =
-      await supabaseClient
-        .from("product_cache")
-        .select("*")
-        .contains("categories_tags", [category])
-        .neq("barcode", scannedProduct.barcode)
-        .limit(20);
-
-    if (fallbackError) {
-      console.error("Fallback kategori sorgu hatası:", fallbackError);
-      return [];
-    }
-
-    candidates = fallbackCandidates ?? [];
-  }
-
-  if (candidates.length === 0) {
     return [];
   }
 
@@ -113,13 +75,13 @@ export async function findSafeAlternatives(
       continue;
     }
 
-    const grade = candidate.nutriscore_grade?.toUpperCase();
+    const grade = candidate.nutriscore?.toUpperCase();
 
     safeAlternatives.push({
       barcode: candidate.barcode,
-      product_name: candidate.product_name ?? "Bilinmeyen Ürün",
-      brand: candidate.brand,
-      image_url: candidate.image_url,
+      product_name: candidate.name ?? "Bilinmeyen Ürün",
+      brand: candidate.brand ?? undefined,
+      image_url: candidate.image_url ?? undefined,
       nutriscore_grade: grade,
       is_safe: true,
       recommendation_reason: grade
@@ -135,6 +97,5 @@ export async function findSafeAlternatives(
     return scoreA - scoreB;
   });
 
-  // En fazla limit kadar güvenli alternatif döndür
   return safeAlternatives.slice(0, limit);
 }

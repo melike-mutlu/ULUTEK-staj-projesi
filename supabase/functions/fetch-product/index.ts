@@ -31,36 +31,30 @@ Deno.serve(async (req: Request) => {
     }
 
     let ruleEngineResult = null;
-let safeAlternatives: any[] = [];
+    let safeAlternatives: unknown[] = [];
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select()
+        .eq("user_id", user.id)
+        .maybeSingle();
+      // Profil olmasa bile rule engine çalışır (null-safe) — eskisi gibi.
+      ruleEngineResult = runRuleEngine(product, profile);
 
-if (user) {
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select()
-    .eq("user_id", user.id)
-    .maybeSingle();
+      // Alternatifler gerçek bir profil gerektirir, aksi halde anlamsız olur.
+      if (profile) {
+        safeAlternatives = await findSafeAlternatives(product, profile, supabase);
+      }
+    }
 
-  if (profile) {
-  ruleEngineResult = runRuleEngine(product, profile);
-
-  safeAlternatives = await findSafeAlternatives(
-    product,
-    profile,
-    supabase,
-  );
-}
-}
-
-const missingFields = findMissingFields(product);
-
-return jsonResponse({
-  status: missingFields.length > 0 ? "partial" : "found",
-  product,
-  rule_engine_result: ruleEngineResult,
-  safe_alternatives: safeAlternatives,
-  ...(missingFields.length > 0 ? { missing_fields: missingFields } : {}),
-});
-
+    const missingFields = findMissingFields(product);
+    return jsonResponse({
+      status: missingFields.length > 0 ? "partial" : "found",
+      product,
+      rule_engine_result: ruleEngineResult,
+      safe_alternatives: safeAlternatives,
+      ...(missingFields.length > 0 ? { missing_fields: missingFields } : {}),
+    });
   } catch (error) {
     console.error(error);
     return jsonResponse({ status: "error", message: "beklenmeyen hata" }, 500);
