@@ -1,0 +1,21 @@
+{
+  "_comment": "Örnek: Ülker Çikolatalı Gofret etiketinden çıkarılmış gerçekçi veri",
+  "product_name": "Çikolatalı Gofret",
+  "brand": "Ülker",
+  "ingredients_text": "Buğday unu, şeker, bitkisel yağ (palmiye yağı, shea yağı), kakao tozu (yağı alınmış, %3,5), az yağlı kakao kitlesi (%1,5), peynir altı suyu tozu (sütten), glikoz-früktoz şurubu, emülgatör (E322 soya lesitini), kabartma tozu (E500ii), tuz, vanilin.",
+  "additives": ["E322", "E500"],
+  "allergens_mentioned": ["buğday", "gluten", "süt", "soya"],
+  "nutrition": {
+    "energy_kcal_100g": 495,
+    "fat_100g": 27.1,
+    "saturated_fat_100g": 14.3,
+    "carbohydrates_100g": 62.5,
+    "sugars_100g": 38.2,
+    "proteins_100g": 6.5,
+    "salt_100g": 0.3,
+    "fiber_100g": null
+  },
+  "serving_size_g": 34,
+  "confidence": "high",
+  "unreadable_fields": []
+}
