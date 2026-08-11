@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/alternative.dart';
+import '../../../core/navigation/app_routes.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'recommendation_card.dart';
 import 'recommendations_sheet.dart';
@@ -54,7 +55,16 @@ class RecommendationsSection extends StatelessWidget {
               itemCount: alternatives.length,
               separatorBuilder: (_, __) => const SizedBox(width: 20),
               itemBuilder: (context, index) {
-                return RecommendationCard(alternative: alternatives[index]);
+                final alternative = alternatives[index];
+                return RecommendationCard(
+                  alternative: alternative,
+                  onTap: alternative.barcode.isEmpty
+                      ? null
+                      : () => Navigator.of(context).pushNamed(
+                            AppRoutes.productDetail,
+                            arguments: alternative.barcode,
+                          ),
+                );
               },
             ),
           ),

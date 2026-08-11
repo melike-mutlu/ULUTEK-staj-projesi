@@ -1,61 +1,42 @@
-/// A recommended alternative product shown in the "Öneriler" section.
+/// A safe alternative product shown in the "Öneriler" section.
 ///
-/// Kept close to the expected backend response shape so that, once the real
-/// service is ready, only the data layer changes — not the UI.
+/// Mirrors the `safe_alternatives[]` items inside the `fetch-product` response,
+/// so parsing stays a straight field map with no client-side reshaping.
 class Alternative {
   const Alternative({
-    required this.id,
-    required this.name,
+    required this.barcode,
+    required this.productName,
     required this.brand,
     required this.imageUrl,
-    required this.score,
+    required this.nutriscoreGrade,
+    required this.isSafe,
+    required this.recommendationReason,
   });
 
-  final String id;
-  final String name;
+  /// Lookup key used to open this alternative on the product detail screen.
+  final String barcode;
+  final String productName;
   final String brand;
   final String imageUrl;
 
-  /// Backend sends the score level; colour and label are decided client-side.
-  final AlternativeScore score;
+  /// Nutri-Score letter A–E (uppercased); empty when the backend omits it.
+  final String nutriscoreGrade;
+
+  /// The backend only lists alternatives it deems safe for the user's profile.
+  final bool isSafe;
+
+  /// Short human-readable reason this product is recommended.
+  final String recommendationReason;
 
   factory Alternative.fromJson(Map<String, dynamic> json) {
     return Alternative(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      brand: json['brand'] as String,
+      barcode: json['barcode'] as String? ?? '',
+      productName: json['product_name'] as String? ?? '',
+      brand: json['brand'] as String? ?? '',
       imageUrl: json['image_url'] as String? ?? '',
-      score: AlternativeScore.fromKey(json['score'] as String?),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'brand': brand,
-      'image_url': imageUrl,
-      'score': score.key,
-    };
-  }
-}
-
-/// Score level of an alternative. The UI derives the display label and colour
-/// from this; the backend only ever sends the level.
-enum AlternativeScore {
-  excellent('excellent'),
-  good('good');
-
-  const AlternativeScore(this.key);
-
-  /// Wire value exchanged with the backend.
-  final String key;
-
-  /// Falls back to [good] for unknown or missing values.
-  static AlternativeScore fromKey(String? key) {
-    return AlternativeScore.values.firstWhere(
-      (score) => score.key == key,
-      orElse: () => AlternativeScore.good,
+      nutriscoreGrade: (json['nutriscore_grade'] as String? ?? '').toUpperCase(),
+      isSafe: json['is_safe'] as bool? ?? false,
+      recommendationReason: json['recommendation_reason'] as String? ?? '',
     );
   }
 }

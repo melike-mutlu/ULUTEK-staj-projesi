@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/repositories/alternatives_repository.dart';
 import '../data/repositories/explanation_repository.dart';
 import '../data/repositories/product_cache_repository.dart';
 import '../data/repositories/product_repository.dart';
@@ -20,13 +19,6 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 /// the rule engine; this only supplies the human-readable text.
 final explanationRepositoryProvider = Provider<ExplanationRepository>((ref) {
   return ExplanationRepository();
-});
-
-/// Recommended alternatives shown on product detail. Mock data for now; only
-/// this provider's repository changes when the backend is ready.
-final alternativesRepositoryProvider =
-    Provider<AlternativesRepository>((ref) {
-  return AlternativesRepository();
 });
 
 final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {

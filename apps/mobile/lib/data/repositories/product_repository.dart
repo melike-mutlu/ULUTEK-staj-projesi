@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/models/alternative.dart';
 import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/supabase_client.dart';
@@ -8,12 +9,16 @@ class ProductFetchResult {
   final String status; // "found" | "not_found" | "partial" | "error"
   final Product? product;
   final RuleEngineResult? ruleEngineResult;
+
+  /// Safe alternatives the backend recommends; always a list, empty when none.
+  final List<Alternative> safeAlternatives;
   final String? errorMessage;
 
   const ProductFetchResult({
     required this.status,
     this.product,
     this.ruleEngineResult,
+    this.safeAlternatives = const [],
     this.errorMessage,
   });
 }
@@ -70,6 +75,7 @@ class ProductRepository {
             ? RuleEngineResult.fromJson(
                 data['rule_engine_result'] as Map<String, dynamic>)
             : null,
+        safeAlternatives: _parseAlternatives(data['safe_alternatives']),
       );
     } catch (e, stack) {
       debugPrint('[ProductRepository] fetchProduct Exception: $e\n$stack');
@@ -82,5 +88,15 @@ class ProductRepository {
         errorMessage: userMsg,
       );
     }
+  }
+
+  /// Maps the `safe_alternatives` field into models, tolerating a missing or
+  /// malformed value by returning an empty list.
+  List<Alternative> _parseAlternatives(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map<String, dynamic>>()
+        .map(Alternative.fromJson)
+        .toList(growable: false);
   }
 }
