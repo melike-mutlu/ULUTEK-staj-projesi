@@ -9,12 +9,28 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../profile/profile_viewmodel.dart';
+import 'widgets/country_edit_dialog.dart';
 
 /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
-class SettingsView extends ConsumerWidget {
+class SettingsView extends ConsumerStatefulWidget {
   const SettingsView({super.key});
 
-  Future<void> _signOut(BuildContext context) async {
+  @override
+  ConsumerState<SettingsView> createState() => _SettingsViewState();
+}
+
+class _SettingsViewState extends ConsumerState<SettingsView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(profileViewModelProvider).load();
+      }
+    });
+  }
+
+  Future<void> _signOut() async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -29,12 +45,32 @@ class SettingsView extends ConsumerWidget {
     navigator.pushNamedAndRemoveUntil(AppRoutes.auth, (Route<void> _) => false);
   }
 
-  void _navigateToProfile(BuildContext context) {
+  void _navigateToProfile() {
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
     } else {
       Navigator.pushNamed(context, AppRoutes.profile);
     }
+  }
+
+  Future<void> _editCountry() async {
+    final profileVm = ref.read(profileViewModelProvider);
+    final initialCountry = profileVm.countryDraft;
+
+    final String? result = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => CountryEditDialog(
+        initialCountry: initialCountry,
+      ),
+    );
+
+    if (result == null) return;
+
+    final saved = await profileVm.saveCountry(result);
+    if (!mounted || !saved) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Ülke seçimi güncellendi.')),
+    );
   }
 
   Future<void> _togglePremium(BuildContext context, WidgetRef ref) async {
@@ -52,6 +88,7 @@ class SettingsView extends ConsumerWidget {
         dietPreferences: currentProfile?.dietPreferences ?? const <String>[],
         healthConditions: currentProfile?.healthConditions ?? const <String>[],
         displayName: currentProfile?.displayName,
+        country: currentProfile?.country,
         avatarUrl: currentProfile?.avatarUrl,
         isPremium: !isCurrentlyPremium,
       );
@@ -224,8 +261,9 @@ class SettingsView extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isPremium = ref.watch(homeViewModelProvider).isPremium;
+    final country = ref.watch(profileViewModelProvider).country;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -246,7 +284,14 @@ class SettingsView extends ConsumerWidget {
             _SettingsRow(
               icon: Icons.person_outline_rounded,
               label: 'Profil Bilgilerini Düzenle',
-              onTap: () => _navigateToProfile(context),
+              onTap: _navigateToProfile,
+            ),
+            const SizedBox(height: 10),
+            _SettingsRow(
+              icon: Icons.public_rounded,
+              label: 'Ülke Seçimi',
+              subtitle: (country != null && country.isNotEmpty) ? country : 'Seçilmedi',
+              onTap: _editCountry,
             ),
             const SizedBox(height: 10),
             _SettingsRow(
@@ -280,7 +325,7 @@ class SettingsView extends ConsumerWidget {
               icon: Icons.logout_rounded,
               label: 'Çıkış Yap',
               isDestructive: true,
-              onTap: () => _signOut(context),
+              onTap: _signOut,
             ),
           ],
         ),

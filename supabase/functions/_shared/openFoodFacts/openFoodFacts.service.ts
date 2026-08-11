@@ -3,6 +3,7 @@ const OFF_BASE_URL = "https://world.openfoodfacts.org/api/v2/product";
 export interface OffProduct {
   barcode: string;
   name: string;
+  brand: string | null;
   ingredients_text: string;
   additives: string[];
   allergens_tags: string[];
@@ -12,6 +13,8 @@ export interface OffProduct {
   ingredients_analysis_tags: string[];
   /** Producer labels, e.g. en:vegan, en:vegetarian, en:gluten-free. */
   labels_tags: string[];
+  /** OFF category tags, e.g. en:snacks — used to find same-category alternatives. */
+  categories_tags: string[];
   nutriments: {
     energy_kcal_100g: number | null;
     sugars_100g: number | null;
@@ -36,12 +39,14 @@ export async function fetchFromOpenFoodFacts(barcode: string): Promise<OffProduc
   return {
     barcode,
     name: p.product_name ?? "",
+    brand: p.brands ?? null,
     ingredients_text: p.ingredients_text ?? "",
     additives: p.additives_tags ?? [],
     allergens_tags: p.allergens_tags ?? [],
     traces_tags: p.traces_tags ?? [],
     ingredients_analysis_tags: p.ingredients_analysis_tags ?? [],
     labels_tags: p.labels_tags ?? [],
+    categories_tags: p.categories_tags ?? [],
     nutriments: {
       energy_kcal_100g: p.nutriments?.["energy-kcal_100g"] ?? null,
       sugars_100g: p.nutriments?.sugars_100g ?? null,

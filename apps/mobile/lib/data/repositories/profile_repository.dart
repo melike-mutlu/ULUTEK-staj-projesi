@@ -61,7 +61,18 @@ class SupabaseProfileRepository implements ProfileRepository {
 
   @override
   Future<void> saveProfile(UserProfile profile) async {
-    await supabase.from('profiles').upsert(profile.toJson());
+    try {
+      await supabase.from('profiles').upsert(profile.toJson());
+    } on PostgrestException catch (e) {
+      // If the 'country' column doesn't exist in the remote database schema yet,
+      // fall back gracefully without 'country' so the save doesn't fail.
+      if (e.code == 'PGRST204' || e.message.toLowerCase().contains('country')) {
+        final json = profile.toJson()..remove('country');
+        await supabase.from('profiles').upsert(json);
+        return;
+      }
+      rethrow;
+    }
   }
 
   @override

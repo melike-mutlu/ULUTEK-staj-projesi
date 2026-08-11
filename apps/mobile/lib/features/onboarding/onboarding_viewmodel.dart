@@ -37,6 +37,7 @@ class OnboardingViewModel extends ChangeNotifier {
   bool _isSaving = false;
   String? _errorMessage;
   String _displayName = '';
+  String _country = '';
 
   // --- Okuma ---
 
@@ -44,6 +45,7 @@ class OnboardingViewModel extends ChangeNotifier {
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
   String get displayName => _displayName;
+  String get country => _country;
   OnboardingStep get currentStep => onboardingSteps[_currentIndex];
   int get stepCount => onboardingSteps.length;
   double get progress => (_currentIndex + 1) / stepCount;
@@ -71,13 +73,15 @@ class OnboardingViewModel extends ChangeNotifier {
       _selections[field]!.contains(option);
 
   /// Alt butonun metni: karşılama adımında `ctaLabel`, isim adımında isim yoksa
-  /// `skipLabel`, seçim adımında hiç seçim yoksa `skipLabel`, aksi halde "Devam".
+  /// `skipLabel`, ülke adımında ülke yoksa `skipLabel`, seçim adımında hiç seçim yoksa `skipLabel`, aksi halde "Devam".
   String get primaryActionLabel {
     final step = currentStep;
     return switch (step) {
       OnboardingWelcomeStep(:final ctaLabel) => ctaLabel ?? '',
       OnboardingNameStep(:final skipLabel) =>
         _displayName.trim().isEmpty ? skipLabel : 'Devam',
+      OnboardingCountryStep(:final skipLabel) =>
+        _country.trim().isEmpty ? skipLabel : 'Devam',
       OnboardingSelectionStep() =>
         _selections[step.field]!.isEmpty ? step.skipLabel : 'Devam',
     };
@@ -87,6 +91,11 @@ class OnboardingViewModel extends ChangeNotifier {
 
   void setDisplayName(String name) {
     _displayName = name;
+    notifyListeners();
+  }
+
+  void setCountry(String country) {
+    _country = country;
     notifyListeners();
   }
 
@@ -174,6 +183,8 @@ class OnboardingViewModel extends ChangeNotifier {
           userId: userId,
           displayName:
               _displayName.trim().isEmpty ? null : _displayName.trim(),
+          country:
+              _country.trim().isEmpty ? null : _country.trim(),
           allergies: _selections[OnboardingField.allergies]!.toList(),
           dietPreferences: _selections[OnboardingField.diet]!.toList(),
           healthConditions: _selections[OnboardingField.health]!.toList(),

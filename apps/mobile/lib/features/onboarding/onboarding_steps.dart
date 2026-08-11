@@ -81,6 +81,21 @@ final class OnboardingNameStep extends OnboardingStep {
   final String skipLabel;
 }
 
+/// Kullanıcıdan yaşadığı ülkeyi almayı hedefleyen adım.
+final class OnboardingCountryStep extends OnboardingStep {
+  const OnboardingCountryStep({
+    required this.title,
+    required this.subtitle,
+    required this.placeholder,
+    required this.skipLabel,
+  });
+
+  final String title;
+  final String subtitle;
+  final String placeholder;
+  final String skipLabel;
+}
+
 /// Seçim adımını katalogdan kurar — soru/seçenek/skip metni tek kaynaktan
 /// (core/constants/profile_options.dart) gelir.
 OnboardingSelectionStep _selectionStep(OnboardingField field) =>
@@ -118,6 +133,12 @@ final List<OnboardingStep> onboardingSteps = <OnboardingStep>[
     title: 'Sana nasıl hitap edelim?',
     subtitle: 'İsmini girerek deneyimini kişiselleştirebilirsin.',
     placeholder: 'Adınız',
+    skipLabel: 'Atla',
+  ),
+  const OnboardingCountryStep(
+    title: 'Hangi ülkede yaşıyorsun?',
+    subtitle: 'Sana uygun ürün ve market içeriklerini sunabilmemiz için ülkeni seçebilirsin.',
+    placeholder: 'Ülke adı (örn. Türkiye)',
     skipLabel: 'Atla',
   ),
   _selectionStep(OnboardingField.allergies),

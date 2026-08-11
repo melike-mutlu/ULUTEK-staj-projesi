@@ -2,6 +2,7 @@ import { getServiceClient, getUserClient } from "../_shared/lib/supabaseClient.t
 import { getFromCache, saveToCache } from "../_shared/supabase/productCache.service.ts";
 import { fetchFromOpenFoodFacts } from "../_shared/openFoodFacts/openFoodFacts.service.ts";
 import { runRuleEngine, findMissingFields } from "../_shared/ruleEngine/ruleEngine.service.ts";
+import { findSafeAlternatives } from "../_shared/alternativeProducts.service.ts";
 import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 
 Deno.serve(async (req: Request) => {
@@ -30,13 +31,20 @@ Deno.serve(async (req: Request) => {
     }
 
     let ruleEngineResult = null;
+    let safeAlternatives: unknown[] = [];
     if (user) {
       const { data: profile } = await supabase
         .from("profiles")
         .select()
         .eq("user_id", user.id)
         .maybeSingle();
+      // Profil olmasa bile rule engine çalışır (null-safe) — eskisi gibi.
       ruleEngineResult = runRuleEngine(product, profile);
+
+      // Alternatifler gerçek bir profil gerektirir, aksi halde anlamsız olur.
+      if (profile) {
+        safeAlternatives = await findSafeAlternatives(product, profile, supabase);
+      }
     }
 
     const missingFields = findMissingFields(product);
@@ -44,6 +52,7 @@ Deno.serve(async (req: Request) => {
       status: missingFields.length > 0 ? "partial" : "found",
       product,
       rule_engine_result: ruleEngineResult,
+      safe_alternatives: safeAlternatives,
       ...(missingFields.length > 0 ? { missing_fields: missingFields } : {}),
     });
   } catch (error) {

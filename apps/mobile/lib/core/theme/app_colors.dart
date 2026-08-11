@@ -80,6 +80,12 @@ abstract final class AppColors {
   /// "Show all" link.
   static const Color linkAccent = Color(0xFF6C5CE7);
 
+  // --- Alternatives / recommendation score ---
+  /// Score dot colours for recommended alternatives. Client decides the colour;
+  /// the backend only sends the score level.
+  static const Color scoreExcellent = ok;
+  static const Color scoreGood = Color(0xFF7AC943);
+
   /// Pastel tones for selected profile chips, handed out by chip position so a
   /// card never reads as one solid colour block. Saturated enough to separate
   /// clearly from [chipUnselected] while staying in the pastel family.

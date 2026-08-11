@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/models/alternative.dart';
 import '../../core/models/explanation.dart';
 import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
+import '../../data/repositories/alternatives_repository.dart';
 import '../../data/repositories/explanation_repository.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
@@ -11,14 +13,21 @@ import '../../data/repositories/profile_repository.dart';
 enum ProductDetailStatus { loading, found, notFound, partial, error }
 
 class ProductDetailViewModel extends ChangeNotifier {
-  ProductDetailViewModel([this._explanationRepository]);
+  ProductDetailViewModel([
+    this._explanationRepository,
+    this._alternativesRepository,
+  ]);
 
   final ExplanationRepository? _explanationRepository;
+  final AlternativesRepository? _alternativesRepository;
 
   ProductDetailStatus status = ProductDetailStatus.found;
   Product? product;
   RuleEngineResult? ruleEngineResult;
   Explanation? explanation;
+
+  /// Recommended alternatives for the current product. Empty until loaded.
+  List<Alternative> alternatives = const [];
 
   /// Diyet/sağlık kategorilerini beslemek için tutulur.
   UserProfile? userProfile;
@@ -26,7 +35,8 @@ class ProductDetailViewModel extends ChangeNotifier {
   String? errorMessage;
 
   ProductDetailViewModel.withMock({String mockState = 'warning'})
-      : _explanationRepository = null {
+      : _explanationRepository = null,
+        _alternativesRepository = null {
     loadMockState(mockState);
   }
 
@@ -270,6 +280,7 @@ class ProductDetailViewModel extends ChangeNotifier {
     _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
+    _loadAlternatives();
   }
 
   Future<void> load({
@@ -305,6 +316,21 @@ class ProductDetailViewModel extends ChangeNotifier {
     _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
+    _loadAlternatives();
+  }
+
+  /// Fetches alternatives in the background so they never block the verdict.
+  /// Failures are non-fatal: the section simply stays empty.
+  Future<void> _loadAlternatives() async {
+    final repo = _alternativesRepository;
+    final barcode = product?.barcode;
+    if (repo == null || barcode == null) return;
+    try {
+      alternatives = await repo.getAlternatives(barcode);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('[ProductDetailViewModel] alternatives load warning: $e');
+    }
   }
 
   /// The verdict when the LLM is unavailable: comes purely from the rule engine.
