@@ -104,26 +104,8 @@ class PendingProductRepository {
     }
   }
 
-  /// Görüntüden Metin Çıkarma (OCR/Vision AI) - GEÇİCİ TEST (MOCK) VERSİYONU
-  Future<String?> extractTextFromImage(XFile imageFile) async {
-    try {
-      // 1. Sanki fotoğraf internetten Supabase'e gidip geliyormuş gibi 3 saniye bekle
-      // Bu sayede ekrana eklediğin o "Yükleniyor (Spinner)" animasyonunu test edebilirsin.
-      await Future.delayed(const Duration(seconds: 3));
 
-      // 2. Eda'nın fonksiyonu hazır olana kadar sahte (mock) metin döndür
-      return "Şeker, tam yağlı süt tozu, kakao yağı, peyniraltı suyu tozu, emülgatör (soya lesitini), aroma verici (vanilin). Eser miktarda fındık ve yer fıstığı içerebilir.";
-      
-    } catch (e) {
-      debugPrint('[PendingProductRepository] Mock Extraction Hatası: $e');
-      return null;
-    }
-  }
-
-
-  /*
-
-  /// Görüntüden Metin Çıkarma (OCR/Vision AI) için Eda'nın Edge Function'ını çağırır
+  /// Görüntüden Metin Çıkarma için Eda'nın Edge Function'ını çağırır
   Future<String?> extractTextFromImage(XFile imageFile) async {
     try {
       // 1. Görüntüyü base64'e çevir (Edge function'a doğrudan yollamak için)
@@ -153,7 +135,6 @@ class PendingProductRepository {
       return null;
     }
   }
-  */
 }
 
 final pendingProductRepositoryProvider = Provider<PendingProductRepository>((ref) {
