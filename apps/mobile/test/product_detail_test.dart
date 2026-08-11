@@ -17,6 +17,8 @@ import 'package:akilli_sepet/core/providers.dart';
 import 'package:akilli_sepet/data/repositories/product_repository.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 import 'package:akilli_sepet/data/repositories/explanation_repository.dart';
+import 'package:akilli_sepet/data/repositories/alternatives_repository.dart';
+import 'package:akilli_sepet/core/models/alternative.dart';
 import 'package:akilli_sepet/core/models/user_profile.dart';
 
 const _foundFetchResult = ProductFetchResult(
@@ -93,6 +95,14 @@ class _FakeProductRepository implements ProductRepository {
   }
 }
 
+/// Resolves synchronously — the real repository's artificial network delay
+/// leaves a pending Timer that trips the widget-test "no pending timers"
+/// invariant.
+class _FakeAlternativesRepository implements AlternativesRepository {
+  @override
+  Future<List<Alternative>> getAlternatives(String barcode) async => const [];
+}
+
 /// Opens the screen with a route argument; profile layer is faked (no Supabase).
 Widget _productDetailUnderTest(
   Object? arguments, {
@@ -101,6 +111,7 @@ Widget _productDetailUnderTest(
   return ProviderScope(
     overrides: <Override>[
       profileRepositoryProvider.overrideWithValue(InMemoryProfileRepository()),
+      alternativesRepositoryProvider.overrideWithValue(_FakeAlternativesRepository()),
       if (productRepository != null)
         productRepositoryProvider.overrideWithValue(productRepository),
     ],
