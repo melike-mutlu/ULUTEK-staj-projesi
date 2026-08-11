@@ -21,14 +21,14 @@ class SearchBarField extends StatelessWidget {
   final VoidCallback? onClear;
   final String hintText;
 
-  static const Color _fill = Color(0xFFEFEFF0);
+  static const Color _fill = Color(0xFFE5E5EA);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: _fill,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
         controller: controller,
