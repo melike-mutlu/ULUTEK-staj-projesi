@@ -474,15 +474,12 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     if (finalConfirmed != true || !mounted) return;
 
     try {
-      // Eda'nın hesap silme fonksiyonunun stub çağrısı yapılır
       await ref.read(profileRepositoryProvider).deleteAccount();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'Hesap silme talebi işlendi (Eda\'nın silme fonksiyonu bağlandığında işlem tamamlanacaktır).',
-            ),
+            content: Text('Hesabınız silindi.'),
             duration: Duration(seconds: 4),
           ),
         );

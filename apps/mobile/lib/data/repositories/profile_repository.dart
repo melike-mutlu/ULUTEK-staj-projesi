@@ -28,8 +28,7 @@ abstract class ProfileRepository {
     required String fileExtension,
   });
 
-  /// Eda'nın hesap silme fonksiyonu (Edge Function / RPC) hazır olduğunda çağrılır.
-  /// Şimdilik projede bu fonksiyon bulunmadığı için yer tutucu (stub) olarak durmaktadır.
+  /// Hesabı ve ilişkili tüm verileri siler (delete-account Edge Function).
   Future<void> deleteAccount();
 }
 
@@ -105,14 +104,12 @@ class SupabaseProfileRepository implements ProfileRepository {
     return '$url?v=${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  /// Eda'nın hesap silme fonksiyonu (Edge Function / RPC) yazıldığında burası güncellenecektir.
-  /// NOT: Şu an projede Eda'nın hesap silme fonksiyonu henüz bulunmamaktadır.
   @override
   Future<void> deleteAccount() async {
-    // TODO: Eda'nın Supabase Edge Function veya RPC hesap silme fonksiyonunu çağır:
-    // await supabase.functions.invoke('delete-user-account');
-    // veya
-    // await supabase.rpc('delete_user_account');
+    final response = await supabase.functions.invoke('delete-account');
+    if (response.status != 200) {
+      throw Exception('Hesap silinemedi (durum: ${response.status})');
+    }
   }
 }
 
