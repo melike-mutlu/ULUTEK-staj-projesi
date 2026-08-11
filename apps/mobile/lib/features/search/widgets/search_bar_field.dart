@@ -28,7 +28,7 @@ class SearchBarField extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: _fill,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: TextField(
         controller: controller,
