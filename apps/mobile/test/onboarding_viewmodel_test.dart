@@ -30,6 +30,9 @@ class _FakeProfileRepository implements ProfileRepository {
     required String fileExtension,
   }) async =>
       'https://example.invalid/avatars/$userId.$fileExtension';
+
+  @override
+  Future<void> deleteAccount() async {}
 }
 
 void main() {

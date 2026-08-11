@@ -8,6 +8,8 @@ import '../../data/repositories/profile_repository.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../startup/startup_destination.dart';
 
+import 'widgets/terms_conditions_dialog.dart';
+
 class AuthView extends ConsumerStatefulWidget {
   const AuthView({super.key});
 
@@ -19,12 +21,25 @@ class _AuthViewState extends ConsumerState<AuthView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isSignUpMode = true;
+  bool _acceptedTerms = false;
 
   /// Keeps the button spinner up while the destination is being resolved, so
   /// no intermediate loading screen is needed.
   bool _isResolvingRoute = false;
 
   Future<void> _submit() async {
+    if (_isSignUpMode && !_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Devam etmek için lütfen Kullanım Şartları ve Gizlilik Sözleşmesi\'ni kabul edin.',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     final vm = ref.read(authViewModelProvider);
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -50,12 +65,25 @@ class _AuthViewState extends ConsumerState<AuthView> {
   }
 
   Future<void> _continueAsGuest() async {
+    setState(() => _isResolvingRoute = true);
     final vm = ref.read(authViewModelProvider);
-    final success = await vm.signInAsGuest();
+    await vm.signInAsGuest();
 
-    if (success && mounted) {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.onboarding);
+    if (!mounted) return;
+
+    String route;
+    try {
+      route = await resolveStartupRoute(ref.read(profileRepositoryProvider));
+      if (route == AppRoutes.auth) {
+        route = AppRoutes.onboarding;
+      }
+    } catch (_) {
+      route = AppRoutes.onboarding;
     }
+
+    if (!mounted) return;
+    setState(() => _isResolvingRoute = false);
+    Navigator.of(context).pushReplacementNamed(route);
   }
 
   @override
@@ -137,6 +165,71 @@ class _AuthViewState extends ConsumerState<AuthView> {
               ),
               obscureText: true,
             ),
+            if (_isSignUpMode) ...[
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                      value: _acceptedTerms,
+                      onChanged: (value) {
+                        setState(() {
+                          _acceptedTerms = value ?? false;
+                        });
+                      },
+                      activeColor: AkilliSepetColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _acceptedTerms = !_acceptedTerms;
+                        });
+                      },
+                      child: Wrap(
+                        children: [
+                          const Text(
+                            'Kullanım Şartları ve Gizlilik Sözleşmesi',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: AkilliSepetColors.primary,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => TermsConditionsDialog.show(context),
+                            child: const Padding(
+                              padding: EdgeInsets.only(left: 4),
+                              child: Icon(
+                                Icons.open_in_new_rounded,
+                                size: 14,
+                                color: AkilliSepetColors.primary,
+                              ),
+                            ),
+                          ),
+                          const Text(
+                            '\'ni okudum, kabul ediyorum.',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: AkilliSepetColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 24),
             if (vm.emailAlreadyRegistered) ...[
               InlineErrorRow(
@@ -243,7 +336,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
             SizedBox(
               height: 48,
               child: OutlinedButton.icon(
-                onPressed: vm.isLoading ? null : _continueAsGuest,
+                onPressed: isBusy ? null : _continueAsGuest,
                 icon: const Icon(Icons.person_outline_rounded),
                 label: const Text('Misafir Olarak Devam Et'),
                 style: OutlinedButton.styleFrom(
