@@ -35,7 +35,13 @@ class _PendingProductViewState extends ConsumerState<PendingProductView> {
   }
 
   void _onViewModelChanged() {
-    if (mounted) setState(() {});
+    if (mounted){
+      //Viewmodelden gelen yapay zeka metnini Controllera aktar
+      //Kullanıcının imleç yerini bozmamak için sadece farklıysa aktar
+      if(_ingredientsController.text != _viewModel.ingredientsText){
+        _ingredientsController.text = _viewModel.ingredientsText;
+      }
+    } setState(() {});
   }
 
   @override
@@ -170,15 +176,26 @@ class _PendingProductViewState extends ConsumerState<PendingProductView> {
 
             TextField(
               controller: _ingredientsController,
-              maxLines: 3,
+              maxLines: 4,
               onChanged: (val) => _viewModel.setIngredientsText(val),
               decoration: InputDecoration(
                 labelText: 'İçindekiler Metni (İsteğe Bağlı)',
-                hintText: 'Etikette yer alan içindekiler...',
+                hintText: 'Fotoğraf çektiğinizde yapay zeka burayı otomatik doldurur. Gerekirse elle düzeltebilirsiniz.',
                 prefixIcon: const Icon(Icons.article_outlined),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
+
+            // Yapay zeka metni okurken çıkacak küçük animasyon
+            if (_viewModel.isExtractingText)
+              const Padding(
+                padding: EdgeInsets.all(12.0),
+                child: SizedBox(
+                  width: 20, height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+
             const SizedBox(height: 28),
 
             // Photo Attachment Section
