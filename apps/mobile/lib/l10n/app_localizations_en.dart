@@ -363,4 +363,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsClose => 'I understand and close';
+
+  @override
+  String get homeGreeting => 'Hello,';
+
+  @override
+  String get userFallback => 'User';
+
+  @override
+  String get scanButton => 'Scan';
+
+  @override
+  String get scanTagline =>
+      'Scan a product\'s barcode to see its contents\nand whether it suits you';
+
+  @override
+  String get recentScansTitle => 'Your recent scans';
+
+  @override
+  String get noScansYet => 'You haven\'t scanned any products yet.';
+
+  @override
+  String get contentAnalysis => 'Content analysis';
+
+  @override
+  String barcodeLabel(String barcode) {
+    return 'Barcode: $barcode';
+  }
+
+  @override
+  String get seeAllHistory => 'See all history';
+
+  @override
+  String get allMyScans => 'All my scans';
+
+  @override
+  String get historyNotFound => 'No history found.';
+
+  @override
+  String get searchNoResults => 'No results found.';
+
+  @override
+  String get searchError =>
+      'Something went wrong during the search. Please try again.';
+
+  @override
+  String get adArea => 'AD SPACE';
+
+  @override
+  String get sponsored => 'Sponsored';
+
+  @override
+  String get adPlaceholderBody =>
+      'Sponsored product announcements or dynamic ads will appear here.';
+
+  @override
+  String get adRemovePremiumNote =>
+      'You can remove ads by upgrading to Premium in Settings.';
 }

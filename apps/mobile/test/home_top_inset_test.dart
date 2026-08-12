@@ -8,6 +8,7 @@ import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 import 'package:akilli_sepet/data/repositories/scan_history_repository.dart';
 import 'package:akilli_sepet/features/chatbot/chatbot_view.dart';
 import 'package:akilli_sepet/features/home/home_view.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 import 'package:akilli_sepet/shared/widgets/user_avatar_circle.dart';
 
 class _FakeScanHistoryRepository implements ScanHistoryRepository {
@@ -39,6 +40,9 @@ Widget _screenWithTopInset(Widget screen, double topInset) {
       chatbotRepositoryProvider.overrideWithValue(_FakeChatbotRepository()),
     ],
     child: MaterialApp(
+      locale: const Locale('tr'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: MediaQuery(
         data: MediaQueryData(padding: EdgeInsets.only(top: topInset)),
         child: screen,

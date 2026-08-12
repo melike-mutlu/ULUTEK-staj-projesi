@@ -359,4 +359,61 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get termsClose => 'Anladım ve Kapat';
+
+  @override
+  String get homeGreeting => 'Merhaba,';
+
+  @override
+  String get userFallback => 'Kullanıcı';
+
+  @override
+  String get scanButton => 'Tara';
+
+  @override
+  String get scanTagline =>
+      'Bir ürünün barkodunu okut, içeriğini ve\nsana uygunluğunu öğren';
+
+  @override
+  String get recentScansTitle => 'Son Taramaların';
+
+  @override
+  String get noScansYet => 'Henüz bir ürün taramadınız.';
+
+  @override
+  String get contentAnalysis => 'İçerik Analizi';
+
+  @override
+  String barcodeLabel(String barcode) {
+    return 'Barkod: $barcode';
+  }
+
+  @override
+  String get seeAllHistory => 'Tüm Geçmişi Gör';
+
+  @override
+  String get allMyScans => 'Tüm Taramalarım';
+
+  @override
+  String get historyNotFound => 'Geçmiş bulunamadı.';
+
+  @override
+  String get searchNoResults => 'Sonuç bulunamadı.';
+
+  @override
+  String get searchError =>
+      'Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get adArea => 'REKLAM ALANI';
+
+  @override
+  String get sponsored => 'Sponsorlu';
+
+  @override
+  String get adPlaceholderBody =>
+      'Burada sponsorlu ürün duyuruları veya dinamik reklamlar görüntülenecektir.';
+
+  @override
+  String get adRemovePremiumNote =>
+      'Ayarlar\'dan Premium\'a geçerek reklamları kaldırabilirsiniz.';
 }

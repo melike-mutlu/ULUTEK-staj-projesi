@@ -108,5 +108,22 @@
   "termsSection5Title": "5. Termination and Changes to the Agreement",
   "termsSection5Body": "The app administration reserves the right to update the terms of use without prior notice. The current terms take effect on the date they are published within the App. The User may terminate the agreement at any time by deleting their account.",
   "termsLastUpdated": "Last updated: 11 August 2026",
-  "termsClose": "I understand and close"
+  "termsClose": "I understand and close",
+  "homeGreeting": "Hello,",
+  "userFallback": "User",
+  "scanButton": "Scan",
+  "scanTagline": "Scan a product's barcode to see its contents\nand whether it suits you",
+  "recentScansTitle": "Your recent scans",
+  "noScansYet": "You haven't scanned any products yet.",
+  "contentAnalysis": "Content analysis",
+  "barcodeLabel": "Barcode: {barcode}",
+  "seeAllHistory": "See all history",
+  "allMyScans": "All my scans",
+  "historyNotFound": "No history found.",
+  "searchNoResults": "No results found.",
+  "searchError": "Something went wrong during the search. Please try again.",
+  "adArea": "AD SPACE",
+  "sponsored": "Sponsored",
+  "adPlaceholderBody": "Sponsored product announcements or dynamic ads will appear here.",
+  "adRemovePremiumNote": "You can remove ads by upgrading to Premium in Settings."
 }

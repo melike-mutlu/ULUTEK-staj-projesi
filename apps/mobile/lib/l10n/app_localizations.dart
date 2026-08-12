@@ -751,6 +751,108 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Anladım ve Kapat'**
   String get termsClose;
+
+  /// Greeting above the user name on the home screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Merhaba,'**
+  String get homeGreeting;
+
+  /// Fallback name when the user has no display name.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı'**
+  String get userFallback;
+
+  /// Label on the large scan button.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tara'**
+  String get scanButton;
+
+  /// Tagline under the scan button.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir ürünün barkodunu okut, içeriğini ve\nsana uygunluğunu öğren'**
+  String get scanTagline;
+
+  /// Heading for the recent scans list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son Taramaların'**
+  String get recentScansTitle;
+
+  /// Empty state when there are no scans.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz bir ürün taramadınız.'**
+  String get noScansYet;
+
+  /// Note badge on a recent scan card.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçerik Analizi'**
+  String get contentAnalysis;
+
+  /// Fallback title showing the barcode when the product name is unknown.
+  ///
+  /// In tr, this message translates to:
+  /// **'Barkod: {barcode}'**
+  String barcodeLabel(String barcode);
+
+  /// Button opening the full scan history sheet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm Geçmişi Gör'**
+  String get seeAllHistory;
+
+  /// Title of the full scan history sheet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm Taramalarım'**
+  String get allMyScans;
+
+  /// Empty state in the full history sheet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçmiş bulunamadı.'**
+  String get historyNotFound;
+
+  /// Empty state for product search.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonuç bulunamadı.'**
+  String get searchNoResults;
+
+  /// Error state for product search.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.'**
+  String get searchError;
+
+  /// Title of the ad placeholder card.
+  ///
+  /// In tr, this message translates to:
+  /// **'REKLAM ALANI'**
+  String get adArea;
+
+  /// Sponsored tag on the ad placeholder card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sponsorlu'**
+  String get sponsored;
+
+  /// Body of the ad placeholder card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Burada sponsorlu ürün duyuruları veya dinamik reklamlar görüntülenecektir.'**
+  String get adPlaceholderBody;
+
+  /// Note about removing ads via Premium.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarlar\'dan Premium\'a geçerek reklamları kaldırabilirsiniz.'**
+  String get adRemovePremiumNote;
 }
 
 class _AppLocalizationsDelegate

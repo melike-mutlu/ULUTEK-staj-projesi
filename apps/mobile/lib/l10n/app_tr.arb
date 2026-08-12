@@ -450,5 +450,78 @@
   "termsClose": "Anladım ve Kapat",
   "@termsClose": {
     "description": "Close button of the terms dialog."
+  },
+  "homeGreeting": "Merhaba,",
+  "@homeGreeting": {
+    "description": "Greeting above the user name on the home screen."
+  },
+  "userFallback": "Kullanıcı",
+  "@userFallback": {
+    "description": "Fallback name when the user has no display name."
+  },
+  "scanButton": "Tara",
+  "@scanButton": {
+    "description": "Label on the large scan button."
+  },
+  "scanTagline": "Bir ürünün barkodunu okut, içeriğini ve\nsana uygunluğunu öğren",
+  "@scanTagline": {
+    "description": "Tagline under the scan button."
+  },
+  "recentScansTitle": "Son Taramaların",
+  "@recentScansTitle": {
+    "description": "Heading for the recent scans list."
+  },
+  "noScansYet": "Henüz bir ürün taramadınız.",
+  "@noScansYet": {
+    "description": "Empty state when there are no scans."
+  },
+  "contentAnalysis": "İçerik Analizi",
+  "@contentAnalysis": {
+    "description": "Note badge on a recent scan card."
+  },
+  "barcodeLabel": "Barkod: {barcode}",
+  "@barcodeLabel": {
+    "description": "Fallback title showing the barcode when the product name is unknown.",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "seeAllHistory": "Tüm Geçmişi Gör",
+  "@seeAllHistory": {
+    "description": "Button opening the full scan history sheet."
+  },
+  "allMyScans": "Tüm Taramalarım",
+  "@allMyScans": {
+    "description": "Title of the full scan history sheet."
+  },
+  "historyNotFound": "Geçmiş bulunamadı.",
+  "@historyNotFound": {
+    "description": "Empty state in the full history sheet."
+  },
+  "searchNoResults": "Sonuç bulunamadı.",
+  "@searchNoResults": {
+    "description": "Empty state for product search."
+  },
+  "searchError": "Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.",
+  "@searchError": {
+    "description": "Error state for product search."
+  },
+  "adArea": "REKLAM ALANI",
+  "@adArea": {
+    "description": "Title of the ad placeholder card."
+  },
+  "sponsored": "Sponsorlu",
+  "@sponsored": {
+    "description": "Sponsored tag on the ad placeholder card."
+  },
+  "adPlaceholderBody": "Burada sponsorlu ürün duyuruları veya dinamik reklamlar görüntülenecektir.",
+  "@adPlaceholderBody": {
+    "description": "Body of the ad placeholder card."
+  },
+  "adRemovePremiumNote": "Ayarlar'dan Premium'a geçerek reklamları kaldırabilirsiniz.",
+  "@adRemovePremiumNote": {
+    "description": "Note about removing ads via Premium."
   }
 }
