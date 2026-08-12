@@ -7,6 +7,9 @@ import '../../core/providers.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
 import 'widgets/ad_placeholder_card.dart';
 import 'widgets/recent_scan_card.dart';
+import '../search/search_viewmodel.dart';
+import '../search/widgets/search_bar_field.dart';
+import '../search/widgets/search_result_tile.dart';
 import '../shell/shell_viewmodel.dart';
 
 class HomeView extends ConsumerStatefulWidget {
@@ -17,13 +20,29 @@ class HomeView extends ConsumerStatefulWidget {
 }
 
 class _HomeViewState extends ConsumerState<HomeView> {
-  
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeViewModelProvider).loadDashboardData();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// Opens a search hit's product detail by barcode, then clears the search so
+  /// the dashboard is back when the user returns.
+  void _openSearchResult(String barcode) {
+    FocusScope.of(context).unfocus();
+    _searchController.clear();
+    ref.read(searchViewModelProvider).clear();
+    _openProductDetail(barcode);
   }
 
   // --- YENİ: TÜM GEÇMİŞİ GÖSTEREN AŞAĞIDAN KAYARAK AÇILAN PANEL ---
@@ -126,6 +145,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
     // other screens do with SafeArea. Device driven, not a fixed offset.
     final topInset = mediaPadding.top;
     final viewModel = ref.watch(homeViewModelProvider);
+    final search = ref.watch(searchViewModelProvider);
+    final isSearching = search.status != SearchStatus.idle;
 
     return Scaffold(
       body: viewModel.isLoading
@@ -169,8 +190,20 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ],
                     ),
                     
-                    const SizedBox(height: 40),
+                    // --- ÜRÜN ARAMA ÇUBUĞU ---
+                    const SizedBox(height: 24),
+                    SearchBarField(
+                      controller: _searchController,
+                      onChanged: (value) => search.onQueryChanged(value),
+                      onClear: search.clear,
+                    ),
+                    const SizedBox(height: 24),
 
+                    // While searching, the results replace the dashboard so the
+                    // page stays focused; clearing the query brings it back.
+                    if (isSearching)
+                      _buildSearchResults(search)
+                    else ...[
                     // --- 2. TARA BUTONU ---
                     Center(
                       child: GestureDetector(
@@ -289,11 +322,60 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     ],
 
                     const SizedBox(height: 32),
+                    ], // end of dashboard (shown when not searching)
                   ],
                 ),
               ),
             ),
     );
+  }
+
+  /// Search states below the bar: spinner, results, empty and error. Rendered
+  /// inline so the whole page scrolls as one.
+  Widget _buildSearchResults(SearchViewModel search) {
+    switch (search.status) {
+      case SearchStatus.loading:
+        return const Padding(
+          padding: EdgeInsets.only(top: 32),
+          child: Center(
+            child: CircularProgressIndicator(color: AkilliSepetColors.primary),
+          ),
+        );
+      case SearchStatus.empty:
+        return const Padding(
+          padding: EdgeInsets.only(top: 32),
+          child: Center(
+            child: Text(
+              'Sonuç bulunamadı.',
+              style: TextStyle(color: AkilliSepetColors.textSecondary, fontSize: 16),
+            ),
+          ),
+        );
+      case SearchStatus.error:
+        return const Padding(
+          padding: EdgeInsets.only(top: 32),
+          child: Center(
+            child: Text(
+              'Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AkilliSepetColors.textSecondary, fontSize: 16),
+            ),
+          ),
+        );
+      case SearchStatus.results:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final result in search.results)
+              SearchResultTile(
+                result: result,
+                onTap: () => _openSearchResult(result.barcode),
+              ),
+          ],
+        );
+      case SearchStatus.idle:
+        return const SizedBox.shrink();
+    }
   }
 
   void _openProductDetail(String barcode) {

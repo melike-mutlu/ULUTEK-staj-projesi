@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/alternative.dart';
+import '../../../core/navigation/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import 'alternative_score_badge.dart';
 import 'alternative_thumbnail.dart';
+import 'nutri_score_badge.dart';
 
 /// Opens the "Tümünü gör" bottom sheet listing every recommended alternative.
 Future<void> showRecommendationsSheet(
@@ -53,7 +54,11 @@ class _RecommendationsSheet extends StatelessWidget {
                     color: AppColors.border,
                   ),
                   itemBuilder: (context, index) {
-                    return _RecommendationRow(alternative: alternatives[index]);
+                    final alternative = alternatives[index];
+                    return _RecommendationRow(
+                      alternative: alternative,
+                      onTap: () => _openAlternative(context, alternative),
+                    );
                   },
                 ),
               ),
@@ -111,48 +116,71 @@ class _SheetHeader extends StatelessWidget {
   }
 }
 
-/// One alternative as a full-width row: image, name + brand + score, chevron.
+/// Closes the sheet, then opens the tapped alternative on the product detail
+/// screen by its barcode (same route the scanner uses).
+void _openAlternative(BuildContext context, Alternative alternative) {
+  if (alternative.barcode.isEmpty) return;
+  Navigator.of(context)
+    ..pop()
+    ..pushNamed(AppRoutes.productDetail, arguments: alternative.barcode);
+}
+
+/// One alternative as a full-width row: image, name + brand + Nutri-Score +
+/// reason, chevron.
 class _RecommendationRow extends StatelessWidget {
-  const _RecommendationRow({required this.alternative});
+  const _RecommendationRow({required this.alternative, this.onTap});
 
   final Alternative alternative;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          AlternativeThumbnail(imageUrl: alternative.imageUrl, size: 64),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  alternative.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.title,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  alternative.brand,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.caption,
-                ),
-                const SizedBox(height: 8),
-                AlternativeScoreBadge(score: alternative.score),
-              ],
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            AlternativeThumbnail(imageUrl: alternative.imageUrl, size: 64),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    alternative.productName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.title,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    alternative.brand,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.caption,
+                  ),
+                  const SizedBox(height: 8),
+                  NutriScoreBadge(grade: alternative.nutriscoreGrade),
+                  if (alternative.recommendationReason.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      alternative.recommendationReason,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.bodyMuted,
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: AppColors.textSecondary,
-          ),
-        ],
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -5,7 +5,6 @@ import '../../core/models/explanation.dart';
 import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
-import '../../data/repositories/alternatives_repository.dart';
 import '../../data/repositories/explanation_repository.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
@@ -13,13 +12,9 @@ import '../../data/repositories/profile_repository.dart';
 enum ProductDetailStatus { loading, found, notFound, partial, error }
 
 class ProductDetailViewModel extends ChangeNotifier {
-  ProductDetailViewModel([
-    this._explanationRepository,
-    this._alternativesRepository,
-  ]);
+  ProductDetailViewModel([this._explanationRepository]);
 
   final ExplanationRepository? _explanationRepository;
-  final AlternativesRepository? _alternativesRepository;
 
   ProductDetailStatus status = ProductDetailStatus.found;
   Product? product;
@@ -35,8 +30,7 @@ class ProductDetailViewModel extends ChangeNotifier {
   String? errorMessage;
 
   ProductDetailViewModel.withMock({String mockState = 'warning'})
-      : _explanationRepository = null,
-        _alternativesRepository = null {
+      : _explanationRepository = null {
     loadMockState(mockState);
   }
 
@@ -108,6 +102,14 @@ class ProductDetailViewModel extends ChangeNotifier {
       dietPreferences: const [],
       healthConditions: const [],
     );
+
+    // Alternatives ride inside the fetch response; no separate request needed.
+    // TODO(backend): drop the mock fallback once fetch-product returns
+    // safe_alternatives. Until then, real scans show mock data so the section
+    // stays visible during development.
+    alternatives = fetchResult.safeAlternatives.isNotEmpty
+        ? fetchResult.safeAlternatives
+        : _mockAlternatives;
 
     await load(
       product: product,
@@ -277,10 +279,10 @@ class ProductDetailViewModel extends ChangeNotifier {
         break;
     }
 
+    alternatives = _mockAlternatives;
     _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
-    _loadAlternatives();
   }
 
   Future<void> load({
@@ -316,21 +318,6 @@ class ProductDetailViewModel extends ChangeNotifier {
     _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
-    _loadAlternatives();
-  }
-
-  /// Fetches alternatives in the background so they never block the verdict.
-  /// Failures are non-fatal: the section simply stays empty.
-  Future<void> _loadAlternatives() async {
-    final repo = _alternativesRepository;
-    final barcode = product?.barcode;
-    if (repo == null || barcode == null) return;
-    try {
-      alternatives = await repo.getAlternatives(barcode);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('[ProductDetailViewModel] alternatives load warning: $e');
-    }
   }
 
   /// The verdict when the LLM is unavailable: comes purely from the rule engine.
@@ -393,3 +380,64 @@ class ProductDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+/// Mock alternatives used only by [ProductDetailViewModel.loadMockState] for UI
+/// previews; the real screen reads `safe_alternatives` from the fetch response.
+const List<Alternative> _mockAlternatives = [
+  Alternative(
+    barcode: '8690504041502',
+    productName: 'Fındık & Kakao Meyve Barı',
+    brand: 'Zuber',
+    imageUrl:
+        'https://images.openfoodfacts.org/images/products/869/050/404/1502/front_tr.3.400.jpg',
+    nutriscoreGrade: 'A',
+    isSafe: true,
+    recommendationReason: 'İlave şeker yok, profilinize uygun.',
+  ),
+  Alternative(
+    barcode: '8690504112233',
+    productName: 'Yulaf & Muz Bar',
+    brand: 'Eti',
+    imageUrl:
+        'https://images.openfoodfacts.org/images/products/869/050/411/2233/front_tr.3.400.jpg',
+    nutriscoreGrade: 'B',
+    isSafe: true,
+    recommendationReason: 'Daha düşük yağ oranı.',
+  ),
+  Alternative(
+    barcode: '8681234567890',
+    productName: 'Hurma & Badem Bar',
+    brand: 'Zuber',
+    imageUrl: '',
+    nutriscoreGrade: 'A',
+    isSafe: true,
+    recommendationReason: 'Tamamen doğal içerik.',
+  ),
+  Alternative(
+    barcode: '8690000000017',
+    productName: 'Fıstık Ezmeli Protein Bar',
+    brand: 'Fellas',
+    imageUrl: '',
+    nutriscoreGrade: 'B',
+    isSafe: true,
+    recommendationReason: 'Yüksek protein.',
+  ),
+  Alternative(
+    barcode: '8690000000024',
+    productName: 'Kuru Meyve Bar',
+    brand: 'Seeberger',
+    imageUrl: '',
+    nutriscoreGrade: 'B',
+    isSafe: true,
+    recommendationReason: 'Katkı maddesi içermez.',
+  ),
+  Alternative(
+    barcode: '8690000000031',
+    productName: 'Çikolatalı Yulaf Bar',
+    brand: 'Nature Valley',
+    imageUrl: '',
+    nutriscoreGrade: 'A',
+    isSafe: true,
+    recommendationReason: 'Tam tahıllı yulaf.',
+  ),
+];

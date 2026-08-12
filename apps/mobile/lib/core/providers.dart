@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/repositories/alternatives_repository.dart';
 import '../data/repositories/explanation_repository.dart';
+import '../data/repositories/product_search_repository.dart';
 import '../data/repositories/product_cache_repository.dart';
 import '../data/repositories/product_repository.dart';
 import '../data/repositories/profile_repository.dart';
 import '../features/auth/auth_viewmodel.dart';
+import '../features/search/search_viewmodel.dart';
 import '../features/scan/scan_viewmodel.dart';
 import '../data/repositories/scan_history_repository.dart';
 import '../features/home/home_viewmodel.dart';
@@ -22,11 +23,11 @@ final explanationRepositoryProvider = Provider<ExplanationRepository>((ref) {
   return ExplanationRepository();
 });
 
-/// Recommended alternatives shown on product detail. Mock data for now; only
-/// this provider's repository changes when the backend is ready.
-final alternativesRepositoryProvider =
-    Provider<AlternativesRepository>((ref) {
-  return AlternativesRepository();
+/// Product name search (Zeynep's OFF search). Mock data until the backend is
+/// ready; only this repository's [searchByName] body changes then.
+final productSearchRepositoryProvider =
+    Provider<ProductSearchRepository>((ref) {
+  return ProductSearchRepository();
 });
 
 final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {
@@ -39,6 +40,11 @@ final scanViewModelProvider = ChangeNotifierProvider<ScanViewModel>((ref) {
 
 final authViewModelProvider = ChangeNotifierProvider<AuthViewModel>((ref) {
   return AuthViewModel();
+});
+
+/// Drives the product name search bar on the home screen.
+final searchViewModelProvider = ChangeNotifierProvider<SearchViewModel>((ref) {
+  return SearchViewModel(ref.watch(productSearchRepositoryProvider));
 });
 
 final productCacheRepositoryProvider = Provider<ProductCacheRepository>((ref) {

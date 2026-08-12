@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/product.dart';
 import '../../../core/theme/akilli_sepet_colors.dart';
+import 'nutri_score_badge.dart';
 
 /// Nutri-Score values Open Food Facts sends when it has no grade.
 const _unknownNutriScores = <String>{'unknown', 'not-applicable'};
@@ -85,7 +86,7 @@ class ProductHeaderCard extends StatelessWidget {
               runSpacing: 6,
               children: [
                 if (product.isPending) const _PendingBadge(),
-                if (score != null) _NutriScoreBadge(score: score),
+                if (score != null) NutriScoreBadge(grade: score),
               ],
             ),
           ],
@@ -172,38 +173,3 @@ class _PendingBadge extends StatelessWidget {
   }
 }
 
-class _NutriScoreBadge extends StatelessWidget {
-  const _NutriScoreBadge({required this.score});
-
-  final String score;
-
-  static const _scoreColors = <String, Color>{
-    'A': Color(0xFF038141),
-    'B': Color(0xFF85BB2F),
-    'C': Color(0xFFFECB02),
-    'D': Color(0xFFEE8100),
-    'E': Color(0xFFE63E11),
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final color = _scoreColors[score] ?? const Color(0xFF9CA3AF);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color),
-      ),
-      child: Text(
-        'Nutri-Score $score',
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
