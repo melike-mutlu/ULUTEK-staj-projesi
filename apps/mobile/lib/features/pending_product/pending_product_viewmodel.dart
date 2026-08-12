@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../data/repositories/pending_product_repository.dart';
+import 'pending_product_error.dart';
 
 class PendingProductViewModel extends ChangeNotifier {
   PendingProductViewModel(this._repository, {String? initialBarcode}) {
@@ -21,7 +22,9 @@ class PendingProductViewModel extends ChangeNotifier {
   XFile? imageNutrition;
 
   bool isLoading = false;
-  String? errorMessage;
+
+  /// Last failure reason, or null. The View maps this to a localized message.
+  PendingProductError? error;
   bool isSuccess = false;
 
   void setBarcode(String value) {
@@ -93,13 +96,13 @@ class PendingProductViewModel extends ChangeNotifier {
 
   Future<bool> submit() async {
     if (barcode.trim().isEmpty) {
-      errorMessage = 'Lütfen geçerli bir barkod giriniz.';
+      error = PendingProductError.invalidBarcode;
       notifyListeners();
       return false;
     }
 
     isLoading = true;
-    errorMessage = null;
+    error = null;
     isSuccess = false;
     notifyListeners();
 
@@ -119,7 +122,10 @@ class PendingProductViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } else {
-      errorMessage = result.errorMessage ?? 'Gönderim başarısız oldu.';
+      if (kDebugMode) {
+        debugPrint('[PendingProductViewModel] submit failed <- ${result.errorMessage}');
+      }
+      error = PendingProductError.submitFailed;
       notifyListeners();
       return false;
     }

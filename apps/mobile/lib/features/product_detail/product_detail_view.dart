@@ -6,6 +6,7 @@ import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
+import '../../l10n/app_localizations.dart';
 import 'product_detail_viewmodel.dart';
 import 'profile_checks.dart';
 import 'widgets/ingredients_section.dart';
@@ -84,6 +85,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AkilliSepetColors.background,
       appBar: AppBar(
@@ -93,24 +95,25 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Ürün Detayı'),
+        title: Text(l10n.productDetailTitle),
       ),
       body: _buildBody(context),
     );
   }
 
   Widget _buildBody(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     switch (_viewModel.status) {
       case ProductDetailStatus.loading:
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(color: AkilliSepetColors.primary),
-              SizedBox(height: 16),
+              const CircularProgressIndicator(color: AkilliSepetColors.primary),
+              const SizedBox(height: 16),
               Text(
-                'Ürün bilgileri ve AI analizi getiriliyor...',
-                style: TextStyle(color: AkilliSepetColors.textSecondary),
+                l10n.loadingProductAnalysis,
+                style: const TextStyle(color: AkilliSepetColors.textSecondary),
               ),
             ],
           ),
@@ -151,11 +154,13 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 explanation: explanation,
                 insufficientData: insufficient,
                 reason: personalReasonSpans(
+                  l10n: l10n,
                   explanation: explanation,
                   rule: _viewModel.ruleEngineResult,
                   profile: _viewModel.userProfile,
                 ),
                 reasonLines: personalReasonLines(
+                  l10n: l10n,
                   rule: _viewModel.ruleEngineResult,
                   profile: _viewModel.userProfile,
                 ),
@@ -180,22 +185,24 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
               ProfileCheckSection(
-                title: 'Diyet türü',
+                title: l10n.dietType,
                 icon: Icons.eco_outlined,
                 checks: dietChecks(
+                  l10n,
                   _viewModel.userProfile,
                   _viewModel.ruleEngineResult,
                 ),
-                emptyMessage: 'Kayıtlı bir diyet tercihin yok.',
+                emptyMessage: l10n.noDietPreference,
               ),
               ProfileCheckSection(
-                title: 'Sağlık durumu',
+                title: l10n.healthConditionTitle,
                 icon: Icons.favorite_outline_rounded,
                 checks: healthChecks(
+                  l10n,
                   _viewModel.userProfile,
                   _viewModel.ruleEngineResult,
                 ),
-                emptyMessage: 'Kayıtlı bir sağlık durumun yok.',
+                emptyMessage: l10n.noHealthCondition,
               ),
               if (!showNutrimentsFirst) nutrimentsCard,
 
@@ -236,7 +243,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           foregroundColor: Colors.white,
         ),
         icon: const Icon(Icons.add_a_photo_outlined, size: 18),
-        label: const Text('Ürünü Bize Bildir', maxLines: 1),
+        label: Text(AppLocalizations.of(context).reportToUs, maxLines: 1),
       ),
     );
   }
@@ -263,7 +270,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Bir Hata Oluştu',
+              AppLocalizations.of(context).errorOccurred,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AkilliSepetColors.textPrimary,
@@ -271,8 +278,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
             ),
             const SizedBox(height: 12),
             Text(
-              _viewModel.errorMessage ??
-                  'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.',
+              AppLocalizations.of(context).productDetailServerError,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AkilliSepetColors.textSecondary,
@@ -285,13 +291,13 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               children: [
                 OutlinedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Geri Dön'),
+                  child: Text(AppLocalizations.of(context).goBack),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton.icon(
                   onPressed: _loadFromRouteArguments,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Tekrar Dene'),
+                  label: Text(AppLocalizations.of(context).tryAgain),
                 ),
               ],
             ),
@@ -302,6 +308,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   }
 
   Widget _buildNotFoundState(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final barcodeText = _scannedBarcode ?? '—';
 
     return Padding(
@@ -336,7 +343,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'Barkod: $barcodeText',
+                    l10n.barcodeLabel(barcodeText),
                     style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF6B7280),
@@ -346,7 +353,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Bu ürünü veritabanımızda\nbulamadık',
+                  l10n.productNotFoundTitle,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
@@ -355,7 +362,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Yanlış bilgi vermektense dürüst olmayı tercih ederiz. Barkodu elle girebilir ya da ürünü bize bildirerek yardımcı olabilirsin.',
+                  l10n.productNotFoundBody,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AkilliSepetColors.textSecondary,
@@ -370,7 +377,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
             children: [
               ElevatedButton(
                 onPressed: () => _showManualBarcodeDialog(context),
-                child: const Text('Barkodu Elle Gir'),
+                child: Text(l10n.enterBarcodeManually),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
@@ -381,14 +388,14 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                     arguments: barcodeText,
                   );
                 },
-                child: const Text('Ürünü Bize Bildir'),
+                child: Text(l10n.reportToUs),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () {
                   _viewModel.loadMockState('green');
                 },
-                child: const Text('Örnek Ürünü Göster (Demo)'),
+                child: Text(l10n.sampleProductDemo),
               ),
             ],
           ),
@@ -398,16 +405,17 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   }
 
   void _showManualBarcodeDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Barkodu Girin'),
+        title: Text(l10n.enterBarcode),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            hintText: 'Örn: 8690504112233',
+            hintText: l10n.barcodeHintExample,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -416,14 +424,14 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               _viewModel.loadMockState('green');
             },
-            child: const Text('Ara'),
+            child: Text(l10n.searchAction),
           ),
         ],
       ),

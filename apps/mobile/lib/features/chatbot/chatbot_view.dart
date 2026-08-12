@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
 import '../shell/shell_viewmodel.dart';
 import '../profile/profile_viewmodel.dart';
@@ -34,7 +35,10 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
   void _sendMessage() {
     final text = _messageController.text;
     if (text.trim().isNotEmpty) {
-      ref.read(chatbotViewModelProvider).sendMessage(text);
+      ref.read(chatbotViewModelProvider).sendMessage(
+            text,
+            errorText: AppLocalizations.of(context).chatError,
+          );
       _messageController.clear();
       _scrollToBottom();
     }
@@ -96,7 +100,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$actualValue profilinize eklendi!'), 
+            content: Text(AppLocalizations.of(context).addedToProfileSnack(actualValue)),
             backgroundColor: Colors.green.shade600,
             behavior: SnackBarBehavior.floating,
           ),
@@ -107,7 +111,9 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
     }
 
     // 6. Sohbet ekranındaki kartı kaldırıp normal mesaja dönüştür
-    chatVm.markSuggestionAsHandled(index);
+    if (mounted) {
+      chatVm.markSuggestionAsHandled(index, AppLocalizations.of(context).addedToProfile);
+    }
   }
 
 
@@ -123,7 +129,8 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
     final homeVm = ref.watch(homeViewModelProvider);
     final chatVm = ref.watch(chatbotViewModelProvider);
     final profileVm = ref.watch(profileViewModelProvider);
-    
+    final l10n = AppLocalizations.of(context);
+
     final isPremium = profileVm.profile?.isPremium ?? false;
 
     // Başka bir ekran (ör. profil "danış") bir metin bıraktıysa input'a yaz ve
@@ -163,14 +170,14 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Akıllı Asistan',
+                        l10n.chatbotTitle,
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: textColor,
                             ),
                       ),
                       Text(
-                        'Size nasıl yardımcı olabilirim ${homeVm.displayName}?',
+                        l10n.chatbotGreeting(homeVm.displayName),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: secondaryTextColor,
                             ),
@@ -231,13 +238,13 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Row(
+                              Row(
                                 children: [
-                                  Icon(Icons.auto_awesome, color: AkilliSepetColors.primary, size: 20),
-                                  SizedBox(width: 8),
+                                  const Icon(Icons.auto_awesome, color: AkilliSepetColors.primary, size: 20),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'Yapay Zeka Önerisi',
-                                    style: TextStyle(
+                                    l10n.aiSuggestion,
+                                    style: const TextStyle(
                                       color: AkilliSepetColors.primary,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
@@ -247,9 +254,9 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                msg.text.isNotEmpty 
-                                  ? msg.text 
-                                  : 'Profilinize yeni bir özellik eklememi ister misiniz?',
+                                msg.text.isNotEmpty
+                                  ? msg.text
+                                  : l10n.suggestionFallback,
                                 style: TextStyle(fontSize: 15, color: textColor),
                               ),
                               const SizedBox(height: 12),
@@ -271,9 +278,9 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                                 children: [
                                   TextButton(
                                     onPressed: () {
-                                      chatVm.markSuggestionAsHandled(index);
+                                      chatVm.markSuggestionAsHandled(index, l10n.addedToProfile);
                                     },
-                                    child: Text('Hayır', style: TextStyle(color: secondaryTextColor, fontWeight: FontWeight.bold)),
+                                    child: Text(l10n.no, style: TextStyle(color: secondaryTextColor, fontWeight: FontWeight.bold)),
                                   ),
                                   ElevatedButton(
                                     onPressed: () => _acceptSuggestion(
@@ -287,7 +294,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                                       elevation: 0,
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                     ),
-                                    child: const Text('Evet, Ekle', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    child: Text(l10n.yesAdd, style: const TextStyle(fontWeight: FontWeight.bold)),
                                   ),
                                 ],
                               )
@@ -334,7 +341,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Asistan yazıyor...',
+                      l10n.assistantTyping,
                       style: TextStyle(color: secondaryTextColor, fontSize: 13, fontStyle: FontStyle.italic),
                     ),
                   ),
@@ -366,7 +373,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                               textInputAction: TextInputAction.send,
                               onSubmitted: (_) => _sendMessage(),
                               decoration: InputDecoration(
-                                hintText: 'Bir şeyler sorun...',
+                                hintText: l10n.askSomething,
                                 hintStyle: TextStyle(color: secondaryTextColor),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(24),
@@ -400,7 +407,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                             ref.read(chatbotViewModelProvider).clearMessages();
                           },
                           icon: const Icon(Icons.refresh_rounded, size: 16),
-                          label: const Text('Yeni Sohbet Başlat'),
+                          label: Text(l10n.newChat),
                           style: TextButton.styleFrom(
                             foregroundColor: secondaryTextColor,
                             minimumSize: Size.zero,
@@ -434,7 +441,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          'Premium Özellik',
+                          l10n.premiumFeature,
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AkilliSepetColors.textPrimary,
@@ -442,7 +449,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Sohbet asistanını kullanmak ve profilinize özel yapay zeka tavsiyeleri almak için Premium üye olmanız gerekmektedir.',
+                          l10n.chatbotPaywallBody,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: AkilliSepetColors.textSecondary,
@@ -463,9 +470,9 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                             ),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            'Ayarlara Git',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          child: Text(
+                            l10n.goToSettings,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         ),
                       ],

@@ -11,6 +11,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/theme_viewmodel.dart';
 import '../../core/utils/email_masker.dart';
 import '../../data/repositories/profile_repository.dart';
+import '../../l10n/app_localizations.dart';
 import '../profile/profile_viewmodel.dart';
 import 'widgets/country_edit_dialog.dart';
 
@@ -36,16 +37,25 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   Future<void> _signOut() async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
     try {
       await supabase.auth.signOut();
     } catch (_) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Çıkış yapılamadı. Lütfen tekrar dene.')),
+        SnackBar(content: Text(l10n.signOutFailed)),
       );
       return;
     }
     // Oturum kapandı: geri tuşuyla içeri dönülemesin diye yığın sıfırlanır.
     navigator.pushNamedAndRemoveUntil(AppRoutes.auth, (Route<void> _) => false);
+  }
+
+  void _navigateToProfile() {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Navigator.pushNamed(context, AppRoutes.profile);
+    }
   }
 
   Future<void> _editCountry() async {
@@ -64,13 +74,81 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     final saved = await profileVm.saveCountry(result);
     if (!mounted || !saved) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ülke seçimi güncellendi.')),
+      SnackBar(content: Text(AppLocalizations.of(context).countryUpdated)),
+    );
+  }
+
+  /// Label for a locale in the picker and the row subtitle. A null locale
+  /// follows the device.
+  String _languageLabel(AppLocalizations l10n, Locale? locale) {
+    switch (locale?.languageCode) {
+      case 'tr':
+        return l10n.languageTurkish;
+      case 'en':
+        return l10n.languageEnglish;
+      default:
+        return l10n.languageSystem;
+    }
+  }
+
+  Future<void> _editLanguage() async {
+    final controller = ref.read(localeControllerProvider);
+    final l10n = AppLocalizations.of(context);
+    // 'system' is the sentinel for "follow the device"; a null result means
+    // the sheet was dismissed without a choice.
+    final current = controller.locale?.languageCode ?? 'system';
+
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return SimpleDialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(l10n.language, style: AppTextStyles.title),
+          children: <Widget>[
+            _languageOption(dialogContext, 'system', l10n.languageSystem, current),
+            _languageOption(dialogContext, 'tr', l10n.languageTurkish, current),
+            _languageOption(dialogContext, 'en', l10n.languageEnglish, current),
+          ],
+        );
+      },
+    );
+
+    if (choice == null) return;
+    await controller.setLocale(choice == 'system' ? null : Locale(choice));
+  }
+
+  Widget _languageOption(
+    BuildContext dialogContext,
+    String code,
+    String label,
+    String current,
+  ) {
+    final isSelected = code == current;
+    return SimpleDialogOption(
+      onPressed: () => Navigator.pop(dialogContext, code),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            isSelected
+                ? Icons.radio_button_checked_rounded
+                : Icons.radio_button_unchecked_rounded,
+            color: isSelected ? AppColors.brand : AppColors.textSecondary,
+            size: 22,
+          ),
+          const SizedBox(width: 12),
+          Text(label, style: AppTextStyles.body),
+        ],
+      ),
     );
   }
 
   Future<void> _togglePremium(BuildContext context, WidgetRef ref) async {
     final repo = ref.read(profileRepositoryProvider);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
     final userId = repo.currentUserId;
     if (userId == null) return;
 
@@ -97,9 +175,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
         messenger.showSnackBar(
           SnackBar(
             content: Text(
-              !isCurrentlyPremium
-                  ? 'Premium aktif edildi!'
-                  : 'Premium devre dışı bırakıldı.',
+              !isCurrentlyPremium ? l10n.premiumEnabled : l10n.premiumDisabled,
             ),
             duration: const Duration(seconds: 2),
           ),
@@ -108,13 +184,14 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     } catch (_) {
       if (context.mounted) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('Premium durumu güncellenemedi.')),
+          SnackBar(content: Text(l10n.premiumUpdateFailed)),
         );
       }
     }
   }
 
   void _showAboutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -123,40 +200,34 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.info_outline_rounded, color: AppColors.brand),
-              SizedBox(width: 10),
-              Text('Hakkında', style: AppTextStyles.title),
+              const Icon(Icons.info_outline_rounded, color: AppColors.brand),
+              const SizedBox(width: 10),
+              Text(l10n.about, style: AppTextStyles.title),
             ],
           ),
-          content: const Column(
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Akıllı Sepet — Versiyon 1.0.0',
-                style: TextStyle(
+                l10n.aboutVersion,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 8),
-              Text(
-                'ULUTEK Staj Projesi kapsamında geliştirilmiş, barkod tarama ve yapay zeka destekli akıllı ürün analiz asistanıdır.',
-                style: AppTextStyles.body,
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Kullanıcıların alerji, diyet ve özel sağlık tercihlerine göre ürün içeriklerini otomatik değerlendirir ve kişiselleştirilmiş uyarılarda bulunur.',
-                style: AppTextStyles.caption,
-              ),
+              const SizedBox(height: 8),
+              Text(l10n.aboutBody1, style: AppTextStyles.body),
+              const SizedBox(height: 12),
+              Text(l10n.aboutBody2, style: AppTextStyles.caption),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Kapat', style: TextStyle(color: AppColors.brand)),
+              child: Text(l10n.close, style: const TextStyle(color: AppColors.brand)),
             ),
           ],
         );
@@ -165,6 +236,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   }
 
   void _showPrivacyDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -173,42 +245,36 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.shield_outlined, color: AppColors.brand),
-              SizedBox(width: 10),
-              Text('Gizlilik Politikası', style: AppTextStyles.title),
+              const Icon(Icons.shield_outlined, color: AppColors.brand),
+              const SizedBox(width: 10),
+              Text(l10n.privacyPolicy, style: AppTextStyles.title),
             ],
           ),
-          content: const SingleChildScrollView(
+          content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Veri Gizliliği ve Güvenliği',
-                  style: TextStyle(
+                  l10n.privacyHeading,
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                SizedBox(height: 8),
-                Text(
-                  'Akıllı Sepet uygulaması, seçtiğiniz diyet, alerji ve sağlık verilerini yalnızca size özel ürün analizi yapabilmek amacıyla Supabase veritabanında güvenli bir şekilde saklar.',
-                  style: AppTextStyles.body,
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Kişisel verileriniz hiçbir koşulda 3. taraflarla paylaşılmaz. İstediğiniz zaman profilinizden bilgilerinizi güncelleyebilirsiniz.',
-                  style: AppTextStyles.caption,
-                ),
+                const SizedBox(height: 8),
+                Text(l10n.privacyBody1, style: AppTextStyles.body),
+                const SizedBox(height: 10),
+                Text(l10n.privacyBody2, style: AppTextStyles.caption),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Anladım', style: TextStyle(color: AppColors.brand)),
+              child: Text(l10n.understood, style: const TextStyle(color: AppColors.brand)),
             ),
           ],
         );
@@ -217,6 +283,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   }
 
   Future<void> _showChangePasswordDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
     bool isObscured = true;
@@ -233,11 +300,11 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: const Row(
+              title: Row(
                 children: [
-                  Icon(Icons.lock_reset_rounded, color: AppColors.brand),
-                  SizedBox(width: 10),
-                  Text('Şifre Değiştir', style: AppTextStyles.title),
+                  const Icon(Icons.lock_reset_rounded, color: AppColors.brand),
+                  const SizedBox(width: 10),
+                  Text(l10n.changePassword, style: AppTextStyles.title),
                 ],
               ),
               content: SingleChildScrollView(
@@ -245,8 +312,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Yeni şifrenizi girin. Şifreniz en az 6 karakter olmalıdır.',
+                    Text(
+                      l10n.passwordHint,
                       style: AppTextStyles.caption,
                     ),
                     const SizedBox(height: 16),
@@ -254,7 +321,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                       controller: newPasswordController,
                       obscureText: isObscured,
                       decoration: InputDecoration(
-                        labelText: 'Yeni Şifre',
+                        labelText: l10n.newPassword,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -276,7 +343,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                       controller: confirmPasswordController,
                       obscureText: isObscured,
                       decoration: InputDecoration(
-                        labelText: 'Yeni Şifre (Tekrar)',
+                        labelText: l10n.newPasswordRepeat,
                         prefixIcon: const Icon(Icons.lock_outline),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -296,7 +363,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               actions: [
                 TextButton(
                   onPressed: isSubmitting ? null : () => Navigator.pop(dialogContext),
-                  child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary)),
+                  child: Text(l10n.cancel, style: const TextStyle(color: AppColors.textSecondary)),
                 ),
                 ElevatedButton(
                   onPressed: isSubmitting
@@ -307,13 +374,13 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
                           if (pass.length < 6) {
                             setDialogState(() {
-                              dialogError = 'Şifre en az 6 karakter olmalıdır.';
+                              dialogError = l10n.passwordTooShort;
                             });
                             return;
                           }
                           if (pass != confirmPass) {
                             setDialogState(() {
-                              dialogError = 'Şifreler birbiriyle eşleşmiyor.';
+                              dialogError = l10n.passwordsDoNotMatch;
                             });
                             return;
                           }
@@ -330,8 +397,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             if (context.mounted) {
                               Navigator.pop(dialogContext);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Şifreniz başarıyla güncellendi.'),
+                                SnackBar(
+                                  content: Text(l10n.passwordUpdated),
                                   backgroundColor: AppColors.brand,
                                 ),
                               );
@@ -339,7 +406,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                           } catch (e) {
                             setDialogState(() {
                               isSubmitting = false;
-                              dialogError = 'Şifre güncellenemedi: ${e.toString()}';
+                              dialogError = l10n.passwordUpdateFailed(e.toString());
                             });
                           }
                         },
@@ -355,7 +422,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                           height: 20,
                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                         )
-                      : const Text('Güncelle', style: TextStyle(color: Colors.white)),
+                      : Text(l10n.update, style: const TextStyle(color: Colors.white)),
                 ),
               ],
             );
@@ -366,6 +433,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   }
 
   Future<void> _showDeleteAccountConfirmationDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -374,27 +442,27 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
-              SizedBox(width: 10),
-              Text('Hesabı Sil', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+              const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
+              const SizedBox(width: 10),
+              Text(l10n.deleteAccount, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
             ],
           ),
-          content: const Column(
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hesabınızı silmek istediğinize emin misiniz?',
-                style: TextStyle(
+                l10n.deleteAccountConfirmQuestion,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                'Bu işlem geri alınamaz. Tüm kayıtlı alerji, diyet tercihleriniz ve geçmiş verileriniz kalıcı olarak silinecektir.',
+                l10n.deleteAccountConfirmBody,
                 style: AppTextStyles.body,
               ),
             ],
@@ -402,7 +470,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Vazgeç', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(l10n.cancel, style: const TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(dialogContext, true),
@@ -412,9 +480,9 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                'Evet, Hesabımı Sil',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              child: Text(
+                l10n.deleteAccountConfirm,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -434,18 +502,18 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text(
-            'Son kez soruyoruz',
-            style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+          title: Text(
+            l10n.deleteAccountFinalTitle,
+            style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
           ),
-          content: const Text(
-            'Bu son onaydır. Onaylarsan hesabın ve tüm verilerin kalıcı olarak silinecek.',
+          content: Text(
+            l10n.deleteAccountFinalBody,
             style: AppTextStyles.body,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Vazgeç', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(l10n.cancel, style: const TextStyle(color: AppColors.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(dialogContext, true),
@@ -455,9 +523,9 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                'Evet, Eminim — Sil',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              child: Text(
+                l10n.deleteAccountFinalConfirm,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -472,9 +540,9 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Hesabınız silindi.'),
-            duration: Duration(seconds: 4),
+          SnackBar(
+            content: Text(l10n.accountDeleted),
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -482,7 +550,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Hesap silme işlemi gerçekleştirilemedi.')),
+          SnackBar(content: Text(l10n.deleteAccountFailed)),
         );
       }
     }
@@ -522,7 +590,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Aktif Oturum',
+                  AppLocalizations.of(context).activeSession,
                   style: AppTextStyles.caption.copyWith(color: secondaryTextColor),
                 ),
               ],
@@ -543,6 +611,10 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
     final backgroundColor = theme.scaffoldBackgroundColor;
     final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+    final locale = ref.watch(localeControllerProvider).locale;
+    final l10n = AppLocalizations.of(context);
+    final rawEmail = supabase.auth.currentUser?.email;
+    final maskedEmail = EmailMasker.maskEmail(rawEmail);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -550,7 +622,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
         backgroundColor: backgroundColor,
         elevation: 0,
         centerTitle: false,
-        title: Text('Ayarlar', style: AppTextStyles.heading2.copyWith(color: textColor)),
+        title: Text(l10n.settingsTitle, style: AppTextStyles.heading2.copyWith(color: textColor)),
         iconTheme: IconThemeData(color: textColor),
       ),
       body: SingleChildScrollView(
@@ -562,9 +634,49 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 _buildUserCard(isDark),
-                const SizedBox(height: 20),
-                const _SettingsSection(title: 'GÖRÜNÜM'),
+                const SizedBox(height: 24),
+                _SettingsSectionHeader(title: l10n.settingsSectionAccount),
                 const SizedBox(height: 8),
+                _SettingsRow(
+                  icon: Icons.email_outlined,
+                  label: l10n.registeredEmail,
+                  subtitle: maskedEmail,
+                  onTap: null,
+                ),
+                const SizedBox(height: 10),
+                _SettingsRow(
+                  icon: Icons.person_outline_rounded,
+                  label: l10n.editProfileInfo,
+                  onTap: _navigateToProfile,
+                ),
+                const SizedBox(height: 10),
+                _SettingsRow(
+                  icon: Icons.lock_reset_rounded,
+                  label: l10n.changePassword,
+                  onTap: () => _showChangePasswordDialog(context),
+                ),
+                const SizedBox(height: 10),
+                _SettingsRow(
+                  icon: Icons.public_rounded,
+                  label: l10n.countrySelection,
+                  subtitle: (country != null && country.isNotEmpty) ? country : l10n.notSelected,
+                  onTap: _editCountry,
+                ),
+                const SizedBox(height: 10),
+                _SettingsRow(
+                  icon: isPremium
+                      ? Icons.workspace_premium_rounded
+                      : Icons.workspace_premium_outlined,
+                  iconColor: isPremium ? const Color(0xFFFFB300) : null,
+                  label: isPremium ? l10n.premiumExit : l10n.premiumGo,
+                  subtitle: isPremium ? l10n.premiumActive : l10n.premiumTest,
+                  onTap: () => _togglePremium(context, ref),
+                ),
+                const SizedBox(height: 24),
+                _SettingsSectionHeader(title: l10n.settingsSectionApp),
+                const SizedBox(height: 8),
+                // TODO(l10n): "Koyu Tema" henuz AppLocalizations'a tasinmadi (dark
+                // mode, localization PR'i ile ayni anda gelistirildi).
                 _SettingsSwitchRow(
                   icon: Icons.dark_mode_outlined,
                   label: 'Koyu Tema',
@@ -573,67 +685,41 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     ref.read(themeViewModelProvider).toggleTheme(value);
                   },
                 ),
-                const SizedBox(height: 20),
-                const _SettingsSection(title: 'HESAP VE ÜYELİK'),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 _SettingsRow(
-                  icon: Icons.star_outline_rounded,
-                  iconColor: isPremium ? AppColors.brand : Colors.amber.shade700,
-                  label: isPremium ? 'Premium Üyelik Aktif' : 'Premium\'a Yükselt',
-                  subtitle: isPremium ? 'Aktif' : 'Pasif',
-                  onTap: () => _togglePremium(context, ref),
+                  icon: Icons.language_rounded,
+                  label: l10n.language,
+                  subtitle: _languageLabel(l10n, locale),
+                  onTap: _editLanguage,
                 ),
-                const SizedBox(height: 8),
-                _SettingsRow(
-                  icon: Icons.lock_reset_rounded,
-                  label: 'Şifre Değiştir',
-                  onTap: () => _showChangePasswordDialog(context),
-                ),
-                const SizedBox(height: 8),
-                _SettingsRow(
-                  icon: Icons.public_rounded,
-                  label: 'Ülke Seçimi',
-                  subtitle: (country == null || country.isEmpty) ? 'Türkiye' : country,
-                  onTap: _editCountry,
-                ),
-                const SizedBox(height: 20),
-                const _SettingsSection(title: 'BİLGİ VE DESTEK'),
-                const SizedBox(height: 8),
-                _SettingsRow(
-                  icon: Icons.info_outline_rounded,
-                  label: 'Hakkında',
-                  onTap: () => _showAboutDialog(context),
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 _SettingsRow(
                   icon: Icons.shield_outlined,
-                  label: 'Gizlilik Politikası',
+                  label: l10n.privacyPolicy,
                   onTap: () => _showPrivacyDialog(context),
                 ),
-                const SizedBox(height: 20),
-                const _SettingsSection(title: 'OTURUM'),
+                const SizedBox(height: 10),
+                _SettingsRow(
+                  icon: Icons.info_outline_rounded,
+                  label: l10n.about,
+                  subtitle: 'v1.0.0',
+                  onTap: () => _showAboutDialog(context),
+                ),
+                const SizedBox(height: 24),
+                _SettingsSectionHeader(title: l10n.settingsSectionSession),
                 const SizedBox(height: 8),
                 _SettingsRow(
                   icon: Icons.logout_rounded,
-                  label: 'Çıkış Yap',
+                  label: l10n.signOut,
                   isDestructive: true,
                   onTap: _signOut,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 _SettingsRow(
                   icon: Icons.delete_forever_rounded,
-                  label: 'Hesabı Sil',
+                  label: l10n.deleteAccount,
                   isDestructive: true,
                   onTap: () => _showDeleteAccountConfirmationDialog(context),
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: Text(
-                    'Akıllı Sepet v1.0.0 (ULUTEK Staj)',
-                    style: AppTextStyles.caption.copyWith(
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -644,8 +730,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   }
 }
 
-class _SettingsSection extends StatelessWidget {
-  const _SettingsSection({required this.title});
+class _SettingsSectionHeader extends StatelessWidget {
+  const _SettingsSectionHeader({required this.title});
 
   final String title;
 

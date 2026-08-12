@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/user_avatar_circle.dart';
 
 /// Profile header: centered photo + name + email.
@@ -40,7 +41,7 @@ class ProfileHeader extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
     final secondaryTextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
-
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: <Widget>[
         Stack(
@@ -51,14 +52,14 @@ class ProfileHeader extends StatelessWidget {
               size: _avatarSize,
               isLoading: isUploadingPhoto,
               onTap: onEditPhoto,
-              semanticLabel: 'Profil fotoğrafını değiştir',
+              semanticLabel: l10n.changePhotoLabel,
             ),
             Positioned(
               right: 0,
               bottom: 0,
               child: _EditBadge(
                 onTap: onEditPhoto,
-                tooltip: 'Profil fotoğrafını değiştir',
+                tooltip: l10n.changePhotoLabel,
               ),
             ),
           ],
@@ -74,7 +75,7 @@ class ProfileHeader extends StatelessWidget {
               children: <Widget>[
                 Flexible(
                   child: Text(
-                    name.isEmpty ? 'Adını ekle' : name,
+                    name.isEmpty ? l10n.addNamePrompt : name,
                     style: AppTextStyles.profileName.copyWith(color: textColor),
                     textAlign: TextAlign.center,
                   ),
@@ -91,7 +92,7 @@ class ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          email ?? 'E-posta bulunamadı',
+          email ?? l10n.emailNotFound,
           style: AppTextStyles.profileEmail.copyWith(color: secondaryTextColor),
           textAlign: TextAlign.center,
         ),

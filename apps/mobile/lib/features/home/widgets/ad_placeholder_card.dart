@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/akilli_sepet_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Premium olmayan kullanıcılar için gösterilen statik reklam yer tutucu kutusu.
 /// Gerçek SDK entegre edilene kadar görsel alan olarak hizmet verir.
@@ -9,6 +10,7 @@ class AdPlaceholderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -49,7 +51,7 @@ class AdPlaceholderCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'REKLAM ALANI',
+                    l10n.adArea,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AkilliSepetColors.textPrimary,
@@ -65,7 +67,7 @@ class AdPlaceholderCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'Sponsorlu',
+                  l10n.sponsored,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AkilliSepetColors.textSecondary,
                         fontWeight: FontWeight.w600,
@@ -76,7 +78,7 @@ class AdPlaceholderCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Burada sponsorlu ürün duyuruları veya dinamik reklamlar görüntülenecektir.',
+            l10n.adPlaceholderBody,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AkilliSepetColors.textSecondary,
                 ),
@@ -92,7 +94,7 @@ class AdPlaceholderCard extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'Ayarlar\'dan Premium\'a geçerek reklamları kaldırabilirsiniz.',
+                  l10n.adRemovePremiumNote,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AkilliSepetColors.textSecondary,
                         fontWeight: FontWeight.w500,

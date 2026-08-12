@@ -54,7 +54,9 @@ class ChatbotViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendMessage(String userMessage) async {
+  /// [errorText] is the localized message shown as a bot reply if the request
+  /// fails; the View supplies it so the ViewModel stays free of localization.
+  Future<void> sendMessage(String userMessage, {required String errorText}) async {
     if (userMessage.trim().isEmpty) return;
 
     messages.add(ChatMessage(text: userMessage, isUser: true));
@@ -99,18 +101,21 @@ class ChatbotViewModel extends ChangeNotifier {
 
     } catch (error) {
       errorMessage = error.toString();
-      messages.add(ChatMessage(text: "Bir hata oluştu: $errorMessage", isUser: false));
+      if (kDebugMode) debugPrint('ChatbotViewModel: sendMessage failed <- $error');
+      messages.add(ChatMessage(text: errorText, isUser: false));
     } finally {
       isTyping = false;
       notifyListeners();
     }
   }
 
-  void markSuggestionAsHandled(int messageIndex) {
+  /// [handledLabel] is the localized "added to your profile" note appended to
+  /// the message, passed in by the View to keep localization out of here.
+  void markSuggestionAsHandled(int messageIndex, String handledLabel) {
     if (messageIndex >= 0 && messageIndex < messages.length) {
        final oldMsg = messages[messageIndex];
        messages[messageIndex] = ChatMessage(
-         text: oldMsg.text + "\n\n*(Profilinize eklendi)*", 
+         text: "${oldMsg.text}\n\n*($handledLabel)*",
          isUser: false
        );
        notifyListeners();

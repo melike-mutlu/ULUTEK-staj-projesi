@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:akilli_sepet/features/auth/auth_view.dart';
 import 'package:akilli_sepet/features/auth/auth_viewmodel.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 
 void main() {
   test('AuthViewModel signInAsGuest surfaces failure when Supabase is unavailable',
@@ -15,13 +16,16 @@ void main() {
     final result = await viewModel.signInAsGuest();
     expect(result, isFalse);
     expect(viewModel.isLoading, isFalse);
-    expect(viewModel.errorMessage, isNotNull);
+    expect(viewModel.error, isNotNull);
   });
 
   testWidgets('AuthView renders Misafir Olarak Devam Et button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(
+          locale: Locale('tr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: AuthView(),
         ),
       ),

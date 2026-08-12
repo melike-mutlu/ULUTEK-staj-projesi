@@ -4,6 +4,7 @@ import '../../../core/models/alternative.dart';
 import '../../../core/navigation/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/app_localizations.dart';
 import 'alternative_thumbnail.dart';
 import 'nutri_score_badge.dart';
 
@@ -92,20 +93,20 @@ class _SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(20, 12, 12, 12),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
       child: Row(
         children: [
           // Balances the trailing menu icon so the title stays centred.
-          SizedBox(width: 40),
+          const SizedBox(width: 40),
           Expanded(
             child: Text(
-              'Öneriler',
+              AppLocalizations.of(context).recommendationsTitle,
               textAlign: TextAlign.center,
               style: AppTextStyles.title,
             ),
           ),
-          IconButton(
+          const IconButton(
             icon: Icon(Icons.more_horiz_rounded),
             color: AppColors.textSecondary,
             onPressed: null, // Not wired up yet.

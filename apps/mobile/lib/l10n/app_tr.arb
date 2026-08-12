@@ -1,0 +1,871 @@
+{
+  "@@locale": "tr",
+  "appTitle": "Akıllı Sepet",
+  "@appTitle": {
+    "description": "Application name shown as the OS task title."
+  },
+  "settingsTitle": "Ayarlar",
+  "@settingsTitle": {
+    "description": "Settings screen title and profile action tooltip."
+  },
+  "save": "Kaydet",
+  "@save": {
+    "description": "Generic save button label."
+  },
+  "language": "Dil",
+  "@language": {
+    "description": "Language selector row label and picker title."
+  },
+  "languageSystem": "Sistem",
+  "@languageSystem": {
+    "description": "Language option that follows the device locale."
+  },
+  "languageTurkish": "Türkçe",
+  "@languageTurkish": {
+    "description": "Turkish language option."
+  },
+  "languageEnglish": "İngilizce",
+  "@languageEnglish": {
+    "description": "English language option."
+  },
+  "cancel": "Vazgeç",
+  "@cancel": {
+    "description": "Generic cancel button label."
+  },
+  "ok": "Tamam",
+  "@ok": {
+    "description": "Generic confirm button label."
+  },
+  "profileTitle": "Profil",
+  "@profileTitle": {
+    "description": "Profile screen app bar title."
+  },
+  "nameUpdated": "Adın güncellendi.",
+  "@nameUpdated": {
+    "description": "Snackbar shown after the display name is saved."
+  },
+  "profileUpdated": "Profilin güncellendi.",
+  "@profileUpdated": {
+    "description": "Snackbar shown after the profile is saved."
+  },
+  "sessionNotFound": "Oturum bulunamadı. Lütfen tekrar giriş yap.",
+  "@sessionNotFound": {
+    "description": "Error when the current session cannot be read."
+  },
+  "profileLoadFailed": "Profil yüklenemedi. Lütfen tekrar dene.",
+  "@profileLoadFailed": {
+    "description": "Error when the profile fails to load."
+  },
+  "profileSaveFailed": "Profil kaydedilemedi. Lütfen tekrar dene.",
+  "@profileSaveFailed": {
+    "description": "Error when saving the profile fails."
+  },
+  "nameSaveFailed": "Ad kaydedilemedi. Lütfen tekrar dene.",
+  "@nameSaveFailed": {
+    "description": "Error when saving the display name fails."
+  },
+  "countrySaveFailed": "Ülke kaydedilemedi. Lütfen tekrar dene.",
+  "@countrySaveFailed": {
+    "description": "Error when saving the country fails."
+  },
+  "photoUploadFailed": "Fotoğraf yüklenemedi. Lütfen tekrar dene.",
+  "@photoUploadFailed": {
+    "description": "Error when uploading the avatar fails."
+  },
+  "nameDialogTitle": "Adın",
+  "@nameDialogTitle": {
+    "description": "Title of the name edit dialog."
+  },
+  "nameDialogHint": "Adını yaz",
+  "@nameDialogHint": {
+    "description": "Hint text of the name edit field."
+  },
+  "changePhotoLabel": "Profil fotoğrafını değiştir",
+  "@changePhotoLabel": {
+    "description": "Accessibility label and tooltip for the avatar edit action."
+  },
+  "addNamePrompt": "Adını ekle",
+  "@addNamePrompt": {
+    "description": "Shown in the header when the user has no display name yet."
+  },
+  "emailNotFound": "E-posta bulunamadı",
+  "@emailNotFound": {
+    "description": "Header fallback when no email is available."
+  },
+  "customAllergenConsultPrompt": "'{value}' özel bir alerjen. Doğru anlaşıldığından emin olmak için chatbot'a danışmak ister misin?",
+  "@customAllergenConsultPrompt": {
+    "description": "Offers to consult the chatbot about a custom allergen.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "consultNotNeeded": "Gerek yok",
+  "@consultNotNeeded": {
+    "description": "Declines the chatbot consultation offer."
+  },
+  "consultAskChatbot": "Chatbot'a sor",
+  "@consultAskChatbot": {
+    "description": "Accepts the chatbot consultation offer."
+  },
+  "customAllergenChatbotPrefill": "Profilime alerjen olarak '{value}' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?",
+  "@customAllergenChatbotPrefill": {
+    "description": "Prefilled chatbot question about a custom allergen.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "close": "Kapat",
+  "@close": {
+    "description": "Generic close button label."
+  },
+  "understood": "Anladım",
+  "@understood": {
+    "description": "Acknowledge button label on informational dialogs."
+  },
+  "update": "Güncelle",
+  "@update": {
+    "description": "Generic update button label."
+  },
+  "settingsSectionAccount": "HESAP & PROFİL",
+  "@settingsSectionAccount": {
+    "description": "Settings section header for account and profile rows."
+  },
+  "settingsSectionApp": "UYGULAMA & YASAL",
+  "@settingsSectionApp": {
+    "description": "Settings section header for app and legal rows."
+  },
+  "settingsSectionSession": "OTURUM",
+  "@settingsSectionSession": {
+    "description": "Settings section header for session rows."
+  },
+  "activeSession": "Aktif Oturum",
+  "@activeSession": {
+    "description": "Subtitle under the user card in settings."
+  },
+  "registeredEmail": "Kayıtlı E-posta",
+  "@registeredEmail": {
+    "description": "Settings row label for the registered email."
+  },
+  "editProfileInfo": "Profil Bilgilerini Düzenle",
+  "@editProfileInfo": {
+    "description": "Settings row that opens the profile editor."
+  },
+  "changePassword": "Şifre Değiştir",
+  "@changePassword": {
+    "description": "Settings row and dialog title for changing the password."
+  },
+  "countrySelection": "Ülke Seçimi",
+  "@countrySelection": {
+    "description": "Settings row label for the country picker."
+  },
+  "notSelected": "Seçilmedi",
+  "@notSelected": {
+    "description": "Subtitle shown when no country is selected."
+  },
+  "countryUpdated": "Ülke seçimi güncellendi.",
+  "@countryUpdated": {
+    "description": "Snackbar after the country is saved."
+  },
+  "privacyPolicy": "Gizlilik Politikası",
+  "@privacyPolicy": {
+    "description": "Settings row and dialog title for the privacy policy."
+  },
+  "about": "Hakkında",
+  "@about": {
+    "description": "Settings row and dialog title for the about section."
+  },
+  "signOut": "Çıkış Yap",
+  "@signOut": {
+    "description": "Settings row label to sign out."
+  },
+  "signOutFailed": "Çıkış yapılamadı. Lütfen tekrar dene.",
+  "@signOutFailed": {
+    "description": "Error snackbar when signing out fails."
+  },
+  "deleteAccount": "Hesabı Sil",
+  "@deleteAccount": {
+    "description": "Settings row and dialog title to delete the account."
+  },
+  "premiumExit": "Premium'dan Çık",
+  "@premiumExit": {
+    "description": "Settings row label when premium is active."
+  },
+  "premiumGo": "Premium'a Geç",
+  "@premiumGo": {
+    "description": "Settings row label when premium is inactive."
+  },
+  "premiumActive": "Aktif",
+  "@premiumActive": {
+    "description": "Subtitle when premium is active."
+  },
+  "premiumTest": "Test Amaçlı",
+  "@premiumTest": {
+    "description": "Subtitle noting premium is for testing."
+  },
+  "premiumEnabled": "Premium aktif edildi!",
+  "@premiumEnabled": {
+    "description": "Snackbar when premium is enabled."
+  },
+  "premiumDisabled": "Premium devre dışı bırakıldı.",
+  "@premiumDisabled": {
+    "description": "Snackbar when premium is disabled."
+  },
+  "premiumUpdateFailed": "Premium durumu güncellenemedi.",
+  "@premiumUpdateFailed": {
+    "description": "Snackbar when the premium toggle fails."
+  },
+  "aboutVersion": "Akıllı Sepet — Versiyon 1.0.0",
+  "@aboutVersion": {
+    "description": "App name and version line in the about dialog."
+  },
+  "aboutBody1": "ULUTEK Staj Projesi kapsamında geliştirilmiş, barkod tarama ve yapay zeka destekli akıllı ürün analiz asistanıdır.",
+  "@aboutBody1": {
+    "description": "First paragraph of the about dialog."
+  },
+  "aboutBody2": "Kullanıcıların alerji, diyet ve özel sağlık tercihlerine göre ürün içeriklerini otomatik değerlendirir ve kişiselleştirilmiş uyarılarda bulunur.",
+  "@aboutBody2": {
+    "description": "Second paragraph of the about dialog."
+  },
+  "privacyHeading": "Veri Gizliliği ve Güvenliği",
+  "@privacyHeading": {
+    "description": "Heading inside the privacy dialog."
+  },
+  "privacyBody1": "Akıllı Sepet uygulaması, seçtiğiniz diyet, alerji ve sağlık verilerini yalnızca size özel ürün analizi yapabilmek amacıyla Supabase veritabanında güvenli bir şekilde saklar.",
+  "@privacyBody1": {
+    "description": "First paragraph of the privacy dialog."
+  },
+  "privacyBody2": "Kişisel verileriniz hiçbir koşulda 3. taraflarla paylaşılmaz. İstediğiniz zaman profilinizden bilgilerinizi güncelleyebilirsiniz.",
+  "@privacyBody2": {
+    "description": "Second paragraph of the privacy dialog."
+  },
+  "passwordHint": "Yeni şifrenizi girin. Şifreniz en az 6 karakter olmalıdır.",
+  "@passwordHint": {
+    "description": "Helper text in the change password dialog."
+  },
+  "newPassword": "Yeni Şifre",
+  "@newPassword": {
+    "description": "Label for the new password field."
+  },
+  "newPasswordRepeat": "Yeni Şifre (Tekrar)",
+  "@newPasswordRepeat": {
+    "description": "Label for the confirm new password field."
+  },
+  "passwordTooShort": "Şifre en az 6 karakter olmalıdır.",
+  "@passwordTooShort": {
+    "description": "Validation error for a too-short password."
+  },
+  "passwordsDoNotMatch": "Şifreler birbiriyle eşleşmiyor.",
+  "@passwordsDoNotMatch": {
+    "description": "Validation error when passwords differ."
+  },
+  "passwordUpdated": "Şifreniz başarıyla güncellendi.",
+  "@passwordUpdated": {
+    "description": "Snackbar after the password is updated."
+  },
+  "passwordUpdateFailed": "Şifre güncellenemedi: {error}",
+  "@passwordUpdateFailed": {
+    "description": "Error when updating the password fails.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountConfirmQuestion": "Hesabınızı silmek istediğinize emin misiniz?",
+  "@deleteAccountConfirmQuestion": {
+    "description": "First confirmation question for account deletion."
+  },
+  "deleteAccountConfirmBody": "Bu işlem geri alınamaz. Tüm kayıtlı alerji, diyet tercihleriniz ve geçmiş verileriniz kalıcı olarak silinecektir.",
+  "@deleteAccountConfirmBody": {
+    "description": "First confirmation body for account deletion."
+  },
+  "deleteAccountConfirm": "Evet, Hesabımı Sil",
+  "@deleteAccountConfirm": {
+    "description": "First confirmation button for account deletion."
+  },
+  "deleteAccountFinalTitle": "Son kez soruyoruz",
+  "@deleteAccountFinalTitle": {
+    "description": "Title of the final account deletion confirmation."
+  },
+  "deleteAccountFinalBody": "Bu son onaydır. Onaylarsan hesabın ve tüm verilerin kalıcı olarak silinecek.",
+  "@deleteAccountFinalBody": {
+    "description": "Body of the final account deletion confirmation."
+  },
+  "deleteAccountFinalConfirm": "Evet, Eminim — Sil",
+  "@deleteAccountFinalConfirm": {
+    "description": "Final confirmation button for account deletion."
+  },
+  "accountDeleted": "Hesabınız silindi.",
+  "@accountDeleted": {
+    "description": "Snackbar after the account is deleted."
+  },
+  "deleteAccountFailed": "Hesap silme işlemi gerçekleştirilemedi.",
+  "@deleteAccountFailed": {
+    "description": "Snackbar when account deletion fails."
+  },
+  "statScannedProducts": "Taranan ürün",
+  "@statScannedProducts": {
+    "description": "Profile stat tile label for scanned product count."
+  },
+  "statAvoidedAllergens": "Kaçınılan alerjen",
+  "@statAvoidedAllergens": {
+    "description": "Profile stat tile label for avoided allergen count."
+  },
+  "statMemberDays": "Üyelik günü",
+  "@statMemberDays": {
+    "description": "Profile stat tile label for days since signup."
+  },
+  "signUp": "Kayıt Ol",
+  "@signUp": {
+    "description": "Sign-up button and title."
+  },
+  "signIn": "Giriş Yap",
+  "@signIn": {
+    "description": "Sign-in button and title."
+  },
+  "authWelcome": "Akıllı Sepet'e Hoş Geldiniz",
+  "@authWelcome": {
+    "description": "Welcome heading on the auth screen."
+  },
+  "authTagline": "Kişiselleştirilmiş alışveriş asistanınız",
+  "@authTagline": {
+    "description": "Tagline under the welcome heading."
+  },
+  "email": "E-posta",
+  "@email": {
+    "description": "Email field label."
+  },
+  "password": "Şifre",
+  "@password": {
+    "description": "Password field label."
+  },
+  "termsLink": "Kullanım Şartları ve Gizlilik Sözleşmesi",
+  "@termsLink": {
+    "description": "Terms and privacy agreement link and dialog title."
+  },
+  "termsAcceptSuffix": "'ni okudum, kabul ediyorum.",
+  "@termsAcceptSuffix": {
+    "description": "Text after the terms link in the accept checkbox."
+  },
+  "termsRequiredWarning": "Devam etmek için lütfen Kullanım Şartları ve Gizlilik Sözleşmesi'ni kabul edin.",
+  "@termsRequiredWarning": {
+    "description": "Warning when the terms are not accepted."
+  },
+  "emailAlreadyRegistered": "Bu e-posta zaten kayıtlı. Giriş yapın.",
+  "@emailAlreadyRegistered": {
+    "description": "Notice when signing up with an existing email."
+  },
+  "emailConfirmationNotice": "E-postana bir doğrulama bağlantısı gönderdik. Bağlantıya tıklayıp hesabını doğrulamadan giriş yapamazsın.",
+  "@emailConfirmationNotice": {
+    "description": "Notice that email confirmation is required before sign-in."
+  },
+  "toggleToSignIn": "Zaten hesabın var mı? Giriş yap",
+  "@toggleToSignIn": {
+    "description": "Link switching from sign-up to sign-in."
+  },
+  "toggleToSignUp": "Hesabın yok mu? Kayıt ol",
+  "@toggleToSignUp": {
+    "description": "Link switching from sign-in to sign-up."
+  },
+  "orSeparator": "veya",
+  "@orSeparator": {
+    "description": "Separator between primary auth and social/guest options."
+  },
+  "googleSignIn": "Google ile Giriş Yap",
+  "@googleSignIn": {
+    "description": "Google sign-in button label."
+  },
+  "continueAsGuest": "Misafir Olarak Devam Et",
+  "@continueAsGuest": {
+    "description": "Guest sign-in button label."
+  },
+  "signUpFailed": "Kayıt başarısız. Lütfen tekrar dene.",
+  "@signUpFailed": {
+    "description": "Error when sign-up fails."
+  },
+  "signInFailed": "Giriş başarısız. Lütfen tekrar dene.",
+  "@signInFailed": {
+    "description": "Error when sign-in fails."
+  },
+  "guestSignInFailed": "Misafir girişi başarısız. Lütfen tekrar dene.",
+  "@guestSignInFailed": {
+    "description": "Error when guest sign-in fails."
+  },
+  "googleSignInFailed": "Google ile giriş başarısız. Lütfen tekrar dene.",
+  "@googleSignInFailed": {
+    "description": "Error when Google sign-in fails."
+  },
+  "termsIntro": "Lütfen Akıllı Sepet uygulamasını kullanmadan önce aşağıdaki kullanım şartlarını ve gizlilik esaslarını dikkatlice okuyunuz.",
+  "@termsIntro": {
+    "description": "Intro paragraph of the terms dialog."
+  },
+  "termsSection1Title": "1. Taraflar ve Amaç",
+  "@termsSection1Title": {
+    "description": "Terms dialog section 1 title."
+  },
+  "termsSection1Body": "İşbu sözleşme, Akıllı Sepet uygulaması (\"Uygulama\") ile Uygulamayı kullanan kişi (\"Kullanıcı\") arasında akdedilmiştir. Uygulamanın amacı, kullanıcılara ürün barkodlarını tarama, ürün içeriklerini görüntüleme ve kişisel alerji/diyet tercihlerine göre yapay zeka destekli rehberlik sunmaktır.",
+  "@termsSection1Body": {
+    "description": "Terms dialog section 1 body."
+  },
+  "termsSection2Title": "2. Hizmet Kapsamı ve Sorumluluk Reddi (Önemli Uyarı)",
+  "@termsSection2Title": {
+    "description": "Terms dialog section 2 title."
+  },
+  "termsSection2Body": "Uygulama tarafından sağlanan içerik analizleri, alerjegen uyarıları ve ürün değerlendirmeleri yalnızca bilgilendirme ve rehberlik amaçlıdır. Uygulamadaki veriler resmi ambalaj bilgileri ve açık kaynak veri tabanlarından derlenmektedir. Uygulama hiçbir şekilde tıbbi tavsiye, teşhis veya tedavi niteliği taşımaz. Kullanıcının sağlığı, diyet tercihleri ve ürün tüketimi ile ilgili nihai sorumluluk tamamen Kullanıcıya aittir.",
+  "@termsSection2Body": {
+    "description": "Terms dialog section 2 body."
+  },
+  "termsSection3Title": "3. Kişisel Veriler ve KVKK Aydınlatması",
+  "@termsSection3Title": {
+    "description": "Terms dialog section 3 title."
+  },
+  "termsSection3Body": "Akıllı Sepet, kullanıcının belirlediği alerji, diyet, sağlık verileri ile e-posta adresini hizmetin sunulabilmesi amacıyla güvenli veritabanlarında saklar. Kişisel verileriniz 6698 sayılı KVKK ilkelerine uygun olarak korunmakta olup, üçüncü taraf kurum veya kuruluşlarla ticari amaçla paylaşılmamaktadır.",
+  "@termsSection3Body": {
+    "description": "Terms dialog section 3 body."
+  },
+  "termsSection4Title": "4. Kullanıcı Yükümlülükleri",
+  "@termsSection4Title": {
+    "description": "Terms dialog section 4 title."
+  },
+  "termsSection4Body": "Kullanıcı, kayıt oluştururken doğru ve güncel bilgiler vermeyi, hesap güvenliğini ve şifre gizliliğini korumayı kabul eder. Yetkisiz hesap kullanımı tespiti halinde derhal uygulama yönetimine haber verilmelidir.",
+  "@termsSection4Body": {
+    "description": "Terms dialog section 4 body."
+  },
+  "termsSection5Title": "5. Fesih ve Sözleşme Değişiklikleri",
+  "@termsSection5Title": {
+    "description": "Terms dialog section 5 title."
+  },
+  "termsSection5Body": "Uygulama yönetimi, kullanım şartlarını önceden bildirmeksizin güncelleme hakkını saklı tutar. Güncel şartlar Uygulama içerisinde yayınlandığı tarihte yürürlüğe girer. Kullanıcı dilediği zaman hesabını silerek sözleşmeyi sonlandırabilir.",
+  "@termsSection5Body": {
+    "description": "Terms dialog section 5 body."
+  },
+  "termsLastUpdated": "Son Güncelleme Tarihi: 11 Ağustos 2026",
+  "@termsLastUpdated": {
+    "description": "Last-updated line in the terms dialog."
+  },
+  "termsClose": "Anladım ve Kapat",
+  "@termsClose": {
+    "description": "Close button of the terms dialog."
+  },
+  "homeGreeting": "Merhaba,",
+  "@homeGreeting": {
+    "description": "Greeting above the user name on the home screen."
+  },
+  "userFallback": "Kullanıcı",
+  "@userFallback": {
+    "description": "Fallback name when the user has no display name."
+  },
+  "scanButton": "Tara",
+  "@scanButton": {
+    "description": "Label on the large scan button."
+  },
+  "scanTagline": "Bir ürünün barkodunu okut, içeriğini ve\nsana uygunluğunu öğren",
+  "@scanTagline": {
+    "description": "Tagline under the scan button."
+  },
+  "recentScansTitle": "Son Taramaların",
+  "@recentScansTitle": {
+    "description": "Heading for the recent scans list."
+  },
+  "noScansYet": "Henüz bir ürün taramadınız.",
+  "@noScansYet": {
+    "description": "Empty state when there are no scans."
+  },
+  "contentAnalysis": "İçerik Analizi",
+  "@contentAnalysis": {
+    "description": "Note badge on a recent scan card."
+  },
+  "barcodeLabel": "Barkod: {barcode}",
+  "@barcodeLabel": {
+    "description": "Fallback title showing the barcode when the product name is unknown.",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "seeAllHistory": "Tüm Geçmişi Gör",
+  "@seeAllHistory": {
+    "description": "Button opening the full scan history sheet."
+  },
+  "allMyScans": "Tüm Taramalarım",
+  "@allMyScans": {
+    "description": "Title of the full scan history sheet."
+  },
+  "historyNotFound": "Geçmiş bulunamadı.",
+  "@historyNotFound": {
+    "description": "Empty state in the full history sheet."
+  },
+  "searchNoResults": "Sonuç bulunamadı.",
+  "@searchNoResults": {
+    "description": "Empty state for product search."
+  },
+  "searchError": "Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.",
+  "@searchError": {
+    "description": "Error state for product search."
+  },
+  "adArea": "REKLAM ALANI",
+  "@adArea": {
+    "description": "Title of the ad placeholder card."
+  },
+  "sponsored": "Sponsorlu",
+  "@sponsored": {
+    "description": "Sponsored tag on the ad placeholder card."
+  },
+  "adPlaceholderBody": "Burada sponsorlu ürün duyuruları veya dinamik reklamlar görüntülenecektir.",
+  "@adPlaceholderBody": {
+    "description": "Body of the ad placeholder card."
+  },
+  "adRemovePremiumNote": "Ayarlar'dan Premium'a geçerek reklamları kaldırabilirsiniz.",
+  "@adRemovePremiumNote": {
+    "description": "Note about removing ads via Premium."
+  },
+  "scanTitle": "Barkod Tara",
+  "@scanTitle": {
+    "description": "Scan screen app bar title."
+  },
+  "scanFrameHint": "Barkodu çerçeve içine hizala,\notomatik olarak okunacak",
+  "@scanFrameHint": {
+    "description": "Hint under the scanner frame."
+  },
+  "enterBarcodeManually": "Barkodu Elle Gir",
+  "@enterBarcodeManually": {
+    "description": "Button to enter a barcode manually."
+  },
+  "enterBarcode": "Barkodu Girin",
+  "@enterBarcode": {
+    "description": "Manual barcode dialog title."
+  },
+  "barcodeHintExample": "Örn: 8690504112233",
+  "@barcodeHintExample": {
+    "description": "Example hint in the manual barcode field."
+  },
+  "searchAction": "Ara",
+  "@searchAction": {
+    "description": "Search button in the manual barcode dialog."
+  },
+  "chatbotTitle": "Akıllı Asistan",
+  "@chatbotTitle": {
+    "description": "Chatbot screen title."
+  },
+  "chatbotGreeting": "Size nasıl yardımcı olabilirim {name}?",
+  "@chatbotGreeting": {
+    "description": "Chatbot greeting with the user name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aiSuggestion": "Yapay Zeka Önerisi",
+  "@aiSuggestion": {
+    "description": "Header of an AI suggestion card."
+  },
+  "suggestionFallback": "Profilinize yeni bir özellik eklememi ister misiniz?",
+  "@suggestionFallback": {
+    "description": "Fallback text for a suggestion card with no message."
+  },
+  "no": "Hayır",
+  "@no": {
+    "description": "Decline button on a suggestion card."
+  },
+  "yesAdd": "Evet, Ekle",
+  "@yesAdd": {
+    "description": "Accept button on a suggestion card."
+  },
+  "assistantTyping": "Asistan yazıyor...",
+  "@assistantTyping": {
+    "description": "Indicator shown while the assistant is composing a reply."
+  },
+  "askSomething": "Bir şeyler sorun...",
+  "@askSomething": {
+    "description": "Chat input placeholder."
+  },
+  "newChat": "Yeni Sohbet Başlat",
+  "@newChat": {
+    "description": "Button to start a new chat."
+  },
+  "premiumFeature": "Premium Özellik",
+  "@premiumFeature": {
+    "description": "Paywall heading on the chatbot screen."
+  },
+  "chatbotPaywallBody": "Sohbet asistanını kullanmak ve profilinize özel yapay zeka tavsiyeleri almak için Premium üye olmanız gerekmektedir.",
+  "@chatbotPaywallBody": {
+    "description": "Paywall body on the chatbot screen."
+  },
+  "goToSettings": "Ayarlara Git",
+  "@goToSettings": {
+    "description": "Paywall action button to open settings."
+  },
+  "chatError": "Bir hata oluştu. Lütfen tekrar dene.",
+  "@chatError": {
+    "description": "Bot message shown when a chat request fails."
+  },
+  "addedToProfile": "Profilinize eklendi",
+  "@addedToProfile": {
+    "description": "Suffix appended to a handled suggestion message."
+  },
+  "addedToProfileSnack": "{value} profilinize eklendi!",
+  "@addedToProfileSnack": {
+    "description": "Snackbar after a suggested value is added to the profile.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProductTitle": "Ürün Bulunamadı — Bildir",
+  "@reportProductTitle": {
+    "description": "App bar title of the report-product screen."
+  },
+  "reportReceivedTitle": "Bildirim Alındı",
+  "@reportReceivedTitle": {
+    "description": "Success dialog title after reporting a product."
+  },
+  "reportReceivedBody": "Ürün bildirimi ve fotoğraflarınız başarıyla sisteme kaydedildi. Katkınız için teşekkür ederiz!",
+  "@reportReceivedBody": {
+    "description": "Success dialog body after reporting a product."
+  },
+  "reportIntro": "Bu ürünü veritabanımıza eklememize yardımcı olun. Fotoğrafları yükleyerek doğruluk oranını artırabilirsiniz.",
+  "@reportIntro": {
+    "description": "Info header on the report-product screen."
+  },
+  "productInfo": "Ürün Bilgileri",
+  "@productInfo": {
+    "description": "Section header for product information fields."
+  },
+  "barcodeNumberLabel": "Barkod No *",
+  "@barcodeNumberLabel": {
+    "description": "Barcode field label on the report-product form."
+  },
+  "productNameBrandLabel": "Ürün Adı & Markası",
+  "@productNameBrandLabel": {
+    "description": "Product name/brand field label."
+  },
+  "productNameHintExample": "Örn: Ülker Çikolatalı Gofret",
+  "@productNameHintExample": {
+    "description": "Example hint for the product name field."
+  },
+  "ingredientsTextOptionalLabel": "İçindekiler Metni (İsteğe Bağlı)",
+  "@ingredientsTextOptionalLabel": {
+    "description": "Ingredients text field label."
+  },
+  "ingredientsAutofillHint": "Fotoğraf çektiğinizde yapay zeka burayı otomatik doldurur. Gerekirse elle düzeltebilirsiniz.",
+  "@ingredientsAutofillHint": {
+    "description": "Hint explaining AI autofill of the ingredients field."
+  },
+  "productPhotos": "Ürün Fotoğrafları",
+  "@productPhotos": {
+    "description": "Section header for product photos."
+  },
+  "productPhotosNote": "Ürünün ön yüzü, içindekiler kısmı ve besin değerleri tablosunu çekin veya seçin.",
+  "@productPhotosNote": {
+    "description": "Instruction under the product photos header."
+  },
+  "photoFront": "Ön Yüz",
+  "@photoFront": {
+    "description": "Label for the front photo card."
+  },
+  "photoIngredients": "İçindekiler",
+  "@photoIngredients": {
+    "description": "Label for the ingredients photo card."
+  },
+  "photoNutrition": "Besin Değeri",
+  "@photoNutrition": {
+    "description": "Label for the nutrition photo card."
+  },
+  "submitting": "Gönderiliyor...",
+  "@submitting": {
+    "description": "Submit button label while submitting."
+  },
+  "reportProduct": "Ürünü Bildir",
+  "@reportProduct": {
+    "description": "Submit button label on the report-product form."
+  },
+  "takePhoto": "Kamera ile Çek",
+  "@takePhoto": {
+    "description": "Photo source option: camera."
+  },
+  "pickFromGallery": "Galeriden Seç",
+  "@pickFromGallery": {
+    "description": "Photo source option: gallery."
+  },
+  "invalidBarcode": "Lütfen geçerli bir barkod giriniz.",
+  "@invalidBarcode": {
+    "description": "Validation error for an empty/invalid barcode."
+  },
+  "submitFailed": "Gönderim başarısız oldu.",
+  "@submitFailed": {
+    "description": "Error when submitting a pending product fails."
+  },
+  "productDetailTitle": "Ürün Detayı",
+  "@productDetailTitle": { "description": "Product detail app bar title." },
+  "loadingProductAnalysis": "Ürün bilgileri ve AI analizi getiriliyor...",
+  "@loadingProductAnalysis": { "description": "Loading state on the product detail screen." },
+  "dietType": "Diyet türü",
+  "@dietType": { "description": "Section title for diet preference checks." },
+  "noDietPreference": "Kayıtlı bir diyet tercihin yok.",
+  "@noDietPreference": { "description": "Empty state for the diet section." },
+  "healthConditionTitle": "Sağlık durumu",
+  "@healthConditionTitle": { "description": "Section title for health condition checks." },
+  "noHealthCondition": "Kayıtlı bir sağlık durumun yok.",
+  "@noHealthCondition": { "description": "Empty state for the health section." },
+  "reportToUs": "Ürünü Bize Bildir",
+  "@reportToUs": { "description": "Button to report a product." },
+  "errorOccurred": "Bir Hata Oluştu",
+  "@errorOccurred": { "description": "Error state title on product detail." },
+  "productDetailServerError": "Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.",
+  "@productDetailServerError": { "description": "Error state body on product detail." },
+  "goBack": "Geri Dön",
+  "@goBack": { "description": "Go back button." },
+  "tryAgain": "Tekrar Dene",
+  "@tryAgain": { "description": "Retry button." },
+  "productNotFoundTitle": "Bu ürünü veritabanımızda\nbulamadık",
+  "@productNotFoundTitle": { "description": "Not-found state title." },
+  "productNotFoundBody": "Yanlış bilgi vermektense dürüst olmayı tercih ederiz. Barkodu elle girebilir ya da ürünü bize bildirerek yardımcı olabilirsin.",
+  "@productNotFoundBody": { "description": "Not-found state body." },
+  "sampleProductDemo": "Örnek Ürünü Göster (Demo)",
+  "@sampleProductDemo": { "description": "Demo button showing a sample product." },
+  "allergiesTitle": "Alerjiler",
+  "@allergiesTitle": { "description": "Personal allergens section title." },
+  "insufficientAllergenInfo": "İçerik bilgisi eksik, alerjen kontrolü yapılamadı.",
+  "@insufficientAllergenInfo": { "description": "Shown when allergen data is missing." },
+  "warningsCount": "{count} uyarı",
+  "@warningsCount": { "description": "Meta count of allergen warnings.", "placeholders": { "count": { "type": "int" } } },
+  "noProfileAllergens": "Profilindeki alerjenlerin hiçbiri bu üründe yok.",
+  "@noProfileAllergens": { "description": "No personal allergens in the product." },
+  "conflictsWithAllergies": "Profilindeki alerjilerle çakışıyor",
+  "@conflictsWithAllergies": { "description": "Row subtitle for a conflicting allergen." },
+  "otherAllergensTitle": "Diğer alerjenler",
+  "@otherAllergensTitle": { "description": "Section title for non-personal allergens." },
+  "notInYourProfile": "profilinde yok",
+  "@notInYourProfile": { "description": "Meta for other allergens." },
+  "ingredientsTitle": "İçindekiler",
+  "@ingredientsTitle": { "description": "Ingredients section title." },
+  "noIngredientsInfo": "Bu ürün için içindekiler bilgisi yok.",
+  "@noIngredientsInfo": { "description": "Empty state for ingredients." },
+  "showLess": "Daha az göster",
+  "@showLess": { "description": "Collapse a long text." },
+  "showAllText": "Tümünü göster",
+  "@showAllText": { "description": "Expand a long text." },
+  "nutrimentsTitle": "Besin değerleri",
+  "@nutrimentsTitle": { "description": "Nutrition facts section title." },
+  "per100g": "100 g için",
+  "@per100g": { "description": "Meta noting values are per 100 g." },
+  "noInfo": "Bilgi yok",
+  "@noInfo": { "description": "Shown when a nutrient value is missing." },
+  "unverified": "Doğrulanmadı",
+  "@unverified": { "description": "Badge for an unverified product." },
+  "insufficientContentInfo": "Bu ürünün içerik bilgisi eksik.",
+  "@insufficientContentInfo": { "description": "Reason shown when content data is insufficient." },
+  "recommendationsTitle": "Öneriler",
+  "@recommendationsTitle": { "description": "Recommendations section title." },
+  "seeAll": "Tümünü gör",
+  "@seeAll": { "description": "See-all link for recommendations." },
+  "recommendationsNeutralityNote": "Seçimlerimiz tarafsızdır: hiçbir marka burada yer almak için ödeme yapmaz.",
+  "@recommendationsNeutralityNote": { "description": "Neutrality note under recommendations." },
+  "nutrientEnergy": "Enerji",
+  "@nutrientEnergy": { "description": "Energy nutrient label." },
+  "nutrientSugar": "Şeker",
+  "@nutrientSugar": { "description": "Sugar nutrient label." },
+  "nutrientFat": "Yağ",
+  "@nutrientFat": { "description": "Fat nutrient label." },
+  "nutrientProtein": "Protein",
+  "@nutrientProtein": { "description": "Protein nutrient label." },
+  "energyLow": "Düşük kalorili",
+  "@energyLow": { "description": "Low energy note." },
+  "energyMedium": "Orta kalorili",
+  "@energyMedium": { "description": "Medium energy note." },
+  "energyHigh": "Yüksek kalorili",
+  "@energyHigh": { "description": "High energy note." },
+  "sugarLow": "Az şekerli",
+  "@sugarLow": { "description": "Low sugar note." },
+  "sugarMedium": "Orta düzeyde şekerli",
+  "@sugarMedium": { "description": "Medium sugar note." },
+  "sugarHigh": "Çok şekerli",
+  "@sugarHigh": { "description": "High sugar note." },
+  "fatLow": "Az yağlı",
+  "@fatLow": { "description": "Low fat note." },
+  "fatMedium": "Orta düzeyde yağlı",
+  "@fatMedium": { "description": "Medium fat note." },
+  "fatHigh": "Çok yağlı",
+  "@fatHigh": { "description": "High fat note." },
+  "proteinHigh": "Protein açısından zengin",
+  "@proteinHigh": { "description": "High protein note." },
+  "proteinMedium": "Bir miktar protein",
+  "@proteinMedium": { "description": "Medium protein note." },
+  "proteinLow": "Çok az protein",
+  "@proteinLow": { "description": "Low protein note." },
+  "checkNotEvaluated": "Bu ürün için değerlendirilemedi",
+  "@checkNotEvaluated": { "description": "Profile check note when it can't be judged." },
+  "dietIncompatibleNote": "Bu üründe uygun olmayan içerik var",
+  "@dietIncompatibleNote": { "description": "Diet check note when incompatible." },
+  "dietCompatibleNote": "Bu ürün tercihinle uyumlu",
+  "@dietCompatibleNote": { "description": "Diet check note when compatible." },
+  "healthConflictNote": "Bu üründe durumun için riskli içerik var",
+  "@healthConflictNote": { "description": "Health check note when risky." },
+  "healthOkNote": "Bu ürün için özel bir uyarı yok",
+  "@healthOkNote": { "description": "Health check note when fine." },
+  "reasonAllergenIntro": "Sende alerji yapan ",
+  "@reasonAllergenIntro": { "description": "Prefix of the flat allergen warning; the allergen names follow." },
+  "reasonAllergenOutro": " içeriyor. ",
+  "@reasonAllergenOutro": { "description": "Suffix of the flat allergen warning." },
+  "reasonAnd": " ve ",
+  "@reasonAnd": { "description": "Connector between the last two items in a list." },
+  "reasonDietOutro": " beslenmene uygun değil. ",
+  "@reasonDietOutro": { "description": "Suffix after a diet label in the flat warning." },
+  "reasonHealthIntro": "Profilindeki ",
+  "@reasonHealthIntro": { "description": "Prefix before a health label in the flat warning." },
+  "reasonHealthMid": " için: ",
+  "@reasonHealthMid": { "description": "Connector between a health label and its note." },
+  "reasonAllergenLineIntro": "",
+  "@reasonAllergenLineIntro": { "description": "Prefix of the allergen bullet line (empty in Turkish)." },
+  "reasonAllergenLineOutro": " içeriyor.",
+  "@reasonAllergenLineOutro": { "description": "Suffix of the allergen bullet line." },
+  "reasonDietLineOutro": " beslenmene uygun değil.",
+  "@reasonDietLineOutro": { "description": "Suffix of the diet bullet line." },
+  "reasonHealthLineOutro": " durumu için uygun değil.",
+  "@reasonHealthLineOutro": { "description": "Suffix of the health bullet line." },
+  "verdictSuitable": "Uygun",
+  "@verdictSuitable": { "description": "Verdict when the product is suitable." },
+  "verdictCaution": "Dikkatli ol",
+  "@verdictCaution": { "description": "Verdict when caution is advised." },
+  "verdictUnsuitable": "Uygun değil!",
+  "@verdictUnsuitable": { "description": "Verdict when the product is unsuitable." },
+  "verdictInsufficient": "Yetersiz veri",
+  "@verdictInsufficient": { "description": "Verdict when there is not enough data." },
+  "allergenUnknown": "Bilinmeyen alerjen",
+  "@allergenUnknown": { "description": "Fallback allergen label." },
+  "allergenGluten": "Gluten",
+  "@allergenGluten": { "description": "Allergen: gluten." },
+  "allergenMilk": "Süt / Laktoz",
+  "@allergenMilk": { "description": "Allergen: milk/lactose." },
+  "allergenEggs": "Yumurta",
+  "@allergenEggs": { "description": "Allergen: eggs." },
+  "allergenSoy": "Soya",
+  "@allergenSoy": { "description": "Allergen: soy." },
+  "allergenPeanuts": "Yer fıstığı",
+  "@allergenPeanuts": { "description": "Allergen: peanuts." },
+  "allergenNuts": "Kabuklu yemişler",
+  "@allergenNuts": { "description": "Allergen: tree nuts." },
+  "allergenSesame": "Susam",
+  "@allergenSesame": { "description": "Allergen: sesame." },
+  "allergenFish": "Balık",
+  "@allergenFish": { "description": "Allergen: fish." },
+  "allergenCrustaceans": "Kabuklu deniz ürünleri",
+  "@allergenCrustaceans": { "description": "Allergen: crustaceans." },
+  "allergenMolluscs": "Yumuşakçalar",
+  "@allergenMolluscs": { "description": "Allergen: molluscs." },
+  "allergenCelery": "Kereviz",
+  "@allergenCelery": { "description": "Allergen: celery." },
+  "allergenMustard": "Hardal",
+  "@allergenMustard": { "description": "Allergen: mustard." },
+  "allergenLupin": "Acı bakla",
+  "@allergenLupin": { "description": "Allergen: lupin." },
+  "allergenSulphites": "Sülfitler",
+  "@allergenSulphites": { "description": "Allergen: sulphites." }
+}

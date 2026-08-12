@@ -9,7 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
   flutter_riverpod: ^2.5.1
+  shared_preferences: ^2.5.5
   supabase_flutter: ^2.5.0
   mobile_scanner: ^7.4.0
   flutter_svg: ^2.0.10
@@ -17,7 +21,6 @@ dependencies:
   http: ^1.6.0
   flutter_dotenv: ^6.0.1
   image_picker: ^1.1.2
-  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
@@ -26,6 +29,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/images/
     - assets/allergens/

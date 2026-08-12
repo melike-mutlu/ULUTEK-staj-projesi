@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/explanation.dart';
 import '../../../core/theme/akilli_sepet_colors.dart';
 import '../../../core/theme/warning_level_style.dart';
+import '../../../l10n/app_localizations.dart';
 import '../profile_checks.dart';
 
 /// Verdict — the anchor of the screen: the level on the left, the short verdict
@@ -30,8 +31,6 @@ class WarningBanner extends StatelessWidget {
   /// "Yetersiz veri" instead of a green/red claim.
   final bool insufficientData;
 
-  static const String _insufficientReason = 'Bu ürünün içerik bilgisi eksik.';
-
   /// Sits next to the verdict when the product is suitable.
   static const String _starIcon = 'assets/other/star.png';
   static const double _starSize = 52;
@@ -55,9 +54,18 @@ class WarningBanner extends StatelessWidget {
     ];
   }
 
+  /// Localized verdict title for a [WarningLevel].
+  String _verdictTitle(AppLocalizations l10n, WarningLevel level) =>
+      switch (level) {
+        WarningLevel.warning => l10n.verdictUnsuitable,
+        WarningLevel.caution => l10n.verdictCaution,
+        WarningLevel.ok => l10n.verdictSuitable,
+      };
+
   @override
   Widget build(BuildContext context) {
-    if (insufficientData) return _buildInsufficient();
+    final l10n = AppLocalizations.of(context);
+    if (insufficientData) return _buildInsufficient(l10n);
 
     final style = WarningLevelStyle.of(explanation.level);
 
@@ -94,7 +102,7 @@ class WarningBanner extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        style.title,
+                        _verdictTitle(l10n, explanation.level),
                         style: TextStyle(
                           color: style.main,
                           fontSize: 30,
@@ -191,13 +199,13 @@ class WarningBanner extends StatelessWidget {
   }
 
   /// No dot, no illustration, no disclaimer — a plain left-aligned notice.
-  Widget _buildInsufficient() {
+  Widget _buildInsufficient(AppLocalizations l10n) {
     const style = WarningLevelStyle.insufficient;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          style.title,
+          l10n.verdictInsufficient,
           style: TextStyle(
             color: style.main,
             fontSize: 30,
@@ -206,9 +214,9 @@ class WarningBanner extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          _insufficientReason,
-          style: TextStyle(
+        Text(
+          l10n.insufficientContentInfo,
+          style: const TextStyle(
             color: AkilliSepetColors.textSecondary,
             fontSize: 16,
             height: 1.4,

@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_client.dart';
+import 'auth_error.dart';
 
 class AuthViewModel extends ChangeNotifier {
   bool isLoading = false;
-  String? errorMessage;
+
+  /// Last failure reason, or null. The View maps this to a localized message.
+  AuthError? error;
 
   /// Account exists but its email is unconfirmed, so there is no session and
   /// the user cannot get in yet. UI-only signal: nothing is verified or resent
@@ -30,7 +33,7 @@ class AuthViewModel extends ChangeNotifier {
 
   Future<bool> signUp(String email, String password) async {
     isLoading = true;
-    errorMessage = null;
+    error = null;
     needsEmailConfirmation = false;
     emailAlreadyRegistered = false;
     notifyListeners();
@@ -63,12 +66,12 @@ class AuthViewModel extends ChangeNotifier {
       if (_isEmailAlreadyRegistered(e)) {
         emailAlreadyRegistered = true;
       } else {
-        errorMessage = 'Kayıt başarısız: $e';
+        _fail(AuthError.signUpFailed, e);
       }
       notifyListeners();
       return false;
     } catch (e) {
-      errorMessage = 'Kayıt başarısız: $e';
+      _fail(AuthError.signUpFailed, e);
       isLoading = false;
       notifyListeners();
       return false;
@@ -77,7 +80,7 @@ class AuthViewModel extends ChangeNotifier {
 
   Future<bool> signIn(String email, String password) async {
     isLoading = true;
-    errorMessage = null;
+    error = null;
     needsEmailConfirmation = false;
     emailAlreadyRegistered = false;
     notifyListeners();
@@ -92,12 +95,12 @@ class AuthViewModel extends ChangeNotifier {
       if (_isEmailNotConfirmed(e)) {
         needsEmailConfirmation = true;
       } else {
-        errorMessage = 'Giriş başarısız: $e';
+        _fail(AuthError.signInFailed, e);
       }
       notifyListeners();
       return false;
     } catch (e) {
-      errorMessage = 'Giriş başarısız: $e';
+      _fail(AuthError.signInFailed, e);
       isLoading = false;
       notifyListeners();
       return false;
@@ -107,7 +110,7 @@ class AuthViewModel extends ChangeNotifier {
   /// Hesaba gerek duymadan misafir olarak giriş yapma.
   Future<bool> signInAsGuest() async {
     isLoading = true;
-    errorMessage = null;
+    error = null;
     notifyListeners();
 
     try {
@@ -116,7 +119,7 @@ class AuthViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      errorMessage = 'Misafir girişi başarısız: $e';
+      _fail(AuthError.guestSignInFailed, e);
       isLoading = false;
       notifyListeners();
       return false;
@@ -128,7 +131,7 @@ class AuthViewModel extends ChangeNotifier {
   // ve Supabase panel ayarlarının yapılmış olması gerekir.)
   Future<bool> signInWithGoogle() async{
     isLoading = true;
-    errorMessage = null;
+    error = null;
     notifyListeners();
     try{
       //Supabase'in yerleşik OAuth fonksiyonunu çağırma
@@ -141,11 +144,18 @@ class AuthViewModel extends ChangeNotifier {
       notifyListeners();
       return success;
     } catch (e){
-      errorMessage = 'Google ile giriş başarısız: $e';
+      _fail(AuthError.googleSignInFailed, e);
       isLoading = false;
       notifyListeners();
       return false;
     }
+  }
+
+  /// Records the failure reason; the raw cause goes to the debug console only,
+  /// never into the UI.
+  void _fail(AuthError reason, Object cause) {
+    error = reason;
+    if (kDebugMode) debugPrint('AuthViewModel: ${reason.name} <- $cause');
   }
 
   bool _isEmailAlreadyRegistered(AuthException error) =>

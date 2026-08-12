@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// Adı düzenleme kutusu. Kapatılınca girilen metni, vazgeçilirse null döner.
 ///
 /// Controller'ı kendi state'inde tutar ve orada dispose eder. Çağıran taraf
@@ -39,23 +41,24 @@ class _NameEditDialogState extends State<NameEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('Adın'),
+      title: Text(l10n.nameDialogTitle),
       content: TextField(
         controller: _controller,
         autofocus: true,
         maxLength: widget.maxLength,
         textCapitalization: TextCapitalization.words,
         textInputAction: TextInputAction.done,
-        decoration: const InputDecoration(hintText: 'Adını yaz'),
+        decoration: InputDecoration(hintText: l10n.nameDialogHint),
         onSubmitted: (_) => _submit(),
       ),
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Vazgeç'),
+          child: Text(l10n.cancel),
         ),
-        TextButton(onPressed: _submit, child: const Text('Tamam')),
+        TextButton(onPressed: _submit, child: Text(l10n.ok)),
       ],
     );
   }

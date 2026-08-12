@@ -6,9 +6,11 @@ import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/profile_repository.dart';
+import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../startup/startup_destination.dart';
 
+import 'auth_error.dart';
 import 'widgets/terms_conditions_dialog.dart';
 
 class AuthView extends ConsumerStatefulWidget {
@@ -79,10 +81,8 @@ class _AuthViewState extends ConsumerState<AuthView> {
   bool _hasAcceptedTermsOrWarn() {
     if (_isSignUpMode && !_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Devam etmek için lütfen Kullanım Şartları ve Gizlilik Sözleşmesi\'ni kabul edin.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).termsRequiredWarning),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -90,6 +90,14 @@ class _AuthViewState extends ConsumerState<AuthView> {
     }
     return true;
   }
+
+  /// Maps an [AuthError] to its localized message.
+  String _errorText(AppLocalizations l10n, AuthError error) => switch (error) {
+        AuthError.signUpFailed => l10n.signUpFailed,
+        AuthError.signInFailed => l10n.signInFailed,
+        AuthError.guestSignInFailed => l10n.guestSignInFailed,
+        AuthError.googleSignInFailed => l10n.googleSignInFailed,
+      };
 
   Future<void> _submit() async {
     if (!_hasAcceptedTermsOrWarn()) return;
@@ -161,6 +169,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
   @override
   Widget build(BuildContext context) {
     final vm = ref.watch(authViewModelProvider);
+    final l10n = AppLocalizations.of(context);
     final isBusy = vm.isLoading || _isResolvingRoute;
 
     return Scaffold(
@@ -169,7 +178,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
         backgroundColor: AkilliSepetColors.background,
         elevation: 0,
         title: Text(
-          _isSignUpMode ? 'Kayıt Ol' : 'Giriş Yap',
+          _isSignUpMode ? l10n.signUp : l10n.signIn,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -196,7 +205,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Akıllı Sepet\'e Hoş Geldiniz',
+              l10n.authWelcome,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -204,17 +213,17 @@ class _AuthViewState extends ConsumerState<AuthView> {
                   ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Kişiselleştirilmiş alışveriş asistanınız',
+            Text(
+              l10n.authTagline,
               textAlign: TextAlign.center,
-              style: TextStyle(color: AkilliSepetColors.textSecondary),
+              style: const TextStyle(color: AkilliSepetColors.textSecondary),
             ),
             const SizedBox(height: 32),
 
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
-                labelText: 'E-posta',
+                labelText: l10n.email,
                 prefixIcon: const Icon(Icons.email_outlined),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -224,7 +233,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(
-                labelText: 'Şifre',
+                labelText: l10n.password,
                 prefixIcon: const Icon(Icons.lock_outline),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -261,9 +270,9 @@ class _AuthViewState extends ConsumerState<AuthView> {
                       },
                       child: Wrap(
                         children: [
-                          const Text(
-                            'Kullanım Şartları ve Gizlilik Sözleşmesi',
-                            style: TextStyle(
+                          Text(
+                            l10n.termsLink,
+                            style: const TextStyle(
                               fontSize: 12.5,
                               color: AkilliSepetColors.primary,
                               fontWeight: FontWeight.bold,
@@ -281,9 +290,9 @@ class _AuthViewState extends ConsumerState<AuthView> {
                               ),
                             ),
                           ),
-                          const Text(
-                            '\'ni okudum, kabul ediyorum.',
-                            style: TextStyle(
+                          Text(
+                            l10n.termsAcceptSuffix,
+                            style: const TextStyle(
                               fontSize: 12.5,
                               color: AkilliSepetColors.textSecondary,
                             ),
@@ -298,9 +307,9 @@ class _AuthViewState extends ConsumerState<AuthView> {
             const SizedBox(height: 24),
             if (vm.emailAlreadyRegistered) ...[
               InlineErrorRow(
-                message: 'Bu e-posta zaten kayıtlı. Giriş yapın.',
+                message: l10n.emailAlreadyRegistered,
                 icon: Icons.person_outline_rounded,
-                actionLabel: 'Giriş yap',
+                actionLabel: l10n.signIn,
                 // Switches to sign-in with the typed email kept.
                 onRetry: () {
                   vm.clearEmailAlreadyRegisteredNotice();
@@ -312,17 +321,15 @@ class _AuthViewState extends ConsumerState<AuthView> {
             ],
             if (vm.needsEmailConfirmation) ...[
               InlineErrorRow(
-                message: 'E-postana bir doğrulama bağlantısı gönderdik. '
-                    'Bağlantıya tıklayıp hesabını doğrulamadan giriş '
-                    'yapamazsın.',
+                message: l10n.emailConfirmationNotice,
                 icon: Icons.mark_email_unread_outlined,
                 onDismiss: vm.clearEmailConfirmationNotice,
               ),
               const SizedBox(height: 8),
             ],
-            if (vm.errorMessage != null) ...[
+            if (vm.error != null) ...[
               Text(
-                vm.errorMessage!,
+                _errorText(l10n, vm.error!),
                 style: const TextStyle(color: Colors.redAccent, fontSize: 13),
                 textAlign: TextAlign.center,
               ),
@@ -339,30 +346,30 @@ class _AuthViewState extends ConsumerState<AuthView> {
                         height: 20,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
-                    : Text(_isSignUpMode ? 'Kayıt Ol' : 'Giriş Yap'),
+                    : Text(_isSignUpMode ? l10n.signUp : l10n.signIn),
               ),
             ),
             const SizedBox(height: 12),
 
             TextButton(
               onPressed: () => setState(() => _isSignUpMode = !_isSignUpMode),
-              child: Text(_isSignUpMode
-                  ? 'Zaten hesabın var mı? Giriş yap'
-                  : 'Hesabın yok mu? Kayıt ol'),
+              child: Text(
+                _isSignUpMode ? l10n.toggleToSignIn : l10n.toggleToSignUp,
+              ),
             ),
 
             const SizedBox(height: 20),
-            const Row(
+            Row(
               children: [
-                Expanded(child: Divider()),
+                const Expanded(child: Divider()),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
-                    'veya',
-                    style: TextStyle(color: AkilliSepetColors.textSecondary, fontSize: 13),
+                    l10n.orSeparator,
+                    style: const TextStyle(color: AkilliSepetColors.textSecondary, fontSize: 13),
                   ),
                 ),
-                Expanded(child: Divider()),
+                const Expanded(child: Divider()),
               ],
             ),
             const SizedBox(height: 20),
@@ -377,9 +384,9 @@ class _AuthViewState extends ConsumerState<AuthView> {
                   width: 20,
                   height: 20,
                 ),
-                label: const Text(
-                  'Google ile Giriş Yap',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                label: Text(
+                  l10n.googleSignIn,
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
@@ -397,7 +404,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
               child: OutlinedButton.icon(
                 onPressed: isBusy ? null : _continueAsGuest,
                 icon: const Icon(Icons.person_outline_rounded),
-                label: const Text('Misafir Olarak Devam Et'),
+                label: Text(l10n.continueAsGuest),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Colors.grey.shade300),
                   foregroundColor: AkilliSepetColors.textPrimary,

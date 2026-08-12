@@ -4,6 +4,7 @@ import '../../core/navigation/app_routes.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../core/utils/relative_date.dart';
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
 import 'widgets/ad_placeholder_card.dart';
 import 'widgets/recent_scan_card.dart';
@@ -48,6 +49,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   // --- YENİ: TÜM GEÇMİŞİ GÖSTEREN AŞAĞIDAN KAYARAK AÇILAN PANEL ---
   void _showAllHistoryBottomSheet(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     // Butona basıldığı an veritabanından 50'lik tüm listeyi çekmeye başlıyoruz
     ref.read(homeViewModelProvider).loadFullHistory();
 
@@ -90,7 +92,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           ),
                         ),
                         Text(
-                          'Tüm Taramalarım',
+                          l10n.allMyScans,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AkilliSepetColors.textPrimary,
@@ -102,7 +104,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           child: historyVm.isLoadingFullHistory
                               ? const Center(child: CircularProgressIndicator(color: AkilliSepetColors.primary))
                               : historyVm.fullHistory.isEmpty
-                                  ? const Center(child: Text('Geçmiş bulunamadı.', style: TextStyle(color: Colors.grey)))
+                                  ? Center(child: Text(l10n.historyNotFound, style: const TextStyle(color: Colors.grey)))
                                   : ListView.builder(
                                       controller: scrollController, // Parmağınla paneli kaydırmanı sağlar
                                       itemCount: historyVm.fullHistory.length,
@@ -111,8 +113,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                         return Padding(
                                           padding: const EdgeInsets.only(bottom: 12.0),
                                           child: RecentScanCard(
-                                            title: entry.productName ?? 'Barkod: ${entry.barcode}',
-                                            note: 'İçerik Analizi',
+                                            title: entry.productName ?? l10n.barcodeLabel(entry.barcode),
+                                            note: l10n.contentAnalysis,
                                             noteColor: AkilliSepetColors.success,
                                             backgroundColor: const Color(0xFFE8F5E9),
                                             time: formatScanDate(entry.scannedAt),
@@ -147,6 +149,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final topInset = mediaPadding.top;
     final viewModel = ref.watch(homeViewModelProvider);
     final search = ref.watch(searchViewModelProvider);
+    final l10n = AppLocalizations.of(context);
     final isSearching = search.status != SearchStatus.idle;
 
     return Scaffold(
@@ -167,13 +170,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Merhaba,',
+                              l10n.homeGreeting,
                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                     color: AkilliSepetColors.textSecondary,
                                   ),
                             ),
                             Text(
-                              viewModel.displayName.isNotEmpty ? viewModel.displayName : 'Kullanıcı',
+                              viewModel.displayName.isNotEmpty ? viewModel.displayName : l10n.userFallback,
                               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: AkilliSepetColors.textPrimary,
@@ -203,7 +206,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     // While searching, the results replace the dashboard so the
                     // page stays focused; clearing the query brings it back.
                     if (isSearching)
-                      _buildSearchResults(search)
+                      _buildSearchResults(search, l10n)
                     else ...[
                     // --- 2. TARA BUTONU ---
                     Center(
@@ -238,7 +241,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Tara',
+                                l10n.scanButton,
                                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -254,7 +257,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     // Alt Açıklama
                     Center(
                       child: Text(
-                        'Bir ürünün barkodunu okut, içeriğini ve\nsana uygunluğunu öğren',
+                        l10n.scanTagline,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: AkilliSepetColors.textSecondary,
@@ -276,7 +279,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
                     // --- 3. SON TARAMALAR LİSTESİ ---
                     Text(
-                      'Son Taramaların',
+                      l10n.recentScansTitle,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AkilliSepetColors.textPrimary,
@@ -285,12 +288,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     const SizedBox(height: 16),
                     
                     if (viewModel.recentScans.isEmpty)
-                      const Center(
+                      Center(
                         child: Padding(
-                          padding: EdgeInsets.only(top: 20),
+                          padding: const EdgeInsets.only(top: 20),
                           child: Text(
-                            'Henüz bir ürün taramadınız.',
-                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                            l10n.noScansYet,
+                            style: const TextStyle(color: Colors.grey, fontSize: 16),
                           ),
                         ),
                       )
@@ -300,8 +303,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: RecentScanCard(
-                            title: entry.productName ?? 'Barkod: ${entry.barcode}',
-                            note: 'İçerik Analizi',
+                            title: entry.productName ?? l10n.barcodeLabel(entry.barcode),
+                            note: l10n.contentAnalysis,
                             noteColor: AkilliSepetColors.success,
                             backgroundColor: const Color(0xFFE8F5E9),
                             time: formatScanDate(entry.scannedAt),
@@ -315,9 +318,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         child: TextButton.icon(
                           onPressed: () => _showAllHistoryBottomSheet(context, ref),
                           icon: const Icon(Icons.keyboard_arrow_down, color: AkilliSepetColors.primary),
-                          label: const Text(
-                            'Tüm Geçmişi Gör',
-                            style: TextStyle(
+                          label: Text(
+                            l10n.seeAllHistory,
+                            style: const TextStyle(
                               color: AkilliSepetColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -338,7 +341,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   /// Search states below the bar: spinner, results, empty and error. Rendered
   /// inline so the whole page scrolls as one.
-  Widget _buildSearchResults(SearchViewModel search) {
+  Widget _buildSearchResults(SearchViewModel search, AppLocalizations l10n) {
     switch (search.status) {
       case SearchStatus.loading:
         return const Padding(
@@ -348,23 +351,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ),
         );
       case SearchStatus.empty:
-        return const Padding(
-          padding: EdgeInsets.only(top: 32),
+        return Padding(
+          padding: const EdgeInsets.only(top: 32),
           child: Center(
             child: Text(
-              'Sonuç bulunamadı.',
-              style: TextStyle(color: AkilliSepetColors.textSecondary, fontSize: 16),
+              l10n.searchNoResults,
+              style: const TextStyle(color: AkilliSepetColors.textSecondary, fontSize: 16),
             ),
           ),
         );
       case SearchStatus.error:
-        return const Padding(
-          padding: EdgeInsets.only(top: 32),
+        return Padding(
+          padding: const EdgeInsets.only(top: 32),
           child: Center(
             child: Text(
-              'Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+              l10n.searchError,
               textAlign: TextAlign.center,
-              style: TextStyle(color: AkilliSepetColors.textSecondary, fontSize: 16),
+              style: const TextStyle(color: AkilliSepetColors.textSecondary, fontSize: 16),
             ),
           ),
         );

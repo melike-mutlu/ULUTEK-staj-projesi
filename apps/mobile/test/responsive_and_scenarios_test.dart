@@ -8,6 +8,7 @@ import 'package:akilli_sepet/core/models/explanation.dart';
 import 'package:akilli_sepet/core/models/product.dart';
 import 'package:akilli_sepet/core/models/rule_engine_result.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 
 Widget _buildTestableWidget({
   required Widget child,
@@ -18,6 +19,9 @@ Widget _buildTestableWidget({
       profileRepositoryProvider.overrideWithValue(InMemoryProfileRepository()),
     ],
     child: MaterialApp(
+      locale: const Locale('tr'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: MediaQuery(
         data: MediaQueryData(size: screenSize),
         child: Scaffold(

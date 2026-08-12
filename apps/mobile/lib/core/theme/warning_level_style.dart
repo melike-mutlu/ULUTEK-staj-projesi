@@ -12,7 +12,6 @@ class WarningLevelStyle {
     required this.background,
     required this.border,
     required this.icon,
-    required this.title,
     this.asset,
   });
 
@@ -22,9 +21,6 @@ class WarningLevelStyle {
   final Color border;
   final IconData icon;
 
-  /// Short verdict shown to the user, e.g. "Uygun değil!".
-  final String title;
-
   /// Illustration for this level; levels without one fall back to the dot.
   final String? asset;
 
@@ -33,7 +29,6 @@ class WarningLevelStyle {
     background: Color(0xFFFEF2F2),
     border: Color(0xFFFCA5A5),
     icon: Icons.gpp_bad_rounded,
-    title: 'Uygun değil!',
     asset: 'assets/other/warning.png',
   );
 
@@ -42,7 +37,6 @@ class WarningLevelStyle {
     background: Color(0xFFFFFBEB),
     border: Color(0xFFFDE68A),
     icon: Icons.report_problem_rounded,
-    title: 'Dikkatli ol',
   );
 
   static const WarningLevelStyle ok = WarningLevelStyle(
@@ -50,7 +44,6 @@ class WarningLevelStyle {
     background: Color(0xFFF0FDF4),
     border: Color(0xFF86EFAC),
     icon: Icons.verified_user_rounded,
-    title: 'Uygun',
     asset: 'assets/other/suitable.png',
   );
 
@@ -61,7 +54,6 @@ class WarningLevelStyle {
     background: Color(0xFFF3F4F6),
     border: Color(0xFFE5E7EB),
     icon: Icons.help_outline_rounded,
-    title: 'Yetersiz veri',
   );
 
   static WarningLevelStyle of(WarningLevel level) => switch (level) {

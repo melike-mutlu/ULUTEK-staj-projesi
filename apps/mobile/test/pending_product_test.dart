@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:akilli_sepet/data/repositories/pending_product_repository.dart';
+import 'package:akilli_sepet/features/pending_product/pending_product_error.dart';
 import 'package:akilli_sepet/features/pending_product/pending_product_view.dart';
 import 'package:akilli_sepet/features/pending_product/pending_product_viewmodel.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 
 class MockPendingProductRepository extends PendingProductRepository {
   bool shouldSucceed = true;
@@ -33,7 +35,7 @@ void main() {
     final success = await viewModel.submit();
 
     expect(success, isFalse);
-    expect(viewModel.errorMessage, contains('barkod'));
+    expect(viewModel.error, PendingProductError.invalidBarcode);
   });
 
   test('PendingProductViewModel submit calls repository successfully', () async {
@@ -45,13 +47,16 @@ void main() {
 
     expect(success, isTrue);
     expect(viewModel.isSuccess, isTrue);
-    expect(viewModel.errorMessage, isNull);
+    expect(viewModel.error, isNull);
   });
 
   testWidgets('PendingProductView renders title and form fields', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(
+          locale: Locale('tr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: PendingProductView(barcode: '8690504112233'),
         ),
       ),

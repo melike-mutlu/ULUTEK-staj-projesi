@@ -1,8 +1,10 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:akilli_sepet/core/models/explanation.dart';
 import 'package:akilli_sepet/core/models/rule_engine_result.dart';
 import 'package:akilli_sepet/core/models/user_profile.dart';
 import 'package:akilli_sepet/features/product_detail/profile_checks.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 
 const _explanation = Explanation(
   summary: 'Ozet',
@@ -24,8 +26,16 @@ UserProfile _profile({
 }
 
 void main() {
+  late AppLocalizations l10n;
+
+  setUpAll(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    l10n = await AppLocalizations.delegate.load(const Locale('tr'));
+  });
+
   test('alerjenleri tek cumlede sayar', () {
     final reason = personalReason(
+      l10n: l10n,
       explanation: _explanation,
       rule: const RuleEngineResult(
         matchedAllergens: [],
@@ -48,6 +58,7 @@ void main() {
 
   test('diyet ve saglik cakismalarini ekler', () {
     final reason = personalReason(
+      l10n: l10n,
       explanation: _explanation,
       rule: const RuleEngineResult(
         matchedAllergens: [],
@@ -67,6 +78,7 @@ void main() {
 
   test('kisisel bir sey yoksa backend mesajina duser', () {
     final reason = personalReason(
+      l10n: l10n,
       explanation: _explanation,
       rule: const RuleEngineResult(
         matchedAllergens: [],
