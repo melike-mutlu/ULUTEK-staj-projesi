@@ -435,4 +435,55 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get searchAction => 'Ara';
+
+  @override
+  String get chatbotTitle => 'Akıllı Asistan';
+
+  @override
+  String chatbotGreeting(String name) {
+    return 'Size nasıl yardımcı olabilirim $name?';
+  }
+
+  @override
+  String get aiSuggestion => 'Yapay Zeka Önerisi';
+
+  @override
+  String get suggestionFallback =>
+      'Profilinize yeni bir özellik eklememi ister misiniz?';
+
+  @override
+  String get no => 'Hayır';
+
+  @override
+  String get yesAdd => 'Evet, Ekle';
+
+  @override
+  String get assistantTyping => 'Asistan yazıyor...';
+
+  @override
+  String get askSomething => 'Bir şeyler sorun...';
+
+  @override
+  String get newChat => 'Yeni Sohbet Başlat';
+
+  @override
+  String get premiumFeature => 'Premium Özellik';
+
+  @override
+  String get chatbotPaywallBody =>
+      'Sohbet asistanını kullanmak ve profilinize özel yapay zeka tavsiyeleri almak için Premium üye olmanız gerekmektedir.';
+
+  @override
+  String get goToSettings => 'Ayarlara Git';
+
+  @override
+  String get chatError => 'Bir hata oluştu. Lütfen tekrar dene.';
+
+  @override
+  String get addedToProfile => 'Profilinize eklendi';
+
+  @override
+  String addedToProfileSnack(String value) {
+    return '$value profilinize eklendi!';
+  }
 }

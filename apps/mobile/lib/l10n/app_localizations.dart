@@ -889,6 +889,96 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ara'**
   String get searchAction;
+
+  /// Chatbot screen title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Akıllı Asistan'**
+  String get chatbotTitle;
+
+  /// Chatbot greeting with the user name.
+  ///
+  /// In tr, this message translates to:
+  /// **'Size nasıl yardımcı olabilirim {name}?'**
+  String chatbotGreeting(String name);
+
+  /// Header of an AI suggestion card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay Zeka Önerisi'**
+  String get aiSuggestion;
+
+  /// Fallback text for a suggestion card with no message.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilinize yeni bir özellik eklememi ister misiniz?'**
+  String get suggestionFallback;
+
+  /// Decline button on a suggestion card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hayır'**
+  String get no;
+
+  /// Accept button on a suggestion card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet, Ekle'**
+  String get yesAdd;
+
+  /// Indicator shown while the assistant is composing a reply.
+  ///
+  /// In tr, this message translates to:
+  /// **'Asistan yazıyor...'**
+  String get assistantTyping;
+
+  /// Chat input placeholder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir şeyler sorun...'**
+  String get askSomething;
+
+  /// Button to start a new chat.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Sohbet Başlat'**
+  String get newChat;
+
+  /// Paywall heading on the chatbot screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium Özellik'**
+  String get premiumFeature;
+
+  /// Paywall body on the chatbot screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sohbet asistanını kullanmak ve profilinize özel yapay zeka tavsiyeleri almak için Premium üye olmanız gerekmektedir.'**
+  String get chatbotPaywallBody;
+
+  /// Paywall action button to open settings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarlara Git'**
+  String get goToSettings;
+
+  /// Bot message shown when a chat request fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir hata oluştu. Lütfen tekrar dene.'**
+  String get chatError;
+
+  /// Suffix appended to a handled suggestion message.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilinize eklendi'**
+  String get addedToProfile;
+
+  /// Snackbar after a suggested value is added to the profile.
+  ///
+  /// In tr, this message translates to:
+  /// **'{value} profilinize eklendi!'**
+  String addedToProfileSnack(String value);
 }
 
 class _AppLocalizationsDelegate

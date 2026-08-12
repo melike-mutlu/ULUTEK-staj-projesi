@@ -439,4 +439,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchAction => 'Search';
+
+  @override
+  String get chatbotTitle => 'Smart Assistant';
+
+  @override
+  String chatbotGreeting(String name) {
+    return 'How can I help you, $name?';
+  }
+
+  @override
+  String get aiSuggestion => 'AI Suggestion';
+
+  @override
+  String get suggestionFallback =>
+      'Would you like me to add a new feature to your profile?';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get yesAdd => 'Yes, add';
+
+  @override
+  String get assistantTyping => 'Assistant is typing...';
+
+  @override
+  String get askSomething => 'Ask something...';
+
+  @override
+  String get newChat => 'Start new chat';
+
+  @override
+  String get premiumFeature => 'Premium feature';
+
+  @override
+  String get chatbotPaywallBody =>
+      'To use the chat assistant and receive AI advice tailored to your profile, you need to be a Premium member.';
+
+  @override
+  String get goToSettings => 'Go to Settings';
+
+  @override
+  String get chatError => 'An error occurred. Please try again.';
+
+  @override
+  String get addedToProfile => 'Added to your profile';
+
+  @override
+  String addedToProfileSnack(String value) {
+    return '$value added to your profile!';
+  }
 }

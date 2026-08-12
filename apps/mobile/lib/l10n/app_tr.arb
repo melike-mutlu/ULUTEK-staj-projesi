@@ -547,5 +547,75 @@
   "searchAction": "Ara",
   "@searchAction": {
     "description": "Search button in the manual barcode dialog."
+  },
+  "chatbotTitle": "Akıllı Asistan",
+  "@chatbotTitle": {
+    "description": "Chatbot screen title."
+  },
+  "chatbotGreeting": "Size nasıl yardımcı olabilirim {name}?",
+  "@chatbotGreeting": {
+    "description": "Chatbot greeting with the user name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aiSuggestion": "Yapay Zeka Önerisi",
+  "@aiSuggestion": {
+    "description": "Header of an AI suggestion card."
+  },
+  "suggestionFallback": "Profilinize yeni bir özellik eklememi ister misiniz?",
+  "@suggestionFallback": {
+    "description": "Fallback text for a suggestion card with no message."
+  },
+  "no": "Hayır",
+  "@no": {
+    "description": "Decline button on a suggestion card."
+  },
+  "yesAdd": "Evet, Ekle",
+  "@yesAdd": {
+    "description": "Accept button on a suggestion card."
+  },
+  "assistantTyping": "Asistan yazıyor...",
+  "@assistantTyping": {
+    "description": "Indicator shown while the assistant is composing a reply."
+  },
+  "askSomething": "Bir şeyler sorun...",
+  "@askSomething": {
+    "description": "Chat input placeholder."
+  },
+  "newChat": "Yeni Sohbet Başlat",
+  "@newChat": {
+    "description": "Button to start a new chat."
+  },
+  "premiumFeature": "Premium Özellik",
+  "@premiumFeature": {
+    "description": "Paywall heading on the chatbot screen."
+  },
+  "chatbotPaywallBody": "Sohbet asistanını kullanmak ve profilinize özel yapay zeka tavsiyeleri almak için Premium üye olmanız gerekmektedir.",
+  "@chatbotPaywallBody": {
+    "description": "Paywall body on the chatbot screen."
+  },
+  "goToSettings": "Ayarlara Git",
+  "@goToSettings": {
+    "description": "Paywall action button to open settings."
+  },
+  "chatError": "Bir hata oluştu. Lütfen tekrar dene.",
+  "@chatError": {
+    "description": "Bot message shown when a chat request fails."
+  },
+  "addedToProfile": "Profilinize eklendi",
+  "@addedToProfile": {
+    "description": "Suffix appended to a handled suggestion message."
+  },
+  "addedToProfileSnack": "{value} profilinize eklendi!",
+  "@addedToProfileSnack": {
+    "description": "Snackbar after a suggested value is added to the profile.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
   }
 }

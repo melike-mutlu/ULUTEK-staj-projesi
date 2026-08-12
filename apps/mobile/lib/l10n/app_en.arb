@@ -131,5 +131,20 @@
   "enterBarcodeManually": "Enter barcode manually",
   "enterBarcode": "Enter barcode",
   "barcodeHintExample": "e.g. 8690504112233",
-  "searchAction": "Search"
+  "searchAction": "Search",
+  "chatbotTitle": "Smart Assistant",
+  "chatbotGreeting": "How can I help you, {name}?",
+  "aiSuggestion": "AI Suggestion",
+  "suggestionFallback": "Would you like me to add a new feature to your profile?",
+  "no": "No",
+  "yesAdd": "Yes, add",
+  "assistantTyping": "Assistant is typing...",
+  "askSomething": "Ask something...",
+  "newChat": "Start new chat",
+  "premiumFeature": "Premium feature",
+  "chatbotPaywallBody": "To use the chat assistant and receive AI advice tailored to your profile, you need to be a Premium member.",
+  "goToSettings": "Go to Settings",
+  "chatError": "An error occurred. Please try again.",
+  "addedToProfile": "Added to your profile",
+  "addedToProfileSnack": "{value} added to your profile!"
 }
