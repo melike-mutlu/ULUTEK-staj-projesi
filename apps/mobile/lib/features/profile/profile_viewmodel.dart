@@ -6,6 +6,7 @@ import '../../core/models/user_profile.dart';
 import '../../core/utils/display_name.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../shared/services/image_picker_service.dart';
+import 'profile_error.dart';
 
 /// Onboarding'de girilen profili sonradan düzenlemek için.
 ///
@@ -35,7 +36,7 @@ class ProfileViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool _isSaving = false;
   bool _isUploadingAvatar = false;
-  String? _errorMessage;
+  ProfileError? _error;
 
   /// Kayıtlı ad. Taslak DEĞİL: kutu kapanır kapanmaz veritabanına yazılır.
   String? _displayName;
@@ -63,7 +64,9 @@ class ProfileViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   bool get isUploadingAvatar => _isUploadingAvatar;
-  String? get errorMessage => _errorMessage;
+
+  /// Last failure reason, or null. The View maps this to a localized message.
+  ProfileError? get error => _error;
   bool get loadFailed => _loadFailed;
 
   /// Kutuya ön değer olarak konur — yedek (e-posta) isim değil, gerçek ad.
@@ -138,18 +141,18 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       userId = _profileRepository.currentUserId;
     } catch (error, stackTrace) {
-      _failWith('Ad kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.nameSaveFailed, error, stackTrace);
       notifyListeners();
       return false;
     }
     if (userId == null) {
-      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      _error = ProfileError.sessionNotFound;
       notifyListeners();
       return false;
     }
 
     _isSavingName = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
@@ -178,7 +181,7 @@ class ProfileViewModel extends ChangeNotifier {
       return true;
     } catch (error, stackTrace) {
       _isSavingName = false;
-      _failWith('Ad kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.nameSaveFailed, error, stackTrace);
       notifyListeners();
       return false;
     }
@@ -194,18 +197,18 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       userId = _profileRepository.currentUserId;
     } catch (error, stackTrace) {
-      _failWith('Ülke kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.countrySaveFailed, error, stackTrace);
       notifyListeners();
       return false;
     }
     if (userId == null) {
-      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      _error = ProfileError.sessionNotFound;
       notifyListeners();
       return false;
     }
 
     _isSaving = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
@@ -234,7 +237,7 @@ class ProfileViewModel extends ChangeNotifier {
       return true;
     } catch (error, stackTrace) {
       _isSaving = false;
-      _failWith('Ülke kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.countrySaveFailed, error, stackTrace);
       notifyListeners();
       return false;
     }
@@ -271,12 +274,12 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       userId = _profileRepository.currentUserId;
     } catch (error, stackTrace) {
-      _failWith('Fotoğraf yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.photoUploadFailed, error, stackTrace);
       notifyListeners();
       return;
     }
     if (userId == null) {
-      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      _error = ProfileError.sessionNotFound;
       notifyListeners();
       return;
     }
@@ -287,7 +290,7 @@ class ProfileViewModel extends ChangeNotifier {
       if (picked == null) return;
 
       _isUploadingAvatar = true;
-      _errorMessage = null;
+      _error = null;
       notifyListeners();
 
       final url = await _profileRepository.uploadAvatar(
@@ -307,7 +310,7 @@ class ProfileViewModel extends ChangeNotifier {
       _profile = updated;
       _avatarUrl = url;
     } catch (error, stackTrace) {
-      _failWith('Fotoğraf yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.photoUploadFailed, error, stackTrace);
     }
 
     _isUploadingAvatar = false;
@@ -342,20 +345,20 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Kullanıcıya gösterilecek mesajı yazar, teknik detayı geliştirici
-  /// konsoluna bırakır. Sessiz `catch (_)` bir backend değişikliğini (kolon
-  /// tipi, RLS) fark edilmez hâle getiriyordu.
-  void _failWith(String message, Object error, StackTrace stackTrace) {
-    _errorMessage = message;
+  /// Records the failure reason and leaves the technical detail in the
+  /// developer console. A silent `catch (_)` used to hide backend changes
+  /// (column type, RLS) from view.
+  void _failWith(ProfileError error, Object cause, StackTrace stackTrace) {
+    _error = error;
     if (kDebugMode) {
-      debugPrint('ProfileViewModel: $message <- $error');
+      debugPrint('ProfileViewModel: ${error.name} <- $cause');
       debugPrintStack(stackTrace: stackTrace);
     }
   }
 
   void clearError() {
-    if (_errorMessage == null) return;
-    _errorMessage = null;
+    if (_error == null) return;
+    _error = null;
     notifyListeners();
   }
 
@@ -364,7 +367,7 @@ class ProfileViewModel extends ChangeNotifier {
   /// boş taslakla başlanır.
   Future<void> load() async {
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     _loadFailed = false;
     notifyListeners();
 
@@ -375,7 +378,7 @@ class ProfileViewModel extends ChangeNotifier {
       if (userId == null) {
         _isLoading = false;
         _loadFailed = true;
-        _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+        _error = ProfileError.sessionNotFound;
         notifyListeners();
         return;
       }
@@ -387,7 +390,7 @@ class ProfileViewModel extends ChangeNotifier {
       _applyToDraft(_profile);
     } catch (error, stackTrace) {
       _loadFailed = true;
-      _failWith('Profil yüklenemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.profileLoadFailed, error, stackTrace);
     }
 
     _isLoading = false;
@@ -400,18 +403,18 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       userId = _profileRepository.currentUserId;
     } catch (error, stackTrace) {
-      _failWith('Profil kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.profileSaveFailed, error, stackTrace);
       notifyListeners();
       return false;
     }
     if (userId == null) {
-      _errorMessage = 'Oturum bulunamadı. Lütfen tekrar giriş yap.';
+      _error = ProfileError.sessionNotFound;
       notifyListeners();
       return false;
     }
 
     _isSaving = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
@@ -434,7 +437,7 @@ class ProfileViewModel extends ChangeNotifier {
       return true;
     } catch (error, stackTrace) {
       _isSaving = false;
-      _failWith('Profil kaydedilemedi. Lütfen tekrar dene.', error, stackTrace);
+      _failWith(ProfileError.profileSaveFailed, error, stackTrace);
       notifyListeners();
       return false;
     }

@@ -139,6 +139,126 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'İngilizce'**
   String get languageEnglish;
+
+  /// Generic cancel button label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vazgeç'**
+  String get cancel;
+
+  /// Generic confirm button label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamam'**
+  String get ok;
+
+  /// Profile screen app bar title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil'**
+  String get profileTitle;
+
+  /// Snackbar shown after the display name is saved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adın güncellendi.'**
+  String get nameUpdated;
+
+  /// Snackbar shown after the profile is saved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilin güncellendi.'**
+  String get profileUpdated;
+
+  /// Error when the current session cannot be read.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturum bulunamadı. Lütfen tekrar giriş yap.'**
+  String get sessionNotFound;
+
+  /// Error when the profile fails to load.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil yüklenemedi. Lütfen tekrar dene.'**
+  String get profileLoadFailed;
+
+  /// Error when saving the profile fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil kaydedilemedi. Lütfen tekrar dene.'**
+  String get profileSaveFailed;
+
+  /// Error when saving the display name fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad kaydedilemedi. Lütfen tekrar dene.'**
+  String get nameSaveFailed;
+
+  /// Error when saving the country fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke kaydedilemedi. Lütfen tekrar dene.'**
+  String get countrySaveFailed;
+
+  /// Error when uploading the avatar fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraf yüklenemedi. Lütfen tekrar dene.'**
+  String get photoUploadFailed;
+
+  /// Title of the name edit dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adın'**
+  String get nameDialogTitle;
+
+  /// Hint text of the name edit field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adını yaz'**
+  String get nameDialogHint;
+
+  /// Accessibility label and tooltip for the avatar edit action.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil fotoğrafını değiştir'**
+  String get changePhotoLabel;
+
+  /// Shown in the header when the user has no display name yet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adını ekle'**
+  String get addNamePrompt;
+
+  /// Header fallback when no email is available.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta bulunamadı'**
+  String get emailNotFound;
+
+  /// Offers to consult the chatbot about a custom allergen.
+  ///
+  /// In tr, this message translates to:
+  /// **'\'{value}\' özel bir alerjen. Doğru anlaşıldığından emin olmak için chatbot\'a danışmak ister misin?'**
+  String customAllergenConsultPrompt(String value);
+
+  /// Declines the chatbot consultation offer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerek yok'**
+  String get consultNotNeeded;
+
+  /// Accepts the chatbot consultation offer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Chatbot\'a sor'**
+  String get consultAskChatbot;
+
+  /// Prefilled chatbot question about a custom allergen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilime alerjen olarak \'{value}\' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?'**
+  String customAllergenChatbotPrefill(String value);
 }
 
 class _AppLocalizationsDelegate

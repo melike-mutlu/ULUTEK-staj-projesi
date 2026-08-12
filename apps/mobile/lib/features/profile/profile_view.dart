@@ -6,10 +6,12 @@ import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/error_state_view.dart';
 import '../../shared/widgets/inline_error_row.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../shell/shell_viewmodel.dart';
+import 'profile_error.dart';
 import 'profile_viewmodel.dart';
 import 'widgets/name_edit_dialog.dart';
 import 'widgets/profile_header.dart';
@@ -71,9 +73,20 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     final saved = await viewModel.saveDisplayName(result);
     if (!mounted || !saved) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Adın güncellendi.')),
+      SnackBar(content: Text(AppLocalizations.of(context).nameUpdated)),
     );
   }
+
+  /// Maps a [ProfileError] to its localized message.
+  String _errorText(AppLocalizations l10n, ProfileError error) =>
+      switch (error) {
+        ProfileError.sessionNotFound => l10n.sessionNotFound,
+        ProfileError.profileLoadFailed => l10n.profileLoadFailed,
+        ProfileError.profileSaveFailed => l10n.profileSaveFailed,
+        ProfileError.nameSaveFailed => l10n.nameSaveFailed,
+        ProfileError.countrySaveFailed => l10n.countrySaveFailed,
+        ProfileError.photoUploadFailed => l10n.photoUploadFailed,
+      };
 
   /// Offers to clarify a just-added custom allergen with the chatbot. Runs
   /// post-frame so the "add allergen" dialog is fully dismissed first and the
@@ -81,20 +94,19 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   void _offerChatbotForCustomAllergen(String value) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       final consult = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) => AlertDialog(
-          content: Text(
-            "'$value' özel bir alerjen. Doğru anlaşıldığından emin olmak için chatbot'a danışmak ister misin?",
-          ),
+          content: Text(l10n.customAllergenConsultPrompt(value)),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Gerek yok'),
+              child: Text(l10n.consultNotNeeded),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Chatbot\'a sor'),
+              child: Text(l10n.consultAskChatbot),
             ),
           ],
         ),
@@ -107,7 +119,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   /// The unsaved allergen stays in the draft; it saves with "Kaydet" as usual.
   void _consultChatbot(String value) {
     ref.read(chatbotViewModelProvider).setPendingInput(
-          "Profilime alerjen olarak '$value' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?",
+          AppLocalizations.of(context).customAllergenChatbotPrefill(value),
         );
     ref.read(shellViewModelProvider).selectTab(ShellTab.chatbot);
   }
@@ -116,13 +128,14 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     final saved = await viewModel.save();
     if (!mounted || !saved) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profilin güncellendi.')),
+      SnackBar(content: Text(AppLocalizations.of(context).profileUpdated)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = ref.watch(profileViewModelProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -130,13 +143,13 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
         backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: false,
-        title: const Text('Profil', style: AppTextStyles.heading2),
+        title: Text(l10n.profileTitle, style: AppTextStyles.heading2),
         actions: <Widget>[
           IconButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
             icon: const Icon(Icons.settings_outlined),
             color: AppColors.textPrimary,
-            tooltip: 'Ayarlar',
+            tooltip: l10n.settingsTitle,
           ),
         ],
       ),
@@ -153,8 +166,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
       return const Center(child: CircularProgressIndicator());
     }
     if (viewModel.loadFailed) {
+      final l10n = AppLocalizations.of(context);
       return ErrorStateView(
-        message: viewModel.errorMessage ?? 'Profil yüklenemedi.',
+        message: _errorText(l10n, viewModel.error ?? ProfileError.profileLoadFailed),
         onRetry: viewModel.load,
       );
     }
@@ -166,6 +180,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     // shell_view.dart `_TabContentInset`); opened standalone this is just the
     // system safe area.
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final l10n = AppLocalizations.of(context);
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
@@ -212,16 +227,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 ),
                 const SizedBox(height: _sectionGap),
               ],
-              if (viewModel.errorMessage != null) ...<Widget>[
+              if (viewModel.error != null) ...<Widget>[
                 InlineErrorRow(
-                  message: viewModel.errorMessage!,
+                  message: _errorText(l10n, viewModel.error!),
                   onRetry: () => _save(viewModel),
                   onDismiss: viewModel.clearError,
                 ),
                 const SizedBox(height: 12),
               ],
               PrimaryButton(
-                label: 'Kaydet',
+                label: l10n.save,
                 isCompact: true,
                 alignment: Alignment.centerRight,
                 isLoading: viewModel.isSaving,

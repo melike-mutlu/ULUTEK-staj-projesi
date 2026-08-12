@@ -27,5 +27,95 @@
   "languageEnglish": "İngilizce",
   "@languageEnglish": {
     "description": "English language option."
+  },
+  "cancel": "Vazgeç",
+  "@cancel": {
+    "description": "Generic cancel button label."
+  },
+  "ok": "Tamam",
+  "@ok": {
+    "description": "Generic confirm button label."
+  },
+  "profileTitle": "Profil",
+  "@profileTitle": {
+    "description": "Profile screen app bar title."
+  },
+  "nameUpdated": "Adın güncellendi.",
+  "@nameUpdated": {
+    "description": "Snackbar shown after the display name is saved."
+  },
+  "profileUpdated": "Profilin güncellendi.",
+  "@profileUpdated": {
+    "description": "Snackbar shown after the profile is saved."
+  },
+  "sessionNotFound": "Oturum bulunamadı. Lütfen tekrar giriş yap.",
+  "@sessionNotFound": {
+    "description": "Error when the current session cannot be read."
+  },
+  "profileLoadFailed": "Profil yüklenemedi. Lütfen tekrar dene.",
+  "@profileLoadFailed": {
+    "description": "Error when the profile fails to load."
+  },
+  "profileSaveFailed": "Profil kaydedilemedi. Lütfen tekrar dene.",
+  "@profileSaveFailed": {
+    "description": "Error when saving the profile fails."
+  },
+  "nameSaveFailed": "Ad kaydedilemedi. Lütfen tekrar dene.",
+  "@nameSaveFailed": {
+    "description": "Error when saving the display name fails."
+  },
+  "countrySaveFailed": "Ülke kaydedilemedi. Lütfen tekrar dene.",
+  "@countrySaveFailed": {
+    "description": "Error when saving the country fails."
+  },
+  "photoUploadFailed": "Fotoğraf yüklenemedi. Lütfen tekrar dene.",
+  "@photoUploadFailed": {
+    "description": "Error when uploading the avatar fails."
+  },
+  "nameDialogTitle": "Adın",
+  "@nameDialogTitle": {
+    "description": "Title of the name edit dialog."
+  },
+  "nameDialogHint": "Adını yaz",
+  "@nameDialogHint": {
+    "description": "Hint text of the name edit field."
+  },
+  "changePhotoLabel": "Profil fotoğrafını değiştir",
+  "@changePhotoLabel": {
+    "description": "Accessibility label and tooltip for the avatar edit action."
+  },
+  "addNamePrompt": "Adını ekle",
+  "@addNamePrompt": {
+    "description": "Shown in the header when the user has no display name yet."
+  },
+  "emailNotFound": "E-posta bulunamadı",
+  "@emailNotFound": {
+    "description": "Header fallback when no email is available."
+  },
+  "customAllergenConsultPrompt": "'{value}' özel bir alerjen. Doğru anlaşıldığından emin olmak için chatbot'a danışmak ister misin?",
+  "@customAllergenConsultPrompt": {
+    "description": "Offers to consult the chatbot about a custom allergen.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "consultNotNeeded": "Gerek yok",
+  "@consultNotNeeded": {
+    "description": "Declines the chatbot consultation offer."
+  },
+  "consultAskChatbot": "Chatbot'a sor",
+  "@consultAskChatbot": {
+    "description": "Accepts the chatbot consultation offer."
+  },
+  "customAllergenChatbotPrefill": "Profilime alerjen olarak '{value}' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?",
+  "@customAllergenChatbotPrefill": {
+    "description": "Prefilled chatbot question about a custom allergen.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
   }
 }

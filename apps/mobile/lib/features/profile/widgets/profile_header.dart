@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/user_avatar_circle.dart';
 
 /// Profile header: centered photo + name + email.
@@ -37,6 +38,7 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: <Widget>[
         Stack(
@@ -47,7 +49,7 @@ class ProfileHeader extends StatelessWidget {
               size: _avatarSize,
               isLoading: isUploadingPhoto,
               onTap: onEditPhoto,
-              semanticLabel: 'Profil fotoğrafını değiştir',
+              semanticLabel: l10n.changePhotoLabel,
             ),
             // The badge repeats the avatar's own action: it is the affordance
             // that says the photo is editable at all.
@@ -56,7 +58,7 @@ class ProfileHeader extends StatelessWidget {
               bottom: 0,
               child: _EditBadge(
                 onTap: onEditPhoto,
-                tooltip: 'Profil fotoğrafını değiştir',
+                tooltip: l10n.changePhotoLabel,
               ),
             ),
           ],
@@ -73,7 +75,7 @@ class ProfileHeader extends StatelessWidget {
                 // Flexible: a long name must not push the pencil icon off-screen.
                 Flexible(
                   child: Text(
-                    name.isEmpty ? 'Adını ekle' : name,
+                    name.isEmpty ? l10n.addNamePrompt : name,
                     style: AppTextStyles.profileName,
                     textAlign: TextAlign.center,
                   ),
@@ -90,7 +92,7 @@ class ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          email ?? 'E-posta bulunamadı',
+          email ?? l10n.emailNotFound,
           style: AppTextStyles.profileEmail,
           textAlign: TextAlign.center,
         ),

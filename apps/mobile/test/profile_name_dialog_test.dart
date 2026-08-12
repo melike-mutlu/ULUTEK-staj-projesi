@@ -1,5 +1,6 @@
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 import 'package:akilli_sepet/features/profile/profile_view.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 import 'package:akilli_sepet/shared/services/image_picker_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +17,12 @@ Widget _profileUnderTest(ProfileRepository repository) {
       profileRepositoryProvider.overrideWithValue(repository),
       imagePickerServiceProvider.overrideWithValue(_NoopImagePickerService()),
     ],
-    child: const MaterialApp(home: ProfileView()),
+    child: const MaterialApp(
+      locale: Locale('tr'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: ProfileView(),
+    ),
   );
 }
 

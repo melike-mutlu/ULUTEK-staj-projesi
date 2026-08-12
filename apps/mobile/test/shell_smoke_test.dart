@@ -11,6 +11,7 @@ import 'package:akilli_sepet/features/shell/shell_view.dart';
 import 'package:akilli_sepet/features/shell/shell_viewmodel.dart';
 import 'package:akilli_sepet/features/shell/widgets/glass_bottom_nav.dart';
 import 'package:akilli_sepet/features/startup/startup_gate.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 import 'package:akilli_sepet/shared/widgets/user_avatar_circle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,7 +56,11 @@ Widget _shellUnderTest() {
       profileRepositoryProvider.overrideWithValue(InMemoryProfileRepository()),
       chatbotRepositoryProvider.overrideWithValue(_FakeChatbotRepository()),
     ],
-    child: const MaterialApp(home: ShellView()),
+    child: const MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: ShellView(),
+    ),
   );
 }
 
