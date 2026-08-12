@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:akilli_sepet/core/models/product.dart';
 import 'package:akilli_sepet/features/product_detail/widgets/product_header_card.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 
 /// Widths cover a narrow phone (280), the reported overflow case (310) and a
 /// common phone width (360).
@@ -44,6 +45,9 @@ final _scenarios = <String, Product>{
 
 Widget _cardAt(double width, Product product) {
   return MaterialApp(
+    locale: const Locale('tr'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(
       body: Center(
         child: SizedBox(width: width, child: ProductHeaderCard(product: product)),

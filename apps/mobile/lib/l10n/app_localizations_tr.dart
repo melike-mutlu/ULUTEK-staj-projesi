@@ -553,4 +553,204 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get submitFailed => 'Gönderim başarısız oldu.';
+
+  @override
+  String get productDetailTitle => 'Ürün Detayı';
+
+  @override
+  String get loadingProductAnalysis =>
+      'Ürün bilgileri ve AI analizi getiriliyor...';
+
+  @override
+  String get dietType => 'Diyet türü';
+
+  @override
+  String get noDietPreference => 'Kayıtlı bir diyet tercihin yok.';
+
+  @override
+  String get healthConditionTitle => 'Sağlık durumu';
+
+  @override
+  String get noHealthCondition => 'Kayıtlı bir sağlık durumun yok.';
+
+  @override
+  String get reportToUs => 'Ürünü Bize Bildir';
+
+  @override
+  String get errorOccurred => 'Bir Hata Oluştu';
+
+  @override
+  String get productDetailServerError =>
+      'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.';
+
+  @override
+  String get goBack => 'Geri Dön';
+
+  @override
+  String get tryAgain => 'Tekrar Dene';
+
+  @override
+  String get productNotFoundTitle => 'Bu ürünü veritabanımızda\nbulamadık';
+
+  @override
+  String get productNotFoundBody =>
+      'Yanlış bilgi vermektense dürüst olmayı tercih ederiz. Barkodu elle girebilir ya da ürünü bize bildirerek yardımcı olabilirsin.';
+
+  @override
+  String get sampleProductDemo => 'Örnek Ürünü Göster (Demo)';
+
+  @override
+  String get allergiesTitle => 'Alerjiler';
+
+  @override
+  String get insufficientAllergenInfo =>
+      'İçerik bilgisi eksik, alerjen kontrolü yapılamadı.';
+
+  @override
+  String warningsCount(int count) {
+    return '$count uyarı';
+  }
+
+  @override
+  String get noProfileAllergens =>
+      'Profilindeki alerjenlerin hiçbiri bu üründe yok.';
+
+  @override
+  String get conflictsWithAllergies => 'Profilindeki alerjilerle çakışıyor';
+
+  @override
+  String get otherAllergensTitle => 'Diğer alerjenler';
+
+  @override
+  String get notInYourProfile => 'profilinde yok';
+
+  @override
+  String get ingredientsTitle => 'İçindekiler';
+
+  @override
+  String get noIngredientsInfo => 'Bu ürün için içindekiler bilgisi yok.';
+
+  @override
+  String get showLess => 'Daha az göster';
+
+  @override
+  String get showAllText => 'Tümünü göster';
+
+  @override
+  String get nutrimentsTitle => 'Besin değerleri';
+
+  @override
+  String get per100g => '100 g için';
+
+  @override
+  String get noInfo => 'Bilgi yok';
+
+  @override
+  String get unverified => 'Doğrulanmadı';
+
+  @override
+  String get insufficientContentInfo => 'Bu ürünün içerik bilgisi eksik.';
+
+  @override
+  String get recommendationsTitle => 'Öneriler';
+
+  @override
+  String get seeAll => 'Tümünü gör';
+
+  @override
+  String get recommendationsNeutralityNote =>
+      'Seçimlerimiz tarafsızdır: hiçbir marka burada yer almak için ödeme yapmaz.';
+
+  @override
+  String get nutrientEnergy => 'Enerji';
+
+  @override
+  String get nutrientSugar => 'Şeker';
+
+  @override
+  String get nutrientFat => 'Yağ';
+
+  @override
+  String get nutrientProtein => 'Protein';
+
+  @override
+  String get energyLow => 'Düşük kalorili';
+
+  @override
+  String get energyMedium => 'Orta kalorili';
+
+  @override
+  String get energyHigh => 'Yüksek kalorili';
+
+  @override
+  String get sugarLow => 'Az şekerli';
+
+  @override
+  String get sugarMedium => 'Orta düzeyde şekerli';
+
+  @override
+  String get sugarHigh => 'Çok şekerli';
+
+  @override
+  String get fatLow => 'Az yağlı';
+
+  @override
+  String get fatMedium => 'Orta düzeyde yağlı';
+
+  @override
+  String get fatHigh => 'Çok yağlı';
+
+  @override
+  String get proteinHigh => 'Protein açısından zengin';
+
+  @override
+  String get proteinMedium => 'Bir miktar protein';
+
+  @override
+  String get proteinLow => 'Çok az protein';
+
+  @override
+  String get checkNotEvaluated => 'Bu ürün için değerlendirilemedi';
+
+  @override
+  String get dietIncompatibleNote => 'Bu üründe uygun olmayan içerik var';
+
+  @override
+  String get dietCompatibleNote => 'Bu ürün tercihinle uyumlu';
+
+  @override
+  String get healthConflictNote => 'Bu üründe durumun için riskli içerik var';
+
+  @override
+  String get healthOkNote => 'Bu ürün için özel bir uyarı yok';
+
+  @override
+  String get reasonAllergenIntro => 'Sende alerji yapan ';
+
+  @override
+  String get reasonAllergenOutro => ' içeriyor. ';
+
+  @override
+  String get reasonAnd => ' ve ';
+
+  @override
+  String get reasonDietOutro => ' beslenmene uygun değil. ';
+
+  @override
+  String get reasonHealthIntro => 'Profilindeki ';
+
+  @override
+  String get reasonHealthMid => ' için: ';
+
+  @override
+  String get reasonAllergenLineIntro => '';
+
+  @override
+  String get reasonAllergenLineOutro => ' içeriyor.';
+
+  @override
+  String get reasonDietLineOutro => ' beslenmene uygun değil.';
+
+  @override
+  String get reasonHealthLineOutro => ' durumu için uygun değil.';
 }

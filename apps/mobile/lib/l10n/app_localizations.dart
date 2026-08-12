@@ -1105,6 +1105,390 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Gönderim başarısız oldu.'**
   String get submitFailed;
+
+  /// Product detail app bar title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün Detayı'**
+  String get productDetailTitle;
+
+  /// Loading state on the product detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün bilgileri ve AI analizi getiriliyor...'**
+  String get loadingProductAnalysis;
+
+  /// Section title for diet preference checks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diyet türü'**
+  String get dietType;
+
+  /// Empty state for the diet section.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıtlı bir diyet tercihin yok.'**
+  String get noDietPreference;
+
+  /// Section title for health condition checks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sağlık durumu'**
+  String get healthConditionTitle;
+
+  /// Empty state for the health section.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıtlı bir sağlık durumun yok.'**
+  String get noHealthCondition;
+
+  /// Button to report a product.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürünü Bize Bildir'**
+  String get reportToUs;
+
+  /// Error state title on product detail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir Hata Oluştu'**
+  String get errorOccurred;
+
+  /// Error state body on product detail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.'**
+  String get productDetailServerError;
+
+  /// Go back button.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri Dön'**
+  String get goBack;
+
+  /// Retry button.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar Dene'**
+  String get tryAgain;
+
+  /// Not-found state title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürünü veritabanımızda\nbulamadık'**
+  String get productNotFoundTitle;
+
+  /// Not-found state body.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yanlış bilgi vermektense dürüst olmayı tercih ederiz. Barkodu elle girebilir ya da ürünü bize bildirerek yardımcı olabilirsin.'**
+  String get productNotFoundBody;
+
+  /// Demo button showing a sample product.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örnek Ürünü Göster (Demo)'**
+  String get sampleProductDemo;
+
+  /// Personal allergens section title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alerjiler'**
+  String get allergiesTitle;
+
+  /// Shown when allergen data is missing.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçerik bilgisi eksik, alerjen kontrolü yapılamadı.'**
+  String get insufficientAllergenInfo;
+
+  /// Meta count of allergen warnings.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} uyarı'**
+  String warningsCount(int count);
+
+  /// No personal allergens in the product.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilindeki alerjenlerin hiçbiri bu üründe yok.'**
+  String get noProfileAllergens;
+
+  /// Row subtitle for a conflicting allergen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilindeki alerjilerle çakışıyor'**
+  String get conflictsWithAllergies;
+
+  /// Section title for non-personal allergens.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer alerjenler'**
+  String get otherAllergensTitle;
+
+  /// Meta for other allergens.
+  ///
+  /// In tr, this message translates to:
+  /// **'profilinde yok'**
+  String get notInYourProfile;
+
+  /// Ingredients section title.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçindekiler'**
+  String get ingredientsTitle;
+
+  /// Empty state for ingredients.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün için içindekiler bilgisi yok.'**
+  String get noIngredientsInfo;
+
+  /// Collapse a long text.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha az göster'**
+  String get showLess;
+
+  /// Expand a long text.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü göster'**
+  String get showAllText;
+
+  /// Nutrition facts section title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Besin değerleri'**
+  String get nutrimentsTitle;
+
+  /// Meta noting values are per 100 g.
+  ///
+  /// In tr, this message translates to:
+  /// **'100 g için'**
+  String get per100g;
+
+  /// Shown when a nutrient value is missing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilgi yok'**
+  String get noInfo;
+
+  /// Badge for an unverified product.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğrulanmadı'**
+  String get unverified;
+
+  /// Reason shown when content data is insufficient.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürünün içerik bilgisi eksik.'**
+  String get insufficientContentInfo;
+
+  /// Recommendations section title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneriler'**
+  String get recommendationsTitle;
+
+  /// See-all link for recommendations.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü gör'**
+  String get seeAll;
+
+  /// Neutrality note under recommendations.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçimlerimiz tarafsızdır: hiçbir marka burada yer almak için ödeme yapmaz.'**
+  String get recommendationsNeutralityNote;
+
+  /// Energy nutrient label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Enerji'**
+  String get nutrientEnergy;
+
+  /// Sugar nutrient label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şeker'**
+  String get nutrientSugar;
+
+  /// Fat nutrient label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yağ'**
+  String get nutrientFat;
+
+  /// Protein nutrient label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Protein'**
+  String get nutrientProtein;
+
+  /// Low energy note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşük kalorili'**
+  String get energyLow;
+
+  /// Medium energy note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Orta kalorili'**
+  String get energyMedium;
+
+  /// High energy note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüksek kalorili'**
+  String get energyHigh;
+
+  /// Low sugar note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Az şekerli'**
+  String get sugarLow;
+
+  /// Medium sugar note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Orta düzeyde şekerli'**
+  String get sugarMedium;
+
+  /// High sugar note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok şekerli'**
+  String get sugarHigh;
+
+  /// Low fat note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Az yağlı'**
+  String get fatLow;
+
+  /// Medium fat note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Orta düzeyde yağlı'**
+  String get fatMedium;
+
+  /// High fat note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok yağlı'**
+  String get fatHigh;
+
+  /// High protein note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Protein açısından zengin'**
+  String get proteinHigh;
+
+  /// Medium protein note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir miktar protein'**
+  String get proteinMedium;
+
+  /// Low protein note.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok az protein'**
+  String get proteinLow;
+
+  /// Profile check note when it can't be judged.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün için değerlendirilemedi'**
+  String get checkNotEvaluated;
+
+  /// Diet check note when incompatible.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üründe uygun olmayan içerik var'**
+  String get dietIncompatibleNote;
+
+  /// Diet check note when compatible.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün tercihinle uyumlu'**
+  String get dietCompatibleNote;
+
+  /// Health check note when risky.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üründe durumun için riskli içerik var'**
+  String get healthConflictNote;
+
+  /// Health check note when fine.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün için özel bir uyarı yok'**
+  String get healthOkNote;
+
+  /// Prefix of the flat allergen warning; the allergen names follow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sende alerji yapan '**
+  String get reasonAllergenIntro;
+
+  /// Suffix of the flat allergen warning.
+  ///
+  /// In tr, this message translates to:
+  /// **' içeriyor. '**
+  String get reasonAllergenOutro;
+
+  /// Connector between the last two items in a list.
+  ///
+  /// In tr, this message translates to:
+  /// **' ve '**
+  String get reasonAnd;
+
+  /// Suffix after a diet label in the flat warning.
+  ///
+  /// In tr, this message translates to:
+  /// **' beslenmene uygun değil. '**
+  String get reasonDietOutro;
+
+  /// Prefix before a health label in the flat warning.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilindeki '**
+  String get reasonHealthIntro;
+
+  /// Connector between a health label and its note.
+  ///
+  /// In tr, this message translates to:
+  /// **' için: '**
+  String get reasonHealthMid;
+
+  /// Prefix of the allergen bullet line (empty in Turkish).
+  ///
+  /// In tr, this message translates to:
+  /// **''**
+  String get reasonAllergenLineIntro;
+
+  /// Suffix of the allergen bullet line.
+  ///
+  /// In tr, this message translates to:
+  /// **' içeriyor.'**
+  String get reasonAllergenLineOutro;
+
+  /// Suffix of the diet bullet line.
+  ///
+  /// In tr, this message translates to:
+  /// **' beslenmene uygun değil.'**
+  String get reasonDietLineOutro;
+
+  /// Suffix of the health bullet line.
+  ///
+  /// In tr, this message translates to:
+  /// **' durumu için uygun değil.'**
+  String get reasonHealthLineOutro;
 }
 
 class _AppLocalizationsDelegate

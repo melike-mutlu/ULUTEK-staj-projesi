@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/product.dart';
 import '../../../core/theme/akilli_sepet_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import 'nutri_score_badge.dart';
 
 /// Nutri-Score values Open Food Facts sends when it has no grade.
@@ -154,14 +155,14 @@ class _PendingBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: const Color(0xFFF59E0B)),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.gpp_maybe_rounded, size: 13, color: Color(0xFFB45309)),
-          SizedBox(width: 4),
+          const Icon(Icons.gpp_maybe_rounded, size: 13, color: Color(0xFFB45309)),
+          const SizedBox(width: 4),
           Text(
-            'Doğrulanmadı',
-            style: TextStyle(
+            AppLocalizations.of(context).unverified,
+            style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
               color: Color(0xFFB45309),

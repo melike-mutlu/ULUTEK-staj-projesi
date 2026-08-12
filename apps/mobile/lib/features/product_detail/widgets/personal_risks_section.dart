@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/allergen_catalog.dart';
 import '../../../core/models/explanation.dart';
 import '../../../core/models/rule_engine_result.dart';
+import '../../../l10n/app_localizations.dart';
 import 'detail_row.dart';
 import 'detail_section.dart';
 import 'section_note.dart';
@@ -18,25 +19,26 @@ class PersonalRisksSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final risks = (ruleEngineResult?.personalRiskKeys ?? const <String>[])
         .map(allergenInfo)
         .toList();
 
     // Without allergen data an empty risk list is not proof of safety.
     if (risks.isEmpty && ruleEngineResult?.hasSufficientData == false) {
-      return const DetailSection(
-        title: 'Alerjiler',
+      return DetailSection(
+        title: l10n.allergiesTitle,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
-                AllergenIcon(asset: '$_assetDir/nope.png'),
-                SizedBox(width: 12),
+                const AllergenIcon(asset: '$_assetDir/nope.png'),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'İçerik bilgisi eksik, alerjen kontrolü yapılamadı.',
-                    style: TextStyle(
+                    l10n.insufficientAllergenInfo,
+                    style: const TextStyle(
                       fontSize: 15,
                       color: Color(0xFF6B7280),
                       height: 1.35,
@@ -51,19 +53,16 @@ class PersonalRisksSection extends StatelessWidget {
     }
 
     return DetailSection(
-      title: 'Alerjiler',
-      meta: risks.isEmpty ? null : '${risks.length} uyarı',
+      title: l10n.allergiesTitle,
+      meta: risks.isEmpty ? null : l10n.warningsCount(risks.length),
       children: risks.isEmpty
-          ? const [
-              SectionNote(
-                  text: 'Profilindeki alerjenlerin hiçbiri bu üründe yok.')
-            ]
+          ? [SectionNote(text: l10n.noProfileAllergens)]
           : [
               for (final risk in risks)
                 DetailRow(
                   leading: AllergenIcon(asset: risk.asset),
                   title: risk.label,
-                  subtitle: 'Profilindeki alerjilerle çakışıyor',
+                  subtitle: l10n.conflictsWithAllergies,
                   level: WarningLevel.warning,
                 ),
             ],

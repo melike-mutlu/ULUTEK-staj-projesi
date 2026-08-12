@@ -18,6 +18,7 @@ import 'package:akilli_sepet/data/repositories/product_repository.dart';
 import 'package:akilli_sepet/data/repositories/profile_repository.dart';
 import 'package:akilli_sepet/data/repositories/explanation_repository.dart';
 import 'package:akilli_sepet/core/models/user_profile.dart';
+import 'package:akilli_sepet/l10n/app_localizations.dart';
 
 const _foundFetchResult = ProductFetchResult(
   status: 'found',
@@ -105,6 +106,9 @@ Widget _productDetailUnderTest(
         productRepositoryProvider.overrideWithValue(productRepository),
     ],
     child: MaterialApp(
+      locale: const Locale('tr'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       onGenerateRoute: (_) => MaterialPageRoute<void>(
         builder: (_) => const ProductDetailView(),
         settings: RouteSettings(arguments: arguments),
@@ -125,6 +129,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: WarningBanner(explanation: explanation),
         ),
@@ -147,6 +154,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: WarningBanner(
             explanation: explanation,
@@ -179,6 +189,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: WarningBanner(explanation: explanation, insufficientData: true),
         ),
@@ -204,6 +217,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: PersonalRisksSection(ruleEngineResult: result),
         ),
@@ -227,6 +243,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: PersonalRisksSection(ruleEngineResult: result),
         ),
@@ -262,6 +281,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: OtherAllergensSection(
             product: product,
@@ -289,6 +311,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: IngredientsSection(product: product)),
       ),
     );
@@ -306,6 +331,9 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: NutrimentsCard(
             nutriments: Nutriments(
@@ -341,6 +369,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: ProductHeaderCard(product: product),
         ),
@@ -393,6 +424,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('tr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: ProductHeaderCard(product: pendingProduct),
         ),

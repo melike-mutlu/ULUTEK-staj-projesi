@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/allergen_catalog.dart';
 import '../../../core/models/product.dart';
 import '../../../core/models/rule_engine_result.dart';
+import '../../../l10n/app_localizations.dart';
 import 'detail_section.dart';
 import 'personal_risks_section.dart';
 
@@ -38,12 +39,13 @@ class OtherAllergensSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final others = _others();
     if (others.isEmpty) return const SizedBox.shrink();
 
     return DetailSection(
-      title: 'Diğer alerjenler',
-      meta: 'profilinde yok',
+      title: l10n.otherAllergensTitle,
+      meta: l10n.notInYourProfile,
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 10, bottom: 4),

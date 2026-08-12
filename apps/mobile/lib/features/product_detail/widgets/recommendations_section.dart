@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/alternative.dart';
 import '../../../core/navigation/app_routes.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/app_localizations.dart';
 import 'recommendation_card.dart';
 import 'recommendations_sheet.dart';
 
@@ -19,6 +20,7 @@ class RecommendationsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (alternatives.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 28),
@@ -29,21 +31,21 @@ class RecommendationsSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              const Expanded(
-                child: Text('Öneriler', style: AppTextStyles.heading2),
+              Expanded(
+                child: Text(l10n.recommendationsTitle, style: AppTextStyles.heading2),
               ),
               if (alternatives.length > _seeAllThreshold)
                 GestureDetector(
                   onTap: () => showRecommendationsSheet(context, alternatives),
                   behavior: HitTestBehavior.opaque,
                   child:
-                      const Text('Tümünü gör', style: AppTextStyles.profileLink),
+                      Text(l10n.seeAll, style: AppTextStyles.profileLink),
                 ),
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Seçimlerimiz tarafsızdır: hiçbir marka burada yer almak için ödeme yapmaz.',
+          Text(
+            l10n.recommendationsNeutralityNote,
             style: AppTextStyles.caption,
           ),
           const SizedBox(height: 16),

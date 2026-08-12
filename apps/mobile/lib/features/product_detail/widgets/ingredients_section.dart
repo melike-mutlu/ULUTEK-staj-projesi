@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/product.dart';
+import '../../../l10n/app_localizations.dart';
 import 'detail_section.dart';
 
 /// Ingredients text and additives. Collapsed by default so a long ingredient
@@ -21,13 +22,14 @@ class _IngredientsSectionState extends State<IngredientsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final text = widget.product.ingredientsText.trim();
     final additives = widget.product.additives;
 
     if (text.isEmpty && additives.isEmpty) return const SizedBox.shrink();
 
     return DetailSection(
-      title: 'İçindekiler',
+      title: l10n.ingredientsTitle,
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 10),
@@ -46,9 +48,9 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                 const SizedBox(height: 12),
               ],
               if (text.isEmpty)
-                const Text(
-                  'Bu ürün için içindekiler bilgisi yok.',
-                  style: TextStyle(
+                Text(
+                  l10n.noIngredientsInfo,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF9CA3AF),
                     fontStyle: FontStyle.italic,
@@ -75,7 +77,7 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          _expanded ? 'Daha az göster' : 'Tümünü göster',
+                          _expanded ? l10n.showLess : l10n.showAllText,
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,

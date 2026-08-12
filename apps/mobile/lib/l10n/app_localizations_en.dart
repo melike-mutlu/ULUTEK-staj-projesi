@@ -557,4 +557,208 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get submitFailed => 'Submission failed.';
+
+  @override
+  String get productDetailTitle => 'Product details';
+
+  @override
+  String get loadingProductAnalysis =>
+      'Loading product info and AI analysis...';
+
+  @override
+  String get dietType => 'Diet type';
+
+  @override
+  String get noDietPreference => 'You have no saved diet preference.';
+
+  @override
+  String get healthConditionTitle => 'Health condition';
+
+  @override
+  String get noHealthCondition => 'You have no saved health condition.';
+
+  @override
+  String get reportToUs => 'Report this product';
+
+  @override
+  String get errorOccurred => 'An error occurred';
+
+  @override
+  String get productDetailServerError =>
+      'Could not reach the server while loading product details.';
+
+  @override
+  String get goBack => 'Go back';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get productNotFoundTitle =>
+      'We couldn\'t find this\nproduct in our database';
+
+  @override
+  String get productNotFoundBody =>
+      'We\'d rather be honest than give wrong information. You can enter the barcode manually or help us by reporting the product.';
+
+  @override
+  String get sampleProductDemo => 'Show sample product (Demo)';
+
+  @override
+  String get allergiesTitle => 'Allergies';
+
+  @override
+  String get insufficientAllergenInfo =>
+      'Ingredient info is missing; allergen check could not be performed.';
+
+  @override
+  String warningsCount(int count) {
+    return '$count warning(s)';
+  }
+
+  @override
+  String get noProfileAllergens =>
+      'None of your profile allergens are in this product.';
+
+  @override
+  String get conflictsWithAllergies => 'Conflicts with your profile allergies';
+
+  @override
+  String get otherAllergensTitle => 'Other allergens';
+
+  @override
+  String get notInYourProfile => 'not in your profile';
+
+  @override
+  String get ingredientsTitle => 'Ingredients';
+
+  @override
+  String get noIngredientsInfo => 'No ingredient information for this product.';
+
+  @override
+  String get showLess => 'Show less';
+
+  @override
+  String get showAllText => 'Show all';
+
+  @override
+  String get nutrimentsTitle => 'Nutrition facts';
+
+  @override
+  String get per100g => 'per 100 g';
+
+  @override
+  String get noInfo => 'No info';
+
+  @override
+  String get unverified => 'Unverified';
+
+  @override
+  String get insufficientContentInfo =>
+      'This product\'s content information is incomplete.';
+
+  @override
+  String get recommendationsTitle => 'Recommendations';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get recommendationsNeutralityNote =>
+      'Our choices are impartial: no brand pays to appear here.';
+
+  @override
+  String get nutrientEnergy => 'Energy';
+
+  @override
+  String get nutrientSugar => 'Sugar';
+
+  @override
+  String get nutrientFat => 'Fat';
+
+  @override
+  String get nutrientProtein => 'Protein';
+
+  @override
+  String get energyLow => 'Low calorie';
+
+  @override
+  String get energyMedium => 'Medium calorie';
+
+  @override
+  String get energyHigh => 'High calorie';
+
+  @override
+  String get sugarLow => 'Low sugar';
+
+  @override
+  String get sugarMedium => 'Moderate sugar';
+
+  @override
+  String get sugarHigh => 'High sugar';
+
+  @override
+  String get fatLow => 'Low fat';
+
+  @override
+  String get fatMedium => 'Moderate fat';
+
+  @override
+  String get fatHigh => 'High fat';
+
+  @override
+  String get proteinHigh => 'Rich in protein';
+
+  @override
+  String get proteinMedium => 'Some protein';
+
+  @override
+  String get proteinLow => 'Very little protein';
+
+  @override
+  String get checkNotEvaluated => 'Could not be evaluated for this product';
+
+  @override
+  String get dietIncompatibleNote =>
+      'This product contains unsuitable ingredients';
+
+  @override
+  String get dietCompatibleNote => 'This product matches your preference';
+
+  @override
+  String get healthConflictNote =>
+      'This product contains ingredients risky for your condition';
+
+  @override
+  String get healthOkNote => 'No specific warning for this product';
+
+  @override
+  String get reasonAllergenIntro => 'It contains ';
+
+  @override
+  String get reasonAllergenOutro => ', which you react to. ';
+
+  @override
+  String get reasonAnd => ' and ';
+
+  @override
+  String get reasonDietOutro => ' doesn\'t fit your diet. ';
+
+  @override
+  String get reasonHealthIntro => 'For ';
+
+  @override
+  String get reasonHealthMid => ': ';
+
+  @override
+  String get reasonAllergenLineIntro => 'Contains ';
+
+  @override
+  String get reasonAllergenLineOutro => '.';
+
+  @override
+  String get reasonDietLineOutro => ' doesn\'t fit your diet.';
+
+  @override
+  String get reasonHealthLineOutro => ' isn\'t suitable for your condition.';
 }
