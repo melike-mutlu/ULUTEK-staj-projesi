@@ -7,8 +7,16 @@
 // Kullanım:
 //   import { extractFromImages, validateVisionResult } from "./_shared/visionExtract.ts";
 //
-//   // LLM'ye gönder + doğrula
+//   // 1) URL listesiyle (public Storage URL)
 //   const result = await extractFromImages([ingredientsUrl, nutritionUrl]);
+//
+//   // 2) Doğrudan base64 inline data ile (mobil → edge function)
+//   const result = await extractFromImages([
+//     { mime_type: "image/jpeg", data: base64String },
+//   ]);
+//
+//   // 3) Karışık kullanım (URL + inline data bir arada)
+//   const result = await extractFromImages([ingredientsUrl, { mime_type: "image/png", data: b64 }]);
 //
 //   // Sadece doğrulama (LLM çağrısı olmadan, test veya mock veri için)
 //   const validated = validateVisionResult(rawJson);
@@ -21,6 +29,22 @@ import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 // ─────────────────────────────────────────────────────────────────────────────
 // Tip Tanımları
 // ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * extractFromImages'a geçirilebilen görüntü girdisi.
+ *
+ * - `string`  → public URL; fonksiyon içinde fetch edilip base64'e çevrilir.
+ * - `InlineImageData` → base64 encode edilmiş ham piksel verisi (mobil tarafın
+ *   doğrudan gönderdiği format). Storage yüklemesi gerektirmez.
+ */
+export interface InlineImageData {
+  /** IANA medya türü, örn. "image/jpeg", "image/png", "image/webp" */
+  mime_type: string;
+  /** Base64 kodlu ham görüntü baytları (padding dahil) */
+  data: string;
+}
+
+export type ImageInput = string | InlineImageData;
 
 export interface VisionNutrition {
   energy_kcal_100g: number | null;
@@ -341,18 +365,27 @@ async function fetchImageAsInlineData(
  * Bir veya birden fazla ürün etiketi fotoğrafını Vision LLM'e gönderir,
  * dönen JSON'ı ayrıştırır ve doğrular.
  *
- * @param imageUrls  Ürün etiket fotoğraflarının public URL listesi.
- *                   Boş liste verilirse `LlmError` fırlatır.
- * @param model      Gemini model adı. Varsayılan: "gemini-3.6-flash" (bkz. chatbot/index.ts).
+ * Her görüntü şu iki formattan biriyle verilebilir:
+ *
+ * 1. **`string` (URL)** — public erişilebilir görüntü URL'si.
+ *    Fonksiyon içinde `fetch` edilip base64'e dönüştürülür.
+ *
+ * 2. **`InlineImageData`** — `{ mime_type, data }` nesnesi.
+ *    `data` base64 kodlu ham görüntü baytlarıdır; ek bir ağ isteği yapılmaz.
+ *    Mobil istemcinin Storage'a yüklemeden doğrudan gönderdiği format budur.
+ *
+ * @param images  Bir veya daha fazla `ImageInput` (URL ya da InlineImageData).
+ *                Boş dizi verilirse `LlmError` fırlatır.
+ * @param model   Gemini model adı. Varsayılan: "gemini-3.6-flash".
  * @throws LlmError       — API erişim hatası veya JSON ayrıştırma hatası
  * @throws ValidationError — Şema doğrulama hatası
  */
 export async function extractFromImages(
-  imageUrls: string[],
+  images: ImageInput[],
   model = "gemini-3.6-flash",
 ): Promise<VisionExtractResult> {
-  if (imageUrls.length === 0) {
-    throw new LlmError("En az bir fotoğraf URL'si gereklidir");
+  if (images.length === 0) {
+    throw new LlmError("En az bir fotoğraf (URL veya inline data) gereklidir");
   }
 
   const apiKey = Deno.env.get("LLM_API_KEY");
@@ -360,9 +393,14 @@ export async function extractFromImages(
     throw new LlmError("LLM_API_KEY ortam değişkeni tanımlı değil");
   }
 
+  // Her girdiyi Gemini inline_data formatına çevir.
+  // - string ise fetch edip base64'e dönüştür (eski davranış)
+  // - InlineImageData ise doğrudan kullan (yeni, mobil destekli yol)
   const imageParts = await Promise.all(
-    imageUrls.map(async (url) => ({
-      inline_data: await fetchImageAsInlineData(url),
+    images.map(async (input) => ({
+      inline_data: typeof input === "string"
+        ? await fetchImageAsInlineData(input)
+        : input,
     })),
   );
 
