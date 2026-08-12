@@ -11,5 +11,21 @@
   "save": "Kaydet",
   "@save": {
     "description": "Generic save button label."
+  },
+  "language": "Dil",
+  "@language": {
+    "description": "Language selector row label and picker title."
+  },
+  "languageSystem": "Sistem",
+  "@languageSystem": {
+    "description": "Language option that follows the device locale."
+  },
+  "languageTurkish": "Türkçe",
+  "@languageTurkish": {
+    "description": "Turkish language option."
+  },
+  "languageEnglish": "İngilizce",
+  "@languageEnglish": {
+    "description": "English language option."
   }
 }

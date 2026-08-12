@@ -2,5 +2,9 @@
   "@@locale": "en",
   "appTitle": "Smart Cart",
   "settingsTitle": "Settings",
-  "save": "Save"
+  "save": "Save",
+  "language": "Language",
+  "languageSystem": "System",
+  "languageTurkish": "Turkish",
+  "languageEnglish": "English"
 }

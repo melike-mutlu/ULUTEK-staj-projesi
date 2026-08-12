@@ -12,6 +12,14 @@ import '../features/home/home_viewmodel.dart';
 import '../features/chatbot/chatbot_viewmodel.dart';
 import '../data/repositories/chatbot_repository.dart';
 import '../core/supabase_client.dart';
+import 'localization/locale_controller.dart';
+
+/// Holds the persisted language choice; `app.dart` binds it to
+/// `MaterialApp.locale`.
+final localeControllerProvider =
+    ChangeNotifierProvider<LocaleController>((ref) {
+  return LocaleController();
+});
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepository();

@@ -16,4 +16,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get save => 'Kaydet';
+
+  @override
+  String get language => 'Dil';
+
+  @override
+  String get languageSystem => 'Sistem';
+
+  @override
+  String get languageTurkish => 'Türkçe';
+
+  @override
+  String get languageEnglish => 'İngilizce';
 }

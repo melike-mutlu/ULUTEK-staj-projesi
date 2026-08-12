@@ -115,6 +115,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kaydet'**
   String get save;
+
+  /// Language selector row label and picker title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dil'**
+  String get language;
+
+  /// Language option that follows the device locale.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sistem'**
+  String get languageSystem;
+
+  /// Turkish language option.
+  ///
+  /// In tr, this message translates to:
+  /// **'Türkçe'**
+  String get languageTurkish;
+
+  /// English language option.
+  ///
+  /// In tr, this message translates to:
+  /// **'İngilizce'**
+  String get languageEnglish;
 }
 
 class _AppLocalizationsDelegate

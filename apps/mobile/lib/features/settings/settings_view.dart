@@ -10,6 +10,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/email_masker.dart';
 import '../../data/repositories/profile_repository.dart';
+import '../../l10n/app_localizations.dart';
 import '../profile/profile_viewmodel.dart';
 import 'widgets/country_edit_dialog.dart';
 
@@ -72,6 +73,73 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     if (!mounted || !saved) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Ülke seçimi güncellendi.')),
+    );
+  }
+
+  /// Label for a locale in the picker and the row subtitle. A null locale
+  /// follows the device.
+  String _languageLabel(AppLocalizations l10n, Locale? locale) {
+    switch (locale?.languageCode) {
+      case 'tr':
+        return l10n.languageTurkish;
+      case 'en':
+        return l10n.languageEnglish;
+      default:
+        return l10n.languageSystem;
+    }
+  }
+
+  Future<void> _editLanguage() async {
+    final controller = ref.read(localeControllerProvider);
+    final l10n = AppLocalizations.of(context);
+    // 'system' is the sentinel for "follow the device"; a null result means
+    // the sheet was dismissed without a choice.
+    final current = controller.locale?.languageCode ?? 'system';
+
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return SimpleDialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(l10n.language, style: AppTextStyles.title),
+          children: <Widget>[
+            _languageOption(dialogContext, 'system', l10n.languageSystem, current),
+            _languageOption(dialogContext, 'tr', l10n.languageTurkish, current),
+            _languageOption(dialogContext, 'en', l10n.languageEnglish, current),
+          ],
+        );
+      },
+    );
+
+    if (choice == null) return;
+    await controller.setLocale(choice == 'system' ? null : Locale(choice));
+  }
+
+  Widget _languageOption(
+    BuildContext dialogContext,
+    String code,
+    String label,
+    String current,
+  ) {
+    final isSelected = code == current;
+    return SimpleDialogOption(
+      onPressed: () => Navigator.pop(dialogContext, code),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            isSelected
+                ? Icons.radio_button_checked_rounded
+                : Icons.radio_button_unchecked_rounded,
+            color: isSelected ? AppColors.brand : AppColors.textSecondary,
+            size: 22,
+          ),
+          const SizedBox(width: 12),
+          Text(label, style: AppTextStyles.body),
+        ],
+      ),
     );
   }
 
@@ -538,6 +606,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   Widget build(BuildContext context) {
     final isPremium = ref.watch(homeViewModelProvider).isPremium;
     final country = ref.watch(profileViewModelProvider).country;
+    final locale = ref.watch(localeControllerProvider).locale;
+    final l10n = AppLocalizations.of(context);
     final rawEmail = supabase.auth.currentUser?.email;
     final maskedEmail = EmailMasker.maskEmail(rawEmail);
 
@@ -595,6 +665,13 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
             const SizedBox(height: 24),
             const _SettingsSectionHeader(title: 'UYGULAMA & YASAL'),
             const SizedBox(height: 8),
+            _SettingsRow(
+              icon: Icons.language_rounded,
+              label: l10n.language,
+              subtitle: _languageLabel(l10n, locale),
+              onTap: _editLanguage,
+            ),
+            const SizedBox(height: 10),
             _SettingsRow(
               icon: Icons.shield_outlined,
               label: 'Gizlilik Politikası',
