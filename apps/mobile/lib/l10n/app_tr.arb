@@ -306,5 +306,17 @@
   "deleteAccountFailed": "Hesap silme işlemi gerçekleştirilemedi.",
   "@deleteAccountFailed": {
     "description": "Snackbar when account deletion fails."
+  },
+  "statScannedProducts": "Taranan ürün",
+  "@statScannedProducts": {
+    "description": "Profile stat tile label for scanned product count."
+  },
+  "statAvoidedAllergens": "Kaçınılan alerjen",
+  "@statAvoidedAllergens": {
+    "description": "Profile stat tile label for avoided allergen count."
+  },
+  "statMemberDays": "Üyelik günü",
+  "@statMemberDays": {
+    "description": "Profile stat tile label for days since signup."
   }
 }

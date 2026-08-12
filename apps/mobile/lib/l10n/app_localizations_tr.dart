@@ -240,4 +240,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get deleteAccountFailed => 'Hesap silme işlemi gerçekleştirilemedi.';
+
+  @override
+  String get statScannedProducts => 'Taranan ürün';
+
+  @override
+  String get statAvoidedAllergens => 'Kaçınılan alerjen';
+
+  @override
+  String get statMemberDays => 'Üyelik günü';
 }

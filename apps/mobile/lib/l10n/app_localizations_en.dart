@@ -244,4 +244,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountFailed => 'Could not delete the account.';
+
+  @override
+  String get statScannedProducts => 'Scanned products';
+
+  @override
+  String get statAvoidedAllergens => 'Avoided allergens';
+
+  @override
+  String get statMemberDays => 'Member days';
 }

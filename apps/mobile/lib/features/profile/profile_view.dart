@@ -16,6 +16,7 @@ import 'profile_viewmodel.dart';
 import 'widgets/name_edit_dialog.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_section_card.dart';
+import 'widgets/profile_stats_section.dart';
 
 /// Profil — alt navigasyonun 4. sekmesi.
 /// Onboarding'de verilen alerji/diyet/sağlık seçimlerini düzenleme ekranı.
@@ -205,6 +206,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 onEditPhoto: viewModel.pickAndUploadAvatar,
               ),
               const SizedBox(height: 24),
+              const ProfileStatsSection(),
+              const SizedBox(height: _sectionGap),
               for (final field in OnboardingField.values) ...<Widget>[
                 ProfileSectionCard(
                   title: profileSectionTitles[field]!,

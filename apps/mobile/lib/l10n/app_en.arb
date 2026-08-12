@@ -72,5 +72,8 @@
   "deleteAccountFinalBody": "This is the final confirmation. If you confirm, your account and all your data will be permanently deleted.",
   "deleteAccountFinalConfirm": "Yes, I'm sure — Delete",
   "accountDeleted": "Your account has been deleted.",
-  "deleteAccountFailed": "Could not delete the account."
+  "deleteAccountFailed": "Could not delete the account.",
+  "statScannedProducts": "Scanned products",
+  "statAvoidedAllergens": "Avoided allergens",
+  "statMemberDays": "Member days"
 }
