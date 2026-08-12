@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'dart:async';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/material.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
@@ -26,6 +28,42 @@ class _AuthViewState extends ConsumerState<AuthView> {
   /// Keeps the button spinner up while the destination is being resolved, so
   /// no intermediate loading screen is needed.
   bool _isResolvingRoute = false;
+
+  // Supabase dinleyicisi
+  StreamSubscription<AuthState>? _authStateSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    // Supabase'deki oturum değişikliklerini canlı olarak dinler
+    _authStateSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      // Eğer tarayıcıdan (arka plandan) başarılı bir giriş yapıldıysa
+      if (event == AuthChangeEvent.signedIn && session != null) {
+        if (!mounted) return;
+        
+        setState(() => _isResolvingRoute = true);
+        String route;
+        try {
+          route = await resolveStartupRoute(ref.read(profileRepositoryProvider));
+        } catch (_) {
+          route = AppRoutes.startup;
+        }
+        
+        if (!mounted) return;
+        setState(() => _isResolvingRoute = false);
+        
+        // Kullanıcıyı anasayfaya (veya kaldığı yere) yönlendir
+        Navigator.of(context).pushReplacementNamed(route);
+      }
+    });
+  }
 
   /// Kayıt modundayken kullanım şartları onaylanmadan hiçbir hesap yöntemiyle
   /// (e-posta, Google, ...) devam edilemez. Onaylanmadıysa uyarı gösterip
@@ -107,6 +145,8 @@ class _AuthViewState extends ConsumerState<AuthView> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    // YENİ EKLENDİ: Ekran kapanırken hafıza sızıntısı olmasın diye dinleyiciyi kapatıyoruz
+    _authStateSubscription?.cancel();
     super.dispose();
   }
 
