@@ -12,6 +12,11 @@
 //
 //   // Sadece doğrulama (LLM çağrısı olmadan, test veya mock veri için)
 //   const validated = validateVisionResult(rawJson);
+//
+// NOT: LLM_API_KEY bir Gemini anahtarıdır (bkz. chatbot/index.ts), OpenAI değil.
+// extractFromImages bu yüzden generativelanguage.googleapis.com'a istek atar.
+
+import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tip Tanımları
@@ -313,19 +318,38 @@ export function validateVisionResult(raw: unknown): VisionExtractResult {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Bir görüntü URL'sini indirir ve Gemini'nin `inline_data` formatına çevirir.
+ */
+async function fetchImageAsInlineData(
+  url: string,
+): Promise<{ mime_type: string; data: string }> {
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch (err) {
+    throw new LlmError(`Fotoğraf indirilemedi: ${url}`, err);
+  }
+  if (!response.ok) {
+    throw new LlmError(`Fotoğraf indirilemedi (HTTP ${response.status}): ${url}`);
+  }
+  const mime_type = response.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  return { mime_type, data: encodeBase64(bytes) };
+}
+
+/**
  * Bir veya birden fazla ürün etiketi fotoğrafını Vision LLM'e gönderir,
  * dönen JSON'ı ayrıştırır ve doğrular.
  *
  * @param imageUrls  Ürün etiket fotoğraflarının public URL listesi.
  *                   Boş liste verilirse `LlmError` fırlatır.
- * @param model      OpenAI model adı. Varsayılan: "gpt-4o-mini".
- *                   Daha iyi doğruluk için "gpt-4o" kullanılabilir.
+ * @param model      Gemini model adı. Varsayılan: "gemini-3.6-flash" (bkz. chatbot/index.ts).
  * @throws LlmError       — API erişim hatası veya JSON ayrıştırma hatası
  * @throws ValidationError — Şema doğrulama hatası
  */
 export async function extractFromImages(
   imageUrls: string[],
-  model = "gpt-4o-mini",
+  model = "gemini-3.6-flash",
 ): Promise<VisionExtractResult> {
   if (imageUrls.length === 0) {
     throw new LlmError("En az bir fotoğraf URL'si gereklidir");
@@ -336,68 +360,60 @@ export async function extractFromImages(
     throw new LlmError("LLM_API_KEY ortam değişkeni tanımlı değil");
   }
 
-  // Kullanıcı mesajı: metin + fotoğraflar
-  const imageContent = imageUrls.map((url) => ({
-    type: "image_url" as const,
-    image_url: { url, detail: "high" as const },
-  }));
-
-  const requestBody = {
-    model,
-    messages: [
-      {
-        role: "system",
-        content: VISION_SYSTEM_PROMPT,
-      },
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: "Aşağıdaki fotoğraflardan içindekiler ve besin değerlerini oku.",
-          },
-          ...imageContent,
-        ],
-      },
-    ],
-    // JSON çıktısını zorla — model bu modu destekliyorsa syntax hatası azalır
-    response_format: { type: "json_object" },
-    // Düşük temperature: tutarlı, deterministik çıktı
-    temperature: 0.1,
-    max_tokens: 1500,
-  };
+  const imageParts = await Promise.all(
+    imageUrls.map(async (url) => ({
+      inline_data: await fetchImageAsInlineData(url),
+    })),
+  );
 
   let response: Response;
   try {
-    response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+    response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: VISION_SYSTEM_PROMPT }],
+          },
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: "Aşağıdaki fotoğraflardan içindekiler ve besin değerlerini oku.",
+                },
+                ...imageParts,
+              ],
+            },
+          ],
+          generationConfig: {
+            // Düşük temperature: tutarlı, deterministik çıktı
+            temperature: 0.1,
+            maxOutputTokens: 1500,
+            // JSON çıktısını zorla — syntax hatası riskini azaltır
+            responseMimeType: "application/json",
+          },
+        }),
       },
-      body: JSON.stringify(requestBody),
-    });
+    );
   } catch (err) {
-    throw new LlmError("OpenAI API'ye ulaşılamadı", err);
+    throw new LlmError("Gemini API'ye ulaşılamadı", err);
   }
 
   if (!response.ok) {
     const text = await response.text().catch(() => "<body okunamadı>");
     throw new LlmError(
-      `OpenAI API HTTP ${response.status}: ${text.slice(0, 200)}`,
+      `Gemini API HTTP ${response.status}: ${text.slice(0, 200)}`,
     );
   }
 
-  let completion: { choices?: { message?: { content?: string } }[] };
-  try {
-    completion = await response.json();
-  } catch (err) {
-    throw new LlmError("OpenAI yanıtı JSON olarak ayrıştırılamadı", err);
-  }
+  const payload = await response.json();
+  const rawContent = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-  const rawContent = completion?.choices?.[0]?.message?.content;
   if (typeof rawContent !== "string" || rawContent.trim().length === 0) {
-    throw new LlmError("OpenAI yanıtında içerik yok");
+    throw new LlmError("Gemini yanıtında içerik yok");
   }
 
   let parsed: unknown;
