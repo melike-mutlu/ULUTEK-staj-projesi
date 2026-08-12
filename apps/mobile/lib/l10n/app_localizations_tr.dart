@@ -486,4 +486,71 @@ class AppLocalizationsTr extends AppLocalizations {
   String addedToProfileSnack(String value) {
     return '$value profilinize eklendi!';
   }
+
+  @override
+  String get reportProductTitle => 'Ürün Bulunamadı — Bildir';
+
+  @override
+  String get reportReceivedTitle => 'Bildirim Alındı';
+
+  @override
+  String get reportReceivedBody =>
+      'Ürün bildirimi ve fotoğraflarınız başarıyla sisteme kaydedildi. Katkınız için teşekkür ederiz!';
+
+  @override
+  String get reportIntro =>
+      'Bu ürünü veritabanımıza eklememize yardımcı olun. Fotoğrafları yükleyerek doğruluk oranını artırabilirsiniz.';
+
+  @override
+  String get productInfo => 'Ürün Bilgileri';
+
+  @override
+  String get barcodeNumberLabel => 'Barkod No *';
+
+  @override
+  String get productNameBrandLabel => 'Ürün Adı & Markası';
+
+  @override
+  String get productNameHintExample => 'Örn: Ülker Çikolatalı Gofret';
+
+  @override
+  String get ingredientsTextOptionalLabel => 'İçindekiler Metni (İsteğe Bağlı)';
+
+  @override
+  String get ingredientsAutofillHint =>
+      'Fotoğraf çektiğinizde yapay zeka burayı otomatik doldurur. Gerekirse elle düzeltebilirsiniz.';
+
+  @override
+  String get productPhotos => 'Ürün Fotoğrafları';
+
+  @override
+  String get productPhotosNote =>
+      'Ürünün ön yüzü, içindekiler kısmı ve besin değerleri tablosunu çekin veya seçin.';
+
+  @override
+  String get photoFront => 'Ön Yüz';
+
+  @override
+  String get photoIngredients => 'İçindekiler';
+
+  @override
+  String get photoNutrition => 'Besin Değeri';
+
+  @override
+  String get submitting => 'Gönderiliyor...';
+
+  @override
+  String get reportProduct => 'Ürünü Bildir';
+
+  @override
+  String get takePhoto => 'Kamera ile Çek';
+
+  @override
+  String get pickFromGallery => 'Galeriden Seç';
+
+  @override
+  String get invalidBarcode => 'Lütfen geçerli bir barkod giriniz.';
+
+  @override
+  String get submitFailed => 'Gönderim başarısız oldu.';
 }

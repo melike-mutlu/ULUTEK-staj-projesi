@@ -490,4 +490,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String addedToProfileSnack(String value) {
     return '$value added to your profile!';
   }
+
+  @override
+  String get reportProductTitle => 'Product not found — Report';
+
+  @override
+  String get reportReceivedTitle => 'Report received';
+
+  @override
+  String get reportReceivedBody =>
+      'Your product report and photos have been saved successfully. Thank you for your contribution!';
+
+  @override
+  String get reportIntro =>
+      'Help us add this product to our database. You can improve accuracy by uploading photos.';
+
+  @override
+  String get productInfo => 'Product information';
+
+  @override
+  String get barcodeNumberLabel => 'Barcode number *';
+
+  @override
+  String get productNameBrandLabel => 'Product name & brand';
+
+  @override
+  String get productNameHintExample => 'e.g. Ülker Chocolate Wafer';
+
+  @override
+  String get ingredientsTextOptionalLabel => 'Ingredients text (optional)';
+
+  @override
+  String get ingredientsAutofillHint =>
+      'When you take a photo, AI fills this in automatically. You can edit it manually if needed.';
+
+  @override
+  String get productPhotos => 'Product photos';
+
+  @override
+  String get productPhotosNote =>
+      'Take or select the product\'s front, ingredients section and nutrition table.';
+
+  @override
+  String get photoFront => 'Front';
+
+  @override
+  String get photoIngredients => 'Ingredients';
+
+  @override
+  String get photoNutrition => 'Nutrition';
+
+  @override
+  String get submitting => 'Submitting...';
+
+  @override
+  String get reportProduct => 'Report product';
+
+  @override
+  String get takePhoto => 'Take a photo';
+
+  @override
+  String get pickFromGallery => 'Choose from gallery';
+
+  @override
+  String get invalidBarcode => 'Please enter a valid barcode.';
+
+  @override
+  String get submitFailed => 'Submission failed.';
 }

@@ -617,5 +617,89 @@
         "type": "String"
       }
     }
+  },
+  "reportProductTitle": "Ürün Bulunamadı — Bildir",
+  "@reportProductTitle": {
+    "description": "App bar title of the report-product screen."
+  },
+  "reportReceivedTitle": "Bildirim Alındı",
+  "@reportReceivedTitle": {
+    "description": "Success dialog title after reporting a product."
+  },
+  "reportReceivedBody": "Ürün bildirimi ve fotoğraflarınız başarıyla sisteme kaydedildi. Katkınız için teşekkür ederiz!",
+  "@reportReceivedBody": {
+    "description": "Success dialog body after reporting a product."
+  },
+  "reportIntro": "Bu ürünü veritabanımıza eklememize yardımcı olun. Fotoğrafları yükleyerek doğruluk oranını artırabilirsiniz.",
+  "@reportIntro": {
+    "description": "Info header on the report-product screen."
+  },
+  "productInfo": "Ürün Bilgileri",
+  "@productInfo": {
+    "description": "Section header for product information fields."
+  },
+  "barcodeNumberLabel": "Barkod No *",
+  "@barcodeNumberLabel": {
+    "description": "Barcode field label on the report-product form."
+  },
+  "productNameBrandLabel": "Ürün Adı & Markası",
+  "@productNameBrandLabel": {
+    "description": "Product name/brand field label."
+  },
+  "productNameHintExample": "Örn: Ülker Çikolatalı Gofret",
+  "@productNameHintExample": {
+    "description": "Example hint for the product name field."
+  },
+  "ingredientsTextOptionalLabel": "İçindekiler Metni (İsteğe Bağlı)",
+  "@ingredientsTextOptionalLabel": {
+    "description": "Ingredients text field label."
+  },
+  "ingredientsAutofillHint": "Fotoğraf çektiğinizde yapay zeka burayı otomatik doldurur. Gerekirse elle düzeltebilirsiniz.",
+  "@ingredientsAutofillHint": {
+    "description": "Hint explaining AI autofill of the ingredients field."
+  },
+  "productPhotos": "Ürün Fotoğrafları",
+  "@productPhotos": {
+    "description": "Section header for product photos."
+  },
+  "productPhotosNote": "Ürünün ön yüzü, içindekiler kısmı ve besin değerleri tablosunu çekin veya seçin.",
+  "@productPhotosNote": {
+    "description": "Instruction under the product photos header."
+  },
+  "photoFront": "Ön Yüz",
+  "@photoFront": {
+    "description": "Label for the front photo card."
+  },
+  "photoIngredients": "İçindekiler",
+  "@photoIngredients": {
+    "description": "Label for the ingredients photo card."
+  },
+  "photoNutrition": "Besin Değeri",
+  "@photoNutrition": {
+    "description": "Label for the nutrition photo card."
+  },
+  "submitting": "Gönderiliyor...",
+  "@submitting": {
+    "description": "Submit button label while submitting."
+  },
+  "reportProduct": "Ürünü Bildir",
+  "@reportProduct": {
+    "description": "Submit button label on the report-product form."
+  },
+  "takePhoto": "Kamera ile Çek",
+  "@takePhoto": {
+    "description": "Photo source option: camera."
+  },
+  "pickFromGallery": "Galeriden Seç",
+  "@pickFromGallery": {
+    "description": "Photo source option: gallery."
+  },
+  "invalidBarcode": "Lütfen geçerli bir barkod giriniz.",
+  "@invalidBarcode": {
+    "description": "Validation error for an empty/invalid barcode."
+  },
+  "submitFailed": "Gönderim başarısız oldu.",
+  "@submitFailed": {
+    "description": "Error when submitting a pending product fails."
   }
 }

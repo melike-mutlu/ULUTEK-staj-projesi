@@ -979,6 +979,132 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'{value} profilinize eklendi!'**
   String addedToProfileSnack(String value);
+
+  /// App bar title of the report-product screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün Bulunamadı — Bildir'**
+  String get reportProductTitle;
+
+  /// Success dialog title after reporting a product.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirim Alındı'**
+  String get reportReceivedTitle;
+
+  /// Success dialog body after reporting a product.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün bildirimi ve fotoğraflarınız başarıyla sisteme kaydedildi. Katkınız için teşekkür ederiz!'**
+  String get reportReceivedBody;
+
+  /// Info header on the report-product screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürünü veritabanımıza eklememize yardımcı olun. Fotoğrafları yükleyerek doğruluk oranını artırabilirsiniz.'**
+  String get reportIntro;
+
+  /// Section header for product information fields.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün Bilgileri'**
+  String get productInfo;
+
+  /// Barcode field label on the report-product form.
+  ///
+  /// In tr, this message translates to:
+  /// **'Barkod No *'**
+  String get barcodeNumberLabel;
+
+  /// Product name/brand field label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün Adı & Markası'**
+  String get productNameBrandLabel;
+
+  /// Example hint for the product name field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn: Ülker Çikolatalı Gofret'**
+  String get productNameHintExample;
+
+  /// Ingredients text field label.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçindekiler Metni (İsteğe Bağlı)'**
+  String get ingredientsTextOptionalLabel;
+
+  /// Hint explaining AI autofill of the ingredients field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraf çektiğinizde yapay zeka burayı otomatik doldurur. Gerekirse elle düzeltebilirsiniz.'**
+  String get ingredientsAutofillHint;
+
+  /// Section header for product photos.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün Fotoğrafları'**
+  String get productPhotos;
+
+  /// Instruction under the product photos header.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürünün ön yüzü, içindekiler kısmı ve besin değerleri tablosunu çekin veya seçin.'**
+  String get productPhotosNote;
+
+  /// Label for the front photo card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ön Yüz'**
+  String get photoFront;
+
+  /// Label for the ingredients photo card.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçindekiler'**
+  String get photoIngredients;
+
+  /// Label for the nutrition photo card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Besin Değeri'**
+  String get photoNutrition;
+
+  /// Submit button label while submitting.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönderiliyor...'**
+  String get submitting;
+
+  /// Submit button label on the report-product form.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürünü Bildir'**
+  String get reportProduct;
+
+  /// Photo source option: camera.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera ile Çek'**
+  String get takePhoto;
+
+  /// Photo source option: gallery.
+  ///
+  /// In tr, this message translates to:
+  /// **'Galeriden Seç'**
+  String get pickFromGallery;
+
+  /// Validation error for an empty/invalid barcode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen geçerli bir barkod giriniz.'**
+  String get invalidBarcode;
+
+  /// Error when submitting a pending product fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönderim başarısız oldu.'**
+  String get submitFailed;
 }
 
 class _AppLocalizationsDelegate
