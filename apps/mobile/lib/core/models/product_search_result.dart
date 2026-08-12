@@ -17,7 +17,7 @@ class ProductSearchResult {
   factory ProductSearchResult.fromJson(Map<String, dynamic> json) {
     return ProductSearchResult(
       barcode: json['barcode'] as String? ?? '',
-      name: json['name'] as String? ?? '',
+      name: json['product_name'] as String? ?? '',
       brand: json['brand'] as String? ?? '',
       imageUrl: json['image_url'] as String? ?? '',
     );
