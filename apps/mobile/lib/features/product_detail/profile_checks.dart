@@ -2,10 +2,11 @@ import '../../core/constants/allergen_catalog.dart';
 import '../../core/models/explanation.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
+import '../../l10n/app_localizations.dart';
 
 /// One profile entry checked against the product: what the user selected and
-/// how this product relates to it. [level] null = "değerlendirilemedi": we
-/// could not judge it, which must never read as safe.
+/// how this product relates to it. [level] null = not evaluated: we could not
+/// judge it, which must never read as safe.
 class ProfileCheck {
   const ProfileCheck({
     required this.label,
@@ -19,32 +20,32 @@ class ProfileCheck {
   final WarningLevel? level;
 }
 
-const _notEvaluatedNote = 'Bu ürün için değerlendirilemedi';
-
 /// Diet preferences vs. the product. Only vegan/vegetarian have a backend
 /// compatibility flag; every other diet is reported "not evaluated" rather than
 /// falsely marked compatible.
-List<ProfileCheck> dietChecks(UserProfile? profile, RuleEngineResult? rule) {
+List<ProfileCheck> dietChecks(
+    AppLocalizations l10n, UserProfile? profile, RuleEngineResult? rule) {
   final preferences = profile?.dietPreferences ?? const <String>[];
-  return [for (final preference in preferences) _dietCheck(preference, rule)];
+  return [for (final preference in preferences) _dietCheck(l10n, preference, rule)];
 }
 
-ProfileCheck _dietCheck(String preference, RuleEngineResult? rule) {
+ProfileCheck _dietCheck(
+    AppLocalizations l10n, String preference, RuleEngineResult? rule) {
   final compatible = _dietCompatibility(preference, rule);
   if (compatible == null) {
     return ProfileCheck(
-        label: preference, note: _notEvaluatedNote, level: null);
+        label: preference, note: l10n.checkNotEvaluated, level: null);
   }
   if (!compatible) {
     return ProfileCheck(
       label: preference,
-      note: 'Bu üründe uygun olmayan içerik var',
+      note: l10n.dietIncompatibleNote,
       level: WarningLevel.warning,
     );
   }
   return ProfileCheck(
     label: preference,
-    note: 'Bu ürün tercihinle uyumlu',
+    note: l10n.dietCompatibleNote,
     level: WarningLevel.ok,
   );
 }
@@ -60,7 +61,8 @@ bool? _dietCompatibility(String preference, RuleEngineResult? rule) {
 /// Health conditions vs. the product, driven by the rule engine's per-condition
 /// result. Diabetes keeps its descriptive sugar note; unmapped or unjudged
 /// conditions are "not evaluated", never a fake all-clear.
-List<ProfileCheck> healthChecks(UserProfile? profile, RuleEngineResult? rule) {
+List<ProfileCheck> healthChecks(
+    AppLocalizations l10n, UserProfile? profile, RuleEngineResult? rule) {
   final conditions = profile?.healthConditions ?? const <String>[];
   final statuses = <String, String>{
     for (final h in rule?.healthConditions ?? const <HealthConditionResult>[])
@@ -70,12 +72,13 @@ List<ProfileCheck> healthChecks(UserProfile? profile, RuleEngineResult? rule) {
 
   return [
     for (final condition in conditions)
-      _healthCheck(condition, statuses[condition.toLowerCase()], diabeticNote),
+      _healthCheck(
+          l10n, condition, statuses[condition.toLowerCase()], diabeticNote),
   ];
 }
 
-ProfileCheck _healthCheck(
-    String condition, String? status, String? diabeticNote) {
+ProfileCheck _healthCheck(AppLocalizations l10n, String condition,
+    String? status, String? diabeticNote) {
   // Diabetes carries a descriptive note; keep it when the backend flagged it.
   if (_isDiabetes(condition) &&
       diabeticNote != null &&
@@ -92,19 +95,19 @@ ProfileCheck _healthCheck(
     case 'conflict':
       return ProfileCheck(
         label: condition,
-        note: 'Bu üründe durumun için riskli içerik var',
+        note: l10n.healthConflictNote,
         level: WarningLevel.warning,
       );
     case 'ok':
       return ProfileCheck(
         label: condition,
-        note: 'Bu ürün için özel bir uyarı yok',
+        note: l10n.healthOkNote,
         level: WarningLevel.ok,
       );
     default:
       return ProfileCheck(
         label: condition,
-        note: _notEvaluatedNote,
+        note: l10n.checkNotEvaluated,
         level: null,
       );
   }
@@ -140,6 +143,7 @@ class ReasonSpan {
 /// Falls back to the backend explanation when the profile is empty, so an
 /// anonymous user still sees something meaningful.
 List<ReasonSpan> personalReasonSpans({
+  required AppLocalizations l10n,
   required Explanation explanation,
   required RuleEngineResult? rule,
   required UserProfile? profile,
@@ -147,32 +151,32 @@ List<ReasonSpan> personalReasonSpans({
   final spans = <ReasonSpan>[];
 
   final allergens = (rule?.personalRiskKeys ?? const <String>[])
-      .map((key) => allergenInfo(key).label.toLowerCase())
+      .map((key) => allergenLabel(l10n, allergenInfo(key)).toLowerCase())
       .toList();
   if (allergens.isNotEmpty) {
-    spans.add(const ReasonSpan('Sende alerji yapan '));
+    spans.add(ReasonSpan(l10n.reasonAllergenIntro));
     for (var i = 0; i < allergens.length; i++) {
       if (i > 0) {
-        spans.add(ReasonSpan(i == allergens.length - 1 ? ' ve ' : ', '));
+        spans.add(ReasonSpan(i == allergens.length - 1 ? l10n.reasonAnd : ', '));
       }
       spans.add(ReasonSpan(allergens[i], highlight: true));
     }
-    spans.add(const ReasonSpan(' içeriyor. '));
+    spans.add(ReasonSpan(l10n.reasonAllergenOutro));
   }
 
   // Only real conflicts feed the warning; "not evaluated" (null) never does.
-  for (final check in dietChecks(profile, rule)) {
+  for (final check in dietChecks(l10n, profile, rule)) {
     if (check.level == WarningLevel.warning) {
       spans.add(ReasonSpan(check.label, highlight: true));
-      spans.add(const ReasonSpan(' beslenmene uygun değil. '));
+      spans.add(ReasonSpan(l10n.reasonDietOutro));
     }
   }
 
-  for (final check in healthChecks(profile, rule)) {
+  for (final check in healthChecks(l10n, profile, rule)) {
     if (check.level == WarningLevel.warning) {
-      spans.add(const ReasonSpan('Profilindeki '));
+      spans.add(ReasonSpan(l10n.reasonHealthIntro));
       spans.add(ReasonSpan(check.label, highlight: true));
-      spans.add(ReasonSpan(' için: ${check.note}. '));
+      spans.add(ReasonSpan('${l10n.reasonHealthMid}${check.note}. '));
     }
   }
 
@@ -186,45 +190,49 @@ List<ReasonSpan> personalReasonSpans({
   return spans;
 }
 
-/// One bullet per category for the "uygun değil" verdict: allergens, then each
+/// One bullet per category for the "not suitable" verdict: allergens, then each
 /// conflicting diet, then each conflicting health condition. Each line is a
 /// short span list with the profile keywords highlighted. Empty when there is
 /// no conflict — the caller then shows the flat reason instead.
 List<List<ReasonSpan>> personalReasonLines({
+  required AppLocalizations l10n,
   required RuleEngineResult? rule,
   required UserProfile? profile,
 }) {
   final lines = <List<ReasonSpan>>[];
 
   final allergens = (rule?.personalRiskKeys ?? const <String>[])
-      .map((key) => allergenInfo(key).label.toLowerCase())
+      .map((key) => allergenLabel(l10n, allergenInfo(key)).toLowerCase())
       .toList();
   if (allergens.isNotEmpty) {
     final line = <ReasonSpan>[];
+    if (l10n.reasonAllergenLineIntro.isNotEmpty) {
+      line.add(ReasonSpan(l10n.reasonAllergenLineIntro));
+    }
     for (var i = 0; i < allergens.length; i++) {
       if (i > 0) {
-        line.add(ReasonSpan(i == allergens.length - 1 ? ' ve ' : ', '));
+        line.add(ReasonSpan(i == allergens.length - 1 ? l10n.reasonAnd : ', '));
       }
       line.add(ReasonSpan(allergens[i], highlight: true));
     }
-    line.add(const ReasonSpan(' içeriyor.'));
+    line.add(ReasonSpan(l10n.reasonAllergenLineOutro));
     lines.add(line);
   }
 
-  for (final check in dietChecks(profile, rule)) {
+  for (final check in dietChecks(l10n, profile, rule)) {
     if (check.level == WarningLevel.warning) {
       lines.add([
         ReasonSpan(check.label, highlight: true),
-        const ReasonSpan(' beslenmene uygun değil.'),
+        ReasonSpan(l10n.reasonDietLineOutro),
       ]);
     }
   }
 
-  for (final check in healthChecks(profile, rule)) {
+  for (final check in healthChecks(l10n, profile, rule)) {
     if (check.level == WarningLevel.warning) {
       lines.add([
         ReasonSpan(check.label, highlight: true),
-        const ReasonSpan(' durumu için uygun değil.'),
+        ReasonSpan(l10n.reasonHealthLineOutro),
       ]);
     }
   }
@@ -234,11 +242,13 @@ List<List<ReasonSpan>> personalReasonLines({
 
 /// Plain-text form of [personalReasonSpans].
 String personalReason({
+  required AppLocalizations l10n,
   required Explanation explanation,
   required RuleEngineResult? rule,
   required UserProfile? profile,
 }) {
   return personalReasonSpans(
+    l10n: l10n,
     explanation: explanation,
     rule: rule,
     profile: profile,

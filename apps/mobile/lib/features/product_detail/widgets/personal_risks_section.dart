@@ -61,7 +61,7 @@ class PersonalRisksSection extends StatelessWidget {
               for (final risk in risks)
                 DetailRow(
                   leading: AllergenIcon(asset: risk.asset),
-                  title: risk.label,
+                  title: allergenLabel(l10n, risk),
                   subtitle: l10n.conflictsWithAllergies,
                   level: WarningLevel.warning,
                 ),

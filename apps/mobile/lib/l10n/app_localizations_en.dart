@@ -761,4 +761,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reasonHealthLineOutro => ' isn\'t suitable for your condition.';
+
+  @override
+  String get verdictSuitable => 'Suitable';
+
+  @override
+  String get verdictCaution => 'Be careful';
+
+  @override
+  String get verdictUnsuitable => 'Not suitable!';
+
+  @override
+  String get verdictInsufficient => 'Insufficient data';
+
+  @override
+  String get allergenUnknown => 'Unknown allergen';
+
+  @override
+  String get allergenGluten => 'Gluten';
+
+  @override
+  String get allergenMilk => 'Milk / Lactose';
+
+  @override
+  String get allergenEggs => 'Eggs';
+
+  @override
+  String get allergenSoy => 'Soy';
+
+  @override
+  String get allergenPeanuts => 'Peanuts';
+
+  @override
+  String get allergenNuts => 'Tree nuts';
+
+  @override
+  String get allergenSesame => 'Sesame';
+
+  @override
+  String get allergenFish => 'Fish';
+
+  @override
+  String get allergenCrustaceans => 'Crustaceans';
+
+  @override
+  String get allergenMolluscs => 'Molluscs';
+
+  @override
+  String get allergenCelery => 'Celery';
+
+  @override
+  String get allergenMustard => 'Mustard';
+
+  @override
+  String get allergenLupin => 'Lupin';
+
+  @override
+  String get allergenSulphites => 'Sulphites';
 }

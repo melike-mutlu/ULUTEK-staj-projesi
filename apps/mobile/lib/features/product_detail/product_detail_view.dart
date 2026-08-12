@@ -154,11 +154,13 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 explanation: explanation,
                 insufficientData: insufficient,
                 reason: personalReasonSpans(
+                  l10n: l10n,
                   explanation: explanation,
                   rule: _viewModel.ruleEngineResult,
                   profile: _viewModel.userProfile,
                 ),
                 reasonLines: personalReasonLines(
+                  l10n: l10n,
                   rule: _viewModel.ruleEngineResult,
                   profile: _viewModel.userProfile,
                 ),
@@ -186,6 +188,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 title: l10n.dietType,
                 icon: Icons.eco_outlined,
                 checks: dietChecks(
+                  l10n,
                   _viewModel.userProfile,
                   _viewModel.ruleEngineResult,
                 ),
@@ -195,6 +198,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 title: l10n.healthConditionTitle,
                 icon: Icons.favorite_outline_rounded,
                 checks: healthChecks(
+                  l10n,
                   _viewModel.userProfile,
                   _viewModel.ruleEngineResult,
                 ),

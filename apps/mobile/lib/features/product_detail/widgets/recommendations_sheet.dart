@@ -106,8 +106,8 @@ class _SheetHeader extends StatelessWidget {
               style: AppTextStyles.title,
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.more_horiz_rounded),
+          const IconButton(
+            icon: Icon(Icons.more_horiz_rounded),
             color: AppColors.textSecondary,
             onPressed: null, // Not wired up yet.
           ),

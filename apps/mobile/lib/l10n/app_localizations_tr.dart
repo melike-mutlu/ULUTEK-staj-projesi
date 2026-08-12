@@ -753,4 +753,61 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get reasonHealthLineOutro => ' durumu için uygun değil.';
+
+  @override
+  String get verdictSuitable => 'Uygun';
+
+  @override
+  String get verdictCaution => 'Dikkatli ol';
+
+  @override
+  String get verdictUnsuitable => 'Uygun değil!';
+
+  @override
+  String get verdictInsufficient => 'Yetersiz veri';
+
+  @override
+  String get allergenUnknown => 'Bilinmeyen alerjen';
+
+  @override
+  String get allergenGluten => 'Gluten';
+
+  @override
+  String get allergenMilk => 'Süt / Laktoz';
+
+  @override
+  String get allergenEggs => 'Yumurta';
+
+  @override
+  String get allergenSoy => 'Soya';
+
+  @override
+  String get allergenPeanuts => 'Yer fıstığı';
+
+  @override
+  String get allergenNuts => 'Kabuklu yemişler';
+
+  @override
+  String get allergenSesame => 'Susam';
+
+  @override
+  String get allergenFish => 'Balık';
+
+  @override
+  String get allergenCrustaceans => 'Kabuklu deniz ürünleri';
+
+  @override
+  String get allergenMolluscs => 'Yumuşakçalar';
+
+  @override
+  String get allergenCelery => 'Kereviz';
+
+  @override
+  String get allergenMustard => 'Hardal';
+
+  @override
+  String get allergenLupin => 'Acı bakla';
+
+  @override
+  String get allergenSulphites => 'Sülfitler';
 }

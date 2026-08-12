@@ -1489,6 +1489,120 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **' durumu için uygun değil.'**
   String get reasonHealthLineOutro;
+
+  /// Verdict when the product is suitable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygun'**
+  String get verdictSuitable;
+
+  /// Verdict when caution is advised.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dikkatli ol'**
+  String get verdictCaution;
+
+  /// Verdict when the product is unsuitable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygun değil!'**
+  String get verdictUnsuitable;
+
+  /// Verdict when there is not enough data.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yetersiz veri'**
+  String get verdictInsufficient;
+
+  /// Fallback allergen label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilinmeyen alerjen'**
+  String get allergenUnknown;
+
+  /// Allergen: gluten.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gluten'**
+  String get allergenGluten;
+
+  /// Allergen: milk/lactose.
+  ///
+  /// In tr, this message translates to:
+  /// **'Süt / Laktoz'**
+  String get allergenMilk;
+
+  /// Allergen: eggs.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yumurta'**
+  String get allergenEggs;
+
+  /// Allergen: soy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Soya'**
+  String get allergenSoy;
+
+  /// Allergen: peanuts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yer fıstığı'**
+  String get allergenPeanuts;
+
+  /// Allergen: tree nuts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabuklu yemişler'**
+  String get allergenNuts;
+
+  /// Allergen: sesame.
+  ///
+  /// In tr, this message translates to:
+  /// **'Susam'**
+  String get allergenSesame;
+
+  /// Allergen: fish.
+  ///
+  /// In tr, this message translates to:
+  /// **'Balık'**
+  String get allergenFish;
+
+  /// Allergen: crustaceans.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabuklu deniz ürünleri'**
+  String get allergenCrustaceans;
+
+  /// Allergen: molluscs.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yumuşakçalar'**
+  String get allergenMolluscs;
+
+  /// Allergen: celery.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kereviz'**
+  String get allergenCelery;
+
+  /// Allergen: mustard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hardal'**
+  String get allergenMustard;
+
+  /// Allergen: lupin.
+  ///
+  /// In tr, this message translates to:
+  /// **'Acı bakla'**
+  String get allergenLupin;
+
+  /// Allergen: sulphites.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sülfitler'**
+  String get allergenSulphites;
 }
 
 class _AppLocalizationsDelegate

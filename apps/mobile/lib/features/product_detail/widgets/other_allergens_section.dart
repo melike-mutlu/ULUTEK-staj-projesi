@@ -57,6 +57,7 @@ class OtherAllergensSection extends StatelessWidget {
                 for (final allergen in others)
                   _AllergenItem(
                     allergen: allergen,
+                    label: allergenLabel(l10n, allergen),
                     maxWidth: constraints.maxWidth,
                   ),
               ],
@@ -69,9 +70,14 @@ class OtherAllergensSection extends StatelessWidget {
 }
 
 class _AllergenItem extends StatelessWidget {
-  const _AllergenItem({required this.allergen, required this.maxWidth});
+  const _AllergenItem({
+    required this.allergen,
+    required this.label,
+    required this.maxWidth,
+  });
 
   final AllergenInfo allergen;
+  final String label;
 
   /// Wrap gives children unbounded width; without a bound a long label would
   /// silently paint outside the section instead of wrapping to a new line.
@@ -88,7 +94,7 @@ class _AllergenItem extends StatelessWidget {
           const SizedBox(width: 3),
           Flexible(
             child: Text(
-              allergen.label,
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(

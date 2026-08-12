@@ -3,14 +3,47 @@ import 'package:flutter/material.dart';
 import '../../../core/models/explanation.dart';
 import '../../../core/models/product.dart';
 import '../../../core/theme/akilli_sepet_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import 'detail_row.dart';
 import 'detail_section.dart';
 import 'section_note.dart';
 
 typedef _ValueOf = double? Function(Nutriments nutriments);
-typedef _Notes = ({String ok, String caution, String warning});
 
 const String _iconDir = 'assets/nutritional_values';
+
+/// Localized name for a nutrient by its stable [id].
+String _nutrientLabel(AppLocalizations l10n, String id) => switch (id) {
+      'energy' => l10n.nutrientEnergy,
+      'sugar' => l10n.nutrientSugar,
+      'fat' => l10n.nutrientFat,
+      _ => l10n.nutrientProtein,
+    };
+
+/// Localized plain-language note for a nutrient at a given [level].
+String _nutrientNote(AppLocalizations l10n, String id, WarningLevel level) =>
+    switch (id) {
+      'energy' => switch (level) {
+          WarningLevel.ok => l10n.energyLow,
+          WarningLevel.caution => l10n.energyMedium,
+          WarningLevel.warning => l10n.energyHigh,
+        },
+      'sugar' => switch (level) {
+          WarningLevel.ok => l10n.sugarLow,
+          WarningLevel.caution => l10n.sugarMedium,
+          WarningLevel.warning => l10n.sugarHigh,
+        },
+      'fat' => switch (level) {
+          WarningLevel.ok => l10n.fatLow,
+          WarningLevel.caution => l10n.fatMedium,
+          WarningLevel.warning => l10n.fatHigh,
+        },
+      _ => switch (level) {
+          WarningLevel.ok => l10n.proteinHigh,
+          WarningLevel.caution => l10n.proteinMedium,
+          WarningLevel.warning => l10n.proteinLow,
+        },
+    };
 
 double? _energy(Nutriments n) => n.energyKcal100g;
 double? _sugars(Nutriments n) => n.sugars100g;
@@ -22,19 +55,19 @@ double? _proteins(Nutriments n) => n.proteins100g;
 /// here — adding a nutrient is a single entry.
 class _Nutrient {
   const _Nutrient({
-    required this.label,
+    required this.id,
     required this.unit,
     required this.asset,
     required this.iconSize,
     required this.valueOf,
     required this.low,
     required this.high,
-    required this.notes,
     this.decimals = 1,
     this.higherIsBetter = false,
   });
 
-  final String label;
+  /// Stable id used to resolve the localized label and notes.
+  final String id;
   final String unit;
 
   /// Icon file under assets/nutritional_values/ and its rendered size — the
@@ -46,7 +79,6 @@ class _Nutrient {
   /// At or below [low] the value is good; above [high] it is bad.
   final double low;
   final double high;
-  final _Notes notes;
   final int decimals;
 
   /// Protein reads the other way round: more is better.
@@ -61,18 +93,12 @@ class _Nutrient {
     return value <= high ? WarningLevel.caution : WarningLevel.warning;
   }
 
-  String noteFor(WarningLevel level) => switch (level) {
-        WarningLevel.ok => notes.ok,
-        WarningLevel.caution => notes.caution,
-        WarningLevel.warning => notes.warning,
-      };
-
   String format(double value) => '${value.toStringAsFixed(decimals)} $unit';
 }
 
 const List<_Nutrient> _nutrients = <_Nutrient>[
   _Nutrient(
-    label: 'Enerji',
+    id: 'energy',
     unit: 'kcal',
     asset: '$_iconDir/energy.png',
     iconSize: 34,
@@ -80,42 +106,27 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
     low: 150,
     high: 350,
     decimals: 0,
-    notes: (
-      ok: 'Düşük kalorili',
-      caution: 'Orta kalorili',
-      warning: 'Yüksek kalorili'
-    ),
   ),
   _Nutrient(
-    label: 'Şeker',
+    id: 'sugar',
     unit: 'g',
     asset: '$_iconDir/sugar.png',
     iconSize: 37,
     valueOf: _sugars,
     low: 5,
     high: 22.5,
-    notes: (
-      ok: 'Az şekerli',
-      caution: 'Orta düzeyde şekerli',
-      warning: 'Çok şekerli'
-    ),
   ),
   _Nutrient(
-    label: 'Yağ',
+    id: 'fat',
     unit: 'g',
     asset: '$_iconDir/oil.png',
     iconSize: 40,
     valueOf: _fat,
     low: 3,
     high: 17.5,
-    notes: (
-      ok: 'Az yağlı',
-      caution: 'Orta düzeyde yağlı',
-      warning: 'Çok yağlı'
-    ),
   ),
   _Nutrient(
-    label: 'Protein',
+    id: 'protein',
     unit: 'g',
     asset: '$_iconDir/protein.png',
     iconSize: 62,
@@ -123,11 +134,6 @@ const List<_Nutrient> _nutrients = <_Nutrient>[
     low: 4,
     high: 8,
     higherIsBetter: true,
-    notes: (
-      ok: 'Protein açısından zengin',
-      caution: 'Bir miktar protein',
-      warning: 'Çok az protein'
-    ),
   ),
 ];
 
@@ -142,11 +148,12 @@ class NutrimentsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final note = dietNote?.trim();
 
     return DetailSection(
-      title: 'Besin değerleri',
-      meta: '100 g için',
+      title: l10n.nutrimentsTitle,
+      meta: l10n.per100g,
       children: [
         for (final nutrient in _nutrients)
           _NutrientRow(nutrient: nutrient, value: nutrient.valueOf(nutriments)),
@@ -164,14 +171,15 @@ class _NutrientRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final amount = value;
     final level = amount == null ? null : nutrient.levelFor(amount);
 
     return DetailRow(
       leading: _NutrientIcon(asset: nutrient.asset, size: nutrient.iconSize),
-      title: nutrient.label,
+      title: _nutrientLabel(l10n, nutrient.id),
       // Without a value there is nothing to judge, so no note and no dot.
-      subtitle: level == null ? 'Bilgi yok' : nutrient.noteFor(level),
+      subtitle: level == null ? l10n.noInfo : _nutrientNote(l10n, nutrient.id, level),
       value: amount == null ? '—' : nutrient.format(amount),
       level: level,
     );
