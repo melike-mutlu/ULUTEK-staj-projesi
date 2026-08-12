@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../chatbot/chatbot_view.dart';
 import '../home/home_view.dart';
 import '../profile/profile_view.dart';

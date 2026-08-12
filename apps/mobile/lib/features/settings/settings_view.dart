@@ -48,14 +48,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     navigator.pushNamedAndRemoveUntil(AppRoutes.auth, (Route<void> _) => false);
   }
 
-  void _navigateToProfile() {
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    } else {
-      Navigator.pushNamed(context, AppRoutes.profile);
-    }
-  }
-
   Future<void> _editCountry() async {
     final profileVm = ref.read(profileViewModelProvider);
     final initialCountry = profileVm.countryDraft;
@@ -547,8 +539,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     final isDark = theme.brightness == Brightness.dark;
     final isPremium = ref.watch(homeViewModelProvider).isPremium;
     final country = ref.watch(profileViewModelProvider).country;
-    final rawEmail = supabase.auth.currentUser?.email;
-    final maskedEmail = EmailMasker.maskEmail(rawEmail);
     final themeVm = ref.watch(themeViewModelProvider);
 
     final backgroundColor = theme.scaffoldBackgroundColor;
