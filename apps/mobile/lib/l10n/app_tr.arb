@@ -16,6 +16,10 @@
   "@language": {
     "description": "Language selector row label and picker title."
   },
+  "darkTheme": "Koyu Tema",
+  "@darkTheme": {
+    "description": "Dark theme toggle row label in Settings."
+  },
   "languageSystem": "Sistem",
   "@languageSystem": {
     "description": "Language option that follows the device locale."

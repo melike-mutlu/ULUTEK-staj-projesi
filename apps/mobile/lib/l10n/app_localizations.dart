@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Dil'**
   String get language;
 
+  /// Dark theme toggle row label in Settings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koyu Tema'**
+  String get darkTheme;
+
   /// Language option that follows the device locale.
   ///
   /// In tr, this message translates to:

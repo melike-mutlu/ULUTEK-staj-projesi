@@ -21,6 +21,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get language => 'Dil';
 
   @override
+  String get darkTheme => 'Koyu Tema';
+
+  @override
   String get languageSystem => 'Sistem';
 
   @override

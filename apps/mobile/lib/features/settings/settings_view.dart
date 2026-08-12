@@ -675,11 +675,9 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 const SizedBox(height: 24),
                 _SettingsSectionHeader(title: l10n.settingsSectionApp),
                 const SizedBox(height: 8),
-                // TODO(l10n): "Koyu Tema" henuz AppLocalizations'a tasinmadi (dark
-                // mode, localization PR'i ile ayni anda gelistirildi).
                 _SettingsSwitchRow(
                   icon: Icons.dark_mode_outlined,
-                  label: 'Koyu Tema',
+                  label: l10n.darkTheme,
                   value: themeVm.isDarkMode,
                   onChanged: (bool value) {
                     ref.read(themeViewModelProvider).toggleTheme(value);
