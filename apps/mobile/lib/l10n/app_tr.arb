@@ -117,5 +117,194 @@
         "type": "String"
       }
     }
+  },
+  "close": "Kapat",
+  "@close": {
+    "description": "Generic close button label."
+  },
+  "understood": "Anladım",
+  "@understood": {
+    "description": "Acknowledge button label on informational dialogs."
+  },
+  "update": "Güncelle",
+  "@update": {
+    "description": "Generic update button label."
+  },
+  "settingsSectionAccount": "HESAP & PROFİL",
+  "@settingsSectionAccount": {
+    "description": "Settings section header for account and profile rows."
+  },
+  "settingsSectionApp": "UYGULAMA & YASAL",
+  "@settingsSectionApp": {
+    "description": "Settings section header for app and legal rows."
+  },
+  "settingsSectionSession": "OTURUM",
+  "@settingsSectionSession": {
+    "description": "Settings section header for session rows."
+  },
+  "activeSession": "Aktif Oturum",
+  "@activeSession": {
+    "description": "Subtitle under the user card in settings."
+  },
+  "registeredEmail": "Kayıtlı E-posta",
+  "@registeredEmail": {
+    "description": "Settings row label for the registered email."
+  },
+  "editProfileInfo": "Profil Bilgilerini Düzenle",
+  "@editProfileInfo": {
+    "description": "Settings row that opens the profile editor."
+  },
+  "changePassword": "Şifre Değiştir",
+  "@changePassword": {
+    "description": "Settings row and dialog title for changing the password."
+  },
+  "countrySelection": "Ülke Seçimi",
+  "@countrySelection": {
+    "description": "Settings row label for the country picker."
+  },
+  "notSelected": "Seçilmedi",
+  "@notSelected": {
+    "description": "Subtitle shown when no country is selected."
+  },
+  "countryUpdated": "Ülke seçimi güncellendi.",
+  "@countryUpdated": {
+    "description": "Snackbar after the country is saved."
+  },
+  "privacyPolicy": "Gizlilik Politikası",
+  "@privacyPolicy": {
+    "description": "Settings row and dialog title for the privacy policy."
+  },
+  "about": "Hakkında",
+  "@about": {
+    "description": "Settings row and dialog title for the about section."
+  },
+  "signOut": "Çıkış Yap",
+  "@signOut": {
+    "description": "Settings row label to sign out."
+  },
+  "signOutFailed": "Çıkış yapılamadı. Lütfen tekrar dene.",
+  "@signOutFailed": {
+    "description": "Error snackbar when signing out fails."
+  },
+  "deleteAccount": "Hesabı Sil",
+  "@deleteAccount": {
+    "description": "Settings row and dialog title to delete the account."
+  },
+  "premiumExit": "Premium'dan Çık",
+  "@premiumExit": {
+    "description": "Settings row label when premium is active."
+  },
+  "premiumGo": "Premium'a Geç",
+  "@premiumGo": {
+    "description": "Settings row label when premium is inactive."
+  },
+  "premiumActive": "Aktif",
+  "@premiumActive": {
+    "description": "Subtitle when premium is active."
+  },
+  "premiumTest": "Test Amaçlı",
+  "@premiumTest": {
+    "description": "Subtitle noting premium is for testing."
+  },
+  "premiumEnabled": "Premium aktif edildi!",
+  "@premiumEnabled": {
+    "description": "Snackbar when premium is enabled."
+  },
+  "premiumDisabled": "Premium devre dışı bırakıldı.",
+  "@premiumDisabled": {
+    "description": "Snackbar when premium is disabled."
+  },
+  "premiumUpdateFailed": "Premium durumu güncellenemedi.",
+  "@premiumUpdateFailed": {
+    "description": "Snackbar when the premium toggle fails."
+  },
+  "aboutVersion": "Akıllı Sepet — Versiyon 1.0.0",
+  "@aboutVersion": {
+    "description": "App name and version line in the about dialog."
+  },
+  "aboutBody1": "ULUTEK Staj Projesi kapsamında geliştirilmiş, barkod tarama ve yapay zeka destekli akıllı ürün analiz asistanıdır.",
+  "@aboutBody1": {
+    "description": "First paragraph of the about dialog."
+  },
+  "aboutBody2": "Kullanıcıların alerji, diyet ve özel sağlık tercihlerine göre ürün içeriklerini otomatik değerlendirir ve kişiselleştirilmiş uyarılarda bulunur.",
+  "@aboutBody2": {
+    "description": "Second paragraph of the about dialog."
+  },
+  "privacyHeading": "Veri Gizliliği ve Güvenliği",
+  "@privacyHeading": {
+    "description": "Heading inside the privacy dialog."
+  },
+  "privacyBody1": "Akıllı Sepet uygulaması, seçtiğiniz diyet, alerji ve sağlık verilerini yalnızca size özel ürün analizi yapabilmek amacıyla Supabase veritabanında güvenli bir şekilde saklar.",
+  "@privacyBody1": {
+    "description": "First paragraph of the privacy dialog."
+  },
+  "privacyBody2": "Kişisel verileriniz hiçbir koşulda 3. taraflarla paylaşılmaz. İstediğiniz zaman profilinizden bilgilerinizi güncelleyebilirsiniz.",
+  "@privacyBody2": {
+    "description": "Second paragraph of the privacy dialog."
+  },
+  "passwordHint": "Yeni şifrenizi girin. Şifreniz en az 6 karakter olmalıdır.",
+  "@passwordHint": {
+    "description": "Helper text in the change password dialog."
+  },
+  "newPassword": "Yeni Şifre",
+  "@newPassword": {
+    "description": "Label for the new password field."
+  },
+  "newPasswordRepeat": "Yeni Şifre (Tekrar)",
+  "@newPasswordRepeat": {
+    "description": "Label for the confirm new password field."
+  },
+  "passwordTooShort": "Şifre en az 6 karakter olmalıdır.",
+  "@passwordTooShort": {
+    "description": "Validation error for a too-short password."
+  },
+  "passwordsDoNotMatch": "Şifreler birbiriyle eşleşmiyor.",
+  "@passwordsDoNotMatch": {
+    "description": "Validation error when passwords differ."
+  },
+  "passwordUpdated": "Şifreniz başarıyla güncellendi.",
+  "@passwordUpdated": {
+    "description": "Snackbar after the password is updated."
+  },
+  "passwordUpdateFailed": "Şifre güncellenemedi: {error}",
+  "@passwordUpdateFailed": {
+    "description": "Error when updating the password fails.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountConfirmQuestion": "Hesabınızı silmek istediğinize emin misiniz?",
+  "@deleteAccountConfirmQuestion": {
+    "description": "First confirmation question for account deletion."
+  },
+  "deleteAccountConfirmBody": "Bu işlem geri alınamaz. Tüm kayıtlı alerji, diyet tercihleriniz ve geçmiş verileriniz kalıcı olarak silinecektir.",
+  "@deleteAccountConfirmBody": {
+    "description": "First confirmation body for account deletion."
+  },
+  "deleteAccountConfirm": "Evet, Hesabımı Sil",
+  "@deleteAccountConfirm": {
+    "description": "First confirmation button for account deletion."
+  },
+  "deleteAccountFinalTitle": "Son kez soruyoruz",
+  "@deleteAccountFinalTitle": {
+    "description": "Title of the final account deletion confirmation."
+  },
+  "deleteAccountFinalBody": "Bu son onaydır. Onaylarsan hesabın ve tüm verilerin kalıcı olarak silinecek.",
+  "@deleteAccountFinalBody": {
+    "description": "Body of the final account deletion confirmation."
+  },
+  "deleteAccountFinalConfirm": "Evet, Eminim — Sil",
+  "@deleteAccountFinalConfirm": {
+    "description": "Final confirmation button for account deletion."
+  },
+  "accountDeleted": "Hesabınız silindi.",
+  "@accountDeleted": {
+    "description": "Snackbar after the account is deleted."
+  },
+  "deleteAccountFailed": "Hesap silme işlemi gerçekleştirilemedi.",
+  "@deleteAccountFailed": {
+    "description": "Snackbar when account deletion fails."
   }
 }

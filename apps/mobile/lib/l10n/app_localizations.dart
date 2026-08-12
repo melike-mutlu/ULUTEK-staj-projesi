@@ -259,6 +259,282 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Profilime alerjen olarak \'{value}\' ekledim ama tam emin değilim — bunu netleştirmeme yardım eder misin?'**
   String customAllergenChatbotPrefill(String value);
+
+  /// Generic close button label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapat'**
+  String get close;
+
+  /// Acknowledge button label on informational dialogs.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anladım'**
+  String get understood;
+
+  /// Generic update button label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelle'**
+  String get update;
+
+  /// Settings section header for account and profile rows.
+  ///
+  /// In tr, this message translates to:
+  /// **'HESAP & PROFİL'**
+  String get settingsSectionAccount;
+
+  /// Settings section header for app and legal rows.
+  ///
+  /// In tr, this message translates to:
+  /// **'UYGULAMA & YASAL'**
+  String get settingsSectionApp;
+
+  /// Settings section header for session rows.
+  ///
+  /// In tr, this message translates to:
+  /// **'OTURUM'**
+  String get settingsSectionSession;
+
+  /// Subtitle under the user card in settings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif Oturum'**
+  String get activeSession;
+
+  /// Settings row label for the registered email.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıtlı E-posta'**
+  String get registeredEmail;
+
+  /// Settings row that opens the profile editor.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil Bilgilerini Düzenle'**
+  String get editProfileInfo;
+
+  /// Settings row and dialog title for changing the password.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre Değiştir'**
+  String get changePassword;
+
+  /// Settings row label for the country picker.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke Seçimi'**
+  String get countrySelection;
+
+  /// Subtitle shown when no country is selected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçilmedi'**
+  String get notSelected;
+
+  /// Snackbar after the country is saved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke seçimi güncellendi.'**
+  String get countryUpdated;
+
+  /// Settings row and dialog title for the privacy policy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gizlilik Politikası'**
+  String get privacyPolicy;
+
+  /// Settings row and dialog title for the about section.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hakkında'**
+  String get about;
+
+  /// Settings row label to sign out.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış Yap'**
+  String get signOut;
+
+  /// Error snackbar when signing out fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış yapılamadı. Lütfen tekrar dene.'**
+  String get signOutFailed;
+
+  /// Settings row and dialog title to delete the account.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı Sil'**
+  String get deleteAccount;
+
+  /// Settings row label when premium is active.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium\'dan Çık'**
+  String get premiumExit;
+
+  /// Settings row label when premium is inactive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium\'a Geç'**
+  String get premiumGo;
+
+  /// Subtitle when premium is active.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif'**
+  String get premiumActive;
+
+  /// Subtitle noting premium is for testing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Test Amaçlı'**
+  String get premiumTest;
+
+  /// Snackbar when premium is enabled.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium aktif edildi!'**
+  String get premiumEnabled;
+
+  /// Snackbar when premium is disabled.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium devre dışı bırakıldı.'**
+  String get premiumDisabled;
+
+  /// Snackbar when the premium toggle fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium durumu güncellenemedi.'**
+  String get premiumUpdateFailed;
+
+  /// App name and version line in the about dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Akıllı Sepet — Versiyon 1.0.0'**
+  String get aboutVersion;
+
+  /// First paragraph of the about dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'ULUTEK Staj Projesi kapsamında geliştirilmiş, barkod tarama ve yapay zeka destekli akıllı ürün analiz asistanıdır.'**
+  String get aboutBody1;
+
+  /// Second paragraph of the about dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcıların alerji, diyet ve özel sağlık tercihlerine göre ürün içeriklerini otomatik değerlendirir ve kişiselleştirilmiş uyarılarda bulunur.'**
+  String get aboutBody2;
+
+  /// Heading inside the privacy dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veri Gizliliği ve Güvenliği'**
+  String get privacyHeading;
+
+  /// First paragraph of the privacy dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Akıllı Sepet uygulaması, seçtiğiniz diyet, alerji ve sağlık verilerini yalnızca size özel ürün analizi yapabilmek amacıyla Supabase veritabanında güvenli bir şekilde saklar.'**
+  String get privacyBody1;
+
+  /// Second paragraph of the privacy dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişisel verileriniz hiçbir koşulda 3. taraflarla paylaşılmaz. İstediğiniz zaman profilinizden bilgilerinizi güncelleyebilirsiniz.'**
+  String get privacyBody2;
+
+  /// Helper text in the change password dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni şifrenizi girin. Şifreniz en az 6 karakter olmalıdır.'**
+  String get passwordHint;
+
+  /// Label for the new password field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Şifre'**
+  String get newPassword;
+
+  /// Label for the confirm new password field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Şifre (Tekrar)'**
+  String get newPasswordRepeat;
+
+  /// Validation error for a too-short password.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre en az 6 karakter olmalıdır.'**
+  String get passwordTooShort;
+
+  /// Validation error when passwords differ.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifreler birbiriyle eşleşmiyor.'**
+  String get passwordsDoNotMatch;
+
+  /// Snackbar after the password is updated.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifreniz başarıyla güncellendi.'**
+  String get passwordUpdated;
+
+  /// Error when updating the password fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre güncellenemedi: {error}'**
+  String passwordUpdateFailed(String error);
+
+  /// First confirmation question for account deletion.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınızı silmek istediğinize emin misiniz?'**
+  String get deleteAccountConfirmQuestion;
+
+  /// First confirmation body for account deletion.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem geri alınamaz. Tüm kayıtlı alerji, diyet tercihleriniz ve geçmiş verileriniz kalıcı olarak silinecektir.'**
+  String get deleteAccountConfirmBody;
+
+  /// First confirmation button for account deletion.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet, Hesabımı Sil'**
+  String get deleteAccountConfirm;
+
+  /// Title of the final account deletion confirmation.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son kez soruyoruz'**
+  String get deleteAccountFinalTitle;
+
+  /// Body of the final account deletion confirmation.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu son onaydır. Onaylarsan hesabın ve tüm verilerin kalıcı olarak silinecek.'**
+  String get deleteAccountFinalBody;
+
+  /// Final confirmation button for account deletion.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet, Eminim — Sil'**
+  String get deleteAccountFinalConfirm;
+
+  /// Snackbar after the account is deleted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınız silindi.'**
+  String get accountDeleted;
+
+  /// Snackbar when account deletion fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap silme işlemi gerçekleştirilemedi.'**
+  String get deleteAccountFailed;
 }
 
 class _AppLocalizationsDelegate
