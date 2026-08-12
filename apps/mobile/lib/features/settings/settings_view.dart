@@ -431,6 +431,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
     if (confirmed != true || !mounted) return;
 
+    if (!mounted) return;
     // İkinci ve son onay — yanlışlıkla tek dokunuşla hesap silinmesin.
     final finalConfirmed = await showDialog<bool>(
       context: context,

@@ -107,8 +107,12 @@ class SupabaseProfileRepository implements ProfileRepository {
   @override
   Future<void> deleteAccount() async {
     final response = await supabase.functions.invoke('delete-account');
-    if (response.status != 200) {
-      throw Exception('Hesap silinemedi (durum: ${response.status})');
+    final data = response.data;
+    if (response.status != 200 || (data is Map && data['status'] == 'error')) {
+      final msg = (data is Map && data['message'] != null)
+          ? data['message']
+          : 'durum: ${response.status}';
+      throw Exception('Hesap silinemedi ($msg)');
     }
   }
 }
