@@ -55,17 +55,52 @@ abstract final class AppColors {
   static const Color navUnselected = textPrimary;
 
   // --- Onboarding ---
-  // Kaynak: BitePal referans görseli (bkz. docs/onboarding-plan.md §4b).
-  static const Color onboardingBackground = Color(0xFFEFEEF5);
+  // Onboarding uses the same surface as home/shell so the flow stays visually
+  // consistent with the rest of the app. Kept as an alias, not a copy of the
+  // hex, so changing [background] updates onboarding too.
+  static const Color onboardingBackground = background;
   static const Color onboardingProgressFill = Color(0xFF4AB35D);
-  static const Color onboardingProgressTrack = Color(0xFFFEFEFE);
-  static const Color onboardingSurface = Color(0xFFFEFEFE);
+  // Onboarding surfaces are pure white. Aliased to [surface] instead of
+  // repeating the hex so they stay in sync with the rest of the app.
+  static const Color onboardingProgressTrack = surface;
+  static const Color onboardingSurface = surface;
   static const Color chipSelectedBorder = Color(0xFFE17F71);
   static const Color chipSelectedDot = Color(0xFFFD8366);
   static const Color chipDot = Color(0xFFEDEAED);
 
+  // --- Profile ---
+  /// Selection card title — dark grey, not black.
+  static const Color profileCardTitle = Color(0xFF4A4A4A);
+
+  /// Unselected profile chip: one small step darker than [background] so the
+  /// chip reads as a surface without competing with the selected pastels.
+  static const Color chipUnselected = Color(0xFFEDEEED);
+  static const Color chipUnselectedText = Color(0xFF1A1A1A);
+
+  /// "Show all" link.
+  static const Color linkAccent = Color(0xFF6C5CE7);
+
+  // --- Alternatives / recommendation score ---
+  /// Score dot colours for recommended alternatives. Client decides the colour;
+  /// the backend only sends the score level.
+  static const Color scoreExcellent = ok;
+  static const Color scoreGood = Color(0xFF7AC943);
+
+  /// Pastel tones for selected profile chips, handed out by chip position so a
+  /// card never reads as one solid colour block. Saturated enough to separate
+  /// clearly from [chipUnselected] while staying in the pastel family.
+  static const List<Color> chipPastels = <Color>[
+    Color(0xFFF8C4C4), // pink
+    Color(0xFFCCDEFB), // blue
+    Color(0xFFC2E8D3), // mint
+    Color(0xFFDCC8F5), // lilac
+    Color(0xFFF8E7A9), // cream
+  ];
+
+  /// Disabled primary button (e.g. nothing to save).
+  static const Color buttonDisabled = Color(0xFFBDBDBD);
+
   // Kaynak: Figma "Onboarding" dosyası — karşılama ekranları (node 0:3, 1:2).
-  static const Color onboardingWelcomeBackground = Color(0xFFFFFFFF);
   static const Color onboardingTextPrimary = Color(0xFF000000);
   static const Color onboardingSkipText = Color(0xFFA9A7A7);
   static const Color onboardingButtonBackground = Color(0xFF000000);

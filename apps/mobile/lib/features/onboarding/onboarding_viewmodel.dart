@@ -34,27 +34,31 @@ class OnboardingViewModel extends ChangeNotifier {
     for (final field in OnboardingField.values) field: <String>[],
   };
 
-  bool isSaving = false;
-  String? errorMessage;
+  bool _isSaving = false;
+  String? _errorMessage;
+  String _displayName = '';
+  String _country = '';
 
   // --- Okuma ---
 
   int get currentIndex => _currentIndex;
+  bool get isSaving => _isSaving;
+  String? get errorMessage => _errorMessage;
+  String get displayName => _displayName;
+  String get country => _country;
   OnboardingStep get currentStep => onboardingSteps[_currentIndex];
   int get stepCount => onboardingSteps.length;
   double get progress => (_currentIndex + 1) / stepCount;
   bool get canGoBack => _currentIndex > 0;
   bool get isLastStep => _currentIndex == stepCount - 1;
 
-  /// Sadece seçim ekranları için ilerleme oranı (3 adım, karşılama ekranları
-  /// sayılmaz). Karşılama adımlarında progress bar hiç çizilmediği için
-  /// (bkz. `onboarding_view.dart`) yalnızca bir seçim adımındayken çağrılır.
+  /// Karşılama ekranları dışındaki etkileşimli adımlar için ilerleme oranı.
   double get selectionProgress {
-    final selectionSteps =
-        onboardingSteps.whereType<OnboardingSelectionStep>().toList();
-    final index =
-        selectionSteps.indexOf(currentStep as OnboardingSelectionStep);
-    return (index + 1) / selectionSteps.length;
+    final interactiveSteps =
+        onboardingSteps.where((step) => step is! OnboardingWelcomeStep).toList();
+    final index = interactiveSteps.indexOf(currentStep);
+    if (index == -1) return 0.0;
+    return (index + 1) / interactiveSteps.length;
   }
 
   /// Sabit seçenekler + kullanıcının "+" ile eklediği seçenekler.
@@ -68,18 +72,32 @@ class OnboardingViewModel extends ChangeNotifier {
   bool isSelected(OnboardingField field, String option) =>
       _selections[field]!.contains(option);
 
-  /// Alt butonun metni: karşılama adımında `ctaLabel`, seçim adımında hiç
-  /// seçim yoksa `skipLabel`, varsa "Devam".
+  /// Alt butonun metni: karşılama adımında `ctaLabel`, isim adımında isim yoksa
+  /// `skipLabel`, ülke adımında ülke yoksa `skipLabel`, seçim adımında hiç seçim yoksa `skipLabel`, aksi halde "Devam".
   String get primaryActionLabel {
     final step = currentStep;
     return switch (step) {
       OnboardingWelcomeStep(:final ctaLabel) => ctaLabel ?? '',
+      OnboardingNameStep(:final skipLabel) =>
+        _displayName.trim().isEmpty ? skipLabel : 'Devam',
+      OnboardingCountryStep(:final skipLabel) =>
+        _country.trim().isEmpty ? skipLabel : 'Devam',
       OnboardingSelectionStep() =>
         _selections[step.field]!.isEmpty ? step.skipLabel : 'Devam',
     };
   }
 
   // --- Yazma ---
+
+  void setDisplayName(String name) {
+    _displayName = name;
+    notifyListeners();
+  }
+
+  void setCountry(String country) {
+    _country = country;
+    notifyListeners();
+  }
 
   void toggleOption(OnboardingField field, String option) {
     final selected = _selections[field]!;
@@ -140,60 +158,50 @@ class OnboardingViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Dismisses the inline error without retrying the save.
+  void clearError() {
+    if (_errorMessage == null) return;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   /// Profili kaydeder, başarıysa true döner.
-  ///
-  /// Auth ekranı henüz yok: `currentUserId == null` ise kaydetme atlanır,
-  /// akış yine tamamlanmış sayılır.
   Future<bool> submit() async {
-    isSaving = true;
-    errorMessage = null;
+    _isSaving = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
       final userId = _profileRepository.currentUserId;
+      // TODO(auth): email/password login ships before onboarding, so by the
+      // time we get here there is a valid session and currentUserId is
+      // non-null. This branch is only a safety fallback and should not trigger
+      // in the normal flow — once login is wired, decide whether a missing user
+      // should surface an error instead of silently skipping the save.
       if (userId != null) {
-        await _profileRepository.saveProfile(
-          UserProfile(
-            userId: userId,
-            allergies: _selections[OnboardingField.allergies]!.toList(),
-            dietPreference: _mapDietPreference(
-              _selections[OnboardingField.diet]!,
-            ),
-            healthConditions: _selections[OnboardingField.health]!.toList(),
-          ),
+        final profile = UserProfile(
+          userId: userId,
+          displayName:
+              _displayName.trim().isEmpty ? null : _displayName.trim(),
+          country:
+              _country.trim().isEmpty ? null : _country.trim(),
+          allergies: _selections[OnboardingField.allergies]!.toList(),
+          dietPreferences: _selections[OnboardingField.diet]!.toList(),
+          healthConditions: _selections[OnboardingField.health]!.toList(),
         );
+        await _profileRepository.saveProfile(profile);
       }
-      isSaving = false;
+      _isSaving = false;
       notifyListeners();
       return true;
     } catch (_) {
-      isSaving = false;
-      errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
+      _isSaving = false;
+      _errorMessage = 'Profil kaydedilemedi. Lütfen tekrar dene.';
       notifyListeners();
       return false;
     }
   }
 
-  /// Çoklu diyet seçimini sözleşmedeki tekil `diet_preference` enum'una indirger.
-  ///
-  /// UYARI — bilinçli veri kaybı: seçilen ilk eşleşen değer alınır, kalanlar
-  /// düşer. Sözleşme `diet_preference`'ı tekil enum tanımlıyor
-  /// (docs/architecture.md).
-  /// TODO(backend-pod): `diet_preference` alanının `text[]`e genişletilmesi ya
-  /// da `diet_tags text[]` eklenmesi konuşulacak; genişlerse burası tek
-  /// satırlık değişir.
-  DietPreference _mapDietPreference(Set<String> selections) {
-    const mapping = <String, DietPreference>{
-      'Vegan': DietPreference.vegan,
-      'Vejetaryen': DietPreference.vejetaryen,
-      'Diyabet dostu': DietPreference.diyabetDostu,
-      'Sporcu / Yüksek protein': DietPreference.sporcu,
-    };
-    for (final entry in mapping.entries) {
-      if (selections.contains(entry.key)) return entry.value;
-    }
-    return DietPreference.standard;
-  }
 }
 
 final onboardingViewModelProvider =

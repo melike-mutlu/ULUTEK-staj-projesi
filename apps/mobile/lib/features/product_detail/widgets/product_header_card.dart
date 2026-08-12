@@ -1,146 +1,175 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/product.dart';
+import '../../../core/theme/akilli_sepet_colors.dart';
+import 'nutri_score_badge.dart';
 
-/// Ürün adı, marka, barkod ve Nutri-Score rozetini gösteren kart widget'ı.
+/// Nutri-Score values Open Food Facts sends when it has no grade.
+const _unknownNutriScores = <String>{'unknown', 'not-applicable'};
+
+/// Product identity: thumbnail, name, brand and badges.
+/// The barcode is not shown — it is a lookup key, not information the user
+/// needs while deciding.
 class ProductHeaderCard extends StatelessWidget {
   const ProductHeaderCard({super.key, required this.product});
 
   final Product product;
 
-  Widget _buildNutriScoreBadge(String score) {
-    final cleanScore = score.trim().toUpperCase();
-    
-    Color getScoreColor(String s) {
-      switch (s) {
-        case 'A':
-          return const Color(0xFF038141);
-        case 'B':
-          return const Color(0xFF85BB2F);
-        case 'C':
-          return const Color(0xFFFECB02);
-        case 'D':
-          return const Color(0xFFEE8100);
-        case 'E':
-          return const Color(0xFFE63E11);
-        default:
-          return const Color(0xFF9CA3AF);
-      }
+  /// The image takes 40% of the available width; the name gets the rest.
+  static const double _imageWidthFactor = 0.4;
+
+  String? get _nutriScore {
+    final score = product.nutriscore?.trim().toLowerCase();
+    if (score == null || score.isEmpty || _unknownNutriScores.contains(score)) {
+      return null;
     }
-
-    final scoreColor = getScoreColor(cleanScore);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: scoreColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: scoreColor, width: 1.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: scoreColor,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              cleanScore,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'Nutri-Score $cleanScore',
-            style: TextStyle(
-              color: scoreColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
+    return score.toUpperCase();
   }
 
   @override
   Widget build(BuildContext context) {
-    final brandText = product.brand?.isNotEmpty == true ? product.brand! : 'Genel Marka';
+    final brand = product.brand?.trim();
+    final score = _nutriScore;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
+    // LayoutBuilder, not MediaQuery: the card is also rendered inside narrower
+    // boxes (tests, future split layouts) and must scale with its parent.
+    return LayoutBuilder(
+      builder: (context, constraints) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Marka Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  brandText,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4B5563),
-                  ),
+              _Thumbnail(
+                imageUrl: product.imageUrl,
+                width: constraints.maxWidth * _imageWidthFactor,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF111827),
+                        height: 1.15,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    if (brand != null && brand.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        brand,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AkilliSepetColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              // Nutri-Score (Eğer varsa)
-              if (product.nutriscore != null && product.nutriscore!.isNotEmpty)
-                _buildNutriScoreBadge(product.nutriscore!),
             ],
           ),
-          const SizedBox(height: 10),
-          // Ürün Adı
-          Text(
-            product.name,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF111827),
+          // Badges sit under the row: next to the name they would have to
+          // shrink, and a safety badge must never be clipped.
+          if (product.isPending || score != null) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                if (product.isPending) const _PendingBadge(),
+                if (score != null) NutriScoreBadge(grade: score),
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          // Barkod Bilgisi
-          Row(
-            children: [
-              const Icon(Icons.qr_code_2_rounded, size: 16, color: Color(0xFF9CA3AF)),
-              const SizedBox(width: 4),
-              Text(
-                'Barkod: ${product.barcode}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF6B7280),
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Thumbnail extends StatelessWidget {
+  const _Thumbnail({required this.imageUrl, required this.width});
+
+  final String? imageUrl;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    // Some Open Food Facts URLs are http; iOS blocks those by default.
+    final url = imageUrl?.trim().replaceFirst(RegExp('^http://'), 'https://');
+
+    return Container(
+      width: width,
+      height: width,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFF3F4F6)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: url == null || url.isEmpty
+          ? const _ThumbnailPlaceholder()
+          : Image.network(
+              url,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const _ThumbnailPlaceholder(),
+            ),
+    );
+  }
+}
+
+class _ThumbnailPlaceholder extends StatelessWidget {
+  const _ThumbnailPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        size: 32,
+        color: AkilliSepetColors.textSecondary,
+      ),
+    );
+  }
+}
+
+class _PendingBadge extends StatelessWidget {
+  const _PendingBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF3C7),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFFF59E0B)),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.gpp_maybe_rounded, size: 13, color: Color(0xFFB45309)),
+          SizedBox(width: 4),
+          Text(
+            'Doğrulanmadı',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFB45309),
+            ),
           ),
         ],
       ),
     );
   }
 }
+

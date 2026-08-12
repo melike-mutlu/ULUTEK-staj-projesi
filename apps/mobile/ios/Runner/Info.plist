@@ -70,5 +70,16 @@
 <string>Ürünleri taramak için kameraya erişim gerekiyor.</string>
 <key>NSPhotoLibraryUsageDescription</key>
 <string>Profil fotoğrafı seçmek için galeriye erişim gerekiyor.</string>
+<key>CFBundleURLTypes</key>
+<array>
+	<dict>
+		<key>CFBundleURLName</key>
+		<string>io.supabase.akillisepet</string>
+		<key>CFBundleURLSchemes</key>
+		<array>
+			<string>io.supabase.akillisepet</string>
+		</array>
+	</dict>
+</array>
 </dict>
 </plist>

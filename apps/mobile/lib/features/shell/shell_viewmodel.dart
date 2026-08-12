@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Alt navigasyondaki sekmeler. Buradaki sıra ekrandaki sırayı belirler:
-/// Ana Sayfa · Tara · Geçmiş · Profil.
-enum ShellTab { dashboard, scan, home, profile }
+/// Ana Sayfa · Tara · Chatbot · Profil.
+enum ShellTab { home, scan, chatbot, profile }
 
 /// Alt navigasyon kabuğunun state'i — hangi sekme açık.
 ///
@@ -11,7 +11,7 @@ enum ShellTab { dashboard, scan, home, profile }
 /// izleyebilir: `ChangeNotifier` + `ChangeNotifierProvider`, View tarafında
 /// `ConsumerWidget` + `ref.watch(...)`.
 class ShellViewModel extends ChangeNotifier {
-  ShellTab _currentTab = ShellTab.dashboard;
+  ShellTab _currentTab = ShellTab.home;
 
   ShellTab get currentTab => _currentTab;
 
@@ -25,5 +25,11 @@ class ShellViewModel extends ChangeNotifier {
   }
 }
 
+/// autoDispose: kabuk yığından çıkınca (çıkış yapıldığında) state sıfırlansın.
+/// Aksi hâlde tekrar giriş yapan kullanıcı Ana Sayfa yerine en son açık olan
+/// sekmede karşılanır. Kabuğun üstüne route push edilirken widget'lar ayakta
+/// kaldığı için sekme orada korunur.
 final shellViewModelProvider =
-    ChangeNotifierProvider<ShellViewModel>((ref) => ShellViewModel());
+    ChangeNotifierProvider.autoDispose<ShellViewModel>(
+  (ref) => ShellViewModel(),
+);

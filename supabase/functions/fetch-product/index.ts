@@ -1,13 +1,11 @@
-// Akıllı Sepet — fetch-product Edge Function
-// docs/architecture.md — Sözleşme 1: Mobil -> Backend
+import { getServiceClient, getUserClient } from "../_shared/lib/supabaseClient.ts";
+import { getFromCache, saveToCache } from "../_shared/supabase/productCache.service.ts";
+import { fetchFromOpenFoodFacts } from "../_shared/openFoodFacts/openFoodFacts.service.ts";
+import { runRuleEngine, findMissingFields } from "../_shared/ruleEngine/ruleEngine.service.ts";
+import { findSafeAlternatives } from "../_shared/alternativeProducts.service.ts";
+import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 
-import { createAdminClient, createUserClient } from "../../services/supabase/supabaseClient.ts";
-import { getFromCache, saveToCache } from "../../services/supabase/productCache.service.ts";
-import { fetchFromOpenFoodFacts } from "../../services/openFoodFacts/openFoodFacts.service.ts";
-import { runRuleEngine, findMissingFields } from "../../services/ruleEngine/ruleEngine.service.ts";
-import { jsonResponse, handleCorsPreflight } from "../../services/shared/http.ts";
-
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   // CORS Preflight istekleri için
   if (req.method === "OPTIONS") {
     return handleCorsPreflight();
@@ -19,8 +17,8 @@ Deno.serve(async (req) => {
       return jsonResponse({ status: "error", message: "barcode zorunlu" }, 400);
     }
 
-    const supabase = createAdminClient();
-    const userClient = createUserClient(req.headers.get("Authorization") ?? "");
+    const supabase = getServiceClient();
+    const userClient = getUserClient(req);
     const { data: { user } } = await userClient.auth.getUser();
 
     let product = await getFromCache(barcode);
@@ -33,13 +31,20 @@ Deno.serve(async (req) => {
     }
 
     let ruleEngineResult = null;
+    let safeAlternatives: unknown[] = [];
     if (user) {
       const { data: profile } = await supabase
         .from("profiles")
         .select()
         .eq("user_id", user.id)
         .maybeSingle();
+      // Profil olmasa bile rule engine çalışır (null-safe) — eskisi gibi.
       ruleEngineResult = runRuleEngine(product, profile);
+
+      // Alternatifler gerçek bir profil gerektirir, aksi halde anlamsız olur.
+      if (profile) {
+        safeAlternatives = await findSafeAlternatives(product, profile, supabase);
+      }
     }
 
     const missingFields = findMissingFields(product);
@@ -47,6 +52,7 @@ Deno.serve(async (req) => {
       status: missingFields.length > 0 ? "partial" : "found",
       product,
       rule_engine_result: ruleEngineResult,
+      safe_alternatives: safeAlternatives,
       ...(missingFields.length > 0 ? { missing_fields: missingFields } : {}),
     });
   } catch (error) {

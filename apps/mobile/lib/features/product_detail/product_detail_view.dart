@@ -1,27 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/navigation/app_routes.dart';
+import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
+import '../../data/repositories/product_repository.dart';
+import '../../data/repositories/profile_repository.dart';
 import 'product_detail_viewmodel.dart';
-import 'widgets/allergens_card.dart';
+import 'profile_checks.dart';
+import 'widgets/ingredients_section.dart';
 import 'widgets/nutriments_card.dart';
+import 'widgets/other_allergens_section.dart';
+import 'widgets/personal_risks_section.dart';
+import 'widgets/profile_check_section.dart';
 import 'widgets/product_header_card.dart';
+import 'widgets/recommendations_section.dart';
 import 'widgets/warning_banner.dart';
 
-class ProductDetailView extends StatefulWidget {
+class ProductDetailView extends ConsumerStatefulWidget {
   const ProductDetailView({super.key});
 
   @override
-  State<ProductDetailView> createState() => _ProductDetailViewState();
+  ConsumerState<ProductDetailView> createState() => _ProductDetailViewState();
 }
 
-class _ProductDetailViewState extends State<ProductDetailView> {
+class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   late final ProductDetailViewModel _viewModel;
+  bool _isInitialLoaded = false;
+  String? _scannedBarcode;
 
   @override
   void initState() {
     super.initState();
-    // Varsayılan olarak mock kurgusu ile başlat (Kırmızı / Warning senaryosu)
-    _viewModel = ProductDetailViewModel.withMock(mockState: 'warning');
+    _viewModel = ProductDetailViewModel(
+      ref.read(explanationRepositoryProvider),
+    );
     _viewModel.addListener(_onViewModelChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialLoaded) {
+      _isInitialLoaded = true;
+      _loadFromRouteArguments();
+    }
+  }
+
+  /// Loads the screen from the route argument, which is either a ready
+  /// [ProductFetchResult] or a barcode to fetch. "Tekrar Dene" reuses this.
+  void _loadFromRouteArguments() {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    final profileRepo = ref.read(profileRepositoryProvider);
+
+    if (args is ProductFetchResult) {
+      _scannedBarcode = args.product?.barcode;
+      _viewModel.loadFromFetchResult(args, profileRepo);
+    } else if (args is String) {
+      _scannedBarcode = args;
+      _viewModel.loadFromBarcode(
+        args,
+        ref.read(productRepositoryProvider),
+        profileRepo,
+      );
+    } else {
+      // No barcode or result to work with: show "not found" instead of fake data.
+      _scannedBarcode = null;
+      _viewModel.setStatusFromFetch('not_found');
+    }
   }
 
   void _onViewModelChanged() {
@@ -48,16 +94,6 @@ class _ProductDetailViewState extends State<ProductDetailView> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Ürün Detayı'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ürün detayı paylaşıldı')),
-              );
-            },
-          ),
-        ],
       ),
       body: _buildBody(context),
     );
@@ -80,12 +116,14 @@ class _ProductDetailViewState extends State<ProductDetailView> {
           ),
         );
 
+      case ProductDetailStatus.error:
+        return _buildErrorState(context);
+
       case ProductDetailStatus.notFound:
         return _buildNotFoundState(context);
 
       case ProductDetailStatus.found:
       case ProductDetailStatus.partial:
-      default:
         final product = _viewModel.product;
         final explanation = _viewModel.explanation;
 
@@ -93,135 +131,179 @@ class _ProductDetailViewState extends State<ProductDetailView> {
           return _buildNotFoundState(context);
         }
 
+        final insufficient =
+            _viewModel.ruleEngineResult?.hasSufficientData == false;
+        final nutrimentsCard = NutrimentsCard(
+          nutriments: product.nutriments,
+          dietNote: explanation.dietNote,
+        );
+        // Only worth surfacing early if there is actually something to show.
+        final showNutrimentsFirst = insufficient && product.nutriments.hasAny;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Uygunluk Sonucu (Yeşil / Sarı / Kırmızı Bandı)
-              WarningBanner(explanation: explanation),
-              const SizedBox(height: 16),
+              // 1. Uygunluk sonucu — ekranın görsel çıpası
+              WarningBanner(
+                explanation: explanation,
+                insufficientData: insufficient,
+                reason: personalReasonSpans(
+                  explanation: explanation,
+                  rule: _viewModel.ruleEngineResult,
+                  profile: _viewModel.userProfile,
+                ),
+                reasonLines: personalReasonLines(
+                  rule: _viewModel.ruleEngineResult,
+                  profile: _viewModel.userProfile,
+                ),
+              ),
+              // Veri eksikse kullanıcı ürünü bize bildirerek katkı yapabilir.
+              if (insufficient) ...[
+                const SizedBox(height: 16),
+                _buildReportButton(context, product.barcode),
+              ],
+              const SizedBox(height: 14),
 
-              // 2. Ürün Adı, Marka, Barkod & Nutri-Score Kartı
+              // 2. Ürün kimliği (görsel + ad + marka)
               ProductHeaderCard(product: product),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
 
-              // 3. Besin Değerleri Kartı (100g)
-              NutrimentsCard(nutriments: product.nutriments),
-              const SizedBox(height: 16),
+              // Veri eksik ama besin değerleri varsa, kullanıcı hiç değilse
+              // onları görsün diye kimliğin hemen altına alınır.
+              if (showNutrimentsFirst) nutrimentsCard,
 
-              // 4. Alerjen & İçindekiler Kartı
-              AllergensCard(
+              // 3-6. Profil kategorileri: alerji, diyet, sağlık
+              PersonalRisksSection(
+                ruleEngineResult: _viewModel.ruleEngineResult,
+              ),
+              ProfileCheckSection(
+                title: 'Diyet türü',
+                icon: Icons.eco_outlined,
+                checks: dietChecks(
+                  _viewModel.userProfile,
+                  _viewModel.ruleEngineResult,
+                ),
+                emptyMessage: 'Kayıtlı bir diyet tercihin yok.',
+              ),
+              ProfileCheckSection(
+                title: 'Sağlık durumu',
+                icon: Icons.favorite_outline_rounded,
+                checks: healthChecks(
+                  _viewModel.userProfile,
+                  _viewModel.ruleEngineResult,
+                ),
+                emptyMessage: 'Kayıtlı bir sağlık durumun yok.',
+              ),
+              if (!showNutrimentsFirst) nutrimentsCard,
+
+              // 7-8. Ürünün kendi bilgileri
+              OtherAllergensSection(
                 product: product,
                 ruleEngineResult: _viewModel.ruleEngineResult,
               ),
+              IngredientsSection(product: product),
+
+              // Öneriler — içindekilerin hemen altında.
+              RecommendationsSection(alternatives: _viewModel.alternatives),
               const SizedBox(height: 24),
-
-              // Test & Mock Senaryo Seçici (Staj Değerlendirme & Test Kolaylığı İçin)
-              _buildMockTesterBar(),
-              const SizedBox(height: 20),
-
-              // Ana Butonlar (Sepete Ekle & Ana Sayfa)
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/home',
-                          (route) => false,
-                        );
-                      },
-                      icon: const Icon(Icons.home_outlined),
-                      label: const Text('Ana Sayfa'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${product.name} sepete eklendi!'),
-                            backgroundColor: AkilliSepetColors.primary,
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.shopping_cart_outlined),
-                      label: const Text('Sepete Ekle'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
             ],
           ),
         );
     }
   }
 
-  Widget _buildMockTesterBar() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.bug_report_outlined, size: 16, color: Color(0xFF6B7280)),
-              SizedBox(width: 6),
-              Text(
-                'Mock Test Durumları (Demo):',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4B5563),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildMockChip('🔴 Kırmızı', () => _viewModel.loadMockState('red')),
-              _buildMockChip('🟡 Sarı', () => _viewModel.loadMockState('yellow')),
-              _buildMockChip('🟢 Yeşil', () => _viewModel.loadMockState('green')),
-              _buildMockChip('❌ Yok', () => _viewModel.setStatusFromFetch('not_found')),
-            ],
-          ),
-        ],
+  /// Same destination as the "not found" flow: lets the user report a product
+  /// whose data is missing so it can be completed.
+  Widget _buildReportButton(BuildContext context, String barcode) {
+    // The app theme forces buttons to full width (Size.fromHeight = infinite
+    // width). Override it here so the button hugs its label: one line, centred,
+    // and safe at any screen size — no fixed fraction that could clip.
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ElevatedButton.icon(
+        onPressed: () => Navigator.pushNamed(
+          context,
+          AppRoutes.pendingProduct,
+          arguments: barcode,
+        ),
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+        label: const Text('Ürünü Bize Bildir', maxLines: 1),
       ),
     );
   }
 
-  Widget _buildMockChip(String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFD1D5DB)),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+  Widget _buildErrorState(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEF2F2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                size: 52,
+                color: Colors.redAccent,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Bir Hata Oluştu',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AkilliSepetColors.textPrimary,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _viewModel.errorMessage ??
+                  'Ürün detayları yüklenirken sunucu ile iletişim kurulamadı.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AkilliSepetColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 28),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Geri Dön'),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: _loadFromRouteArguments,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Tekrar Dene'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildNotFoundState(BuildContext context) {
+    final barcodeText = _scannedBarcode ?? '—';
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -247,14 +329,15 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                 ),
                 const SizedBox(height: 24),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF0F0F0),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'Barkod: 8 690 504 112 233',
-                    style: TextStyle(
+                  child: Text(
+                    'Barkod: $barcodeText',
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF6B7280),
                       fontFamily: 'monospace',
@@ -292,8 +375,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Ürün bildirimi gönderildi')),
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.pendingProduct,
+                    arguments: barcodeText,
                   );
                 },
                 child: const Text('Ürünü Bize Bildir'),

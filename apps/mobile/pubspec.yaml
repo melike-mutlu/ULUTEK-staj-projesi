@@ -15,6 +15,8 @@ dependencies:
   flutter_svg: ^2.0.10
   device_preview: ^1.3.1
   http: ^1.6.0
+  flutter_dotenv: ^6.0.1
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +27,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/allergens/
+    - assets/nutritional_values/
+    - assets/other/
+    - .env

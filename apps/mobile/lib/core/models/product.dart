@@ -5,13 +5,26 @@ class Nutriments {
   final double? proteins100g;
   final double? salt100g;
 
+  /// fetch-product bu alani henuz gondermiyor; gelene kadar "—" gosterilir.
+  final double? carbohydrates100g;
+
   const Nutriments({
     this.energyKcal100g,
     this.sugars100g,
     this.fat100g,
     this.proteins100g,
     this.salt100g,
+    this.carbohydrates100g,
   });
+
+  /// En az bir besin değeri var mı — "besin değerleri" bölümünü göstermeye değer.
+  bool get hasAny =>
+      energyKcal100g != null ||
+      sugars100g != null ||
+      fat100g != null ||
+      proteins100g != null ||
+      salt100g != null ||
+      carbohydrates100g != null;
 
   factory Nutriments.fromJson(Map<String, dynamic> json) {
     return Nutriments(
@@ -20,6 +33,7 @@ class Nutriments {
       fat100g: (json['fat_100g'] as num?)?.toDouble(),
       proteins100g: (json['proteins_100g'] as num?)?.toDouble(),
       salt100g: (json['salt_100g'] as num?)?.toDouble(),
+      carbohydrates100g: (json['carbohydrates_100g'] as num?)?.toDouble(),
     );
   }
 }
@@ -29,28 +43,46 @@ class Product {
   final String barcode;
   final String name;
   final String? brand;
+  final String? imageUrl;
   final String ingredientsText;
   final List<String> additives;
   final List<String> allergensTags;
   final Nutriments nutriments;
   final String? nutriscore;
+  final String? status;
+
+  /// Topluluk tarafından eklenmiş ve henüz onay bekleyen/doğrulanmamış ürün göstergesi.
+  final bool isPending;
 
   const Product({
     required this.barcode,
     required this.name,
     this.brand,
+    this.imageUrl,
     required this.ingredientsText,
     required this.additives,
     required this.allergensTags,
     required this.nutriments,
     this.nutriscore,
-  });
+    this.status,
+    bool? isPending,
+  }) : isPending = isPending ?? (status == 'PENDING');
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    final statusVal = json['status'] as String?;
+    final verified = json['verified'] as bool?;
+    final isPendingVal = json['is_pending'] as bool? ??
+        (statusVal?.toUpperCase() == 'PENDING' || verified == false);
+
     return Product(
       barcode: json['barcode'] as String,
       name: json['name'] as String,
       brand: json['brand'] as String? ?? json['brands'] as String?,
+      imageUrl: json['image_url'] as String? ??
+          json['imageUrl'] as String? ??
+          json['image_front_url'] as String? ??
+          json['image_url_small'] as String? ??
+          json['image_front_small_url'] as String?,
       ingredientsText: json['ingredients_text'] as String? ?? '',
       additives: (json['additives'] as List<dynamic>? ?? [])
           .map((e) => e as String)
@@ -58,9 +90,13 @@ class Product {
       allergensTags: (json['allergens_tags'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList(),
-      nutriments: Nutriments.fromJson(
-          json['nutriments'] as Map<String, dynamic>? ?? {}),
+      nutriments: json['nutriments'] != null
+          ? Nutriments.fromJson(
+              Map<String, dynamic>.from(json['nutriments'] as Map))
+          : const Nutriments(),
       nutriscore: json['nutriscore'] as String?,
+      status: statusVal,
+      isPending: isPendingVal,
     );
   }
 
@@ -69,6 +105,7 @@ class Product {
       'barcode': barcode,
       'name': name,
       'brand': brand,
+      if (imageUrl != null) 'image_url': imageUrl,
       'ingredients_text': ingredientsText,
       'additives': additives,
       'allergens_tags': allergensTags,
@@ -78,8 +115,11 @@ class Product {
         'fat_100g': nutriments.fat100g,
         'proteins_100g': nutriments.proteins100g,
         'salt_100g': nutriments.salt100g,
+        'carbohydrates_100g': nutriments.carbohydrates100g,
       },
       'nutriscore': nutriscore,
+      if (status != null) 'status': status,
+      'is_pending': isPending,
     };
   }
 }

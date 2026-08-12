@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 
@@ -21,6 +24,12 @@ class ScanView extends ConsumerStatefulWidget {
 }
 
 class _ScanViewState extends ConsumerState<ScanView> {
+  /// Çerçevenin tasarımdaki boyutu; daha dar ekranlarda bunun altına iner.
+  static const double _maxFrameSize = 280;
+
+  /// Butonla alt bar arasındaki boşluk.
+  static const double _bottomGap = 5;
+
   final MobileScannerController _controller = MobileScannerController(
     formats: const [BarcodeFormat.ean13, BarcodeFormat.ean8],
   );
@@ -37,17 +46,25 @@ class _ScanViewState extends ConsumerState<ScanView> {
   Future<void> _handleBarcode(String barcode) async {
     if (_isHandlingBarcode) return;
     _isHandlingBarcode = true;
-    await _controller.stop();
 
-    final result =
-        await ref.read(scanViewModelProvider).onBarcodeScanned(barcode);
+    try {
+      final result =
+          await ref.read(scanViewModelProvider).onBarcodeScanned(barcode);
 
-    if (!mounted) return;
-    await Navigator.pushNamed(context, '/product-detail', arguments: result);
-
-    if (!mounted) return;
-    _isHandlingBarcode = false;
-    await _controller.start();
+      if (!mounted) return;
+      await _controller.stop();
+      if (!mounted) return;
+      await Navigator.pushNamed(
+        context,
+        AppRoutes.productDetail,
+        arguments: result,
+      );
+    } finally {
+      if (mounted) {
+        await _controller.start();
+        _isHandlingBarcode = false;
+      }
+    }
   }
 
   void _showManualBarcodeDialog(BuildContext context) {
@@ -113,6 +130,14 @@ class _ScanViewState extends ConsumerState<ScanView> {
 
   @override
   Widget build(BuildContext context) {
+    // Inside the shell this already includes the floating bar's height (the
+    // Scaffold's `extendBody` adds it); opened standalone it is just the system
+    // safe area. Clamped because Padding rejects negative values.
+    final bottomPadding = math.max(
+      0.0,
+      MediaQuery.of(context).padding.bottom + _bottomGap,
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xFF1F1F1F), // Koyu fon
       appBar: AppBar(
@@ -139,7 +164,7 @@ class _ScanViewState extends ConsumerState<ScanView> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.fromLTRB(24, 24, 24, bottomPadding),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -149,51 +174,69 @@ class _ScanViewState extends ConsumerState<ScanView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Kamera Görünümü Çerçevesi
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        width: 280,
-                        height: 280,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AkilliSepetColors.primary,
-                            width: 3,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
+                    // Flexible + AspectRatio: kare kalır ama kısa ekranlarda
+                    // küçülür; sabit yükseklikte alttaki metni taşırıyordu.
+                    Flexible(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: _maxFrameSize,
+                          maxHeight: _maxFrameSize,
                         ),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            MobileScanner(
-                              controller: _controller,
-                              onDetect: (capture) {
-                                for (final barcode in capture.barcodes) {
-                                  final value = barcode.rawValue;
-                                  if (value != null) {
-                                    _handleBarcode(value);
-                                    break;
-                                  }
-                                }
-                              },
-                            ),
-                            _cornerBracket(top: true, left: true),
-                            _cornerBracket(top: true, left: false),
-                            _cornerBracket(top: false, left: true),
-                            _cornerBracket(top: false, left: false),
-                            // Tarama Çizgisi
-                            Positioned(
-                              top: 140,
-                              left: 0,
-                              right: 0,
-                              child: Center(
-                                child: Container(
-                                  width: 200,
-                                  height: 2,
-                                  color: Colors.amber,
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: AkilliSepetColors.primary,
+                                  width: 3,
                                 ),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  MobileScanner(
+                                    controller: _controller,
+                                    onDetect: (capture) {
+                                      if (_isHandlingBarcode) return;
+
+                                      // Karede birden fazla farklı barkod
+                                      // görünüyorsa (örn. rafta yan yana
+                                      // duran başka bir ürün, çok parçalı
+                                      // bir kutu) hangisinin hedeflendiği
+                                      // belirsizdir — yanlış ürün açmaktansa
+                                      // bu kareyi atla, kamera akmaya devam
+                                      // eder ve kullanıcı hizaladığında tek
+                                      // barkodlu bir kare yakalanır.
+                                      final values = capture.barcodes
+                                          .map((b) => b.rawValue)
+                                          .whereType<String>()
+                                          .toSet();
+                                      if (values.length == 1) {
+                                        _handleBarcode(values.first);
+                                      }
+                                    },
+                                  ),
+                                  _cornerBracket(top: true, left: true),
+                                  _cornerBracket(top: true, left: false),
+                                  _cornerBracket(top: false, left: true),
+                                  _cornerBracket(top: false, left: false),
+                                  // Tarama Çizgisi — çerçeveye göre ortalanır.
+                                  Center(
+                                    child: FractionallySizedBox(
+                                      widthFactor: 0.7,
+                                      child: Container(
+                                        height: 2,
+                                        color: Colors.amber,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

@@ -1,9 +1,11 @@
+supabase/.temp/
 # Ortam değişkenleri (asla git'e eklenmemeli! - Supabase anahtarları buraya, repoya değil)
 .env
 .env.*
 !.env.example
 supabase/.env
 supabase/.env.local
+apps/mobile/.env
 
 # Supabase yerel geliştirme
 supabase/.branches
@@ -20,3 +22,6 @@ Thumbs.db
 *.swp
 
 CLAUDE.md
+
+# Claude Code kişisel ayarlar (repoya girmemeli)
+.claude/settings.local.json

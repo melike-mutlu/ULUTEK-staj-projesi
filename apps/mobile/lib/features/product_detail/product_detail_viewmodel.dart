@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/models/alternative.dart';
 import '../../core/models/explanation.dart';
 import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
 import '../../data/repositories/explanation_repository.dart';
+import '../../data/repositories/product_repository.dart';
+import '../../data/repositories/profile_repository.dart';
 
 enum ProductDetailStatus { loading, found, notFound, partial, error }
 
@@ -18,9 +21,96 @@ class ProductDetailViewModel extends ChangeNotifier {
   RuleEngineResult? ruleEngineResult;
   Explanation? explanation;
 
+  /// Recommended alternatives for the current product. Empty until loaded.
+  List<Alternative> alternatives = const [];
+
+  /// Diyet/sağlık kategorilerini beslemek için tutulur.
+  UserProfile? userProfile;
+
+  String? errorMessage;
+
   ProductDetailViewModel.withMock({String mockState = 'warning'})
       : _explanationRepository = null {
     loadMockState(mockState);
+  }
+
+  /// Fetches the barcode from the backend and hands the result to
+  /// [loadFromFetchResult]. Used when the screen is opened with a barcode
+  /// only (e.g. from scan history).
+  Future<void> loadFromBarcode(
+    String barcode,
+    ProductRepository productRepository,
+    ProfileRepository profileRepository,
+  ) async {
+    status = ProductDetailStatus.loading;
+    errorMessage = null;
+    product = null;
+    ruleEngineResult = null;
+    explanation = null;
+    notifyListeners();
+
+    final fetchResult = await productRepository.fetchProduct(barcode);
+    await loadFromFetchResult(fetchResult, profileRepository);
+  }
+
+  /// Barkod arama sonucunu (ProductFetchResult) ve gerçek kullanıcı profilini (profileRepository) alıp işler.
+  Future<void> loadFromFetchResult(
+    ProductFetchResult fetchResult,
+    ProfileRepository profileRepository,
+  ) async {
+    status = ProductDetailStatus.loading;
+    errorMessage = null;
+    notifyListeners();
+
+    if (fetchResult.status == 'error') {
+      status = ProductDetailStatus.error;
+      errorMessage = fetchResult.errorMessage ??
+          'Ürün bilgileri alınırken bir hata oluştu.';
+      notifyListeners();
+      return;
+    }
+
+    if (fetchResult.status == 'not_found' || fetchResult.product == null) {
+      status = ProductDetailStatus.notFound;
+      notifyListeners();
+      return;
+    }
+
+    final product = fetchResult.product!;
+    final ruleEngineResult = fetchResult.ruleEngineResult ??
+        const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: true,
+        );
+
+    // profileRepositoryProvider üzerinden gerçek kullanıcı profilini çek
+    UserProfile? userProfile;
+    final userId = profileRepository.currentUserId;
+    if (userId != null) {
+      try {
+        userProfile = await profileRepository.getProfile(userId);
+      } catch (e) {
+        debugPrint('[ProductDetailViewModel] Profile load warning: $e');
+      }
+    }
+
+    // Profil veritabanında henüz oluşturulmadıysa varsayılan profil
+    userProfile ??= UserProfile(
+      userId: userId ?? 'guest',
+      allergies: const [],
+      dietPreferences: const [],
+      healthConditions: const [],
+    );
+
+    // Alternatives ride inside the fetch response; no separate request needed.
+    alternatives = fetchResult.safeAlternatives;
+
+    await load(
+      product: product,
+      ruleEngineResult: ruleEngineResult,
+      userProfile: userProfile,
+    );
   }
 
   void loadMockState(String state) {
@@ -28,12 +118,51 @@ class ProductDetailViewModel extends ChangeNotifier {
     notifyListeners();
 
     switch (state) {
+      case 'pending':
+      case 'unverified':
+        product = const Product(
+          barcode: '9998887776655',
+          name: 'Organik Ev Yapımı Granola',
+          brand: 'Topluluk Katkısı',
+          ingredientsText: 'Yulaf ezmesi, bal, ceviz, tarçın.',
+          additives: [],
+          allergensTags: ['en:nuts'],
+          nutriments: Nutriments(
+            energyKcal100g: 380,
+            sugars100g: 14.0,
+            fat100g: 15.0,
+            proteins100g: 9.0,
+            salt100g: 0.02,
+          ),
+          nutriscore: 'b',
+          isPending: true,
+        );
+
+        ruleEngineResult = const RuleEngineResult(
+          matchedAllergens: [],
+          hasConflict: false,
+          veganCompatible: false,
+          diabeticNote: null,
+        );
+
+        explanation = const Explanation(
+          summary: 'Topluluk tarafından eklenen granola tarifi.',
+          level: WarningLevel.caution,
+          warningMessage:
+              'Bu ürün henüz yetkililerce doğrulanmadı. Tüketmeden önce içerik ve alerjen etiketini dikkatle kontrol ediniz. (Doğrulanmadı, dikkatli ol)',
+          dietNote: 'Topluluk verisidir.',
+          disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+        );
+        break;
+
       case 'warning':
       case 'red':
         product = const Product(
           barcode: '8690504041502',
           name: 'Çikolatalı Gofret',
           brand: 'Ülker',
+          imageUrl:
+              'https://images.openfoodfacts.org/images/products/869/050/404/1502/front_tr.3.400.jpg',
           ingredientsText:
               'Buğday unu, şeker, bitkisel yağ (palm), kakao kitlesi, tam yağlı süt tozu, fındık püresi, emülgatör (soya lesitini), kabartıcı (sodyum hidrojen karbonat), tuz.',
           additives: ['E322', 'E500'],
@@ -72,6 +201,8 @@ class ProductDetailViewModel extends ChangeNotifier {
           barcode: '8690504112233',
           name: 'Süzme Yoğurt 500g',
           brand: 'Sütaş',
+          imageUrl:
+              'https://images.openfoodfacts.org/images/products/869/050/411/2233/front_tr.3.400.jpg',
           ingredientsText: 'Pastörize inek sütü, yoğurt kültürü.',
           additives: [],
           allergensTags: ['en:milk'],
@@ -110,7 +241,8 @@ class ProductDetailViewModel extends ChangeNotifier {
           barcode: '8681234567890',
           name: 'Fındık & Kakao Meyve Barı',
           brand: 'Zuber',
-          ingredientsText: 'Hurma, fındık (%20), kakao kitlesi (%10), deniz tuzu.',
+          ingredientsText:
+              'Hurma, fındık (%20), kakao kitlesi (%10), deniz tuzu.',
           additives: [],
           allergensTags: ['en:nuts'],
           nutriments: Nutriments(
@@ -142,6 +274,8 @@ class ProductDetailViewModel extends ChangeNotifier {
         break;
     }
 
+    alternatives = _mockAlternatives;
+    _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
   }
@@ -153,30 +287,85 @@ class ProductDetailViewModel extends ChangeNotifier {
   }) async {
     this.product = product;
     this.ruleEngineResult = ruleEngineResult;
+    this.userProfile = userProfile;
     status = ProductDetailStatus.loading;
     notifyListeners();
 
-    if (_explanationRepository != null) {
-      explanation = await _explanationRepository.explainProduct(
-        product: product,
-        ruleEngineResult: ruleEngineResult,
-        userProfile: userProfile,
-      );
+    final repo = _explanationRepository;
+    if (repo != null) {
+      try {
+        final llm = await repo.explainProduct(
+          product: product,
+          ruleEngineResult: ruleEngineResult,
+          userProfile: userProfile,
+        );
+        // The rule engine owns the verdict: keep the LLM text but never let its
+        // level fall below the deterministic floor.
+        explanation = _clampToRuleEngine(llm, ruleEngineResult);
+      } catch (e) {
+        debugPrint('[ProductDetailViewModel] explain-product failed: $e');
+        explanation = _deterministicExplanation(product, ruleEngineResult);
+      }
     } else {
-      explanation = Explanation(
-        summary: '${product.name} için ürün analizi tamamlandı.',
-        level: ruleEngineResult.hasConflict
-            ? WarningLevel.warning
-            : WarningLevel.ok,
-        warningMessage: ruleEngineResult.hasConflict
-            ? 'Bu üründe riskli içerik veya alerjen tespit edildi.'
-            : 'Bu ürün profilinize uygundur.',
-        disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
-      );
+      explanation = _deterministicExplanation(product, ruleEngineResult);
     }
 
+    _applyPendingProductRule();
     status = ProductDetailStatus.found;
     notifyListeners();
+  }
+
+  /// The verdict when the LLM is unavailable: comes purely from the rule engine.
+  Explanation _deterministicExplanation(
+    Product product,
+    RuleEngineResult rule,
+  ) {
+    return Explanation(
+      summary: '${product.name} için ürün analizi tamamlandı.',
+      level: rule.hasConflict ? WarningLevel.warning : WarningLevel.ok,
+      warningMessage: rule.hasConflict
+          ? 'Bu üründe riskli içerik veya alerjen tespit edildi.'
+          : 'Bu ürün profilinize uygundur.',
+      disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
+    );
+  }
+
+  /// Client-side guard mirroring the backend clamp: the LLM may raise severity
+  /// but can never lower the verdict below the rule engine floor.
+  Explanation _clampToRuleEngine(Explanation llm, RuleEngineResult rule) {
+    final floor = rule.hasConflict ? WarningLevel.warning : WarningLevel.ok;
+    final level = llm.level.index >= floor.index ? llm.level : floor;
+    if (level == llm.level) return llm;
+    return Explanation(
+      summary: llm.summary,
+      level: level,
+      warningMessage: llm.warningMessage,
+      dietNote: llm.dietNote,
+      disclaimer: llm.disclaimer,
+    );
+  }
+
+  /// Eğer ürün PENDING ise (topluluk tarafından eklenmiş, doğrulanmamış),
+  /// kural motoru sonucu ne olursa olsun asla yeşil/güvenli gösterilmez.
+  /// Seviye en az WarningLevel.caution (nötr/dikkat) yapılır.
+  void _applyPendingProductRule() {
+    final prod = product;
+    final exp = explanation;
+    if (prod != null && prod.isPending && exp != null) {
+      final newLevel =
+          exp.level == WarningLevel.ok ? WarningLevel.caution : exp.level;
+      explanation = Explanation(
+        summary: exp.summary,
+        level: newLevel,
+        warningMessage: exp.level == WarningLevel.ok
+            ? 'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı. Bilgiler resmi onay beklemektedir.'
+            : exp.warningMessage,
+        // Pending is shown by the "Doğrulanmadı" badge only; injecting it here
+        // as well repeated the same warning three times on one screen.
+        dietNote: exp.dietNote,
+        disclaimer: exp.disclaimer,
+      );
+    }
   }
 
   void setStatusFromFetch(String fetchStatus) {
@@ -186,3 +375,64 @@ class ProductDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+/// Mock alternatives used only by [ProductDetailViewModel.loadMockState] for UI
+/// previews; the real screen reads `safe_alternatives` from the fetch response.
+const List<Alternative> _mockAlternatives = [
+  Alternative(
+    barcode: '8690504041502',
+    productName: 'Fındık & Kakao Meyve Barı',
+    brand: 'Zuber',
+    imageUrl:
+        'https://images.openfoodfacts.org/images/products/869/050/404/1502/front_tr.3.400.jpg',
+    nutriscoreGrade: 'A',
+    isSafe: true,
+    recommendationReason: 'İlave şeker yok, profilinize uygun.',
+  ),
+  Alternative(
+    barcode: '8690504112233',
+    productName: 'Yulaf & Muz Bar',
+    brand: 'Eti',
+    imageUrl:
+        'https://images.openfoodfacts.org/images/products/869/050/411/2233/front_tr.3.400.jpg',
+    nutriscoreGrade: 'B',
+    isSafe: true,
+    recommendationReason: 'Daha düşük yağ oranı.',
+  ),
+  Alternative(
+    barcode: '8681234567890',
+    productName: 'Hurma & Badem Bar',
+    brand: 'Zuber',
+    imageUrl: '',
+    nutriscoreGrade: 'A',
+    isSafe: true,
+    recommendationReason: 'Tamamen doğal içerik.',
+  ),
+  Alternative(
+    barcode: '8690000000017',
+    productName: 'Fıstık Ezmeli Protein Bar',
+    brand: 'Fellas',
+    imageUrl: '',
+    nutriscoreGrade: 'B',
+    isSafe: true,
+    recommendationReason: 'Yüksek protein.',
+  ),
+  Alternative(
+    barcode: '8690000000024',
+    productName: 'Kuru Meyve Bar',
+    brand: 'Seeberger',
+    imageUrl: '',
+    nutriscoreGrade: 'B',
+    isSafe: true,
+    recommendationReason: 'Katkı maddesi içermez.',
+  ),
+  Alternative(
+    barcode: '8690000000031',
+    productName: 'Çikolatalı Yulaf Bar',
+    brand: 'Nature Valley',
+    imageUrl: '',
+    nutriscoreGrade: 'A',
+    isSafe: true,
+    recommendationReason: 'Tam tahıllı yulaf.',
+  ),
+];

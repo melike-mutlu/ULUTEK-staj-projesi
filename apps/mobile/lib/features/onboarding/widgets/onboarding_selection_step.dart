@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/selection_chip_group.dart';
 import '../onboarding_steps.dart' as onboarding_steps;
-import 'onboarding_question_card.dart';
-import 'selectable_chip.dart';
 
 /// 3 seçim ekranının TEK widget'ı: `step.field`'a göre farklı soru/seçenek
 /// gösterir. State tutmaz — tüm state `OnboardingViewModel`'de.
+///
+/// Görsel gövde paylaşılan [SelectionChipGroup]'tan gelir; burada yalnızca
+/// adım modeli prop'lara çevrilir ve grup ekranın kaydırma alanına sarılır.
 class OnboardingSelectionStep extends StatelessWidget {
   const OnboardingSelectionStep({
     super.key,
@@ -29,60 +31,20 @@ class OnboardingSelectionStep extends StatelessWidget {
   /// eklenen sol boşluk.
   final double questionLeftInset;
 
-  static const double _gap = 20;
-
-  Future<void> _openAddDialog(BuildContext context) async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('Seçenek ekle'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          textCapitalization: TextCapitalization.sentences,
-          onSubmitted: (String value) => Navigator.pop(dialogContext, value),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: const Text('Ekle'),
-          ),
-        ],
-      ),
-    );
-    if (result != null) onAddCustom(result);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: questionLeftInset),
-          child: OnboardingQuestionCard(question: step.question),
-        ),
-        const SizedBox(height: _gap),
         Expanded(
           child: SingleChildScrollView(
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: <Widget>[
-                for (final option in options)
-                  SelectableChip(
-                    label: option,
-                    isSelected: selections.contains(option),
-                    onTap: () => onToggle(option),
-                  ),
-                SelectableChip.add(onTap: () => _openAddDialog(context)),
-              ],
+            child: SelectionChipGroup(
+              title: step.question,
+              titlePadding: EdgeInsets.only(left: questionLeftInset),
+              options: options,
+              selected: selections,
+              onToggle: onToggle,
+              onAddCustom: onAddCustom,
             ),
           ),
         ),

@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "vision-extract-result",
+  "title": "VisionExtractResult",
+  "description": "Gıda ürünü etiket fotoğrafından Vision LLM tarafından çıkarılan yapılandırılmış veri. Prompt: docs/ai/prompts/vision-extract-prompt.md",
+  "type": "object",
+  "required": [
+    "ingredients_text",
+    "additives",
+    "allergens_mentioned",
+    "nutrition",
+    "confidence",
+    "unreadable_fields"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "product_name": {
+      "description": "Ambalaj üzerindeki ürün adı. Okunamadıysa null.",
+      "type": ["string", "null"],
+      "maxLength": 300
+    },
+    "brand": {
+      "description": "Marka adı. Okunamadıysa null.",
+      "type": ["string", "null"],
+      "maxLength": 200
+    },
+    "ingredients_text": {
+      "description": "Ham içindekiler listesi, etiketteki haliyle. Okunamadıysa null.",
+      "type": ["string", "null"],
+      "maxLength": 5000
+    },
+    "additives": {
+      "description": "İçindekilerden ayıklanan E-kodları. Hiç yoksa boş dizi.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[Ee]\\d{3}[a-zA-Z]?$",
+        "description": "E-kodu formatı: 'E' + 3 rakam, isteğe bağlı harf eki (örn. E471, E160a)"
+      },
+      "uniqueItems": true
+    },
+    "allergens_mentioned": {
+      "description": "Etikette açıkça belirtilen alerjen isimleri (kalın, büyük harf veya 'içerir:' başlığıyla). Ham metin — kural motoru işler.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "uniqueItems": true
+    },
+    "nutrition": {
+      "description": "100 g başına besin değerleri. Okunamayan alanlar null.",
+      "type": "object",
+      "required": [
+        "energy_kcal_100g",
+        "fat_100g",
+        "saturated_fat_100g",
+        "carbohydrates_100g",
+        "sugars_100g",
+        "proteins_100g",
+        "salt_100g",
+        "fiber_100g"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "energy_kcal_100g": {
+          "description": "Enerji (kcal/100g). Okunamadıysa null.",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 900
+        },
+        "fat_100g": {
+          "description": "Toplam yağ (g/100g).",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "saturated_fat_100g": {
+          "description": "Doymuş yağ (g/100g).",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "carbohydrates_100g": {
+          "description": "Karbonhidrat (g/100g).",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "sugars_100g": {
+          "description": "Şeker (g/100g).",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "proteins_100g": {
+          "description": "Protein (g/100g).",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "salt_100g": {
+          "description": "Tuz (g/100g). Sodyumdan hesaplansa bile tuz cinsinden (Na × 2.5).",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "fiber_100g": {
+          "description": "Lif (g/100g). Etikette yoksa null.",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "serving_size_g": {
+      "description": "Porsiyon büyüklüğü (gram). Bulunamazsa null.",
+      "type": ["number", "null"],
+      "minimum": 1,
+      "maximum": 2000
+    },
+    "confidence": {
+      "description": "LLM'nin okuma kalitesine dair kendi güven değerlendirmesi.",
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "unreadable_fields": {
+      "description": "Bulanıklık / ışık / katlama nedeniyle okunamayan alan adları. Tüm görüntü okunamazsa [\"all\"].",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "if": {
+    "properties": {
+      "confidence": { "const": "high" }
+    }
+  },
+  "then": {
+    "description": "confidence=high ise ingredients_text veya en az bir nutrition alanı dolu olmalı.",
+    "anyOf": [
+      {
+        "properties": {
+          "ingredients_text": { "type": "string", "minLength": 1 }
+        }
+      },
+      {
+        "properties": {
+          "nutrition": {
+            "anyOf": [
+              { "properties": { "energy_kcal_100g": { "type": "number" } }, "required": ["energy_kcal_100g"] },
+              { "properties": { "proteins_100g": { "type": "number" } }, "required": ["proteins_100g"] }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

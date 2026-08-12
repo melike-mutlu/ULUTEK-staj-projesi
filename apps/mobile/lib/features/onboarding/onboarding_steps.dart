@@ -1,5 +1,8 @@
-/// Profilde hangi alanı doldurduğumuz. UserProfile alan adlarıyla eşleşir.
-enum OnboardingField { allergies, diet, health }
+import '../../core/constants/profile_options.dart';
+
+// Seçenek kataloğu profil ekranıyla ortak; OnboardingField'ı buradan da
+// import edenler kırılmasın diye yeniden dışa veriliyor.
+export '../../core/constants/profile_options.dart' show OnboardingField;
 
 sealed class OnboardingStep {
   const OnboardingStep();
@@ -63,20 +66,60 @@ final class OnboardingSelectionStep extends OnboardingStep {
   final String skipLabel;
 }
 
+/// Kullanıcıdan adını almayı hedefleyen adım.
+final class OnboardingNameStep extends OnboardingStep {
+  const OnboardingNameStep({
+    required this.title,
+    required this.subtitle,
+    required this.placeholder,
+    required this.skipLabel,
+  });
+
+  final String title;
+  final String subtitle;
+  final String placeholder;
+  final String skipLabel;
+}
+
+/// Kullanıcıdan yaşadığı ülkeyi almayı hedefleyen adım.
+final class OnboardingCountryStep extends OnboardingStep {
+  const OnboardingCountryStep({
+    required this.title,
+    required this.subtitle,
+    required this.placeholder,
+    required this.skipLabel,
+  });
+
+  final String title;
+  final String subtitle;
+  final String placeholder;
+  final String skipLabel;
+}
+
+/// Seçim adımını katalogdan kurar — soru/seçenek/skip metni tek kaynaktan
+/// (core/constants/profile_options.dart) gelir.
+OnboardingSelectionStep _selectionStep(OnboardingField field) =>
+    OnboardingSelectionStep(
+      field: field,
+      question: profileQuestions[field]!,
+      options: profileOptions[field]!,
+      skipLabel: profileSkipLabels[field]!,
+    );
+
 /// Akıştaki TÜM adımlar. Yeni adım eklemek = buraya bir kayıt eklemek;
 /// ilerleme çubuğu ve ileri/geri bu listeden beslenir, başka yer değişmez.
-const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
-  OnboardingWelcomeStep(
+final List<OnboardingStep> onboardingSteps = <OnboardingStep>[
+  const OnboardingWelcomeStep(
     assetPath: 'assets/images/onboarding_shop.svg',
     title: 'Hoş geldin!',
     body: 'Akıllı Sepet, alerjine, diyetine ve sağlık durumuna göre sana '
         'özel bir alışveriş rehberi.',
-    skipLabel: 'Skip',
+    skipLabel: 'Atla',
     imageScale: 0.7,
     contentTopOffset: 20,
     imageTopOffset: 60,
   ),
-  OnboardingWelcomeStep(
+  const OnboardingWelcomeStep(
     assetPath: 'assets/images/onboarding_scan.svg',
     title: 'Barkodu Okut, Anında Öğren',
     body: 'Ürünün barkodunu okut; alerjen, diyet ve sağlık profiline göre '
@@ -86,46 +129,19 @@ const List<OnboardingStep> onboardingSteps = <OnboardingStep>[
     imageTopOffset: 30,
     textTopOffset: 8,
   ),
-  OnboardingSelectionStep(
-    field: OnboardingField.allergies,
-    question: 'Herhangi bir gıda alerjin var mı?',
-    options: <String>[
-      'Gluten',
-      'Süt/Laktoz',
-      'Fındık/Fıstık',
-      'Yumurta',
-      'Balık',
-      'Kabuklu deniz ürünleri',
-      'Soya',
-      'Susam',
-    ],
-    skipLabel: 'Alerjim yok',
+  const OnboardingNameStep(
+    title: 'Sana nasıl hitap edelim?',
+    subtitle: 'İsmini girerek deneyimini kişiselleştirebilirsin.',
+    placeholder: 'Adınız',
+    skipLabel: 'Atla',
   ),
-  OnboardingSelectionStep(
-    field: OnboardingField.diet,
-    question: 'Nasıl bir beslenme düzenin var?',
-    options: <String>[
-      'Vegan',
-      'Vejetaryen',
-      'Diyabet dostu',
-      'Sporcu / Yüksek protein',
-      'Düşük karbonhidrat',
-      'Glutensiz yaşam tarzı',
-      'Ketojenik',
-    ],
-    skipLabel: 'Özel bir diyetim yok',
+  const OnboardingCountryStep(
+    title: 'Hangi ülkede yaşıyorsun?',
+    subtitle: 'Sana uygun ürün ve market içeriklerini sunabilmemiz için ülkeni seçebilirsin.',
+    placeholder: 'Ülke adı (örn. Türkiye)',
+    skipLabel: 'Atla',
   ),
-  OnboardingSelectionStep(
-    field: OnboardingField.health,
-    question: 'Dikkat etmen gereken bir sağlık durumun var mı?',
-    options: <String>[
-      'Tansiyon',
-      'Çölyak',
-      'Yüksek kolesterol',
-      'Böbrek hastalığı',
-      'Şeker hastalığı',
-      'Kalp rahatsızlığı',
-    ],
-    skipLabel: 'Sağlık durumum yok',
-  ),
+  _selectionStep(OnboardingField.allergies),
+  _selectionStep(OnboardingField.diet),
+  _selectionStep(OnboardingField.health),
 ];
