@@ -42,7 +42,8 @@ class _FakeScanHistoryRepository implements ScanHistoryRepository {
 /// istemcisi istiyor, testte ise Supabase hic baslatilmiyor.
 class _FakeChatbotRepository implements ChatbotRepository {
   @override
-  Future<String> sendMessage(String userMessage) async => 'test yaniti';
+  Future<ChatbotResponse> sendMessage(String userMessage, {String? sessionId}) async =>
+      ChatbotResponse(reply: 'test yaniti');
 }
 
 /// Kabuk, sekmeleri araciligiyla veri katmanina dokunuyor; testte hepsi

@@ -1,7 +1,6 @@
 // lib/data/repositories/chatbot_repository.dart
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/foundation.dart'; // debugPrint için gerekli
 
 // Yardımcı Sınıf
 // Hem backend'den dönen cevabı hem de oturum kimliğini tutar

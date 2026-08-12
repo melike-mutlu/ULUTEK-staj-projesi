@@ -27,7 +27,8 @@ class _FakeScanHistoryRepository implements ScanHistoryRepository {
 /// gercek kurucu Supabase istemcisi ister; testte Supabase hic baslatilmiyor.
 class _FakeChatbotRepository implements ChatbotRepository {
   @override
-  Future<String> sendMessage(String userMessage) async => 'test yaniti';
+  Future<ChatbotResponse> sendMessage(String userMessage, {String? sessionId}) async =>
+      ChatbotResponse(reply: 'test yaniti');
 }
 
 /// A screen rendered with a device-like status bar inset.

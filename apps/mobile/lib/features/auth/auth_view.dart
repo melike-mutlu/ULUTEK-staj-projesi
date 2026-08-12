@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/material.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
@@ -39,8 +38,17 @@ class _AuthViewState extends ConsumerState<AuthView> {
   }
 
   void _setupAuthListener() {
+    // Testte Supabase hiç başlatılmadığı için Supabase.instance erişimi
+    // assertion fırlatır; bu ekran o ortamlarda dinleyici olmadan çalışabilmeli.
+    final SupabaseClient client;
+    try {
+      client = Supabase.instance.client;
+    } catch (_) {
+      return;
+    }
+
     // Supabase'deki oturum değişikliklerini canlı olarak dinler
-    _authStateSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+    _authStateSubscription = client.auth.onAuthStateChange.listen((data) async {
       final AuthChangeEvent event = data.event;
       final Session? session = data.session;
 
