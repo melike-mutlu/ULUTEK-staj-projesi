@@ -133,6 +133,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
         title: const Text('Profil', style: AppTextStyles.heading2),
         actions: <Widget>[
           IconButton(
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.shoppingLists),
+            icon: const Icon(Icons.format_list_bulleted_rounded),
+            color: AppColors.textPrimary,
+            tooltip: 'Alışveriş Listelerim',
+          ),
+          IconButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
             icon: const Icon(Icons.settings_outlined),
             color: AppColors.textPrimary,

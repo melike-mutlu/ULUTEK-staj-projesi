@@ -8,6 +8,7 @@ import '../../core/providers.dart';
 import '../../core/supabase_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/theme_viewmodel.dart';
 import '../../core/utils/email_masker.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../profile/profile_viewmodel.dart';
@@ -594,6 +595,17 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               onTap: () => _togglePremium(context, ref),
             ),
             const SizedBox(height: 24),
+            const _SettingsSectionHeader(title: 'GÖRÜNÜM'),
+            const SizedBox(height: 8),
+            _SettingsSwitchRow(
+              icon: Icons.dark_mode_outlined,
+              label: 'Koyu Tema (Dark Theme)',
+              value: ref.watch(themeViewModelProvider).isDarkMode,
+              onChanged: (bool val) {
+                ref.read(themeViewModelProvider).toggleTheme(val);
+              },
+            ),
+            const SizedBox(height: 24),
             const _SettingsSectionHeader(title: 'UYGULAMA & YASAL'),
             const SizedBox(height: 8),
             _SettingsRow(
@@ -707,6 +719,51 @@ class _SettingsRow extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsSwitchRow extends StatelessWidget {
+  const _SettingsSwitchRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final surfaceColor = theme.cardTheme.color ?? AppColors.surface;
+
+    return Material(
+      color: surfaceColor,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        child: Row(
+          children: <Widget>[
+            Icon(icon, size: 22, color: theme.colorScheme.onSurface),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.title.copyWith(color: theme.colorScheme.onSurface),
+              ),
+            ),
+            Switch(
+              value: value,
+              activeColor: AppColors.brand,
+              onChanged: onChanged,
+            ),
+          ],
         ),
       ),
     );

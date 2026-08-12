@@ -10,6 +10,8 @@ import '../../features/profile/profile_view.dart';
 import '../../features/scan/scan_view.dart';
 import '../../features/settings/settings_view.dart';
 import '../../features/shell/shell_view.dart';
+import '../../features/shopping_list/views/shopping_list_detail_view.dart';
+import '../../features/shopping_list/views/shopping_lists_view.dart';
 import '../../features/startup/startup_gate.dart';
 
 /// Uygulamadaki TÜM route adları ve eşleştikleri ekranlar burada tanımlanır.
@@ -36,11 +38,6 @@ abstract final class AppRoutes {
 
   /// Alt navigasyon kabuğu — onboarding bitince girilen ana ekran.
   /// 4 sekmeyi (Ana Sayfa · Tara · Chatbot · Profil) barındırır.
-  ///
-  /// Bilerek '/' DEĞİL: `initialRoute` çok parçalı bir ad aldığında (örneğin
-  /// '/onboarding') Flutter route yığınını ['/', '/onboarding'] olarak kurar.
-  /// Kabuk '/' adresinde olursa uygulama onboarding'in ALTINDA kabukla açılır
-  /// ve kullanıcı geri tuşuyla onboarding'i atlayabilir.
   static const String shell = '/shell';
 
   /// Ana Sayfa — alt navigasyonun 1. sekmesi.
@@ -59,17 +56,19 @@ abstract final class AppRoutes {
   /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
   static const String settings = '/settings';
 
-  /// Ürün detay. Şimdilik tam ekran route; bottom-sheet'e çevirme kararı
-  /// sonraya bırakıldı, o yüzden çağrı tarafı `pushNamed` olarak kalsın.
+  /// Ürün detay.
   static const String productDetail = '/product-detail';
 
   /// Bulunamayan veya eksik ürün bildirimi (Pending Product) ekranı.
   static const String pendingProduct = '/pending-product';
 
+  /// Alışveriş Listelerim ekranı.
+  static const String shoppingLists = '/shopping-lists';
+
+  /// Alışveriş Listesi Detay ekranı.
+  static const String shoppingListDetail = '/shopping-list-detail';
+
   /// `MaterialApp.routes` tablosu.
-  ///
-  /// Sekme ekranları alt navigasyon kabuğunun içinde de gösterilir; buradaki
-  /// kayıtlar onları ayrıca tek başına (kabuksuz) açabilmek için durur.
   static Map<String, WidgetBuilder> get table => <String, WidgetBuilder>{
         startup: (_) => const StartupGate(),
         auth: (_) => const AuthView(),
@@ -82,5 +81,7 @@ abstract final class AppRoutes {
         settings: (_) => const SettingsView(),
         productDetail: (_) => const ProductDetailView(),
         pendingProduct: (_) => const PendingProductView(),
+        shoppingLists: (_) => const ShoppingListsView(),
+        shoppingListDetail: (_) => const ShoppingListDetailView(),
       };
 }

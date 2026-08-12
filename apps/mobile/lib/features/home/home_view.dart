@@ -27,6 +27,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeViewModelProvider).loadDashboardData();
+      ref.read(shoppingListViewModelProvider).loadLists();
     });
   }
 
@@ -268,6 +269,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
                     const SizedBox(height: 24),
 
+                    // --- ALIŞVERİŞ LİSTELERİM BÖLÜMÜ ---
+                    _buildShoppingListsSection(context, ref),
+
+                    const SizedBox(height: 24),
+
                     // --- 3. SON TARAMALAR LİSTESİ ---
                     Text(
                       'Son Taramaların',
@@ -382,4 +388,177 @@ class _HomeViewState extends ConsumerState<HomeView> {
     Navigator.pushNamed(context, AppRoutes.productDetail, arguments: barcode);
   }
 
+  Widget _buildShoppingListsSection(BuildContext context, WidgetRef ref) {
+    final shoppingVm = ref.watch(shoppingListViewModelProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? theme.cardTheme.color ?? Colors.black26 : Colors.white;
+    final textColor = isDark ? Colors.white : AkilliSepetColors.textPrimary;
+    final secondaryTextColor = isDark ? Colors.grey.shade400 : AkilliSepetColors.textSecondary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Alışveriş Listelerim',
+              style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.shoppingLists);
+              },
+              child: const Row(
+                children: [
+                  Text(
+                    'Tümünü Gör',
+                    style: TextStyle(
+                      color: AkilliSepetColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.chevron_right_rounded, size: 18, color: AkilliSepetColors.primary),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (shoppingVm.lists.isEmpty)
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.shoppingLists);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AkilliSepetColors.primary.withAlpha(40),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.playlist_add_rounded, color: AkilliSepetColors.primary),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Henüz Listeniz Yok',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Dokunun ve ilk alışveriş listenizi oluşturun',
+                          style: TextStyle(color: secondaryTextColor, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.add_circle_outline_rounded, color: AkilliSepetColors.primary),
+                ],
+              ),
+            ),
+          )
+        else
+          Column(
+            children: shoppingVm.lists.take(2).map((list) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: Material(
+                  color: cardBg,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.shoppingListDetail,
+                        arguments: list.id,
+                      );
+                    },
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AkilliSepetColors.primary.withAlpha(35),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.shopping_bag_outlined,
+                        color: AkilliSepetColors.primary,
+                        size: 22,
+                      ),
+                    ),
+                    title: Text(
+                      list.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                        fontSize: 15,
+                      ),
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: list.progress,
+                                minHeight: 5,
+                                backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AkilliSepetColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '${list.boughtItems}/${list.totalItems}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: secondaryTextColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right_rounded,
+                      color: AkilliSepetColors.primary,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+      ],
+    );
+  }
 }
