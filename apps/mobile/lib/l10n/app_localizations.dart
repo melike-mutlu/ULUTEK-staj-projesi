@@ -853,6 +853,42 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ayarlar\'dan Premium\'a geçerek reklamları kaldırabilirsiniz.'**
   String get adRemovePremiumNote;
+
+  /// Scan screen app bar title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Barkod Tara'**
+  String get scanTitle;
+
+  /// Hint under the scanner frame.
+  ///
+  /// In tr, this message translates to:
+  /// **'Barkodu çerçeve içine hizala,\notomatik olarak okunacak'**
+  String get scanFrameHint;
+
+  /// Button to enter a barcode manually.
+  ///
+  /// In tr, this message translates to:
+  /// **'Barkodu Elle Gir'**
+  String get enterBarcodeManually;
+
+  /// Manual barcode dialog title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Barkodu Girin'**
+  String get enterBarcode;
+
+  /// Example hint in the manual barcode field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn: 8690504112233'**
+  String get barcodeHintExample;
+
+  /// Search button in the manual barcode dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ara'**
+  String get searchAction;
 }
 
 class _AppLocalizationsDelegate

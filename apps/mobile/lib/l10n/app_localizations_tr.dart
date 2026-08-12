@@ -416,4 +416,23 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get adRemovePremiumNote =>
       'Ayarlar\'dan Premium\'a geçerek reklamları kaldırabilirsiniz.';
+
+  @override
+  String get scanTitle => 'Barkod Tara';
+
+  @override
+  String get scanFrameHint =>
+      'Barkodu çerçeve içine hizala,\notomatik olarak okunacak';
+
+  @override
+  String get enterBarcodeManually => 'Barkodu Elle Gir';
+
+  @override
+  String get enterBarcode => 'Barkodu Girin';
+
+  @override
+  String get barcodeHintExample => 'Örn: 8690504112233';
+
+  @override
+  String get searchAction => 'Ara';
 }

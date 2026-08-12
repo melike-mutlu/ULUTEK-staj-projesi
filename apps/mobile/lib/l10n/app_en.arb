@@ -125,5 +125,11 @@
   "adArea": "AD SPACE",
   "sponsored": "Sponsored",
   "adPlaceholderBody": "Sponsored product announcements or dynamic ads will appear here.",
-  "adRemovePremiumNote": "You can remove ads by upgrading to Premium in Settings."
+  "adRemovePremiumNote": "You can remove ads by upgrading to Premium in Settings.",
+  "scanTitle": "Scan barcode",
+  "scanFrameHint": "Align the barcode within the frame,\nit will be read automatically",
+  "enterBarcodeManually": "Enter barcode manually",
+  "enterBarcode": "Enter barcode",
+  "barcodeHintExample": "e.g. 8690504112233",
+  "searchAction": "Search"
 }

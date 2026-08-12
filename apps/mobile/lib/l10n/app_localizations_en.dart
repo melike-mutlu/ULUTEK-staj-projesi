@@ -420,4 +420,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adRemovePremiumNote =>
       'You can remove ads by upgrading to Premium in Settings.';
+
+  @override
+  String get scanTitle => 'Scan barcode';
+
+  @override
+  String get scanFrameHint =>
+      'Align the barcode within the frame,\nit will be read automatically';
+
+  @override
+  String get enterBarcodeManually => 'Enter barcode manually';
+
+  @override
+  String get enterBarcode => 'Enter barcode';
+
+  @override
+  String get barcodeHintExample => 'e.g. 8690504112233';
+
+  @override
+  String get searchAction => 'Search';
 }

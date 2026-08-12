@@ -7,6 +7,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Figma: "Tarama Ekranı" mockup — kamera görünümü + barkod çerçevesi.
 ///
@@ -68,23 +69,24 @@ class _ScanViewState extends ConsumerState<ScanView> {
   }
 
   void _showManualBarcodeDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Barkodu Girin'),
+        title: Text(l10n.enterBarcode),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            hintText: 'Örn: 8690504112233',
+            hintText: l10n.barcodeHintExample,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -92,7 +94,7 @@ class _ScanViewState extends ConsumerState<ScanView> {
               final value = controller.text.trim();
               if (value.isNotEmpty) _handleBarcode(value);
             },
-            child: const Text('Ara'),
+            child: Text(l10n.searchAction),
           ),
         ],
       ),
@@ -130,6 +132,7 @@ class _ScanViewState extends ConsumerState<ScanView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Inside the shell this already includes the floating bar's height (the
     // Scaffold's `extendBody` adds it); opened standalone it is just the system
     // safe area. Clamped because Padding rejects negative values.
@@ -147,9 +150,9 @@ class _ScanViewState extends ConsumerState<ScanView> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Barkod Tara',
-          style: TextStyle(
+        title: Text(
+          l10n.scanTitle,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -242,7 +245,7 @@ class _ScanViewState extends ConsumerState<ScanView> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Barkodu çerçeve içine hizala,\notomatik olarak okunacak',
+                      l10n.scanFrameHint,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.white70,
@@ -258,7 +261,7 @@ class _ScanViewState extends ConsumerState<ScanView> {
                 ElevatedButton.icon(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _showManualBarcodeDialog(context),
-                  label: const Text('Barkodu Elle Gir'),
+                  label: Text(l10n.enterBarcodeManually),
                 ),
               ],
             ),

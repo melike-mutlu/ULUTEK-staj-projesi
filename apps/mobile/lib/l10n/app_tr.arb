@@ -523,5 +523,29 @@
   "adRemovePremiumNote": "Ayarlar'dan Premium'a geçerek reklamları kaldırabilirsiniz.",
   "@adRemovePremiumNote": {
     "description": "Note about removing ads via Premium."
+  },
+  "scanTitle": "Barkod Tara",
+  "@scanTitle": {
+    "description": "Scan screen app bar title."
+  },
+  "scanFrameHint": "Barkodu çerçeve içine hizala,\notomatik olarak okunacak",
+  "@scanFrameHint": {
+    "description": "Hint under the scanner frame."
+  },
+  "enterBarcodeManually": "Barkodu Elle Gir",
+  "@enterBarcodeManually": {
+    "description": "Button to enter a barcode manually."
+  },
+  "enterBarcode": "Barkodu Girin",
+  "@enterBarcode": {
+    "description": "Manual barcode dialog title."
+  },
+  "barcodeHintExample": "Örn: 8690504112233",
+  "@barcodeHintExample": {
+    "description": "Example hint in the manual barcode field."
+  },
+  "searchAction": "Ara",
+  "@searchAction": {
+    "description": "Search button in the manual barcode dialog."
   }
 }
