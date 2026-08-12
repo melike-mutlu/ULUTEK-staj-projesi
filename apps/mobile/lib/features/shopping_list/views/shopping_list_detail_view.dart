@@ -230,7 +230,6 @@ class _ShoppingListDetailViewState
 
                             return Material(
                               color: surfaceColor,
-                              borderRadius: BorderRadius.circular(14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 side: BorderSide(

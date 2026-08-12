@@ -37,6 +37,10 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+    final secondaryTextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+
     return Column(
       children: <Widget>[
         Stack(
@@ -49,8 +53,6 @@ class ProfileHeader extends StatelessWidget {
               onTap: onEditPhoto,
               semanticLabel: 'Profil fotoğrafını değiştir',
             ),
-            // The badge repeats the avatar's own action: it is the affordance
-            // that says the photo is editable at all.
             Positioned(
               right: 0,
               bottom: 0,
@@ -70,19 +72,18 @@ class ProfileHeader extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                // Flexible: a long name must not push the pencil icon off-screen.
                 Flexible(
                   child: Text(
                     name.isEmpty ? 'Adını ekle' : name,
-                    style: AppTextStyles.profileName,
+                    style: AppTextStyles.profileName.copyWith(color: textColor),
                     textAlign: TextAlign.center,
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Icon(
+                Icon(
                   Icons.edit_rounded,
                   size: 18,
-                  color: AppColors.textSecondary,
+                  color: secondaryTextColor,
                 ),
               ],
             ),
@@ -91,7 +92,7 @@ class ProfileHeader extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           email ?? 'E-posta bulunamadı',
-          style: AppTextStyles.profileEmail,
+          style: AppTextStyles.profileEmail.copyWith(color: secondaryTextColor),
           textAlign: TextAlign.center,
         ),
       ],
@@ -108,8 +109,12 @@ class _EditBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final secondaryTextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+
     return Material(
-      color: AppColors.surface,
+      color: surfaceColor,
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: Tooltip(
@@ -117,12 +122,12 @@ class _EditBadge extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           customBorder: const CircleBorder(),
-          child: const Padding(
-            padding: EdgeInsets.all(6),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
             child: Icon(
               Icons.edit_rounded,
               size: ProfileHeader._badgeIconSize,
-              color: AppColors.textSecondary,
+              color: secondaryTextColor,
             ),
           ),
         ),

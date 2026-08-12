@@ -92,7 +92,7 @@ class _ShellViewState extends ConsumerState<ShellView> {
     final viewModel = ref.watch(shellViewModelProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       // Bar içeriğin üstünde yüzsün diye gövde bar alanına kadar uzatılır.
       extendBody: true,
       // Sekme ekranlarının alt bar için ayıracağı boşluğu elle eklemiyoruz:

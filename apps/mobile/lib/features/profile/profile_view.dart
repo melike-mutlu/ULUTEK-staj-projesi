@@ -123,33 +123,34 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = ref.watch(profileViewModelProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final backgroundColor = theme.scaffoldBackgroundColor;
+    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: backgroundColor,
         elevation: 0,
         centerTitle: false,
-        title: const Text('Profil', style: AppTextStyles.heading2),
+        title: Text('Profil', style: AppTextStyles.heading2.copyWith(color: textColor)),
         actions: <Widget>[
           IconButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.shoppingLists),
             icon: const Icon(Icons.format_list_bulleted_rounded),
-            color: AppColors.textPrimary,
+            color: textColor,
             tooltip: 'Alışveriş Listelerim',
           ),
           IconButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
             icon: const Icon(Icons.settings_outlined),
-            color: AppColors.textPrimary,
+            color: textColor,
             tooltip: 'Ayarlar',
           ),
         ],
       ),
-      // bottom: false — letting SafeArea eat the bottom inset ends the scroll
-      // viewport above the floating bar, clipping content early. The inset goes
-      // to the scroll view's padding instead, so content flows behind the bar
-      // while the last item stays reachable above it.
       body: SafeArea(bottom: false, child: _buildBody(viewModel)),
     );
   }

@@ -43,11 +43,14 @@ class ProfileSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
+
     return Container(
       width: double.infinity,
       padding: _padding,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(_radius),
       ),
       child: SelectionChipGroup(

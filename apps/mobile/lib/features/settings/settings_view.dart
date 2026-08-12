@@ -496,22 +496,27 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     }
   }
 
-  Widget _buildUserCard() {
+  Widget _buildUserCard(bool isDark) {
     final rawEmail = supabase.auth.currentUser?.email;
     final maskedEmail = EmailMasker.maskEmail(rawEmail);
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final borderColor = isDark ? AppColors.darkBorder : AppColors.border;
+    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+    final secondaryTextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 24,
-            backgroundColor: AppColors.brandSoft,
-            child: Icon(Icons.person_rounded, color: AppColors.brand, size: 28),
+            backgroundColor: isDark ? AppColors.brand.withOpacity(0.2) : AppColors.brandSoft,
+            child: const Icon(Icons.person_rounded, color: AppColors.brand, size: 28),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -520,13 +525,13 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               children: [
                 Text(
                   maskedEmail,
-                  style: AppTextStyles.title,
+                  style: AppTextStyles.title.copyWith(color: textColor),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
-                const Text(
+                Text(
                   'Aktif Oturum',
-                  style: AppTextStyles.caption,
+                  style: AppTextStyles.caption.copyWith(color: secondaryTextColor),
                 ),
               ],
             ),
@@ -538,125 +543,134 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isPremium = ref.watch(homeViewModelProvider).isPremium;
     final country = ref.watch(profileViewModelProvider).country;
     final rawEmail = supabase.auth.currentUser?.email;
     final maskedEmail = EmailMasker.maskEmail(rawEmail);
+    final themeVm = ref.watch(themeViewModelProvider);
+
+    final backgroundColor = theme.scaffoldBackgroundColor;
+    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: backgroundColor,
         elevation: 0,
         centerTitle: false,
-        title: const Text('Ayarlar', style: AppTextStyles.heading2),
+        title: Text('Ayarlar', style: AppTextStyles.heading2.copyWith(color: textColor)),
+        iconTheme: IconThemeData(color: textColor),
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          children: <Widget>[
-            _buildUserCard(),
-            const SizedBox(height: 24),
-            const _SettingsSectionHeader(title: 'HESAP & PROFİL'),
-            const SizedBox(height: 8),
-            _SettingsRow(
-              icon: Icons.email_outlined,
-              label: 'Kayıtlı E-posta',
-              subtitle: maskedEmail,
-              onTap: null,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                _buildUserCard(isDark),
+                const SizedBox(height: 20),
+                const _SettingsSection(title: 'GÖRÜNÜM'),
+                const SizedBox(height: 8),
+                _SettingsSwitchRow(
+                  icon: Icons.dark_mode_outlined,
+                  label: 'Koyu Tema',
+                  value: themeVm.isDarkMode,
+                  onChanged: (bool value) {
+                    ref.read(themeViewModelProvider).toggleTheme(value);
+                  },
+                ),
+                const SizedBox(height: 20),
+                const _SettingsSection(title: 'HESAP VE ÜYELİK'),
+                const SizedBox(height: 8),
+                _SettingsRow(
+                  icon: Icons.star_outline_rounded,
+                  iconColor: isPremium ? AppColors.brand : Colors.amber.shade700,
+                  label: isPremium ? 'Premium Üyelik Aktif' : 'Premium\'a Yükselt',
+                  subtitle: isPremium ? 'Aktif' : 'Pasif',
+                  onTap: () => _togglePremium(context, ref),
+                ),
+                const SizedBox(height: 8),
+                _SettingsRow(
+                  icon: Icons.lock_reset_rounded,
+                  label: 'Şifre Değiştir',
+                  onTap: () => _showChangePasswordDialog(context),
+                ),
+                const SizedBox(height: 8),
+                _SettingsRow(
+                  icon: Icons.public_rounded,
+                  label: 'Ülke Seçimi',
+                  subtitle: (country == null || country.isEmpty) ? 'Türkiye' : country,
+                  onTap: _editCountry,
+                ),
+                const SizedBox(height: 20),
+                const _SettingsSection(title: 'BİLGİ VE DESTEK'),
+                const SizedBox(height: 8),
+                _SettingsRow(
+                  icon: Icons.info_outline_rounded,
+                  label: 'Hakkında',
+                  onTap: () => _showAboutDialog(context),
+                ),
+                const SizedBox(height: 8),
+                _SettingsRow(
+                  icon: Icons.shield_outlined,
+                  label: 'Gizlilik Politikası',
+                  onTap: () => _showPrivacyDialog(context),
+                ),
+                const SizedBox(height: 20),
+                const _SettingsSection(title: 'OTURUM'),
+                const SizedBox(height: 8),
+                _SettingsRow(
+                  icon: Icons.logout_rounded,
+                  label: 'Çıkış Yap',
+                  isDestructive: true,
+                  onTap: _signOut,
+                ),
+                const SizedBox(height: 8),
+                _SettingsRow(
+                  icon: Icons.delete_forever_rounded,
+                  label: 'Hesabı Sil',
+                  isDestructive: true,
+                  onTap: () => _showDeleteAccountConfirmationDialog(context),
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: Text(
+                    'Akıllı Sepet v1.0.0 (ULUTEK Staj)',
+                    style: AppTextStyles.caption.copyWith(
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            _SettingsRow(
-              icon: Icons.person_outline_rounded,
-              label: 'Profil Bilgilerini Düzenle',
-              onTap: _navigateToProfile,
-            ),
-            const SizedBox(height: 10),
-            _SettingsRow(
-              icon: Icons.lock_reset_rounded,
-              label: 'Şifre Değiştir',
-              onTap: () => _showChangePasswordDialog(context),
-            ),
-            const SizedBox(height: 10),
-            _SettingsRow(
-              icon: Icons.public_rounded,
-              label: 'Ülke Seçimi',
-              subtitle: (country != null && country.isNotEmpty) ? country : 'Seçilmedi',
-              onTap: _editCountry,
-            ),
-            const SizedBox(height: 10),
-            _SettingsRow(
-              icon: isPremium
-                  ? Icons.workspace_premium_rounded
-                  : Icons.workspace_premium_outlined,
-              iconColor: isPremium ? const Color(0xFFFFB300) : null,
-              label: isPremium ? 'Premium\'dan Çık' : 'Premium\'a Geç',
-              subtitle: isPremium ? 'Aktif' : 'Test Amaçlı',
-              onTap: () => _togglePremium(context, ref),
-            ),
-            const SizedBox(height: 24),
-            const _SettingsSectionHeader(title: 'GÖRÜNÜM'),
-            const SizedBox(height: 8),
-            _SettingsSwitchRow(
-              icon: Icons.dark_mode_outlined,
-              label: 'Koyu Tema (Dark Theme)',
-              value: ref.watch(themeViewModelProvider).isDarkMode,
-              onChanged: (bool val) {
-                ref.read(themeViewModelProvider).toggleTheme(val);
-              },
-            ),
-            const SizedBox(height: 24),
-            const _SettingsSectionHeader(title: 'UYGULAMA & YASAL'),
-            const SizedBox(height: 8),
-            _SettingsRow(
-              icon: Icons.shield_outlined,
-              label: 'Gizlilik Politikası',
-              onTap: () => _showPrivacyDialog(context),
-            ),
-            const SizedBox(height: 10),
-            _SettingsRow(
-              icon: Icons.info_outline_rounded,
-              label: 'Hakkında',
-              subtitle: 'v1.0.0',
-              onTap: () => _showAboutDialog(context),
-            ),
-            const SizedBox(height: 24),
-            const _SettingsSectionHeader(title: 'OTURUM'),
-            const SizedBox(height: 8),
-            _SettingsRow(
-              icon: Icons.logout_rounded,
-              label: 'Çıkış Yap',
-              isDestructive: true,
-              onTap: _signOut,
-            ),
-            const SizedBox(height: 10),
-            _SettingsRow(
-              icon: Icons.delete_forever_rounded,
-              label: 'Hesabı Sil',
-              isDestructive: true,
-              onTap: () => _showDeleteAccountConfirmationDialog(context),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _SettingsSectionHeader extends StatelessWidget {
-  const _SettingsSectionHeader({required this.title});
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection({required this.title});
 
   final String title;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryTextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+
     return Padding(
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         title,
         style: AppTextStyles.caption.copyWith(
           fontWeight: FontWeight.bold,
-          color: AppColors.textSecondary,
+          color: secondaryTextColor,
           letterSpacing: 0.8,
         ),
       ),
@@ -684,11 +698,16 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive ? AppColors.warning : AppColors.textPrimary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+    final secondaryTextColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+
+    final color = isDestructive ? AppColors.warning : textColor;
     final effectiveIconColor = iconColor ?? color;
 
     return Material(
-      color: AppColors.surface,
+      color: surfaceColor,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -708,14 +727,14 @@ class _SettingsRow extends StatelessWidget {
               if (subtitle != null) ...[
                 Text(
                   subtitle!,
-                  style: AppTextStyles.caption,
+                  style: AppTextStyles.caption.copyWith(color: secondaryTextColor),
                 ),
                 const SizedBox(width: 8),
               ],
               if (onTap != null)
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: isDestructive ? AppColors.warning : AppColors.textSecondary,
+                  color: isDestructive ? AppColors.warning : secondaryTextColor,
                 ),
             ],
           ),
@@ -740,8 +759,9 @@ class _SettingsSwitchRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final surfaceColor = theme.cardTheme.color ?? AppColors.surface;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
 
     return Material(
       color: surfaceColor,
@@ -750,12 +770,12 @@ class _SettingsSwitchRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         child: Row(
           children: <Widget>[
-            Icon(icon, size: 22, color: theme.colorScheme.onSurface),
+            Icon(icon, size: 22, color: textColor),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
                 label,
-                style: AppTextStyles.title.copyWith(color: theme.colorScheme.onSurface),
+                style: AppTextStyles.title.copyWith(color: textColor),
               ),
             ),
             Switch(

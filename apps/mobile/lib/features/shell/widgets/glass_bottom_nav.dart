@@ -95,8 +95,13 @@ class GlassBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final borderRadius = BorderRadius.circular(barHeight / 2);
     final position = indicatorPosition.clamp(0.0, _items.length - 1.0);
+
+    final glassSurface = isDark ? AppColors.darkGlassSurface : AppColors.glassSurface;
+    final glassBorder = isDark ? AppColors.darkGlassBorder : AppColors.glassBorder;
+    final navIndicator = isDark ? AppColors.brand.withOpacity(0.25) : AppColors.navIndicator;
 
     // SafeArea yerine elle hesap: bottomMargin negatif olabildiği için barın
     // güvenli alana bir miktar sarkmasına izin veriyoruz, ama ekranın dışına
@@ -129,9 +134,9 @@ class GlassBottomNav extends StatelessWidget {
             child: Container(
               height: barHeight,
               decoration: BoxDecoration(
-                color: AppColors.glassSurface,
+                color: glassSurface,
                 borderRadius: borderRadius,
-                border: Border.all(color: AppColors.glassBorder),
+                border: Border.all(color: glassBorder),
               ),
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
@@ -140,9 +145,6 @@ class GlassBottomNav extends StatelessWidget {
 
                   return Stack(
                     children: <Widget>[
-                      // Tek highlight, sekmeler arasında kayar. Konumu
-                      // sayfanın kayma miktarından geldiği için ayrıca
-                      // animasyona gerek yok — parmağı birebir takip eder.
                       Positioned(
                         left: position * slotWidth + _indicatorInset,
                         top: (barHeight - _indicatorHeight) / 2,
@@ -150,9 +152,7 @@ class GlassBottomNav extends StatelessWidget {
                         height: _indicatorHeight,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            color: AppColors.navIndicator,
-                            // Barla eşmerkezli yarıçap: barınkinden tam olarak
-                            // aradaki boşluk kadar küçük.
+                            color: navIndicator,
                             borderRadius: BorderRadius.circular(
                               _indicatorRadius,
                             ),
@@ -166,8 +166,6 @@ class GlassBottomNav extends StatelessWidget {
                               child: _NavButton(
                                 item: _items[i],
                                 isSelected: _items[i].tab == currentTab,
-                                // Gösterge bu sekmeye ne kadar yakınsa
-                                // renk o kadar seçili tonuna kayar.
                                 selection:
                                     (1 - (position - i).abs()).clamp(0.0, 1.0),
                                 iconSize: _iconSize,
@@ -228,9 +226,13 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final unselectedColor = isDark ? AppColors.darkTextSecondary : AppColors.navUnselected;
+    final selectedColor = isDark ? AppColors.brand : AppColors.navSelected;
+
     final color = Color.lerp(
-      AppColors.navUnselected,
-      AppColors.navSelected,
+      unselectedColor,
+      selectedColor,
       selection,
     )!;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/providers.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
 import '../shell/shell_viewmodel.dart';
@@ -136,8 +137,18 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
       });
     }
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final backgroundColor = theme.scaffoldBackgroundColor;
+    final textColor = isDark ? AppColors.darkTextPrimary : AkilliSepetColors.textPrimary;
+    final secondaryTextColor = isDark ? AppColors.darkTextSecondary : AkilliSepetColors.textSecondary;
+    final surfaceColor = isDark ? AppColors.darkSurface : Colors.white;
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFE5E7EB);
+    final inputFillColor = isDark ? AppColors.darkSurfaceMuted : const Color(0xFFF3F4F6);
+
     return Scaffold(
-      backgroundColor: AkilliSepetColors.background,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -155,13 +166,13 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                         'Akıllı Asistan',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AkilliSepetColors.textPrimary,
+                              color: textColor,
                             ),
                       ),
                       Text(
                         'Size nasıl yardımcı olabilirim ${homeVm.displayName}?',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AkilliSepetColors.textSecondary,
+                              color: secondaryTextColor,
                             ),
                       ),
                     ],
@@ -175,7 +186,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
               ),
             ),
 
-            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+            Divider(height: 1, color: borderColor),
 
             // --- İÇERİK KONTROLÜ ---
             if (profileVm.isLoading)
@@ -206,7 +217,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                             maxWidth: MediaQuery.of(context).size.width * 0.85,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: surfaceColor,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AkilliSepetColors.primary.withValues(alpha: 0.3)),
                             boxShadow: [
@@ -239,30 +250,30 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                                 msg.text.isNotEmpty 
                                   ? msg.text 
                                   : 'Profilinize yeni bir özellik eklememi ister misiniz?',
-                                style: const TextStyle(fontSize: 15, color: Colors.black87),
+                                style: TextStyle(fontSize: 15, color: textColor),
                               ),
                               const SizedBox(height: 12),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: AkilliSepetColors.background,
+                                  color: isDark ? AppColors.darkSurfaceMuted : AkilliSepetColors.background,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   '🏷️ ${msg.suggestedValue}',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, color: AkilliSepetColors.textPrimary),
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
                                 ),
                               ),
                               const SizedBox(height: 16),
                               Wrap(
                                 alignment: WrapAlignment.end,
-                                spacing: 8, // Butonlar arası yatay boşluk
+                                spacing: 8,
                                 children: [
                                   TextButton(
                                     onPressed: () {
                                       chatVm.markSuggestionAsHandled(index);
                                     },
-                                    child: const Text('Hayır', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                                    child: Text('Hayır', style: TextStyle(color: secondaryTextColor, fontWeight: FontWeight.bold)),
                                   ),
                                   ElevatedButton(
                                     onPressed: () => _acceptSuggestion(
@@ -296,17 +307,17 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                           maxWidth: MediaQuery.of(context).size.width * 0.75,
                         ),
                         decoration: BoxDecoration(
-                          color: isUser ? AkilliSepetColors.primary : Colors.white,
+                          color: isUser ? AkilliSepetColors.primary : surfaceColor,
                           borderRadius: BorderRadius.circular(16).copyWith(
                             bottomRight: isUser ? const Radius.circular(0) : const Radius.circular(16),
                             bottomLeft: !isUser ? const Radius.circular(0) : const Radius.circular(16),
                           ),
-                          border: isUser ? null : Border.all(color: const Color(0xFFE5E7EB)),
+                          border: isUser ? null : Border.all(color: borderColor),
                         ),
                         child: Text(
                           msg.text,
                           style: TextStyle(
-                            color: isUser ? Colors.white : AkilliSepetColors.textPrimary,
+                            color: isUser ? Colors.white : textColor,
                             fontSize: 15,
                             height: 1.3,
                           ),
@@ -318,20 +329,21 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
               ),
 
               if (chatVm.isTyping)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Asistan yazıyor...',
-                      style: TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic),
+                      style: TextStyle(color: secondaryTextColor, fontSize: 13, fontStyle: FontStyle.italic),
                     ),
                   ),
                 ),
 
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: surfaceColor,
+                  border: Border(top: BorderSide(color: borderColor)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
@@ -350,17 +362,18 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                           Expanded(
                             child: TextField(
                               controller: _messageController,
+                              style: TextStyle(color: textColor),
                               textInputAction: TextInputAction.send,
                               onSubmitted: (_) => _sendMessage(),
                               decoration: InputDecoration(
                                 hintText: 'Bir şeyler sorun...',
-                                hintStyle: TextStyle(color: Colors.grey.shade400),
+                                hintStyle: TextStyle(color: secondaryTextColor),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(24),
                                   borderSide: BorderSide.none,
                                 ),
                                 filled: true,
-                                fillColor: const Color(0xFFF3F4F6),
+                                fillColor: inputFillColor,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               ),
                             ),
@@ -389,7 +402,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                           icon: const Icon(Icons.refresh_rounded, size: 16),
                           label: const Text('Yeni Sohbet Başlat'),
                           style: TextButton.styleFrom(
-                            foregroundColor: AkilliSepetColors.textSecondary,
+                            foregroundColor: secondaryTextColor,
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),

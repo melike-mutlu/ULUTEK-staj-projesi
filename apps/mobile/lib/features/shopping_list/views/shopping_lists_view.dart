@@ -166,7 +166,6 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
 
                     return Material(
                       color: surfaceColor,
-                      borderRadius: BorderRadius.circular(16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                         side: BorderSide(color: borderColor),
