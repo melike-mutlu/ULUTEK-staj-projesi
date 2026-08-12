@@ -11,6 +11,8 @@ import '../data/repositories/scan_history_repository.dart';
 import '../features/home/home_viewmodel.dart';
 import '../features/chatbot/chatbot_viewmodel.dart';
 import '../data/repositories/chatbot_repository.dart';
+import '../data/repositories/shopping_list_repository.dart';
+import '../features/shopping_list/shopping_list_viewmodel.dart';
 import '../core/supabase_client.dart';
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
@@ -74,4 +76,16 @@ final chatbotViewModelProvider =
     ChangeNotifierProvider<ChatbotViewModel>((ref) {
   final repository = ref.watch(chatbotRepositoryProvider);
   return ChatbotViewModel(repository);
+});
+
+final shoppingListRepositoryProvider = Provider<ShoppingListRepository>((ref) {
+  return MockShoppingListRepository();
+});
+
+final shoppingListViewModelProvider =
+    ChangeNotifierProvider<ShoppingListViewModel>((ref) {
+  return ShoppingListViewModel(
+    ref.watch(shoppingListRepositoryProvider),
+    ref.watch(scanHistoryRepositoryProvider),
+  );
 });

@@ -19,6 +19,16 @@ abstract final class AppColors {
   static const Color surfaceMuted = Color(0xFFEFF1F0);
   static const Color border = Color(0xFFE0E3E1);
 
+  // --- Koyu Tema Yüzeyleri & Renkleri ---
+  static const Color darkBackground = Color(0xFF121815);
+  static const Color darkSurface = Color(0xFF1C2420);
+  static const Color darkSurfaceMuted = Color(0xFF26302B);
+  static const Color darkBorder = Color(0xFF2E3B35);
+  static const Color darkTextPrimary = Color(0xFFF0F4F2);
+  static const Color darkTextSecondary = Color(0xFFA0ACA5);
+  static const Color darkGlassSurface = Color(0xCC1C2420);
+  static const Color darkGlassBorder = Color(0x33FFFFFF);
+
   // --- Metin ---
   static const Color textPrimary = Color(0xFF12211A);
   static const Color textSecondary = Color(0xFF5F6D66);
