@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/akilli_sepet_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Kullanım Şartları ve Gizlilik Sözleşmesi detaylarını gösteren diyalog penceresi.
 class TermsConditionsDialog extends StatelessWidget {
@@ -14,6 +15,7 @@ class TermsConditionsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -32,10 +34,10 @@ class TermsConditionsDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Kullanım Şartları ve Gizlilik Sözleşmesi',
-              style: TextStyle(
+              l10n.termsLink,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AkilliSepetColors.textPrimary,
@@ -44,53 +46,48 @@ class TermsConditionsDialog extends StatelessWidget {
           ),
         ],
       ),
-      content: const SizedBox(
+      content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Lütfen Akıllı Sepet uygulamasını kullanmadan önce aşağıdaki kullanım şartlarını ve gizlilik esaslarını dikkatlice okuyunuz.',
-                style: TextStyle(
+                l10n.termsIntro,
+                style: const TextStyle(
                   fontSize: 13,
                   color: AkilliSepetColors.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               _TermsSection(
-                title: '1. Taraflar ve Amaç',
-                body:
-                    'İşbu sözleşme, Akıllı Sepet uygulaması ("Uygulama") ile Uygulamayı kullanan kişi ("Kullanıcı") arasında akdedilmiştir. Uygulamanın amacı, kullanıcılara ürün barkodlarını tarama, ürün içeriklerini görüntüleme ve kişisel alerji/diyet tercihlerine göre yapay zeka destekli rehberlik sunmaktır.',
+                title: l10n.termsSection1Title,
+                body: l10n.termsSection1Body,
               ),
               _TermsSection(
-                title: '2. Hizmet Kapsamı ve Sorumluluk Reddi (Önemli Uyarı)',
-                body:
-                    'Uygulama tarafından sağlanan içerik analizleri, alerjegen uyarıları ve ürün değerlendirmeleri yalnızca bilgilendirme ve rehberlik amaçlıdır. Uygulamadaki veriler resmi ambalaj bilgileri ve açık kaynak veri tabanlarından derlenmektedir. Uygulama hiçbir şekilde tıbbi tavsiye, teşhis veya tedavi niteliği taşımaz. Kullanıcının sağlığı, diyet tercihleri ve ürün tüketimi ile ilgili nihai sorumluluk tamamen Kullanıcıya aittir.',
+                title: l10n.termsSection2Title,
+                body: l10n.termsSection2Body,
               ),
               _TermsSection(
-                title: '3. Kişisel Veriler ve KVKK Aydınlatması',
-                body:
-                    'Akıllı Sepet, kullanıcının belirlediği alerji, diyet, sağlık verileri ile e-posta adresini hizmetin sunulabilmesi amacıyla güvenli veritabanlarında saklar. Kişisel verileriniz 6698 sayılı KVKK ilkelerine uygun olarak korunmakta olup, üçüncü taraf kurum veya kuruluşlarla ticari amaçla paylaşılmamaktadır.',
+                title: l10n.termsSection3Title,
+                body: l10n.termsSection3Body,
               ),
               _TermsSection(
-                title: '4. Kullanıcı Yükümlülükleri',
-                body:
-                    'Kullanıcı, kayıt oluştururken doğru ve güncel bilgiler vermeyi, hesap güvenliğini ve şifre gizliliğini korumayı kabul eder. Yetkisiz hesap kullanımı tespiti halinde derhal uygulama yönetimine haber verilmelidir.',
+                title: l10n.termsSection4Title,
+                body: l10n.termsSection4Body,
               ),
               _TermsSection(
-                title: '5. Fesih ve Sözleşme Değişiklikleri',
-                body:
-                    'Uygulama yönetimi, kullanım şartlarını önceden bildirmeksizin güncelleme hakkını saklı tutar. Güncel şartlar Uygulama içerisinde yayınlandığı tarihte yürürlüğe girer. Kullanıcı dilediği zaman hesabını silerek sözleşmeyi sonlandırabilir.',
+                title: l10n.termsSection5Title,
+                body: l10n.termsSection5Body,
               ),
 
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                'Son Güncelleme Tarihi: 11 Ağustos 2026',
-                style: TextStyle(
+                l10n.termsLastUpdated,
+                style: const TextStyle(
                   fontSize: 11,
                   color: AkilliSepetColors.textSecondary,
                 ),
@@ -110,9 +107,9 @@ class TermsConditionsDialog extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
-              'Anladım ve Kapat',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            child: Text(
+              l10n.termsClose,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ),

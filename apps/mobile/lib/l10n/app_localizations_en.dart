@@ -253,4 +253,114 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statMemberDays => 'Member days';
+
+  @override
+  String get signUp => 'Sign up';
+
+  @override
+  String get signIn => 'Sign in';
+
+  @override
+  String get authWelcome => 'Welcome to Smart Cart';
+
+  @override
+  String get authTagline => 'Your personalized shopping assistant';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get termsLink => 'Terms and Privacy Agreement';
+
+  @override
+  String get termsAcceptSuffix => ' — I have read and accept it.';
+
+  @override
+  String get termsRequiredWarning =>
+      'Please accept the Terms and Privacy Agreement to continue.';
+
+  @override
+  String get emailAlreadyRegistered =>
+      'This email is already registered. Please sign in.';
+
+  @override
+  String get emailConfirmationNotice =>
+      'We sent a verification link to your email. You can\'t sign in until you click the link and verify your account.';
+
+  @override
+  String get toggleToSignIn => 'Already have an account? Sign in';
+
+  @override
+  String get toggleToSignUp => 'Don\'t have an account? Sign up';
+
+  @override
+  String get orSeparator => 'or';
+
+  @override
+  String get googleSignIn => 'Sign in with Google';
+
+  @override
+  String get continueAsGuest => 'Continue as guest';
+
+  @override
+  String get signUpFailed => 'Sign-up failed. Please try again.';
+
+  @override
+  String get signInFailed => 'Sign-in failed. Please try again.';
+
+  @override
+  String get guestSignInFailed => 'Guest sign-in failed. Please try again.';
+
+  @override
+  String get googleSignInFailed => 'Google sign-in failed. Please try again.';
+
+  @override
+  String get termsIntro =>
+      'Please read the following terms of use and privacy principles carefully before using the Smart Cart app.';
+
+  @override
+  String get termsSection1Title => '1. Parties and Purpose';
+
+  @override
+  String get termsSection1Body =>
+      'This agreement is made between the Smart Cart app (the \"App\") and the person using the App (the \"User\"). The App\'s purpose is to let users scan product barcodes, view product contents and receive AI-assisted guidance based on their personal allergy/diet preferences.';
+
+  @override
+  String get termsSection2Title =>
+      '2. Scope of Service and Disclaimer (Important Notice)';
+
+  @override
+  String get termsSection2Body =>
+      'The content analyses, allergen warnings and product assessments provided by the App are for information and guidance only. The data in the App is compiled from official packaging information and open-source databases. The App in no way constitutes medical advice, diagnosis or treatment. Final responsibility for the User\'s health, diet preferences and product consumption rests entirely with the User.';
+
+  @override
+  String get termsSection3Title => '3. Personal Data and KVKK Notice';
+
+  @override
+  String get termsSection3Body =>
+      'Smart Cart stores the allergy, diet and health data the user specifies, along with their email address, in secure databases in order to provide the service. Your personal data is protected in line with the principles of Turkish Data Protection Law No. 6698 (KVKK) and is not shared commercially with third-party institutions or organizations.';
+
+  @override
+  String get termsSection4Title => '4. User Obligations';
+
+  @override
+  String get termsSection4Body =>
+      'The User agrees to provide accurate and up-to-date information when registering and to protect account security and password confidentiality. Any detected unauthorized account use must be reported to the app administrators immediately.';
+
+  @override
+  String get termsSection5Title =>
+      '5. Termination and Changes to the Agreement';
+
+  @override
+  String get termsSection5Body =>
+      'The app administration reserves the right to update the terms of use without prior notice. The current terms take effect on the date they are published within the App. The User may terminate the agreement at any time by deleting their account.';
+
+  @override
+  String get termsLastUpdated => 'Last updated: 11 August 2026';
+
+  @override
+  String get termsClose => 'I understand and close';
 }

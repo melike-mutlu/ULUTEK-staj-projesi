@@ -553,6 +553,204 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Üyelik günü'**
   String get statMemberDays;
+
+  /// Sign-up button and title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt Ol'**
+  String get signUp;
+
+  /// Sign-in button and title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş Yap'**
+  String get signIn;
+
+  /// Welcome heading on the auth screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Akıllı Sepet\'e Hoş Geldiniz'**
+  String get authWelcome;
+
+  /// Tagline under the welcome heading.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişiselleştirilmiş alışveriş asistanınız'**
+  String get authTagline;
+
+  /// Email field label.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta'**
+  String get email;
+
+  /// Password field label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre'**
+  String get password;
+
+  /// Terms and privacy agreement link and dialog title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanım Şartları ve Gizlilik Sözleşmesi'**
+  String get termsLink;
+
+  /// Text after the terms link in the accept checkbox.
+  ///
+  /// In tr, this message translates to:
+  /// **'\'ni okudum, kabul ediyorum.'**
+  String get termsAcceptSuffix;
+
+  /// Warning when the terms are not accepted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam etmek için lütfen Kullanım Şartları ve Gizlilik Sözleşmesi\'ni kabul edin.'**
+  String get termsRequiredWarning;
+
+  /// Notice when signing up with an existing email.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu e-posta zaten kayıtlı. Giriş yapın.'**
+  String get emailAlreadyRegistered;
+
+  /// Notice that email confirmation is required before sign-in.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-postana bir doğrulama bağlantısı gönderdik. Bağlantıya tıklayıp hesabını doğrulamadan giriş yapamazsın.'**
+  String get emailConfirmationNotice;
+
+  /// Link switching from sign-up to sign-in.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaten hesabın var mı? Giriş yap'**
+  String get toggleToSignIn;
+
+  /// Link switching from sign-in to sign-up.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabın yok mu? Kayıt ol'**
+  String get toggleToSignUp;
+
+  /// Separator between primary auth and social/guest options.
+  ///
+  /// In tr, this message translates to:
+  /// **'veya'**
+  String get orSeparator;
+
+  /// Google sign-in button label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Google ile Giriş Yap'**
+  String get googleSignIn;
+
+  /// Guest sign-in button label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Misafir Olarak Devam Et'**
+  String get continueAsGuest;
+
+  /// Error when sign-up fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt başarısız. Lütfen tekrar dene.'**
+  String get signUpFailed;
+
+  /// Error when sign-in fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş başarısız. Lütfen tekrar dene.'**
+  String get signInFailed;
+
+  /// Error when guest sign-in fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Misafir girişi başarısız. Lütfen tekrar dene.'**
+  String get guestSignInFailed;
+
+  /// Error when Google sign-in fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Google ile giriş başarısız. Lütfen tekrar dene.'**
+  String get googleSignInFailed;
+
+  /// Intro paragraph of the terms dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen Akıllı Sepet uygulamasını kullanmadan önce aşağıdaki kullanım şartlarını ve gizlilik esaslarını dikkatlice okuyunuz.'**
+  String get termsIntro;
+
+  /// Terms dialog section 1 title.
+  ///
+  /// In tr, this message translates to:
+  /// **'1. Taraflar ve Amaç'**
+  String get termsSection1Title;
+
+  /// Terms dialog section 1 body.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşbu sözleşme, Akıllı Sepet uygulaması (\"Uygulama\") ile Uygulamayı kullanan kişi (\"Kullanıcı\") arasında akdedilmiştir. Uygulamanın amacı, kullanıcılara ürün barkodlarını tarama, ürün içeriklerini görüntüleme ve kişisel alerji/diyet tercihlerine göre yapay zeka destekli rehberlik sunmaktır.'**
+  String get termsSection1Body;
+
+  /// Terms dialog section 2 title.
+  ///
+  /// In tr, this message translates to:
+  /// **'2. Hizmet Kapsamı ve Sorumluluk Reddi (Önemli Uyarı)'**
+  String get termsSection2Title;
+
+  /// Terms dialog section 2 body.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama tarafından sağlanan içerik analizleri, alerjegen uyarıları ve ürün değerlendirmeleri yalnızca bilgilendirme ve rehberlik amaçlıdır. Uygulamadaki veriler resmi ambalaj bilgileri ve açık kaynak veri tabanlarından derlenmektedir. Uygulama hiçbir şekilde tıbbi tavsiye, teşhis veya tedavi niteliği taşımaz. Kullanıcının sağlığı, diyet tercihleri ve ürün tüketimi ile ilgili nihai sorumluluk tamamen Kullanıcıya aittir.'**
+  String get termsSection2Body;
+
+  /// Terms dialog section 3 title.
+  ///
+  /// In tr, this message translates to:
+  /// **'3. Kişisel Veriler ve KVKK Aydınlatması'**
+  String get termsSection3Title;
+
+  /// Terms dialog section 3 body.
+  ///
+  /// In tr, this message translates to:
+  /// **'Akıllı Sepet, kullanıcının belirlediği alerji, diyet, sağlık verileri ile e-posta adresini hizmetin sunulabilmesi amacıyla güvenli veritabanlarında saklar. Kişisel verileriniz 6698 sayılı KVKK ilkelerine uygun olarak korunmakta olup, üçüncü taraf kurum veya kuruluşlarla ticari amaçla paylaşılmamaktadır.'**
+  String get termsSection3Body;
+
+  /// Terms dialog section 4 title.
+  ///
+  /// In tr, this message translates to:
+  /// **'4. Kullanıcı Yükümlülükleri'**
+  String get termsSection4Title;
+
+  /// Terms dialog section 4 body.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı, kayıt oluştururken doğru ve güncel bilgiler vermeyi, hesap güvenliğini ve şifre gizliliğini korumayı kabul eder. Yetkisiz hesap kullanımı tespiti halinde derhal uygulama yönetimine haber verilmelidir.'**
+  String get termsSection4Body;
+
+  /// Terms dialog section 5 title.
+  ///
+  /// In tr, this message translates to:
+  /// **'5. Fesih ve Sözleşme Değişiklikleri'**
+  String get termsSection5Title;
+
+  /// Terms dialog section 5 body.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama yönetimi, kullanım şartlarını önceden bildirmeksizin güncelleme hakkını saklı tutar. Güncel şartlar Uygulama içerisinde yayınlandığı tarihte yürürlüğe girer. Kullanıcı dilediği zaman hesabını silerek sözleşmeyi sonlandırabilir.'**
+  String get termsSection5Body;
+
+  /// Last-updated line in the terms dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son Güncelleme Tarihi: 11 Ağustos 2026'**
+  String get termsLastUpdated;
+
+  /// Close button of the terms dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anladım ve Kapat'**
+  String get termsClose;
 }
 
 class _AppLocalizationsDelegate

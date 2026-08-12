@@ -318,5 +318,137 @@
   "statMemberDays": "Üyelik günü",
   "@statMemberDays": {
     "description": "Profile stat tile label for days since signup."
+  },
+  "signUp": "Kayıt Ol",
+  "@signUp": {
+    "description": "Sign-up button and title."
+  },
+  "signIn": "Giriş Yap",
+  "@signIn": {
+    "description": "Sign-in button and title."
+  },
+  "authWelcome": "Akıllı Sepet'e Hoş Geldiniz",
+  "@authWelcome": {
+    "description": "Welcome heading on the auth screen."
+  },
+  "authTagline": "Kişiselleştirilmiş alışveriş asistanınız",
+  "@authTagline": {
+    "description": "Tagline under the welcome heading."
+  },
+  "email": "E-posta",
+  "@email": {
+    "description": "Email field label."
+  },
+  "password": "Şifre",
+  "@password": {
+    "description": "Password field label."
+  },
+  "termsLink": "Kullanım Şartları ve Gizlilik Sözleşmesi",
+  "@termsLink": {
+    "description": "Terms and privacy agreement link and dialog title."
+  },
+  "termsAcceptSuffix": "'ni okudum, kabul ediyorum.",
+  "@termsAcceptSuffix": {
+    "description": "Text after the terms link in the accept checkbox."
+  },
+  "termsRequiredWarning": "Devam etmek için lütfen Kullanım Şartları ve Gizlilik Sözleşmesi'ni kabul edin.",
+  "@termsRequiredWarning": {
+    "description": "Warning when the terms are not accepted."
+  },
+  "emailAlreadyRegistered": "Bu e-posta zaten kayıtlı. Giriş yapın.",
+  "@emailAlreadyRegistered": {
+    "description": "Notice when signing up with an existing email."
+  },
+  "emailConfirmationNotice": "E-postana bir doğrulama bağlantısı gönderdik. Bağlantıya tıklayıp hesabını doğrulamadan giriş yapamazsın.",
+  "@emailConfirmationNotice": {
+    "description": "Notice that email confirmation is required before sign-in."
+  },
+  "toggleToSignIn": "Zaten hesabın var mı? Giriş yap",
+  "@toggleToSignIn": {
+    "description": "Link switching from sign-up to sign-in."
+  },
+  "toggleToSignUp": "Hesabın yok mu? Kayıt ol",
+  "@toggleToSignUp": {
+    "description": "Link switching from sign-in to sign-up."
+  },
+  "orSeparator": "veya",
+  "@orSeparator": {
+    "description": "Separator between primary auth and social/guest options."
+  },
+  "googleSignIn": "Google ile Giriş Yap",
+  "@googleSignIn": {
+    "description": "Google sign-in button label."
+  },
+  "continueAsGuest": "Misafir Olarak Devam Et",
+  "@continueAsGuest": {
+    "description": "Guest sign-in button label."
+  },
+  "signUpFailed": "Kayıt başarısız. Lütfen tekrar dene.",
+  "@signUpFailed": {
+    "description": "Error when sign-up fails."
+  },
+  "signInFailed": "Giriş başarısız. Lütfen tekrar dene.",
+  "@signInFailed": {
+    "description": "Error when sign-in fails."
+  },
+  "guestSignInFailed": "Misafir girişi başarısız. Lütfen tekrar dene.",
+  "@guestSignInFailed": {
+    "description": "Error when guest sign-in fails."
+  },
+  "googleSignInFailed": "Google ile giriş başarısız. Lütfen tekrar dene.",
+  "@googleSignInFailed": {
+    "description": "Error when Google sign-in fails."
+  },
+  "termsIntro": "Lütfen Akıllı Sepet uygulamasını kullanmadan önce aşağıdaki kullanım şartlarını ve gizlilik esaslarını dikkatlice okuyunuz.",
+  "@termsIntro": {
+    "description": "Intro paragraph of the terms dialog."
+  },
+  "termsSection1Title": "1. Taraflar ve Amaç",
+  "@termsSection1Title": {
+    "description": "Terms dialog section 1 title."
+  },
+  "termsSection1Body": "İşbu sözleşme, Akıllı Sepet uygulaması (\"Uygulama\") ile Uygulamayı kullanan kişi (\"Kullanıcı\") arasında akdedilmiştir. Uygulamanın amacı, kullanıcılara ürün barkodlarını tarama, ürün içeriklerini görüntüleme ve kişisel alerji/diyet tercihlerine göre yapay zeka destekli rehberlik sunmaktır.",
+  "@termsSection1Body": {
+    "description": "Terms dialog section 1 body."
+  },
+  "termsSection2Title": "2. Hizmet Kapsamı ve Sorumluluk Reddi (Önemli Uyarı)",
+  "@termsSection2Title": {
+    "description": "Terms dialog section 2 title."
+  },
+  "termsSection2Body": "Uygulama tarafından sağlanan içerik analizleri, alerjegen uyarıları ve ürün değerlendirmeleri yalnızca bilgilendirme ve rehberlik amaçlıdır. Uygulamadaki veriler resmi ambalaj bilgileri ve açık kaynak veri tabanlarından derlenmektedir. Uygulama hiçbir şekilde tıbbi tavsiye, teşhis veya tedavi niteliği taşımaz. Kullanıcının sağlığı, diyet tercihleri ve ürün tüketimi ile ilgili nihai sorumluluk tamamen Kullanıcıya aittir.",
+  "@termsSection2Body": {
+    "description": "Terms dialog section 2 body."
+  },
+  "termsSection3Title": "3. Kişisel Veriler ve KVKK Aydınlatması",
+  "@termsSection3Title": {
+    "description": "Terms dialog section 3 title."
+  },
+  "termsSection3Body": "Akıllı Sepet, kullanıcının belirlediği alerji, diyet, sağlık verileri ile e-posta adresini hizmetin sunulabilmesi amacıyla güvenli veritabanlarında saklar. Kişisel verileriniz 6698 sayılı KVKK ilkelerine uygun olarak korunmakta olup, üçüncü taraf kurum veya kuruluşlarla ticari amaçla paylaşılmamaktadır.",
+  "@termsSection3Body": {
+    "description": "Terms dialog section 3 body."
+  },
+  "termsSection4Title": "4. Kullanıcı Yükümlülükleri",
+  "@termsSection4Title": {
+    "description": "Terms dialog section 4 title."
+  },
+  "termsSection4Body": "Kullanıcı, kayıt oluştururken doğru ve güncel bilgiler vermeyi, hesap güvenliğini ve şifre gizliliğini korumayı kabul eder. Yetkisiz hesap kullanımı tespiti halinde derhal uygulama yönetimine haber verilmelidir.",
+  "@termsSection4Body": {
+    "description": "Terms dialog section 4 body."
+  },
+  "termsSection5Title": "5. Fesih ve Sözleşme Değişiklikleri",
+  "@termsSection5Title": {
+    "description": "Terms dialog section 5 title."
+  },
+  "termsSection5Body": "Uygulama yönetimi, kullanım şartlarını önceden bildirmeksizin güncelleme hakkını saklı tutar. Güncel şartlar Uygulama içerisinde yayınlandığı tarihte yürürlüğe girer. Kullanıcı dilediği zaman hesabını silerek sözleşmeyi sonlandırabilir.",
+  "@termsSection5Body": {
+    "description": "Terms dialog section 5 body."
+  },
+  "termsLastUpdated": "Son Güncelleme Tarihi: 11 Ağustos 2026",
+  "@termsLastUpdated": {
+    "description": "Last-updated line in the terms dialog."
+  },
+  "termsClose": "Anladım ve Kapat",
+  "@termsClose": {
+    "description": "Close button of the terms dialog."
   }
 }
