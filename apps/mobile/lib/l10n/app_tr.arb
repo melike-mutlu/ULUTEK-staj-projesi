@@ -1,0 +1,15 @@
+{
+  "@@locale": "tr",
+  "appTitle": "Akıllı Sepet",
+  "@appTitle": {
+    "description": "Application name shown as the OS task title."
+  },
+  "settingsTitle": "Ayarlar",
+  "@settingsTitle": {
+    "description": "Settings screen title and profile action tooltip."
+  },
+  "save": "Kaydet",
+  "@save": {
+    "description": "Generic save button label."
+  }
+}
