@@ -27,6 +27,9 @@ class ChatbotViewModel extends ChangeNotifier {
   String? errorMessage;
   final List<ChatMessage> messages = [];
 
+  /// Yapay zekanın sohbet geçmişini hatırlaması için gereken kimlik
+  String? currentSessionId;
+
   /// Text another screen wants prefilled into the input, e.g. the profile
   /// "danış" suggestion. The view writes it into its controller and calls
   /// [consumePendingInput] so it never re-appears on a later tab visit.
@@ -46,8 +49,11 @@ class ChatbotViewModel extends ChangeNotifier {
   void clearMessages() {
     messages.clear();
     errorMessage = null;
+    // Yeni sohbet başladığında hafızayı sıfırla
+    currentSessionId = null;
     notifyListeners();
   }
+
   Future<void> sendMessage(String userMessage) async {
     if (userMessage.trim().isEmpty) return;
 
@@ -57,8 +63,18 @@ class ChatbotViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. GERÇEK API'YE İSTEK (Sevde'nin tarafı)
-      final reply = await _chatbotRepository.sendMessage(userMessage);
+      // 1. GERÇEK API'YE İSTEK (Elimizdeki sessionId'yi de gönderiyoruz)
+      final result = await _chatbotRepository.sendMessage(
+        userMessage,
+        sessionId: currentSessionId,
+      );
+
+      // Backend'den dönen yeni/güncel session_id'yi alıyoruz
+      if (result.sessionId != null) {
+        currentSessionId = result.sessionId;
+      }
+
+      final reply = result.reply;  
 
       // 2. GELEN CEVAPTA GİZLİ ŞİFRE KONTROLÜ
       final suggestionRegex = RegExp(r'\[SUGGESTION:\s*(\w+)=([^\]]+)\]');

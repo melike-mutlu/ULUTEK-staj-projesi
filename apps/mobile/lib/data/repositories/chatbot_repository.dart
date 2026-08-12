@@ -1,31 +1,46 @@
 // lib/data/repositories/chatbot_repository.dart
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart'; // debugPrint için gerekli
+
+// Yardımcı Sınıf
+// Hem backend'den dönen cevabı hem de oturum kimliğini tutar
+class ChatbotResponse{
+  final String reply;
+  final String? sessionId;
+  ChatbotResponse({required this.reply, this.sessionId});
+}
 
 class ChatbotRepository {
   ChatbotRepository(this._supabaseClient);
 
   final SupabaseClient _supabaseClient;
 
-  /// Kullanıcının mesajını Supabase Edge Function'daki 'chatbot' endpoint'ine gönderir
-  /// ve yapay zekanın yanıtını ('reply') geri döndürür.
-  Future<String> sendMessage(String userMessage) async {
+  Future<ChatbotResponse> sendMessage(String userMessage, {String? sessionId}) async {
     try {
-      // Supabase Edge Function'ı invoke (tetikleme) etme
+      final body = <String, dynamic>{
+        'user_message': userMessage,
+      };
+
+      if (sessionId != null) {
+        body['session_id'] = sessionId;
+      }
+
       final response = await _supabaseClient.functions.invoke(
         'chatbot',
-        body: {
-          'user_message': userMessage,
-        },
+        body: body,
       );
 
-      // Sunucudan dönen yanıtın durumunu ve verisini kontrol et
       if (response.status == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
         
-        // Sunucu tarafında belirlediğimiz "reply" anahtarını okuyoruz
+        
         if (data.containsKey('reply')) {
-          return data['reply'].toString();
+          return ChatbotResponse(
+            reply: data['reply'].toString(),
+            // Backend'in bize session_id'yi gerçekten bu isimle dönüp dönmediğini kontrol ediyoruz
+            sessionId: data['session_id']?.toString(), 
+          );
         } else {
           throw Exception('Sunucu yanıtında "reply" alanı bulunamadı.');
         }

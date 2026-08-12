@@ -17,7 +17,6 @@ dependencies:
   http: ^1.6.0
   flutter_dotenv: ^6.0.1
   image_picker: ^1.1.2
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
