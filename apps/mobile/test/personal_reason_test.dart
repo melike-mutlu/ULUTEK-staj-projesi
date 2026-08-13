@@ -76,6 +76,23 @@ void main() {
     );
   });
 
+  test('Diyabet dostu diyet tercihi degerlendirilemedi degil sekere gore gosterilir', () {
+    final checks = dietChecks(
+      l10n,
+      _profile(diets: ['Diyabet dostu']),
+      const RuleEngineResult(
+        matchedAllergens: [],
+        hasConflict: false,
+        veganCompatible: null,
+        diabeticNote: 'Düşük şeker oranı. Diyabet dostu.',
+      ),
+    );
+
+    expect(checks, hasLength(1));
+    expect(checks.single.level, WarningLevel.ok);
+    expect(checks.single.note, 'Düşük şeker oranı. Diyabet dostu.');
+  });
+
   test('kisisel bir sey yoksa backend mesajina duser', () {
     final reason = personalReason(
       l10n: l10n,

@@ -31,6 +31,23 @@ List<ProfileCheck> dietChecks(
 
 ProfileCheck _dietCheck(
     AppLocalizations l10n, String preference, RuleEngineResult? rule) {
+  // "Diyabet dostu" is a diet preference on the backend (hasDiet(profile,
+  // "diyabet_dostu")), but it's judged via diet_flags.diabetic_note (sugar
+  // content), not the vegan/vegetarian compatibility flags below — same note
+  // and severity the health-condition path already uses.
+  if (_isDiabetes(preference)) {
+    final diabeticNote = rule?.diabeticNote?.trim();
+    if (diabeticNote == null || diabeticNote.isEmpty) {
+      return ProfileCheck(
+          label: preference, note: l10n.checkNotEvaluated, level: null);
+    }
+    return ProfileCheck(
+      label: preference,
+      note: diabeticNote,
+      level: _diabeticLevel(diabeticNote),
+    );
+  }
+
   final compatible = _dietCompatibility(preference, rule);
   if (compatible == null) {
     return ProfileCheck(
