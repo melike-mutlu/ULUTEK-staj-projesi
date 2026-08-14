@@ -17,6 +17,7 @@ class PickedImage {
 abstract class ImagePickerService {
   /// Returns null when the user cancels the picker.
   Future<PickedImage?> pickFromGallery();
+  Future<PickedImage?> pickFromCamera();
 }
 
 class DeviceImagePickerService implements ImagePickerService {
@@ -54,6 +55,23 @@ class DeviceImagePickerService implements ImagePickerService {
       bytes: await file.readAsBytes(),
       extension:
           _supportedExtensions.contains(extension) ? extension : 'jpg',
+    );
+  }
+
+  @override
+  Future<PickedImage?> pickFromCamera() async {
+    final file = await _picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: _maxDimension,
+      maxHeight: _maxDimension,
+      imageQuality: _quality,
+    );
+    if (file == null) return null;
+
+    final extension = file.path.split('.').last.toLowerCase();
+    return PickedImage(
+      bytes: await file.readAsBytes(),
+      extension: _supportedExtensions.contains(extension) ? extension : 'jpg',
     );
   }
 }
