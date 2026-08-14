@@ -1609,6 +1609,468 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Sülfitler'**
   String get allergenSulphites;
+
+  /// Bottom navigation label for the home tab.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana Sayfa'**
+  String get navHome;
+
+  /// Bottom navigation label for the chatbot tab.
+  ///
+  /// In tr, this message translates to:
+  /// **'Chatbot'**
+  String get navChatbot;
+
+  /// Hint text for the product search field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün ara'**
+  String get searchProductHint;
+
+  /// Title of the dialog to add a custom chip option.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçenek ekle'**
+  String get addOption;
+
+  /// Confirm button that adds a custom option.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get addAction;
+
+  /// Title of the country selection dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke Seçimi'**
+  String get countryDialogTitle;
+
+  /// Hint for the country name text field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke adı yazınız (örn. Türkiye)'**
+  String get countryDialogHint;
+
+  /// Label above the quick-pick country chips.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı Seçim'**
+  String get quickSelect;
+
+  /// Error shown on the startup gate when the profile cannot be loaded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilin yüklenemedi. Bağlantını kontrol edip tekrar dene.'**
+  String get profileLoadRetry;
+
+  /// Relative time for a moment ago.
+  ///
+  /// In tr, this message translates to:
+  /// **'az önce'**
+  String get relativeJustNow;
+
+  /// Relative time in minutes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} dk önce'**
+  String relativeMinutesAgo(int count);
+
+  /// Relative time in hours.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} saat önce'**
+  String relativeHoursAgo(int count);
+
+  /// Relative time for the previous day.
+  ///
+  /// In tr, this message translates to:
+  /// **'dün'**
+  String get relativeYesterday;
+
+  /// Relative time in days.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} gün önce'**
+  String relativeDaysAgo(int count);
+
+  /// Profile card title for the user's allergies.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alerjilerim'**
+  String get profileSectionAllergies;
+
+  /// Profile card title for the user's diet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Beslenme düzenim'**
+  String get profileSectionDiet;
+
+  /// Profile card title for the user's health conditions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sağlık durumum'**
+  String get profileSectionHealth;
+
+  /// Section/screen title for the user's shopping lists.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alışveriş Listelerim'**
+  String get shoppingListsTitle;
+
+  /// See-all link on the home shopping lists header.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü Gör'**
+  String get seeAllUpper;
+
+  /// Empty-state title on the home shopping lists card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz Listeniz Yok'**
+  String get noShoppingListsTitle;
+
+  /// Empty-state prompt on the home shopping lists card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dokunun ve ilk alışveriş listenizi oluşturun'**
+  String get noShoppingListsPrompt;
+
+  /// Title/button to create a new shopping list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Liste Oluştur'**
+  String get createListTitle;
+
+  /// Hint for the new shopping list name field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste Adı (Örn: Hafta Sonu Pazarı)'**
+  String get listNameHint;
+
+  /// Confirm button that creates the list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oluştur'**
+  String get createAction;
+
+  /// Snackbar after creating a list.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" listesi oluşturuldu.'**
+  String listCreated(String name);
+
+  /// Tooltip on the add-list action.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Liste'**
+  String get newListTooltip;
+
+  /// Empty-state title on the shopping lists screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz bir alışveriş listeniz yok'**
+  String get noShoppingListsScreenTitle;
+
+  /// Empty-state body on the shopping lists screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Market veya pazar alışverişlerinizi kolayca planlamak için yeni bir liste oluşturabilirsiniz.'**
+  String get noShoppingListsScreenBody;
+
+  /// Item count summary on a shopping list card.
+  ///
+  /// In tr, this message translates to:
+  /// **'{total} ürün • {bought} alındı'**
+  String listItemsSummary(int total, int bought);
+
+  /// Delete-list dialog title and tooltip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Listeyi Sil'**
+  String get deleteListTitle;
+
+  /// Delete-list confirmation body.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu alışveriş listesini ve içindeki tüm ürünleri silmek istediğinize emin misiniz?'**
+  String get deleteListConfirm;
+
+  /// Confirm button that deletes the list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet, Sil'**
+  String get deleteConfirmAction;
+
+  /// Snackbar after deleting a list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste silindi.'**
+  String get listDeleted;
+
+  /// Fallback title of the list detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste Detayı'**
+  String get listDetailTitle;
+
+  /// Progress card title on the list detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alışveriş İlerlemesi'**
+  String get shoppingProgress;
+
+  /// Bought-of-total label on the progress card.
+  ///
+  /// In tr, this message translates to:
+  /// **'{bought} / {total} Alındı'**
+  String progressBought(int bought, int total);
+
+  /// Empty-state title on the list detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu listede henüz ürün yok'**
+  String get noItemsTitle;
+
+  /// Empty-state body on the list detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aşağıdaki \"Ürün Ekle\" butonuna dokunarak son tarananlardan veya arama ile ürün ekleyebilirsiniz.'**
+  String get noItemsBody;
+
+  /// Add-product FAB label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün Ekle'**
+  String get addProduct;
+
+  /// Snackbar after adding an item.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" listeye eklendi.'**
+  String itemAdded(String name);
+
+  /// Snackbar when adding an item fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün eklenirken bir hata oluştu.'**
+  String get itemAddFailed;
+
+  /// Title of the add-product bottom sheet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Listeye Ürün Ekle'**
+  String get addProductToList;
+
+  /// Add-product sheet tab: recent scans.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son Tarananlar'**
+  String get tabRecentScans;
+
+  /// Add-product sheet tab: search & manual add.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arama & Elle Ekle'**
+  String get tabSearchManual;
+
+  /// Empty-state title in the recent scans tab.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz taranmış ürün bulunmuyor.'**
+  String get noRecentScansTitle;
+
+  /// Empty-state body in the recent scans tab.
+  ///
+  /// In tr, this message translates to:
+  /// **'Barkod tarayarak ürün incelediğinizde öneriler burada görünecektir.'**
+  String get noRecentScansBody;
+
+  /// Manual add section title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Elle Ürün Adı Gir'**
+  String get manualAddTitle;
+
+  /// Hint for the manual product name field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn: Süt, Elma, Yulaf...'**
+  String get manualNameHint;
+
+  /// Search-by-name section title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün İsmine Göre Ara'**
+  String get searchByNameTitle;
+
+  /// Hint for the search-by-name field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Marka veya ürün adı ara...'**
+  String get searchByNameHint;
+
+  /// Short medical disclaimer under the product verdict.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu bilgi tıbbi tavsiye niteliği taşımaz.'**
+  String get medicalDisclaimerShort;
+
+  /// Profile allergy chip: nuts/peanuts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fındık/Fıstık'**
+  String get optNutsPeanuts;
+
+  /// Profile diet chip: vegan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vegan'**
+  String get optVegan;
+
+  /// Profile diet chip: vegetarian.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vejetaryen'**
+  String get optVegetarian;
+
+  /// Profile diet chip: diabetic-friendly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diyabet dostu'**
+  String get optDiabeticFriendly;
+
+  /// Profile diet chip: athlete / high protein.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sporcu / Yüksek protein'**
+  String get optAthleteHighProtein;
+
+  /// Profile diet chip: low carb.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşük karbonhidrat'**
+  String get optLowCarb;
+
+  /// Profile diet chip: gluten-free lifestyle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Glutensiz yaşam tarzı'**
+  String get optGlutenFreeLifestyle;
+
+  /// Profile diet chip: ketogenic.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ketojenik'**
+  String get optKetogenic;
+
+  /// Profile health chip: blood pressure.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tansiyon'**
+  String get optBloodPressure;
+
+  /// Profile health chip: celiac.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çölyak'**
+  String get optCeliac;
+
+  /// Profile health chip: high cholesterol.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüksek kolesterol'**
+  String get optHighCholesterol;
+
+  /// Profile health chip: kidney disease.
+  ///
+  /// In tr, this message translates to:
+  /// **'Böbrek hastalığı'**
+  String get optKidneyDisease;
+
+  /// Profile health chip: diabetes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şeker hastalığı'**
+  String get optDiabetesDisease;
+
+  /// Profile health chip: heart condition.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalp rahatsızlığı'**
+  String get optHeartCondition;
+
+  /// Quick-select country: Türkiye.
+  ///
+  /// In tr, this message translates to:
+  /// **'Türkiye'**
+  String get countryTurkiye;
+
+  /// Quick-select country: Germany.
+  ///
+  /// In tr, this message translates to:
+  /// **'Almanya'**
+  String get countryGermany;
+
+  /// Quick-select country: United Kingdom.
+  ///
+  /// In tr, this message translates to:
+  /// **'İngiltere'**
+  String get countryUk;
+
+  /// Quick-select country: United States.
+  ///
+  /// In tr, this message translates to:
+  /// **'ABD'**
+  String get countryUsa;
+
+  /// Quick-select country: Netherlands.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hollanda'**
+  String get countryNetherlands;
+
+  /// Quick-select country: France.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fransa'**
+  String get countryFrance;
+
+  /// Shown when the AI explanation could not be generated (summary).
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün açıklaması şu an oluşturulamadı.'**
+  String get fallbackNoExplanationSummary;
+
+  /// Neutral fallback when the AI explanation is unavailable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama şu an oluşturulamadı; ürün bilgileri aşağıda.'**
+  String get fallbackNoExplanationDetail;
+
+  /// Fallback warning when the product conflicts with the profile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üründe profilinle çakışan içerik var; ayrıntılar aşağıda.'**
+  String get fallbackProfileConflict;
+
+  /// Deterministic fallback: a risk/allergen was detected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üründe riskli içerik veya alerjen tespit edildi.'**
+  String get fallbackRiskDetected;
+
+  /// Deterministic fallback: the product suits the profile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün profilinize uygundur.'**
+  String get fallbackSuitable;
+
+  /// Notice for community-added, unverified products.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı. Bilgiler resmi onay beklemektedir.'**
+  String get fallbackPendingNotice;
 }
 
 class _AppLocalizationsDelegate

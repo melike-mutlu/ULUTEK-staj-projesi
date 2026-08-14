@@ -16,8 +16,10 @@ class ProfileSectionCard extends StatelessWidget {
     required this.onToggle,
     required this.isExpanded,
     required this.onShowAll,
+    this.onShowLess,
     this.onAddCustom,
     this.canAddCustom = true,
+    this.labelBuilder,
   });
 
   final String title;
@@ -25,9 +27,15 @@ class ProfileSectionCard extends StatelessWidget {
   final Set<String> selected;
   final ValueChanged<String> onToggle;
 
+  /// Maps an option value to its localized chip label (see SelectionChipGroup).
+  final String Function(String option)? labelBuilder;
+
   /// Whether the card is expanded — collapsed shows only [_collapsedCount].
   final bool isExpanded;
   final VoidCallback onShowAll;
+
+  /// Collapses an expanded card; when null the reveal is one-way.
+  final VoidCallback? onShowLess;
 
   /// When null the "+" chip is hidden.
   final ValueChanged<String>? onAddCustom;
@@ -64,8 +72,10 @@ class ProfileSectionCard extends StatelessWidget {
         onToggle: onToggle,
         onAddCustom: onAddCustom,
         canAddCustom: canAddCustom,
+        labelBuilder: labelBuilder,
         visibleCount: isExpanded ? null : _collapsedCount,
         onShowAll: onShowAll,
+        onShowLess: onShowLess,
       ),
     );
   }

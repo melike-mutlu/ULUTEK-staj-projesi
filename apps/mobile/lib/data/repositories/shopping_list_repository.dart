@@ -16,14 +16,14 @@ class MockShoppingListRepository implements ShoppingListRepository {
   final List<ShoppingList> _mockLists = [
     ShoppingList(
       id: 'list-1',
-      name: 'Haftalık Market Alışverişi',
+      name: 'Weekly Grocery Shopping',
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
       updatedAt: DateTime.now().subtract(const Duration(days: 1)),
       items: [
         ShoppingListItem(
           id: 'item-101',
           listId: 'list-1',
-          productName: 'Yulaf Ezmesi 500g',
+          productName: 'Rolled Oats 500g',
           barcode: '8690504018025',
           brand: 'Eti Lifalif',
           isBought: true,
@@ -33,7 +33,7 @@ class MockShoppingListRepository implements ShoppingListRepository {
         ShoppingListItem(
           id: 'item-102',
           listId: 'list-1',
-          productName: 'Süt 1L (%100 Doğal Organik)',
+          productName: 'Milk 1L (100% Natural Organic)',
           barcode: '8690123456789',
           brand: 'Sütaş',
           isBought: false,
@@ -43,7 +43,7 @@ class MockShoppingListRepository implements ShoppingListRepository {
         ShoppingListItem(
           id: 'item-103',
           listId: 'list-1',
-          productName: 'Organik Zeytinyağı 1L',
+          productName: 'Organic Olive Oil 1L',
           barcode: '8690987654321',
           brand: 'Komili',
           isBought: false,
@@ -54,14 +54,14 @@ class MockShoppingListRepository implements ShoppingListRepository {
     ),
     ShoppingList(
       id: 'list-2',
-      name: 'Kahvaltılık ve Meyve',
+      name: 'Breakfast & Fruit',
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
       updatedAt: DateTime.now().subtract(const Duration(hours: 12)),
       items: [
         ShoppingListItem(
           id: 'item-201',
           listId: 'list-2',
-          productName: 'Süzme Peynir 500g',
+          productName: 'Strained Cheese 500g',
           brand: 'Pınar',
           isBought: true,
           quantity: 1,
@@ -70,7 +70,7 @@ class MockShoppingListRepository implements ShoppingListRepository {
         ShoppingListItem(
           id: 'item-202',
           listId: 'list-2',
-          productName: 'Elma Amasya 1kg',
+          productName: 'Amasya Apples 1kg',
           isBought: true,
           quantity: 1,
           createdAt: DateTime.now().subtract(const Duration(days: 4)),

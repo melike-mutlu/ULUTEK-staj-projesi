@@ -140,7 +140,8 @@ void main() {
 
     expect(find.text('Uygun değil!'), findsOneWidget);
     expect(find.text('Bu üründe GLUTEN var!'), findsOneWidget);
-    expect(find.text('Tıbbi tavsiye değildir.'), findsOneWidget);
+    // The banner now renders a localized disclaimer regardless of the model text.
+    expect(find.text('Bu bilgi tıbbi tavsiye niteliği taşımaz.'), findsOneWidget);
   });
 
   testWidgets('WarningBanner çakışmaları madde madde gösterir',

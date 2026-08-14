@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
-
-const List<String> _popularCountries = <String>[
-  'Türkiye',
-  'Almanya',
-  'İngiltere',
-  'ABD',
-  'Hollanda',
-  'Fransa',
-];
+import '../../../l10n/app_localizations.dart';
 
 /// Ülke düzenleme kutusu. Kapatılınca girilen metni, vazgeçilirse null döner.
 class CountryEditDialog extends StatefulWidget {
@@ -50,12 +42,21 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final popularCountries = <String>[
+      l10n.countryTurkiye,
+      l10n.countryGermany,
+      l10n.countryUk,
+      l10n.countryUsa,
+      l10n.countryNetherlands,
+      l10n.countryFrance,
+    ];
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.public_rounded, color: AppColors.brand),
-          SizedBox(width: 10),
-          Text('Ülke Seçimi'),
+          const Icon(Icons.public_rounded, color: AppColors.brand),
+          const SizedBox(width: 10),
+          Text(l10n.countryDialogTitle),
         ],
       ),
       content: SingleChildScrollView(
@@ -70,7 +71,7 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
-                hintText: 'Ülke adı yazınız (örn. Türkiye)',
+                hintText: l10n.countryDialogHint,
                 prefixIcon: const Icon(Icons.location_on_outlined),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
@@ -86,9 +87,9 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Hızlı Seçim',
-              style: TextStyle(
+            Text(
+              l10n.quickSelect,
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -98,7 +99,7 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
             Wrap(
               spacing: 6,
               runSpacing: 6,
-              children: _popularCountries.map((cName) {
+              children: popularCountries.map((cName) {
                 final isSelected =
                     _controller.text.trim().toLowerCase() == cName.toLowerCase();
                 return ChoiceChip(
@@ -119,11 +120,11 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Vazgeç'),
+          child: Text(l10n.cancel),
         ),
         TextButton(
           onPressed: _submit,
-          child: const Text('Kaydet'),
+          child: Text(l10n.save),
         ),
       ],
     );

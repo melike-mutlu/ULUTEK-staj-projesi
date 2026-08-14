@@ -4,6 +4,7 @@ import '../../../core/models/explanation.dart';
 import '../../../core/theme/akilli_sepet_colors.dart';
 import '../../../core/theme/warning_level_style.dart';
 import '../../../l10n/app_localizations.dart';
+import '../explanation_fallbacks.dart';
 import '../profile_checks.dart';
 
 /// Verdict — the anchor of the screen: the level on the left, the short verdict
@@ -44,13 +45,14 @@ class WarningBanner extends StatelessWidget {
   bool get _isSuitable =>
       !insufficientData && explanation.level == WarningLevel.ok;
 
-  List<ReasonSpan> get _reason {
+  List<ReasonSpan> _reasonSpans(AppLocalizations l10n) {
     final personal = reason;
     if (personal != null && personal.isNotEmpty) return personal;
+    final text = explanation.warningMessage.isNotEmpty
+        ? explanation.warningMessage
+        : explanation.summary;
     return [
-      ReasonSpan(explanation.warningMessage.isNotEmpty
-          ? explanation.warningMessage
-          : explanation.summary),
+      ReasonSpan(localizeExplanationFallback(l10n, text)),
     ];
   }
 
@@ -125,32 +127,30 @@ class WarningBanner extends StatelessWidget {
                 if (reasonLines != null && reasonLines!.isNotEmpty)
                   for (final line in reasonLines!) _bullet(line, style.main)
                 else
-                  _reasonText(_reason, style.main),
-                if (explanation.disclaimer.isNotEmpty) ...[
-                  // One blank line, then the disclaimer right under the reason.
-                  const SizedBox(height: 22),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.info_outline_rounded,
-                        size: 13,
-                        color: AkilliSepetColors.textSecondary,
-                      ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Text(
-                          explanation.disclaimer,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AkilliSepetColors.textSecondary,
-                            height: 1.3,
-                          ),
+                  _reasonText(_reasonSpans(l10n), style.main),
+                // Fixed legal notice, always shown under a real verdict.
+                const SizedBox(height: 22),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 13,
+                      color: AkilliSepetColors.textSecondary,
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        l10n.medicalDisclaimerShort,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AkilliSepetColors.textSecondary,
+                          height: 1.3,
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

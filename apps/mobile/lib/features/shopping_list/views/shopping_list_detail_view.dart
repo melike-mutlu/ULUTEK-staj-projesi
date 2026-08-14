@@ -5,6 +5,7 @@ import '../../../core/navigation/app_routes.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/app_localizations.dart';
 import '../widgets/add_product_sheet.dart';
 
 class ShoppingListDetailView extends ConsumerStatefulWidget {
@@ -60,31 +61,30 @@ class _ShoppingListDetailViewState
   Future<void> _deleteList() async {
     if (_effectiveListId == null) return;
 
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.delete_outline_rounded, color: AppColors.warning),
-              SizedBox(width: 8),
-              Text('Listeyi Sil'),
+              const Icon(Icons.delete_outline_rounded, color: AppColors.warning),
+              const SizedBox(width: 8),
+              Text(l10n.deleteListTitle),
             ],
           ),
-          content: const Text(
-            'Bu alışveriş listesini ve içindeki tüm ürünleri silmek istediğinize emin misiniz?',
-          ),
+          content: Text(l10n.deleteListConfirm),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Vazgeç'),
+              child: Text(l10n.cancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(dialogContext, true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.warning,
               ),
-              child: const Text('Evet, Sil', style: TextStyle(color: Colors.white)),
+              child: Text(l10n.deleteConfirmAction, style: const TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -98,7 +98,7 @@ class _ShoppingListDetailViewState
 
       if (mounted && success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Liste silindi.')),
+          SnackBar(content: Text(l10n.listDeleted)),
         );
         Navigator.pop(context);
       }
@@ -107,6 +107,7 @@ class _ShoppingListDetailViewState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final vm = ref.watch(shoppingListViewModelProvider);
@@ -123,13 +124,13 @@ class _ShoppingListDetailViewState
       appBar: AppBar(
         backgroundColor: backgroundColor,
         title: Text(
-          list?.name ?? 'Liste Detayı',
+          list?.name ?? l10n.listDetailTitle,
           style: AppTextStyles.heading2.copyWith(color: textColor),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline_rounded, color: AppColors.warning),
-            tooltip: 'Listeyi Sil',
+            tooltip: l10n.deleteListTitle,
             onPressed: list != null ? _deleteList : null,
           ),
         ],
@@ -155,14 +156,14 @@ class _ShoppingListDetailViewState
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Alışveriş İlerlemesi',
+                            l10n.shoppingProgress,
                             style: AppTextStyles.title.copyWith(
                               color: textColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            '${list.boughtItems} / ${list.totalItems} Alındı',
+                            l10n.progressBought(list.boughtItems, list.totalItems),
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.brand,
                               fontWeight: FontWeight.bold,
@@ -204,14 +205,14 @@ class _ShoppingListDetailViewState
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'Bu listede henüz ürün yok',
+                                  l10n.noItemsTitle,
                                   style: AppTextStyles.title.copyWith(
                                     color: secondaryTextColor,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Aşağıdaki "Ürün Ekle" butonuna dokunarak son tarananlardan veya arama ile ürün ekleyebilirsiniz.',
+                                  l10n.noItemsBody,
                                   textAlign: TextAlign.center,
                                   style: AppTextStyles.caption.copyWith(
                                     color: secondaryTextColor,
@@ -274,7 +275,7 @@ class _ShoppingListDetailViewState
                                       ),
                                     if (item.barcode != null && item.barcode!.isNotEmpty)
                                       Text(
-                                        'Barkod: ${item.barcode}',
+                                        l10n.barcodeLabel(item.barcode!),
                                         style: AppTextStyles.caption.copyWith(
                                           color: secondaryTextColor,
                                           fontSize: 11,
@@ -292,7 +293,7 @@ class _ShoppingListDetailViewState
                                           color: AppColors.brand,
                                           size: 20,
                                         ),
-                                        tooltip: 'Ürün Detayı',
+                                        tooltip: l10n.productDetailTitle,
                                         onPressed: () {
                                           Navigator.pushNamed(
                                             context,
@@ -327,9 +328,9 @@ class _ShoppingListDetailViewState
               onPressed: _openAddProductSheet,
               backgroundColor: AppColors.brand,
               icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: const Text(
-                'Ürün Ekle',
-                style: TextStyle(
+              label: Text(
+                l10n.addProduct,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),

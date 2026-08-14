@@ -813,4 +813,261 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get allergenSulphites => 'Sülfitler';
+
+  @override
+  String get navHome => 'Ana Sayfa';
+
+  @override
+  String get navChatbot => 'Chatbot';
+
+  @override
+  String get searchProductHint => 'Ürün ara';
+
+  @override
+  String get addOption => 'Seçenek ekle';
+
+  @override
+  String get addAction => 'Ekle';
+
+  @override
+  String get countryDialogTitle => 'Ülke Seçimi';
+
+  @override
+  String get countryDialogHint => 'Ülke adı yazınız (örn. Türkiye)';
+
+  @override
+  String get quickSelect => 'Hızlı Seçim';
+
+  @override
+  String get profileLoadRetry =>
+      'Profilin yüklenemedi. Bağlantını kontrol edip tekrar dene.';
+
+  @override
+  String get relativeJustNow => 'az önce';
+
+  @override
+  String relativeMinutesAgo(int count) {
+    return '$count dk önce';
+  }
+
+  @override
+  String relativeHoursAgo(int count) {
+    return '$count saat önce';
+  }
+
+  @override
+  String get relativeYesterday => 'dün';
+
+  @override
+  String relativeDaysAgo(int count) {
+    return '$count gün önce';
+  }
+
+  @override
+  String get profileSectionAllergies => 'Alerjilerim';
+
+  @override
+  String get profileSectionDiet => 'Beslenme düzenim';
+
+  @override
+  String get profileSectionHealth => 'Sağlık durumum';
+
+  @override
+  String get shoppingListsTitle => 'Alışveriş Listelerim';
+
+  @override
+  String get seeAllUpper => 'Tümünü Gör';
+
+  @override
+  String get noShoppingListsTitle => 'Henüz Listeniz Yok';
+
+  @override
+  String get noShoppingListsPrompt =>
+      'Dokunun ve ilk alışveriş listenizi oluşturun';
+
+  @override
+  String get createListTitle => 'Yeni Liste Oluştur';
+
+  @override
+  String get listNameHint => 'Liste Adı (Örn: Hafta Sonu Pazarı)';
+
+  @override
+  String get createAction => 'Oluştur';
+
+  @override
+  String listCreated(String name) {
+    return '\"$name\" listesi oluşturuldu.';
+  }
+
+  @override
+  String get newListTooltip => 'Yeni Liste';
+
+  @override
+  String get noShoppingListsScreenTitle => 'Henüz bir alışveriş listeniz yok';
+
+  @override
+  String get noShoppingListsScreenBody =>
+      'Market veya pazar alışverişlerinizi kolayca planlamak için yeni bir liste oluşturabilirsiniz.';
+
+  @override
+  String listItemsSummary(int total, int bought) {
+    return '$total ürün • $bought alındı';
+  }
+
+  @override
+  String get deleteListTitle => 'Listeyi Sil';
+
+  @override
+  String get deleteListConfirm =>
+      'Bu alışveriş listesini ve içindeki tüm ürünleri silmek istediğinize emin misiniz?';
+
+  @override
+  String get deleteConfirmAction => 'Evet, Sil';
+
+  @override
+  String get listDeleted => 'Liste silindi.';
+
+  @override
+  String get listDetailTitle => 'Liste Detayı';
+
+  @override
+  String get shoppingProgress => 'Alışveriş İlerlemesi';
+
+  @override
+  String progressBought(int bought, int total) {
+    return '$bought / $total Alındı';
+  }
+
+  @override
+  String get noItemsTitle => 'Bu listede henüz ürün yok';
+
+  @override
+  String get noItemsBody =>
+      'Aşağıdaki \"Ürün Ekle\" butonuna dokunarak son tarananlardan veya arama ile ürün ekleyebilirsiniz.';
+
+  @override
+  String get addProduct => 'Ürün Ekle';
+
+  @override
+  String itemAdded(String name) {
+    return '\"$name\" listeye eklendi.';
+  }
+
+  @override
+  String get itemAddFailed => 'Ürün eklenirken bir hata oluştu.';
+
+  @override
+  String get addProductToList => 'Listeye Ürün Ekle';
+
+  @override
+  String get tabRecentScans => 'Son Tarananlar';
+
+  @override
+  String get tabSearchManual => 'Arama & Elle Ekle';
+
+  @override
+  String get noRecentScansTitle => 'Henüz taranmış ürün bulunmuyor.';
+
+  @override
+  String get noRecentScansBody =>
+      'Barkod tarayarak ürün incelediğinizde öneriler burada görünecektir.';
+
+  @override
+  String get manualAddTitle => 'Elle Ürün Adı Gir';
+
+  @override
+  String get manualNameHint => 'Örn: Süt, Elma, Yulaf...';
+
+  @override
+  String get searchByNameTitle => 'Ürün İsmine Göre Ara';
+
+  @override
+  String get searchByNameHint => 'Marka veya ürün adı ara...';
+
+  @override
+  String get medicalDisclaimerShort =>
+      'Bu bilgi tıbbi tavsiye niteliği taşımaz.';
+
+  @override
+  String get optNutsPeanuts => 'Fındık/Fıstık';
+
+  @override
+  String get optVegan => 'Vegan';
+
+  @override
+  String get optVegetarian => 'Vejetaryen';
+
+  @override
+  String get optDiabeticFriendly => 'Diyabet dostu';
+
+  @override
+  String get optAthleteHighProtein => 'Sporcu / Yüksek protein';
+
+  @override
+  String get optLowCarb => 'Düşük karbonhidrat';
+
+  @override
+  String get optGlutenFreeLifestyle => 'Glutensiz yaşam tarzı';
+
+  @override
+  String get optKetogenic => 'Ketojenik';
+
+  @override
+  String get optBloodPressure => 'Tansiyon';
+
+  @override
+  String get optCeliac => 'Çölyak';
+
+  @override
+  String get optHighCholesterol => 'Yüksek kolesterol';
+
+  @override
+  String get optKidneyDisease => 'Böbrek hastalığı';
+
+  @override
+  String get optDiabetesDisease => 'Şeker hastalığı';
+
+  @override
+  String get optHeartCondition => 'Kalp rahatsızlığı';
+
+  @override
+  String get countryTurkiye => 'Türkiye';
+
+  @override
+  String get countryGermany => 'Almanya';
+
+  @override
+  String get countryUk => 'İngiltere';
+
+  @override
+  String get countryUsa => 'ABD';
+
+  @override
+  String get countryNetherlands => 'Hollanda';
+
+  @override
+  String get countryFrance => 'Fransa';
+
+  @override
+  String get fallbackNoExplanationSummary =>
+      'Ürün açıklaması şu an oluşturulamadı.';
+
+  @override
+  String get fallbackNoExplanationDetail =>
+      'Açıklama şu an oluşturulamadı; ürün bilgileri aşağıda.';
+
+  @override
+  String get fallbackProfileConflict =>
+      'Bu üründe profilinle çakışan içerik var; ayrıntılar aşağıda.';
+
+  @override
+  String get fallbackRiskDetected =>
+      'Bu üründe riskli içerik veya alerjen tespit edildi.';
+
+  @override
+  String get fallbackSuitable => 'Bu ürün profilinize uygundur.';
+
+  @override
+  String get fallbackPendingNotice =>
+      'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı. Bilgiler resmi onay beklemektedir.';
 }

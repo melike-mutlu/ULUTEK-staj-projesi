@@ -217,7 +217,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               const SizedBox(height: _sectionGap),
               for (final field in OnboardingField.values) ...<Widget>[
                 ProfileSectionCard(
-                  title: profileSectionTitles[field]!,
+                  title: profileSectionTitle(l10n, field),
+                  labelBuilder: (option) => localizedProfileOption(l10n, option),
                   options: viewModel.optionsFor(field),
                   selected: viewModel.selectionsFor(field),
                   onToggle: (String option) =>
@@ -234,6 +235,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   },
                   isExpanded: _expanded.contains(field),
                   onShowAll: () => setState(() => _expanded.add(field)),
+                  onShowLess: () => setState(() => _expanded.remove(field)),
                 ),
                 const SizedBox(height: _sectionGap),
               ],

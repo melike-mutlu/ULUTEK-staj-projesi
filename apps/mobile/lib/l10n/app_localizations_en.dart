@@ -821,4 +821,261 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allergenSulphites => 'Sulphites';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navChatbot => 'Chatbot';
+
+  @override
+  String get searchProductHint => 'Search products';
+
+  @override
+  String get addOption => 'Add option';
+
+  @override
+  String get addAction => 'Add';
+
+  @override
+  String get countryDialogTitle => 'Country selection';
+
+  @override
+  String get countryDialogHint => 'Enter a country name (e.g. Türkiye)';
+
+  @override
+  String get quickSelect => 'Quick select';
+
+  @override
+  String get profileLoadRetry =>
+      'Could not load your profile. Check your connection and try again.';
+
+  @override
+  String get relativeJustNow => 'Just now';
+
+  @override
+  String relativeMinutesAgo(int count) {
+    return '$count min ago';
+  }
+
+  @override
+  String relativeHoursAgo(int count) {
+    return '$count h ago';
+  }
+
+  @override
+  String get relativeYesterday => 'Yesterday';
+
+  @override
+  String relativeDaysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String get profileSectionAllergies => 'My allergies';
+
+  @override
+  String get profileSectionDiet => 'My diet';
+
+  @override
+  String get profileSectionHealth => 'My health';
+
+  @override
+  String get shoppingListsTitle => 'My shopping lists';
+
+  @override
+  String get seeAllUpper => 'See all';
+
+  @override
+  String get noShoppingListsTitle => 'No lists yet';
+
+  @override
+  String get noShoppingListsPrompt => 'Tap to create your first shopping list';
+
+  @override
+  String get createListTitle => 'Create new list';
+
+  @override
+  String get listNameHint => 'List name (e.g. Weekend market)';
+
+  @override
+  String get createAction => 'Create';
+
+  @override
+  String listCreated(String name) {
+    return 'List \"$name\" created.';
+  }
+
+  @override
+  String get newListTooltip => 'New list';
+
+  @override
+  String get noShoppingListsScreenTitle =>
+      'You don\'t have any shopping lists yet';
+
+  @override
+  String get noShoppingListsScreenBody =>
+      'Create a new list to easily plan your grocery or market shopping.';
+
+  @override
+  String listItemsSummary(int total, int bought) {
+    return '$total items • $bought bought';
+  }
+
+  @override
+  String get deleteListTitle => 'Delete list';
+
+  @override
+  String get deleteListConfirm =>
+      'Are you sure you want to delete this shopping list and all its items?';
+
+  @override
+  String get deleteConfirmAction => 'Yes, delete';
+
+  @override
+  String get listDeleted => 'List deleted.';
+
+  @override
+  String get listDetailTitle => 'List details';
+
+  @override
+  String get shoppingProgress => 'Shopping progress';
+
+  @override
+  String progressBought(int bought, int total) {
+    return '$bought / $total bought';
+  }
+
+  @override
+  String get noItemsTitle => 'No items in this list yet';
+
+  @override
+  String get noItemsBody =>
+      'Tap the \"Add product\" button below to add items from your recent scans or via search.';
+
+  @override
+  String get addProduct => 'Add product';
+
+  @override
+  String itemAdded(String name) {
+    return '\"$name\" added to the list.';
+  }
+
+  @override
+  String get itemAddFailed => 'Something went wrong while adding the product.';
+
+  @override
+  String get addProductToList => 'Add product to list';
+
+  @override
+  String get tabRecentScans => 'Recent scans';
+
+  @override
+  String get tabSearchManual => 'Search & add manually';
+
+  @override
+  String get noRecentScansTitle => 'No scanned products yet.';
+
+  @override
+  String get noRecentScansBody =>
+      'When you scan a barcode to review a product, suggestions will appear here.';
+
+  @override
+  String get manualAddTitle => 'Enter product name manually';
+
+  @override
+  String get manualNameHint => 'e.g. Milk, Apple, Oats...';
+
+  @override
+  String get searchByNameTitle => 'Search by product name';
+
+  @override
+  String get searchByNameHint => 'Search by brand or product name...';
+
+  @override
+  String get medicalDisclaimerShort =>
+      'This information is not medical advice.';
+
+  @override
+  String get optNutsPeanuts => 'Nuts / Peanuts';
+
+  @override
+  String get optVegan => 'Vegan';
+
+  @override
+  String get optVegetarian => 'Vegetarian';
+
+  @override
+  String get optDiabeticFriendly => 'Diabetic-friendly';
+
+  @override
+  String get optAthleteHighProtein => 'Athlete / High protein';
+
+  @override
+  String get optLowCarb => 'Low carb';
+
+  @override
+  String get optGlutenFreeLifestyle => 'Gluten-free lifestyle';
+
+  @override
+  String get optKetogenic => 'Ketogenic';
+
+  @override
+  String get optBloodPressure => 'Blood pressure';
+
+  @override
+  String get optCeliac => 'Celiac';
+
+  @override
+  String get optHighCholesterol => 'High cholesterol';
+
+  @override
+  String get optKidneyDisease => 'Kidney disease';
+
+  @override
+  String get optDiabetesDisease => 'Diabetes';
+
+  @override
+  String get optHeartCondition => 'Heart condition';
+
+  @override
+  String get countryTurkiye => 'Türkiye';
+
+  @override
+  String get countryGermany => 'Germany';
+
+  @override
+  String get countryUk => 'United Kingdom';
+
+  @override
+  String get countryUsa => 'United States';
+
+  @override
+  String get countryNetherlands => 'Netherlands';
+
+  @override
+  String get countryFrance => 'France';
+
+  @override
+  String get fallbackNoExplanationSummary =>
+      'A product explanation isn\'t available right now.';
+
+  @override
+  String get fallbackNoExplanationDetail =>
+      'No explanation right now — the product details are below.';
+
+  @override
+  String get fallbackProfileConflict =>
+      'This product has content that conflicts with your profile; details below.';
+
+  @override
+  String get fallbackRiskDetected =>
+      'Risky content or an allergen was detected in this product.';
+
+  @override
+  String get fallbackSuitable => 'This product suits your profile.';
+
+  @override
+  String get fallbackPendingNotice =>
+      'This product was added by the community and isn\'t verified yet. The information is awaiting official confirmation.';
 }

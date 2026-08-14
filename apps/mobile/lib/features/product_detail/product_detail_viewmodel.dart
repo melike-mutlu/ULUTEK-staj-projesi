@@ -364,7 +364,6 @@ class ProductDetailViewModel extends ChangeNotifier {
       warningMessage: rule.hasConflict
           ? 'Bu üründe riskli içerik veya alerjen tespit edildi.'
           : 'Bu ürün profilinize uygundur.',
-      disclaimer: 'Bu bilgi tıbbi tavsiye niteliği taşımaz.',
     );
   }
 

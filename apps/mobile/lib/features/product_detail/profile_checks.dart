@@ -1,4 +1,5 @@
 import '../../core/constants/allergen_catalog.dart';
+import 'explanation_fallbacks.dart';
 import '../../core/models/explanation.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/models/user_profile.dart';
@@ -199,9 +200,8 @@ List<ReasonSpan> personalReasonSpans({
 
   if (spans.isEmpty) {
     final fallback = explanation.warningMessage.trim();
-    return [
-      ReasonSpan(fallback.isNotEmpty ? fallback : explanation.summary),
-    ];
+    final text = fallback.isNotEmpty ? fallback : explanation.summary;
+    return [ReasonSpan(localizeExplanationFallback(l10n, text))];
   }
 
   return spans;

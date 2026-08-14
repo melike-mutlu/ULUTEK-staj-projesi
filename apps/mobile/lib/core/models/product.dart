@@ -45,6 +45,11 @@ class Product {
   final String? brand;
   final String? imageUrl;
   final String ingredientsText;
+
+  /// English ingredients, filled by the backend (`ingredients_text_en` column).
+  /// Null/empty until the backend populates it; [ingredientsTextFor] then falls
+  /// back to the default [ingredientsText].
+  final String? ingredientsTextEn;
   final List<String> additives;
   final List<String> allergensTags;
   final Nutriments nutriments;
@@ -60,6 +65,7 @@ class Product {
     this.brand,
     this.imageUrl,
     required this.ingredientsText,
+    this.ingredientsTextEn,
     required this.additives,
     required this.allergensTags,
     required this.nutriments,
@@ -67,6 +73,15 @@ class Product {
     this.status,
     bool? isPending,
   }) : isPending = isPending ?? (status == 'PENDING');
+
+  /// Ingredients text for the given [localeName] (e.g. `l10n.localeName`):
+  /// the English column for English UIs when available, otherwise the default.
+  String ingredientsTextFor(String localeName) {
+    final wantsEnglish = localeName.toLowerCase().startsWith('en');
+    final en = ingredientsTextEn?.trim() ?? '';
+    if (wantsEnglish && en.isNotEmpty) return en;
+    return ingredientsText;
+  }
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final statusVal = json['status'] as String?;
@@ -84,6 +99,7 @@ class Product {
           json['image_url_small'] as String? ??
           json['image_front_small_url'] as String?,
       ingredientsText: json['ingredients_text'] as String? ?? '',
+      ingredientsTextEn: json['ingredients_text_en'] as String?,
       additives: (json['additives'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList(),
@@ -107,6 +123,7 @@ class Product {
       'brand': brand,
       if (imageUrl != null) 'image_url': imageUrl,
       'ingredients_text': ingredientsText,
+      if (ingredientsTextEn != null) 'ingredients_text_en': ingredientsTextEn,
       'additives': additives,
       'allergens_tags': allergensTags,
       'nutriments': {

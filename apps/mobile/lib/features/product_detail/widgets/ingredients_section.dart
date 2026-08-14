@@ -34,7 +34,9 @@ class _IngredientsSectionState extends State<IngredientsSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = widget.product.ingredientsText.trim();
+    // Localized ingredients: the English column when the UI is English and the
+    // backend has filled it, otherwise the default (Turkish) text.
+    final text = widget.product.ingredientsTextFor(l10n.localeName).trim();
     final additives = widget.product.additives;
 
     if (text.isEmpty && additives.isEmpty) return const SizedBox.shrink();

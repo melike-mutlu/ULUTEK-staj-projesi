@@ -5,6 +5,7 @@ import '../../core/navigation/app_routes.dart';
 import '../../core/supabase_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/repositories/profile_repository.dart';
+import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/error_state_view.dart';
 import 'startup_destination.dart';
 
@@ -60,15 +61,15 @@ class _StartupGateState extends ConsumerState<StartupGate> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: _failed
             ? ErrorStateView(
-                message: 'Profilin yüklenemedi. Bağlantını kontrol edip '
-                    'tekrar dene.',
+                message: l10n.profileLoadRetry,
                 onRetry: _decide,
-                secondaryLabel: 'Çıkış yap',
+                secondaryLabel: l10n.signOut,
                 onSecondary: _signOut,
               )
             : const Center(child: CircularProgressIndicator()),

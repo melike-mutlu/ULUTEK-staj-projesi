@@ -60,6 +60,7 @@ Widget _shellUnderTest() {
       chatbotRepositoryProvider.overrideWithValue(_FakeChatbotRepository()),
     ],
     child: const MaterialApp(
+      locale: Locale('tr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: ShellView(),

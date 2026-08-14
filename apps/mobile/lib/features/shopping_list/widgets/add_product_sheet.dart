@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../search/search_viewmodel.dart';
 import '../shopping_list_viewmodel.dart';
 
@@ -74,10 +75,11 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
       _isSubmitting = false;
     });
 
+    final l10n = AppLocalizations.of(context);
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('"$name" listeye eklendi.'),
+          content: Text(l10n.itemAdded(name)),
           backgroundColor: AppColors.brand,
           duration: const Duration(seconds: 2),
         ),
@@ -85,8 +87,8 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ürün eklenirken bir hata oluştu.'),
+        SnackBar(
+          content: Text(l10n.itemAddFailed),
           backgroundColor: AppColors.warning,
         ),
       );
@@ -95,6 +97,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final vm = ref.watch(shoppingListViewModelProvider);
@@ -132,7 +135,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Listeye Ürün Ekle',
+                  l10n.addProductToList,
                   style: AppTextStyles.title.copyWith(
                     color: textColor,
                     fontSize: 20,
@@ -153,14 +156,14 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
             indicatorColor: AppColors.brand,
             labelColor: AppColors.brand,
             unselectedLabelColor: secondaryTextColor,
-            tabs: const [
+            tabs: [
               Tab(
-                icon: Icon(Icons.history_rounded, size: 20),
-                text: 'Son Tarananlar',
+                icon: const Icon(Icons.history_rounded, size: 20),
+                text: l10n.tabRecentScans,
               ),
               Tab(
-                icon: Icon(Icons.search_rounded, size: 20),
-                text: 'Arama & Elle Ekle',
+                icon: const Icon(Icons.search_rounded, size: 20),
+                text: l10n.tabSearchManual,
               ),
             ],
           ),
@@ -202,6 +205,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
     Color borderColor,
     bool isDark,
   ) {
+    final l10n = AppLocalizations.of(context);
     if (vm.isLoadingRecentScans) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.brand),
@@ -218,13 +222,13 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
               Icon(Icons.qr_code_scanner_rounded, size: 48, color: secondaryTextColor),
               const SizedBox(height: 12),
               Text(
-                'Henüz taranmış ürün bulunmuyor.',
+                l10n.noRecentScansTitle,
                 style: AppTextStyles.title.copyWith(color: secondaryTextColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 6),
               Text(
-                'Barkod tarayarak ürün incelediğinizde öneriler burada görünecektir.',
+                l10n.noRecentScansBody,
                 style: AppTextStyles.caption.copyWith(color: secondaryTextColor),
                 textAlign: TextAlign.center,
               ),
@@ -240,7 +244,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final entry = vm.recentScans[index];
-        final name = entry.productName ?? 'Barkod: ${entry.barcode}';
+        final name = entry.productName ?? l10n.barcodeLabel(entry.barcode);
 
         return Material(
           color: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceMuted,
@@ -286,7 +290,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Barkod: ${entry.barcode}',
+                          l10n.barcodeLabel(entry.barcode),
                           style: AppTextStyles.caption.copyWith(
                             color: secondaryTextColor,
                           ),
@@ -301,14 +305,14 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
                       color: AppColors.brand,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.add_rounded, color: Colors.white, size: 16),
-                        SizedBox(width: 4),
+                        const Icon(Icons.add_rounded, color: Colors.white, size: 16),
+                        const SizedBox(width: 4),
                         Text(
-                          'Ekle',
-                          style: TextStyle(
+                          l10n.addAction,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
@@ -333,6 +337,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
     Color borderColor,
     bool isDark,
   ) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -340,7 +345,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
         children: [
           // Manuel Ürün Ekleme Kartı
           Text(
-            'Elle Ürün Adı Gir',
+            l10n.manualAddTitle,
             style: AppTextStyles.title.copyWith(
               color: textColor,
               fontWeight: FontWeight.bold,
@@ -352,9 +357,9 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
               Expanded(
                 child: TextField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    hintText: 'Örn: Süt, Elma, Yulaf...',
-                    prefixIcon: Icon(Icons.shopping_bag_outlined),
+                  decoration: InputDecoration(
+                    hintText: l10n.manualNameHint,
+                    prefixIcon: const Icon(Icons.shopping_bag_outlined),
                   ),
                   onSubmitted: (val) => _addItem(name: val),
                 ),
@@ -377,7 +382,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
                         height: 20,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
-                    : const Text('Ekle', style: TextStyle(color: Colors.white)),
+                    : Text(l10n.addAction, style: const TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -387,7 +392,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
 
           // Ürün İsmiyle Canlı Arama
           Text(
-            'Ürün İsmine Göre Ara',
+            l10n.searchByNameTitle,
             style: AppTextStyles.title.copyWith(
               color: textColor,
               fontWeight: FontWeight.bold,
@@ -398,7 +403,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
             controller: _searchController,
             onChanged: (val) => searchVm.onQueryChanged(val),
             decoration: InputDecoration(
-              hintText: 'Marka veya ürün adı ara...',
+              hintText: l10n.searchByNameHint,
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -531,7 +536,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Text(
-                  'Aramaya uygun ürün bulunamadı.',
+                  l10n.searchNoResults,
                   style: TextStyle(color: secondaryTextColor),
                 ),
               ),

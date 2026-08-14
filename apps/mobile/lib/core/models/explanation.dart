@@ -17,6 +17,9 @@ class Explanation {
   final WarningLevel level;
   final String warningMessage;
   final String? dietNote;
+
+  /// Legacy field kept only for backend/JSON compatibility; the UI now renders
+  /// a localized disclaimer instead of this text (see WarningBanner).
   final String disclaimer;
 
   const Explanation({
@@ -24,7 +27,7 @@ class Explanation {
     required this.level,
     required this.warningMessage,
     this.dietNote,
-    required this.disclaimer,
+    this.disclaimer = '',
   });
 
   factory Explanation.fromJson(Map<String, dynamic> json) {
