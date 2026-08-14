@@ -9,6 +9,7 @@ import 'package:akilli_sepet/data/repositories/scan_history_repository.dart';
 import 'package:akilli_sepet/features/chatbot/chatbot_view.dart';
 import 'package:akilli_sepet/features/home/home_view.dart';
 import 'package:akilli_sepet/l10n/app_localizations.dart';
+import 'package:akilli_sepet/shared/services/image_picker_service.dart';
 import 'package:akilli_sepet/shared/widgets/user_avatar_circle.dart';
 
 class _FakeScanHistoryRepository implements ScanHistoryRepository {
@@ -28,7 +29,8 @@ class _FakeScanHistoryRepository implements ScanHistoryRepository {
 /// gercek kurucu Supabase istemcisi ister; testte Supabase hic baslatilmiyor.
 class _FakeChatbotRepository implements ChatbotRepository {
   @override
-  Future<ChatbotResponse> sendMessage(String userMessage, {String? sessionId}) async =>
+  Future<ChatbotResponse> sendMessage(String userMessage,
+          {String? sessionId, PickedImage? image}) async =>
       ChatbotResponse(reply: 'test yaniti');
 }
 

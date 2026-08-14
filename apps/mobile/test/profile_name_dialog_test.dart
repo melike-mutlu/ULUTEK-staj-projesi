@@ -9,6 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 class _NoopImagePickerService implements ImagePickerService {
   @override
   Future<PickedImage?> pickFromGallery() async => null;
+
+  @override
+  Future<PickedImage?> pickFromCamera() async => null;
 }
 
 Widget _profileUnderTest(ProfileRepository repository) {
