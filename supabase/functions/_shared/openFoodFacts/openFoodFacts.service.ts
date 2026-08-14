@@ -29,14 +29,16 @@ export interface OffProduct {
   image_url: string | null; //  1. Arayüze eklendi
 }
 function categoryToSearchTerm(category: string): string {
-  const tag = category.replace(/^en:/, "");
+  const tag = category
+    .replace(/^[a-z]{2}:/, "") // en:, fr:, de:, es: vb. kaldır
+    .replace(/-/g, " ");
 
-  if (tag.includes("crispbread")) return "crispbreads";
-  if (tag.includes("cracker")) return "crackers";
-  if (tag.includes("crisps")) return "crisps";
-  if (tag.includes("bread")) return "breads";
+  if (tag.toLowerCase().includes("crispbread")) return "crispbreads";
+  if (tag.toLowerCase().includes("cracker")) return "crackers";
+  if (tag.toLowerCase().includes("crisps")) return "crisps";
+  if (tag.toLowerCase().includes("bread")) return "breads";
 
-  return tag.replace(/-/g, " ");
+  return tag;
 }
 
 export async function fetchFromOpenFoodFacts(barcode: string): Promise<OffProduct | null> {
