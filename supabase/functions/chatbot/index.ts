@@ -5,8 +5,10 @@ import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 import { buildSystemPromptWithProfile } from "../_shared/system_prompt.ts";
 import { saveMessage, getConversationHistory, type ChatMessage } from "../_shared/chatHistory.ts";
 import { getUserHealthProfile } from "../_shared/userProfile.service.ts";
+import { type InlineImageData } from "../_shared/visionExtract.ts";
 
-// v2: kullanıcı mesajı + sohbet geçmişi + kullanıcı profili -> kişiselleştirilmiş cevap.
+// v3: kullanıcı mesajı + opsiyonel fotoğraf (base64) + sohbet geçmişi + kullanıcı profili
+//     -> kişiselleştirilmiş, multimodal cevap.
 // Kullanıcı ve asistan mesajları chat_history tablosuna kaydediliyor.
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -35,11 +37,24 @@ Deno.serve(async (req) => {
         { status: "error", message: "Bu özellik yalnızca premium kullanıcılar içindir" },
         403,
       );
-    }  
+    }
 
-    const { user_message, session_id } = await req.json();
+    const body = await req.json();
+    const { user_message, session_id, image_base64, mime_type } = body;
+
     if (typeof user_message !== "string" || user_message.trim().length === 0) {
       return jsonResponse({ status: "error", message: "user_message zorunludur" }, 400);
+    }
+
+    // Opsiyonel inline fotoğraf — mobil taraf base64 + mime_type gönderebilir.
+    let inlineImage: InlineImageData | null = null;
+    if (typeof image_base64 === "string" && image_base64.length > 0) {
+      inlineImage = {
+        mime_type: typeof mime_type === "string" && mime_type.length > 0
+          ? mime_type
+          : "image/jpeg",
+        data: image_base64,
+      };
     }
 
     // session_id istekte yoksa yeni bir oturum başlat.
@@ -53,8 +68,15 @@ Deno.serve(async (req) => {
     // 2) Önceki sohbet geçmişini çek (aynı oturumdan) — henüz bu mesajı içermiyor.
     const history = await getConversationHistory(serviceClient, user.id, sessionId);
 
-    // 3) Kullanıcı mesajını kaydet
-    await saveMessage(serviceClient, user.id, sessionId, user_message.trim(), "user");
+    // 3) Kullanıcı mesajını kaydet; fotoğraf geldiyse metadata'ya işaretle.
+    await saveMessage(
+      serviceClient,
+      user.id,
+      sessionId,
+      user_message.trim(),
+      "user",
+      inlineImage ? { has_image: true, mime_type: inlineImage.mime_type } : {},
+    );
 
     // 4) Profil bilgisiyle zenginleştirilmiş sistem promptu oluştur
     const systemPrompt = buildSystemPromptWithProfile({
@@ -65,7 +87,7 @@ Deno.serve(async (req) => {
 
     const apiKey = Deno.env.get("LLM_API_KEY");
     const reply = apiKey
-      ? await callChatbotLlm(user_message.trim(), history, systemPrompt, apiKey)
+      ? await callChatbotLlm(user_message.trim(), history, systemPrompt, apiKey, inlineImage)
       : "Şu an yapay zeka asistanı yapılandırılmamış (LLM_API_KEY eksik). Lütfen daha sonra tekrar dene.";
 
     // 5) Asistan cevabını kaydet
@@ -83,8 +105,10 @@ async function callChatbotLlm(
   history: ChatMessage[],
   systemPrompt: string,
   apiKey: string,
+  /** Opsiyonel inline fotoğraf — visionExtract.ts'teki InlineImageData formatı */
+  inlineImage: InlineImageData | null = null,
 ): Promise<string> {
-  const model = "gemini-3.6-flash"; 
+  const model = "gemini-3.6-flash";
 
   // Geçmiş mesajları Gemini formatına çevir. Gemini'de rol adı "assistant"
   // değil "model" olmalı.
@@ -94,6 +118,21 @@ async function callChatbotLlm(
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: m.message }],
     }));
+
+  // Güncel kullanıcı mesajının part'larını oluştur.
+  // Fotoğraf varsa önce resmi, ardından metin mesajını ekle (Gemini önerisi).
+  const currentUserParts: Record<string, unknown>[] = [];
+
+  if (inlineImage) {
+    currentUserParts.push({
+      inline_data: {
+        mime_type: inlineImage.mime_type,
+        data: inlineImage.data,
+      },
+    });
+  }
+
+  currentUserParts.push({ text: userMessage });
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -106,7 +145,7 @@ async function callChatbotLlm(
         },
         contents: [
           ...historyContents,
-          { role: "user", parts: [{ text: userMessage }] },
+          { role: "user", parts: currentUserParts },
         ],
         generationConfig: {
           temperature: 0.4,
