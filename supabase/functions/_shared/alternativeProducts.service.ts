@@ -47,7 +47,7 @@ function calculateJaccardSimilarity(
 function isSafeAlternative(ruleResult: any): boolean {
   if (!ruleResult) return false;
   if (ruleResult.data_sufficiency === "insufficient") return false;
-  return !ruleResult.has_conflict && !ruleResult.hasConflict;
+  return !ruleResult.has_conflict;
 }
 
 export async function findSafeAlternatives(
