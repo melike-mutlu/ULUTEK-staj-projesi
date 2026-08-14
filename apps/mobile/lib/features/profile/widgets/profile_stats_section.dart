@@ -41,7 +41,7 @@ class _ProfileStatsSectionState extends ConsumerState<ProfileStatsSection> {
     if (stats == null) return const SizedBox.shrink();
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Expanded(
           child: _StatTile(

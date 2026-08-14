@@ -15,7 +15,7 @@ const Map<String, String> _legacyDietLabels = <String, String>{
 /// Okuma tarafı hem diziyi hem de eski tekil string'i kabul eder.
 /// `standard` "tercih yok" demekti, listeye alınmaz.
 List<String> _parseDietPreferences(dynamic value) {
-  final List<dynamic> raw;
+  List<dynamic> raw;
   if (value == null) {
     return const <String>[];
   } else if (value is List) {
@@ -24,10 +24,34 @@ List<String> _parseDietPreferences(dynamic value) {
     raw = <dynamic>[value];
   }
 
+  // PostgREST normalde text[] sütununu gerçek JSON dizisi döndürür; ama bazı
+  // satırlarda değer tek bir Postgres array literal string'i olarak geldi
+  // (ör. '{"a","b"}') — bunu tek eleman sanıp olduğu gibi göstermek yerine
+  // açıp tek tek elemanlara ayırıyoruz.
+  if (raw.length == 1 && raw.single is String) {
+    final single = raw.single as String;
+    if (single.startsWith('{') && single.endsWith('}')) {
+      raw = _unwrapPostgresArrayLiteral(single);
+    }
+  }
+
   return raw
       .whereType<String>()
       .where((String e) => e != 'standard')
       .map((String e) => _legacyDietLabels[e] ?? e)
+      .toList();
+}
+
+/// `{"a","b, c","d"}` gibi bir Postgres array literal string'ini elemanlarına
+/// ayırır. Tırnaklı parçalardaki virgülleri korur.
+List<String> _unwrapPostgresArrayLiteral(String literal) {
+  final inner = literal.substring(1, literal.length - 1);
+  if (inner.isEmpty) return const <String>[];
+
+  final matches = RegExp(r'"((?:[^"\\]|\\.)*)"|([^,]+)').allMatches(inner);
+  return matches
+      .map((m) => (m.group(1) ?? m.group(2) ?? '').trim())
+      .where((e) => e.isNotEmpty)
       .toList();
 }
 

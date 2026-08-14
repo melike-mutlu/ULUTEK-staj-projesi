@@ -67,6 +67,20 @@ void main() {
     expect(profile.dietPreferences, <String>['Vegan']);
   });
 
+  test('postgres array literal string olarak gelen deger acilir', () {
+    final profile = UserProfile.fromJson(<String, dynamic>{
+      'user_id': 'u1',
+      'allergies': <String>[],
+      'diet_preference': '{"Sporcu / Yuksek protein","Dusuk karbonhidrat"}',
+      'health_conditions': <String>[],
+    });
+
+    expect(
+      profile.dietPreferences,
+      <String>['Sporcu / Yuksek protein', 'Dusuk karbonhidrat'],
+    );
+  });
+
   test('standard "tercih yok" demek, listeye alinmaz', () {
     final profile = UserProfile.fromJson(<String, dynamic>{
       'user_id': 'u1',

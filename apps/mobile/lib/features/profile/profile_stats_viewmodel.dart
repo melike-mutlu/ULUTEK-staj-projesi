@@ -17,6 +17,8 @@ class ProfileStatsViewModel extends ChangeNotifier {
   ProfileStats? _stats;
   ProfileStats? get stats => _stats;
 
+  bool _disposed = false;
+
   Future<void> load() async {
     _isLoading = true;
     notifyListeners();
@@ -30,7 +32,14 @@ class ProfileStatsViewModel extends ChangeNotifier {
     }
 
     _isLoading = false;
-    notifyListeners();
+    // autoDispose provider: user can navigate away before fetch() resolves.
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }
 
