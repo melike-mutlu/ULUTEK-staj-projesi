@@ -2035,6 +2035,42 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Fransa'**
   String get countryFrance;
+
+  /// Shown when the AI explanation could not be generated (summary).
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün açıklaması şu an oluşturulamadı.'**
+  String get fallbackNoExplanationSummary;
+
+  /// Neutral fallback when the AI explanation is unavailable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama şu an oluşturulamadı; ürün bilgileri aşağıda.'**
+  String get fallbackNoExplanationDetail;
+
+  /// Fallback warning when the product conflicts with the profile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üründe profilinle çakışan içerik var; ayrıntılar aşağıda.'**
+  String get fallbackProfileConflict;
+
+  /// Deterministic fallback: a risk/allergen was detected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu üründe riskli içerik veya alerjen tespit edildi.'**
+  String get fallbackRiskDetected;
+
+  /// Deterministic fallback: the product suits the profile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün profilinize uygundur.'**
+  String get fallbackSuitable;
+
+  /// Notice for community-added, unverified products.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı. Bilgiler resmi onay beklemektedir.'**
+  String get fallbackPendingNotice;
 }
 
 class _AppLocalizationsDelegate

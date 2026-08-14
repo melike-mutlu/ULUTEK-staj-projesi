@@ -1013,5 +1013,17 @@
   "countryNetherlands": "Hollanda",
   "@countryNetherlands": { "description": "Quick-select country: Netherlands." },
   "countryFrance": "Fransa",
-  "@countryFrance": { "description": "Quick-select country: France." }
+  "@countryFrance": { "description": "Quick-select country: France." },
+  "fallbackNoExplanationSummary": "Ürün açıklaması şu an oluşturulamadı.",
+  "@fallbackNoExplanationSummary": { "description": "Shown when the AI explanation could not be generated (summary)." },
+  "fallbackNoExplanationDetail": "Açıklama şu an oluşturulamadı; ürün bilgileri aşağıda.",
+  "@fallbackNoExplanationDetail": { "description": "Neutral fallback when the AI explanation is unavailable." },
+  "fallbackProfileConflict": "Bu üründe profilinle çakışan içerik var; ayrıntılar aşağıda.",
+  "@fallbackProfileConflict": { "description": "Fallback warning when the product conflicts with the profile." },
+  "fallbackRiskDetected": "Bu üründe riskli içerik veya alerjen tespit edildi.",
+  "@fallbackRiskDetected": { "description": "Deterministic fallback: a risk/allergen was detected." },
+  "fallbackSuitable": "Bu ürün profilinize uygundur.",
+  "@fallbackSuitable": { "description": "Deterministic fallback: the product suits the profile." },
+  "fallbackPendingNotice": "Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı. Bilgiler resmi onay beklemektedir.",
+  "@fallbackPendingNotice": { "description": "Notice for community-added, unverified products." }
 }

@@ -1055,4 +1055,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get countryFrance => 'France';
+
+  @override
+  String get fallbackNoExplanationSummary =>
+      'A product explanation isn\'t available right now.';
+
+  @override
+  String get fallbackNoExplanationDetail =>
+      'No explanation right now — the product details are below.';
+
+  @override
+  String get fallbackProfileConflict =>
+      'This product has content that conflicts with your profile; details below.';
+
+  @override
+  String get fallbackRiskDetected =>
+      'Risky content or an allergen was detected in this product.';
+
+  @override
+  String get fallbackSuitable => 'This product suits your profile.';
+
+  @override
+  String get fallbackPendingNotice =>
+      'This product was added by the community and isn\'t verified yet. The information is awaiting official confirmation.';
 }

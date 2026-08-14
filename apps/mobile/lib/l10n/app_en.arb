@@ -322,5 +322,11 @@
   "countryUk": "United Kingdom",
   "countryUsa": "United States",
   "countryNetherlands": "Netherlands",
-  "countryFrance": "France"
+  "countryFrance": "France",
+  "fallbackNoExplanationSummary": "A product explanation isn't available right now.",
+  "fallbackNoExplanationDetail": "No explanation right now — the product details are below.",
+  "fallbackProfileConflict": "This product has content that conflicts with your profile; details below.",
+  "fallbackRiskDetected": "Risky content or an allergen was detected in this product.",
+  "fallbackSuitable": "This product suits your profile.",
+  "fallbackPendingNotice": "This product was added by the community and isn't verified yet. The information is awaiting official confirmation."
 }

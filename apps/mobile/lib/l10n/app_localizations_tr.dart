@@ -1047,4 +1047,27 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get countryFrance => 'Fransa';
+
+  @override
+  String get fallbackNoExplanationSummary =>
+      'Ürün açıklaması şu an oluşturulamadı.';
+
+  @override
+  String get fallbackNoExplanationDetail =>
+      'Açıklama şu an oluşturulamadı; ürün bilgileri aşağıda.';
+
+  @override
+  String get fallbackProfileConflict =>
+      'Bu üründe profilinle çakışan içerik var; ayrıntılar aşağıda.';
+
+  @override
+  String get fallbackRiskDetected =>
+      'Bu üründe riskli içerik veya alerjen tespit edildi.';
+
+  @override
+  String get fallbackSuitable => 'Bu ürün profilinize uygundur.';
+
+  @override
+  String get fallbackPendingNotice =>
+      'Bu ürün topluluk tarafından eklendi, henüz doğrulanmadı. Bilgiler resmi onay beklemektedir.';
 }
