@@ -265,5 +265,8 @@
   "relativeMinutesAgo": "{count} min ago",
   "relativeHoursAgo": "{count} h ago",
   "relativeYesterday": "Yesterday",
-  "relativeDaysAgo": "{count} days ago"
+  "relativeDaysAgo": "{count} days ago",
+  "profileSectionAllergies": "My allergies",
+  "profileSectionDiet": "My diet",
+  "profileSectionHealth": "My health"
 }

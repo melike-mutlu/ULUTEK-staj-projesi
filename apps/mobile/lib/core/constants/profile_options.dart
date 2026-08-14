@@ -1,3 +1,5 @@
+import '../../l10n/app_localizations.dart';
+
 /// Profilde hangi alanı doldurduğumuz. UserProfile alan adlarıyla eşleşir.
 enum OnboardingField { allergies, diet, health }
 
@@ -37,13 +39,18 @@ const Map<OnboardingField, List<String>> profileOptions =
   ],
 };
 
-/// Card titles on the profile screen — short form of onboarding's questions.
-const Map<OnboardingField, String> profileSectionTitles =
-    <OnboardingField, String>{
-  OnboardingField.allergies: 'Alerjilerim',
-  OnboardingField.diet: 'Beslenme düzenim',
-  OnboardingField.health: 'Sağlık durumum',
-};
+/// Localized card title on the profile screen — short form of onboarding's
+/// question for the given field.
+String profileSectionTitle(AppLocalizations l10n, OnboardingField field) {
+  switch (field) {
+    case OnboardingField.allergies:
+      return l10n.profileSectionAllergies;
+    case OnboardingField.diet:
+      return l10n.profileSectionDiet;
+    case OnboardingField.health:
+      return l10n.profileSectionHealth;
+  }
+}
 
 /// Onboarding'de alan başına sorulan soru.
 const Map<OnboardingField, String> profileQuestions = <OnboardingField, String>{

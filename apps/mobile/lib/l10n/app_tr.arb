@@ -899,5 +899,11 @@
   "relativeYesterday": "dün",
   "@relativeYesterday": { "description": "Relative time for the previous day." },
   "relativeDaysAgo": "{count} gün önce",
-  "@relativeDaysAgo": { "description": "Relative time in days.", "placeholders": { "count": { "type": "int" } } }
+  "@relativeDaysAgo": { "description": "Relative time in days.", "placeholders": { "count": { "type": "int" } } },
+  "profileSectionAllergies": "Alerjilerim",
+  "@profileSectionAllergies": { "description": "Profile card title for the user's allergies." },
+  "profileSectionDiet": "Beslenme düzenim",
+  "@profileSectionDiet": { "description": "Profile card title for the user's diet." },
+  "profileSectionHealth": "Sağlık durumum",
+  "@profileSectionHealth": { "description": "Profile card title for the user's health conditions." }
 }

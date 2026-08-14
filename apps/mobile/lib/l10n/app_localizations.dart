@@ -1693,6 +1693,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'{count} gün önce'**
   String relativeDaysAgo(int count);
+
+  /// Profile card title for the user's allergies.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alerjilerim'**
+  String get profileSectionAllergies;
+
+  /// Profile card title for the user's diet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Beslenme düzenim'**
+  String get profileSectionDiet;
+
+  /// Profile card title for the user's health conditions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sağlık durumum'**
+  String get profileSectionHealth;
 }
 
 class _AppLocalizationsDelegate

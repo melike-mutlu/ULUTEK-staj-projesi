@@ -862,4 +862,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String relativeDaysAgo(int count) {
     return '$count gün önce';
   }
+
+  @override
+  String get profileSectionAllergies => 'Alerjilerim';
+
+  @override
+  String get profileSectionDiet => 'Beslenme düzenim';
+
+  @override
+  String get profileSectionHealth => 'Sağlık durumum';
 }
