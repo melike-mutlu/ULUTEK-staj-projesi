@@ -13,7 +13,8 @@ export interface HealthImplication {
 
 export const DIABETES_SUGAR_LIMIT = 15;
 export const SALT_LIMIT = 1.5;
-export const SATURATED_FAT_LIMIT = 5;
+export const TOTAL_FAT_LIMIT = 15;
+export const SATURATED_FAT_LIMIT = 3;
 
 export const HEALTH_IMPLICATIONS: Record<string, HealthImplication> = {
   "çölyak": {
@@ -36,16 +37,20 @@ export const HEALTH_IMPLICATIONS: Record<string, HealthImplication> = {
     nutrient: { field: "salt_100g", max: SALT_LIMIT },
   },
 
-  "yüksek kolesterol": {
-    nutrient: { field: "saturated_fat_100g", max: SATURATED_FAT_LIMIT },
-  },
+ "yüksek kolesterol": {
+  nutrients: [
+    { field: "fat_100g", max: TOTAL_FAT_LIMIT },
+    { field: "saturated_fat_100g", max: SATURATED_FAT_LIMIT },
+  ],
+},
 
   "kalp rahatsızlığı": {
-    nutrients: [
-      { field: "salt_100g", max: SALT_LIMIT },
-      { field: "saturated_fat_100g", max: SATURATED_FAT_LIMIT },
-    ],
-  },
+  nutrients: [
+    { field: "salt_100g", max: SALT_LIMIT },
+    { field: "fat_100g", max: TOTAL_FAT_LIMIT },
+    { field: "saturated_fat_100g", max: SATURATED_FAT_LIMIT },
+  ],
+},
 
   "böbrek hastalığı": {
     nutrient: { field: "salt_100g", max: SALT_LIMIT },
