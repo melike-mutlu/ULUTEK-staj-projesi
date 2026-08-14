@@ -1037,4 +1037,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get optHeartCondition => 'Heart condition';
+
+  @override
+  String get countryTurkiye => 'Türkiye';
+
+  @override
+  String get countryGermany => 'Germany';
+
+  @override
+  String get countryUk => 'United Kingdom';
+
+  @override
+  String get countryUsa => 'United States';
+
+  @override
+  String get countryNetherlands => 'Netherlands';
+
+  @override
+  String get countryFrance => 'France';
 }

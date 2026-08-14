@@ -16,6 +16,7 @@ class ProfileSectionCard extends StatelessWidget {
     required this.onToggle,
     required this.isExpanded,
     required this.onShowAll,
+    this.onShowLess,
     this.onAddCustom,
     this.canAddCustom = true,
     this.labelBuilder,
@@ -32,6 +33,9 @@ class ProfileSectionCard extends StatelessWidget {
   /// Whether the card is expanded — collapsed shows only [_collapsedCount].
   final bool isExpanded;
   final VoidCallback onShowAll;
+
+  /// Collapses an expanded card; when null the reveal is one-way.
+  final VoidCallback? onShowLess;
 
   /// When null the "+" chip is hidden.
   final ValueChanged<String>? onAddCustom;
@@ -71,6 +75,7 @@ class ProfileSectionCard extends StatelessWidget {
         labelBuilder: labelBuilder,
         visibleCount: isExpanded ? null : _collapsedCount,
         onShowAll: onShowAll,
+        onShowLess: onShowLess,
       ),
     );
   }

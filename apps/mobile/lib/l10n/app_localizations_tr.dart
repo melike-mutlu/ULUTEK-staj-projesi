@@ -1029,4 +1029,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get optHeartCondition => 'Kalp rahatsızlığı';
+
+  @override
+  String get countryTurkiye => 'Türkiye';
+
+  @override
+  String get countryGermany => 'Almanya';
+
+  @override
+  String get countryUk => 'İngiltere';
+
+  @override
+  String get countryUsa => 'ABD';
+
+  @override
+  String get countryNetherlands => 'Hollanda';
+
+  @override
+  String get countryFrance => 'Fransa';
 }

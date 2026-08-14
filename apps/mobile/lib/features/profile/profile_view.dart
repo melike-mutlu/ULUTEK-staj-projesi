@@ -235,6 +235,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   },
                   isExpanded: _expanded.contains(field),
                   onShowAll: () => setState(() => _expanded.add(field)),
+                  onShowLess: () => setState(() => _expanded.remove(field)),
                 ),
                 const SizedBox(height: _sectionGap),
               ],

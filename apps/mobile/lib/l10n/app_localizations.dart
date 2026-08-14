@@ -1999,6 +1999,42 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kalp rahatsızlığı'**
   String get optHeartCondition;
+
+  /// Quick-select country: Türkiye.
+  ///
+  /// In tr, this message translates to:
+  /// **'Türkiye'**
+  String get countryTurkiye;
+
+  /// Quick-select country: Germany.
+  ///
+  /// In tr, this message translates to:
+  /// **'Almanya'**
+  String get countryGermany;
+
+  /// Quick-select country: United Kingdom.
+  ///
+  /// In tr, this message translates to:
+  /// **'İngiltere'**
+  String get countryUk;
+
+  /// Quick-select country: United States.
+  ///
+  /// In tr, this message translates to:
+  /// **'ABD'**
+  String get countryUsa;
+
+  /// Quick-select country: Netherlands.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hollanda'**
+  String get countryNetherlands;
+
+  /// Quick-select country: France.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fransa'**
+  String get countryFrance;
 }
 
 class _AppLocalizationsDelegate

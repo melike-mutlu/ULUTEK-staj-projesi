@@ -28,7 +28,9 @@ class SelectionChipGroup extends StatelessWidget {
     this.selectedFirst = false,
     this.visibleCount,
     this.onShowAll,
+    this.onShowLess,
     this.showAllLabel,
+    this.showLessLabel,
     this.labelBuilder,
   });
 
@@ -62,12 +64,15 @@ class SelectionChipGroup extends StatelessWidget {
   final bool selectedFirst;
 
   /// How many chips to show; null shows all. When truncated and [onShowAll] is
-  /// set, a "show all" link is drawn below.
+  /// set, a "show all" link is drawn below; once expanded (visibleCount null),
+  /// [onShowLess] draws a "show less" link so the reveal is reversible.
   final int? visibleCount;
   final VoidCallback? onShowAll;
+  final VoidCallback? onShowLess;
 
-  /// Falls back to the localized "see all" label when not provided.
+  /// Falls back to the localized "see all" / "show less" labels when not given.
   final String? showAllLabel;
+  final String? showLessLabel;
 
   /// Maps an option value to the text shown on its chip. The value itself is
   /// still used for selection/toggle; only the label is transformed (e.g. to
@@ -164,6 +169,18 @@ class SelectionChipGroup extends StatelessWidget {
               onTap: onShowAll,
               child: Text(
                 showAllLabel ?? AppLocalizations.of(context).seeAll,
+                style: AppTextStyles.profileLink,
+              ),
+            ),
+          ),
+        ] else if (limit == null && onShowLess != null) ...<Widget>[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: GestureDetector(
+              onTap: onShowLess,
+              child: Text(
+                showLessLabel ?? AppLocalizations.of(context).showLess,
                 style: AppTextStyles.profileLink,
               ),
             ),

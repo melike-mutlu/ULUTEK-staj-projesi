@@ -3,15 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 
-const List<String> _popularCountries = <String>[
-  'Türkiye',
-  'Almanya',
-  'İngiltere',
-  'ABD',
-  'Hollanda',
-  'Fransa',
-];
-
 /// Ülke düzenleme kutusu. Kapatılınca girilen metni, vazgeçilirse null döner.
 class CountryEditDialog extends StatefulWidget {
   const CountryEditDialog({
@@ -52,6 +43,14 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final popularCountries = <String>[
+      l10n.countryTurkiye,
+      l10n.countryGermany,
+      l10n.countryUk,
+      l10n.countryUsa,
+      l10n.countryNetherlands,
+      l10n.countryFrance,
+    ];
     return AlertDialog(
       title: Row(
         children: [
@@ -100,7 +99,7 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
             Wrap(
               spacing: 6,
               runSpacing: 6,
-              children: _popularCountries.map((cName) {
+              children: popularCountries.map((cName) {
                 final isSelected =
                     _controller.text.trim().toLowerCase() == cName.toLowerCase();
                 return ChoiceChip(

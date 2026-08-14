@@ -1001,5 +1001,17 @@
   "optDiabetesDisease": "Şeker hastalığı",
   "@optDiabetesDisease": { "description": "Profile health chip: diabetes." },
   "optHeartCondition": "Kalp rahatsızlığı",
-  "@optHeartCondition": { "description": "Profile health chip: heart condition." }
+  "@optHeartCondition": { "description": "Profile health chip: heart condition." },
+  "countryTurkiye": "Türkiye",
+  "@countryTurkiye": { "description": "Quick-select country: Türkiye." },
+  "countryGermany": "Almanya",
+  "@countryGermany": { "description": "Quick-select country: Germany." },
+  "countryUk": "İngiltere",
+  "@countryUk": { "description": "Quick-select country: United Kingdom." },
+  "countryUsa": "ABD",
+  "@countryUsa": { "description": "Quick-select country: United States." },
+  "countryNetherlands": "Hollanda",
+  "@countryNetherlands": { "description": "Quick-select country: Netherlands." },
+  "countryFrance": "Fransa",
+  "@countryFrance": { "description": "Quick-select country: France." }
 }

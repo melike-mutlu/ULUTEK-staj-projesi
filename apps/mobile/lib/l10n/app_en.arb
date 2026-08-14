@@ -316,5 +316,11 @@
   "optHighCholesterol": "High cholesterol",
   "optKidneyDisease": "Kidney disease",
   "optDiabetesDisease": "Diabetes",
-  "optHeartCondition": "Heart condition"
+  "optHeartCondition": "Heart condition",
+  "countryTurkiye": "Türkiye",
+  "countryGermany": "Germany",
+  "countryUk": "United Kingdom",
+  "countryUsa": "United States",
+  "countryNetherlands": "Netherlands",
+  "countryFrance": "France"
 }
