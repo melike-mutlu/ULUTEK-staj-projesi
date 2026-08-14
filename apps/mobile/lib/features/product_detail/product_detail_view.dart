@@ -30,6 +30,22 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   bool _isInitialLoaded = false;
   String? _scannedBarcode;
 
+  final ScrollController _scrollController = ScrollController();
+  final List<GlobalKey> _sectionKeys = List.generate(9, (_) => GlobalKey());
+  int _activeSectionIndex = 0;
+
+  static const List<Map<String, dynamic>> _sectionNavItems = [
+    {'title': 'Uygunluk', 'icon': Icons.shield_outlined},
+    {'title': 'Kimlik', 'icon': Icons.qr_code_rounded},
+    {'title': 'Riskler', 'icon': Icons.warning_amber_rounded},
+    {'title': 'Diyet', 'icon': Icons.eco_outlined},
+    {'title': 'Sağlık', 'icon': Icons.favorite_outline_rounded},
+    {'title': 'Besin Değerleri', 'icon': Icons.restaurant_outlined},
+    {'title': 'Diğer Alerjenler', 'icon': Icons.bug_report_outlined},
+    {'title': 'İçindekiler', 'icon': Icons.list_alt_rounded},
+    {'title': 'Öneriler', 'icon': Icons.thumb_up_outlined},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -46,6 +62,88 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
       _isInitialLoaded = true;
       _loadFromRouteArguments();
     }
+  }
+
+  void _scrollToSection(int index) {
+    setState(() {
+      _activeSectionIndex = index;
+    });
+
+    final targetContext = _sectionKeys[index].currentContext;
+    if (targetContext != null) {
+      Scrollable.ensureVisible(
+        targetContext,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+        alignment: 0.05,
+      );
+    }
+  }
+
+  Widget _buildSectionNavBar() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      height: 48,
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? Colors.white10 : const Color(0xFFE5E7EB),
+          ),
+        ),
+      ),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: _sectionNavItems.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final item = _sectionNavItems[index];
+          final isActive = _activeSectionIndex == index;
+
+          return InkWell(
+            onTap: () => _scrollToSection(index),
+            borderRadius: BorderRadius.circular(20),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? const Color(0xFF26B384)
+                    : (isDark ? Colors.white10 : const Color(0xFFF3F4F6)),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    item['icon'] as IconData,
+                    size: 14,
+                    color: isActive
+                        ? Colors.white
+                        : (isDark ? Colors.grey.shade300 : AkilliSepetColors.textSecondary),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    item['title'] as String,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                      color: isActive
+                          ? Colors.white
+                          : (isDark ? Colors.grey.shade300 : AkilliSepetColors.textPrimary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   /// Loads the screen from the route argument, which is either a ready
@@ -79,6 +177,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _viewModel.removeListener(_onViewModelChanged);
     super.dispose();
   }
@@ -136,88 +235,146 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
 
         final insufficient =
             _viewModel.ruleEngineResult?.hasSufficientData == false;
-        final nutrimentsCard = NutrimentsCard(
-          nutriments: product.nutriments,
-          dietNote: explanation.dietNote,
-        );
-        // Only worth surfacing early if there is actually something to show.
-        final showNutrimentsFirst = insufficient && product.nutriments.hasAny;
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Uygunluk sonucu — ekranın görsel çıpası
-              WarningBanner(
-                explanation: explanation,
-                insufficientData: insufficient,
-                reason: personalReasonSpans(
-                  l10n: l10n,
-                  explanation: explanation,
-                  rule: _viewModel.ruleEngineResult,
-                  profile: _viewModel.userProfile,
+        return Column(
+          children: [
+            // Sticky Quick Section Navigation Bar
+            _buildSectionNavBar(),
+
+            // Main single scroll content with 9 sequential sections
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 1. UYGUNLUK (Warning / Verdict Banner)
+                    KeyedSubtree(
+                      key: _sectionKeys[0],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          WarningBanner(
+                            explanation: explanation,
+                            insufficientData: insufficient,
+                            reason: personalReasonSpans(
+                              l10n: l10n,
+                              explanation: explanation,
+                              rule: _viewModel.ruleEngineResult,
+                              profile: _viewModel.userProfile,
+                            ),
+                            reasonLines: personalReasonLines(
+                              l10n: l10n,
+                              rule: _viewModel.ruleEngineResult,
+                              profile: _viewModel.userProfile,
+                            ),
+                          ),
+                          if (insufficient) ...[
+                            const SizedBox(height: 16),
+                            _buildReportButton(context, product.barcode),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 2. KİMLİK (Product Identity & Verification Voting)
+                    KeyedSubtree(
+                      key: _sectionKeys[1],
+                      child: ProductHeaderCard(
+                        product: product,
+                        upvotes: _viewModel.upvotesCount,
+                        downvotes: _viewModel.downvotesCount,
+                        userVote: _viewModel.userVote,
+                        onVoteApprove: _viewModel.voteApprove,
+                        onVoteReject: _viewModel.voteReject,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 3. RİSKLER (Personal Risks Section)
+                    KeyedSubtree(
+                      key: _sectionKeys[2],
+                      child: PersonalRisksSection(
+                        ruleEngineResult: _viewModel.ruleEngineResult,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 4. DİYET (Diet Preference Checks)
+                    KeyedSubtree(
+                      key: _sectionKeys[3],
+                      child: ProfileCheckSection(
+                        title: l10n.dietType,
+                        icon: Icons.eco_outlined,
+                        checks: dietChecks(
+                          l10n,
+                          _viewModel.userProfile,
+                          _viewModel.ruleEngineResult,
+                        ),
+                        emptyMessage: l10n.noDietPreference,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 5. SAĞLIK (Health Conditions Checks)
+                    KeyedSubtree(
+                      key: _sectionKeys[4],
+                      child: ProfileCheckSection(
+                        title: l10n.healthConditionTitle,
+                        icon: Icons.favorite_outline_rounded,
+                        checks: healthChecks(
+                          l10n,
+                          _viewModel.userProfile,
+                          _viewModel.ruleEngineResult,
+                        ),
+                        emptyMessage: l10n.noHealthCondition,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 6. BESİN DEĞERLERİ (Nutritional Values Card)
+                    KeyedSubtree(
+                      key: _sectionKeys[5],
+                      child: NutrimentsCard(
+                        nutriments: product.nutriments,
+                        dietNote: explanation.dietNote,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 7. DİĞER ALERJENLER (Other Allergens Section)
+                    KeyedSubtree(
+                      key: _sectionKeys[6],
+                      child: OtherAllergensSection(
+                        product: product,
+                        ruleEngineResult: _viewModel.ruleEngineResult,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 8. İÇİNDEKİLER (Ingredients & Additives)
+                    KeyedSubtree(
+                      key: _sectionKeys[7],
+                      child: IngredientsSection(product: product),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 9. ÖNERİLER (Recommendations)
+                    KeyedSubtree(
+                      key: _sectionKeys[8],
+                      child: RecommendationsSection(
+                        alternatives: _viewModel.alternatives,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
-                reasonLines: personalReasonLines(
-                  l10n: l10n,
-                  rule: _viewModel.ruleEngineResult,
-                  profile: _viewModel.userProfile,
-                ),
               ),
-              // Veri eksikse kullanıcı ürünü bize bildirerek katkı yapabilir.
-              if (insufficient) ...[
-                const SizedBox(height: 16),
-                _buildReportButton(context, product.barcode),
-              ],
-              const SizedBox(height: 14),
-
-              // 2. Ürün kimliği (görsel + ad + marka)
-              ProductHeaderCard(product: product),
-              const SizedBox(height: 32),
-
-              // Veri eksik ama besin değerleri varsa, kullanıcı hiç değilse
-              // onları görsün diye kimliğin hemen altına alınır.
-              if (showNutrimentsFirst) nutrimentsCard,
-
-              // 3-6. Profil kategorileri: alerji, diyet, sağlık
-              PersonalRisksSection(
-                ruleEngineResult: _viewModel.ruleEngineResult,
-              ),
-              ProfileCheckSection(
-                title: l10n.dietType,
-                icon: Icons.eco_outlined,
-                checks: dietChecks(
-                  l10n,
-                  _viewModel.userProfile,
-                  _viewModel.ruleEngineResult,
-                ),
-                emptyMessage: l10n.noDietPreference,
-              ),
-              ProfileCheckSection(
-                title: l10n.healthConditionTitle,
-                icon: Icons.favorite_outline_rounded,
-                checks: healthChecks(
-                  l10n,
-                  _viewModel.userProfile,
-                  _viewModel.ruleEngineResult,
-                ),
-                emptyMessage: l10n.noHealthCondition,
-              ),
-              if (!showNutrimentsFirst) nutrimentsCard,
-
-              // 7-8. Ürünün kendi bilgileri
-              OtherAllergensSection(
-                product: product,
-                ruleEngineResult: _viewModel.ruleEngineResult,
-              ),
-              IngredientsSection(product: product),
-
-              // Öneriler — içindekilerin hemen altında.
-              RecommendationsSection(alternatives: _viewModel.alternatives),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         );
     }
   }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/models/additive_info.dart';
 import '../../../core/models/product.dart';
 import '../../../l10n/app_localizations.dart';
+import 'additive_info_sheet.dart';
 import 'detail_section.dart';
 
 /// Ingredients text and additives. Collapsed by default so a long ingredient
@@ -112,21 +114,59 @@ class _AdditiveChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
+    final cleanCode = code.replaceFirst(RegExp('^[a-z]{2}:'), '').toUpperCase();
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          final info = AdditiveInfo.getMockInfo(code);
+          AdditiveInfoSheet.show(context, info);
+        },
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFBFDBFE)),
-      ),
-      child: Text(
-        code.replaceFirst(RegExp('^[a-z]{2}:'), '').toUpperCase(),
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF1D4ED8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF6FF),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: const Color(0xFFBFDBFE)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                cleanCode,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1D4ED8),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Container(
+                width: 14,
+                height: 14,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFDBEAFE),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Text(
+                    'i',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1D4ED8),
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
