@@ -104,20 +104,23 @@ class PendingProductRepository {
     }
   }
 
-
-  /// Görüntüden Metin Çıkarma için Eda'nın Edge Function'ını çağırır
+  /// Görüntüden Metin Çıkarma için extract-ingredients Edge Function'ını çağırır
   Future<String?> extractTextFromImage(XFile imageFile) async {
     try {
-      // 1. Görüntüyü base64'e çevir (Edge function'a doğrudan yollamak için)
-      final bytes = await imageFile.readAsBytes();
-      final base64Image = base64Encode(bytes);
+      
+      // Geçici bir dosya adı oluştur
+      final userId = supabase.auth.currentUser?.id ?? 'anonymous';
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final extension = imageFile.name.split('.').last.toLowerCase();
+      final storagePath = '$userId/ocr_temp_$timestamp.$extension';
 
-      // 2. Edge Function'ı çağır
+      // Zaten var olan fonksiyonunla resmi Storage'a yükle ve linkini al
+      final imageUrl = await _uploadImage(imageFile, storagePath);
+
       final response = await supabase.functions.invoke(
-        'extract-ingredients', // Eda'nın fonksiyonunun adı
+        'extract-ingredients',
         body: {
-          'image_base64': base64Image,
-          'mime_type': 'image/jpeg', // veya image/png
+          'image_urls': [imageUrl], 
         },
       );
 
@@ -125,13 +128,15 @@ class PendingProductRepository {
         final data = response.data as Map<String, dynamic>?;
         if (data != null && data['ingredients_text'] != null) {
           return data['ingredients_text'] as String;
+        } else {
+           debugPrint('📸 [OCR] HATA: Yanıt 200 OK geldi ama "ingredients_text" yok.');
         }
       } else {
-        debugPrint('[PendingProductRepository] Extraction HTTP error: ${response.status}');
+        debugPrint('📸 [OCR] HTTP HATASI: Status Code ${response.status}');
       }
       return null;
     } catch (e) {
-      debugPrint('[PendingProductRepository] extractTextFromImage Hatası: $e');
+      debugPrint('📸 [OCR] BEKLENMEYEN HATA: $e');
       return null;
     }
   }
