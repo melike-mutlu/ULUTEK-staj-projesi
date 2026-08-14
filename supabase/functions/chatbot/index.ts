@@ -6,6 +6,17 @@ import { buildSystemPromptWithProfile } from "../_shared/system_prompt.ts";
 import { saveMessage, getConversationHistory, type ChatMessage } from "../_shared/chatHistory.ts";
 import { getUserHealthProfile } from "../_shared/userProfile.service.ts";
 import { type InlineImageData, fetchImageAsInlineData } from "../_shared/visionExtract.ts";
+// Gemini modelleri arasında fallback zinciri.
+// Kota (429) veya geçici sunucu hatası (503) durumunda bir sonraki modele geçilir.
+// Sıra önemli: ilk model en güçlü/varsayılan model olmalı.
+const MODEL_FALLBACK_CHAIN = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"];
+
+// Bu status kodları "geçici" kabul edilir ve bir sonraki modele geçilmesini tetikler.
+// Diğer hatalarda (ör. 400 Bad Request) fallback yapılmaz, çünkü aynı hata
+// muhtemelen başka bir modelde de tekrar edecektir.
+const RETRYABLE_STATUS_CODES = new Set([429, 503]);
+
+
 
 // v3: kullanıcı mesajı + opsiyonel fotoğraf (base64) + sohbet geçmişi + kullanıcı profili
 //     -> kişiselleştirilmiş, multimodal cevap.
@@ -115,8 +126,6 @@ async function callChatbotLlm(
   /** Opsiyonel inline fotoğraf — visionExtract.ts'teki InlineImageData formatı */
   inlineImage: InlineImageData | null = null,
 ): Promise<string> {
-  const model = "gemini-3.6-flash";
-
   // Geçmiş mesajları Gemini formatına çevir. Gemini'de rol adı "assistant"
   // değil "model" olmalı.
   const historyContents = history
@@ -125,11 +134,11 @@ async function callChatbotLlm(
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: m.message }],
     }));
-
+ 
   // Güncel kullanıcı mesajının part'larını oluştur.
   // Fotoğraf varsa önce resmi, ardından metin mesajını ekle (Gemini önerisi).
   const currentUserParts: Record<string, unknown>[] = [];
-
+ 
   if (inlineImage) {
     currentUserParts.push({
       inline_data: {
@@ -138,44 +147,154 @@ async function callChatbotLlm(
       },
     });
   }
-
+ 
   currentUserParts.push({ text: userMessage });
-
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: systemPrompt }],
-        },
-        contents: [
-          ...historyContents,
-          { role: "user", parts: currentUserParts },
-        ],
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 500,
-        },
-      }),
+ 
+  const requestBody = {
+    systemInstruction: {
+      parts: [{ text: systemPrompt }],
     },
-  );
+    contents: [
+      ...historyContents,
+      { role: "user", parts: currentUserParts },
+    ],
+    generationConfig: {
+      temperature: 0.4,
+      maxOutputTokens: 500,
+    },
+  };
+ 
+  let lastErrorStatus: number | null = null;
+ 
+  for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
+    const model = MODEL_FALLBACK_CHAIN[i];
+    const isLastModel = i === MODEL_FALLBACK_CHAIN.length - 1;
+ 
 
-  if (!response.ok) {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      },
+    );
+ 
+    if (response.ok) {
+      const payload = await response.json();
+      const content = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
+ 
+      if (typeof content === "string" && content.trim().length > 0) {
+        if (i > 0) {
+          console.warn(
+            `Chatbot fallback kullanıldı: ${MODEL_FALLBACK_CHAIN[0]} yerine ${model}`,
+          );
+        }
+        return content.trim();
+      }
+ 
+      console.error(`${model} geçersiz içerik döndü:`, payload);
+      // Boş/geçersiz içerik de bir sonraki modele geçmek için geçerli bir sebep.
+      lastErrorStatus = null;
+      continue;
+    }
+ 
     const errorText = await response.text();
-    console.error("Gemini API çağrısı başarısız oldu:", response.status, errorText);
-    return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
+    console.error(`${model} API çağrısı başarısız oldu:`, response.status, errorText);
+    lastErrorStatus = response.status;
+ 
+    // Kota/geçici hata değilse (ör. 400 Bad Request) fallback yapmanın anlamı yok —
+    // aynı istek muhtemelen bir sonraki modelde de aynı şekilde başarısız olur.
+    if (!RETRYABLE_STATUS_CODES.has(response.status)) {
+      break;
+    }
+ 
+    if (!isLastModel) {
+      console.warn(
+        `${model} geçici hata verdi (${response.status}), sıradaki modele geçiliyor: ${
+          MODEL_FALLBACK_CHAIN[i + 1]
+        }`,
+      );
+    }
   }
-
-  const payload = await response.json();
-  const content = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (typeof content !== "string" || content.trim().length === 0) {
-    console.error("Gemini geçersiz içerik döndü:", payload);
-    return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
-  }
-
-  return content.trim();
+ 
+  console.error(
+    "Chatbot: fallback zincirindeki tüm modeller başarısız oldu.",
+    { lastErrorStatus },
+  );
+  return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
 }
+
+// Bu fonksiyon Tek model çağrır artık kullanılmıyor, yukarıdaki callChatbotLlm ile değiştirildi.
+// async function callChatbotLlm(
+//   userMessage: string,
+//   history: ChatMessage[],
+//   systemPrompt: string,
+//   apiKey: string,
+//   /** Opsiyonel inline fotoğraf — visionExtract.ts'teki InlineImageData formatı */
+//   inlineImage: InlineImageData | null = null,
+// ): Promise<string> {
+//   const model = "gemini-3.6-flash";
+
+//   // Geçmiş mesajları Gemini formatına çevir. Gemini'de rol adı "assistant"
+//   // değil "model" olmalı.
+//   const historyContents = history
+//     .filter((m) => m.role === "user" || m.role === "assistant")
+//     .map((m) => ({
+//       role: m.role === "assistant" ? "model" : "user",
+//       parts: [{ text: m.message }],
+//     }));
+
+//   // Güncel kullanıcı mesajının part'larını oluştur.
+//   // Fotoğraf varsa önce resmi, ardından metin mesajını ekle (Gemini önerisi).
+//   const currentUserParts: Record<string, unknown>[] = [];
+
+//   if (inlineImage) {
+//     currentUserParts.push({
+//       inline_data: {
+//         mime_type: inlineImage.mime_type,
+//         data: inlineImage.data,
+//       },
+//     });
+//   }
+
+//   currentUserParts.push({ text: userMessage });
+
+//   const response = await fetch(
+//     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+//     {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({
+//         systemInstruction: {
+//           parts: [{ text: systemPrompt }],
+//         },
+//         contents: [
+//           ...historyContents,
+//           { role: "user", parts: currentUserParts },
+//         ],
+//         generationConfig: {
+//           temperature: 0.4,
+//           maxOutputTokens: 500,
+//         },
+//       }),
+//     },
+//   );
+
+//   if (!response.ok) {
+//     const errorText = await response.text();
+//     console.error("Gemini API çağrısı başarısız oldu:", response.status, errorText);
+//     return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
+//   }
+
+//   const payload = await response.json();
+//   const content = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+//   if (typeof content !== "string" || content.trim().length === 0) {
+//     console.error("Gemini geçersiz içerik döndü:", payload);
+//     return "Şu an cevap veremiyorum, lütfen birazdan tekrar dene.";
+//   }
+
+//   return content.trim();
+// }
  
