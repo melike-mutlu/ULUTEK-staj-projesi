@@ -905,5 +905,13 @@
   "profileSectionDiet": "Beslenme düzenim",
   "@profileSectionDiet": { "description": "Profile card title for the user's diet." },
   "profileSectionHealth": "Sağlık durumum",
-  "@profileSectionHealth": { "description": "Profile card title for the user's health conditions." }
+  "@profileSectionHealth": { "description": "Profile card title for the user's health conditions." },
+  "shoppingListsTitle": "Alışveriş Listelerim",
+  "@shoppingListsTitle": { "description": "Section/screen title for the user's shopping lists." },
+  "seeAllUpper": "Tümünü Gör",
+  "@seeAllUpper": { "description": "See-all link on the home shopping lists header." },
+  "noShoppingListsTitle": "Henüz Listeniz Yok",
+  "@noShoppingListsTitle": { "description": "Empty-state title on the home shopping lists card." },
+  "noShoppingListsPrompt": "Dokunun ve ilk alışveriş listenizi oluşturun",
+  "@noShoppingListsPrompt": { "description": "Empty-state prompt on the home shopping lists card." }
 }

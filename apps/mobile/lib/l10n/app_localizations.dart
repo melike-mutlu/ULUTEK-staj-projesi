@@ -1711,6 +1711,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Sağlık durumum'**
   String get profileSectionHealth;
+
+  /// Section/screen title for the user's shopping lists.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alışveriş Listelerim'**
+  String get shoppingListsTitle;
+
+  /// See-all link on the home shopping lists header.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü Gör'**
+  String get seeAllUpper;
+
+  /// Empty-state title on the home shopping lists card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz Listeniz Yok'**
+  String get noShoppingListsTitle;
+
+  /// Empty-state prompt on the home shopping lists card.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dokunun ve ilk alışveriş listenizi oluşturun'**
+  String get noShoppingListsPrompt;
 }
 
 class _AppLocalizationsDelegate

@@ -879,4 +879,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSectionHealth => 'My health';
+
+  @override
+  String get shoppingListsTitle => 'My shopping lists';
+
+  @override
+  String get seeAllUpper => 'See all';
+
+  @override
+  String get noShoppingListsTitle => 'No lists yet';
+
+  @override
+  String get noShoppingListsPrompt => 'Tap to create your first shopping list';
 }

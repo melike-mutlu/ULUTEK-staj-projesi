@@ -392,6 +392,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Widget _buildShoppingListsSection(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final shoppingVm = ref.watch(shoppingListViewModelProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -406,7 +407,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Alışveriş Listelerim',
+              l10n.shoppingListsTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: textColor,
@@ -416,17 +417,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
               onPressed: () {
                 Navigator.pushNamed(context, AppRoutes.shoppingLists);
               },
-              child: const Row(
+              child: Row(
                 children: [
                   Text(
-                    'Tümünü Gör',
-                    style: TextStyle(
+                    l10n.seeAllUpper,
+                    style: const TextStyle(
                       color: AkilliSepetColors.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 4),
-                  Icon(Icons.chevron_right_rounded, size: 18, color: AkilliSepetColors.primary),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right_rounded, size: 18, color: AkilliSepetColors.primary),
                 ],
               ),
             ),
@@ -462,7 +463,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Henüz Listeniz Yok',
+                          l10n.noShoppingListsTitle,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: textColor,
@@ -471,7 +472,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Dokunun ve ilk alışveriş listenizi oluşturun',
+                          l10n.noShoppingListsPrompt,
                           style: TextStyle(color: secondaryTextColor, fontSize: 13),
                         ),
                       ],

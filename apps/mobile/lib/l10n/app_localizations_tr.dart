@@ -871,4 +871,17 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get profileSectionHealth => 'Sağlık durumum';
+
+  @override
+  String get shoppingListsTitle => 'Alışveriş Listelerim';
+
+  @override
+  String get seeAllUpper => 'Tümünü Gör';
+
+  @override
+  String get noShoppingListsTitle => 'Henüz Listeniz Yok';
+
+  @override
+  String get noShoppingListsPrompt =>
+      'Dokunun ve ilk alışveriş listenizi oluşturun';
 }

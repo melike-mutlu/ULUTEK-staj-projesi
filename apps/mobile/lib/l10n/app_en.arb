@@ -268,5 +268,9 @@
   "relativeDaysAgo": "{count} days ago",
   "profileSectionAllergies": "My allergies",
   "profileSectionDiet": "My diet",
-  "profileSectionHealth": "My health"
+  "profileSectionHealth": "My health",
+  "shoppingListsTitle": "My shopping lists",
+  "seeAllUpper": "See all",
+  "noShoppingListsTitle": "No lists yet",
+  "noShoppingListsPrompt": "Tap to create your first shopping list"
 }
