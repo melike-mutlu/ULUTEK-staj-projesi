@@ -21,6 +21,39 @@ class ProductDetailViewModel extends ChangeNotifier {
   RuleEngineResult? ruleEngineResult;
   Explanation? explanation;
 
+  /// Community verification voting count and state (Ranim's backend integration ready)
+  int upvotesCount = 14;
+  int downvotesCount = 3;
+  String? userVote; // null, 'up', or 'down'
+
+  void voteApprove() {
+    if (userVote == 'up') {
+      userVote = null;
+      upvotesCount--;
+    } else {
+      if (userVote == 'down') {
+        downvotesCount--;
+      }
+      userVote = 'up';
+      upvotesCount++;
+    }
+    notifyListeners();
+  }
+
+  void voteReject() {
+    if (userVote == 'down') {
+      userVote = null;
+      downvotesCount--;
+    } else {
+      if (userVote == 'up') {
+        upvotesCount--;
+      }
+      userVote = 'down';
+      downvotesCount++;
+    }
+    notifyListeners();
+  }
+
   /// Recommended alternatives for the current product. Empty until loaded.
   List<Alternative> alternatives = const [];
 

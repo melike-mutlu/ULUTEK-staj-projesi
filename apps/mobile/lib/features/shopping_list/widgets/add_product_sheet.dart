@@ -327,7 +327,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
   }
 
   Widget _buildSearchAndManualTab(
-    dynamic searchVm,
+    SearchViewModel searchVm,
     Color textColor,
     Color secondaryTextColor,
     Color borderColor,
@@ -424,25 +424,103 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet>
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: searchVm.results.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 6),
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final item = searchVm.results[index];
-                return ListTile(
-                  tileColor: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceMuted,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  title: Text(item.productName, style: TextStyle(color: textColor)),
-                  subtitle: item.brand != null
-                      ? Text(item.brand!, style: TextStyle(color: secondaryTextColor))
-                      : null,
-                  trailing: IconButton(
-                    icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.brand),
-                    onPressed: () => _addItem(
-                      name: item.productName,
-                      barcode: item.barcode,
-                      brand: item.brand,
+                return Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurfaceMuted : AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? AppColors.darkBorder : AppColors.border,
                     ),
+                  ),
+                  child: Row(
+                    children: [
+                      // Ürün Görseli
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          color: isDark ? Colors.white12 : Colors.grey.shade200,
+                          child: item.imageUrl.isNotEmpty
+                              ? Image.network(
+                                  item.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.image_not_supported_outlined,
+                                    size: 20,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.image_outlined,
+                                  size: 20,
+                                  color: AppColors.textSecondary,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      // Ürün Adı ve Markası
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              style: TextStyle(
+                                color: textColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (item.brand.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                item.brand,
+                                style: TextStyle(
+                                  color: secondaryTextColor,
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Listeye Ekle Butonu
+                      ElevatedButton.icon(
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => _addItem(
+                                  name: item.name,
+                                  barcode: item.barcode,
+                                  brand: item.brand,
+                                ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.brand,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          minimumSize: const Size(0, 36),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        icon: const Icon(Icons.add_rounded, size: 16),
+                        label: const Text(
+                          'Ekle',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },

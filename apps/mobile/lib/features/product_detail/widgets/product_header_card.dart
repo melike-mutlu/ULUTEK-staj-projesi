@@ -4,6 +4,8 @@ import '../../../core/theme/akilli_sepet_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import 'nutri_score_badge.dart';
 
+import 'community_verification_card.dart';
+
 /// Nutri-Score values Open Food Facts sends when it has no grade.
 const _unknownNutriScores = <String>{'unknown', 'not-applicable'};
 
@@ -11,9 +13,22 @@ const _unknownNutriScores = <String>{'unknown', 'not-applicable'};
 /// The barcode is not shown — it is a lookup key, not information the user
 /// needs while deciding.
 class ProductHeaderCard extends StatelessWidget {
-  const ProductHeaderCard({super.key, required this.product});
+  const ProductHeaderCard({
+    super.key,
+    required this.product,
+    this.upvotes,
+    this.downvotes,
+    this.userVote,
+    this.onVoteApprove,
+    this.onVoteReject,
+  });
 
   final Product product;
+  final int? upvotes;
+  final int? downvotes;
+  final String? userVote;
+  final VoidCallback? onVoteApprove;
+  final VoidCallback? onVoteReject;
 
   /// The image takes 40% of the available width; the name gets the rest.
   static const double _imageWidthFactor = 0.4;
@@ -89,6 +104,16 @@ class ProductHeaderCard extends StatelessWidget {
                 if (product.isPending) const _PendingBadge(),
                 if (score != null) NutriScoreBadge(grade: score),
               ],
+            ),
+          ],
+          if (product.isPending && onVoteApprove != null && onVoteReject != null) ...[
+            const SizedBox(height: 12),
+            CommunityVerificationCard(
+              upvotes: upvotes ?? 14,
+              downvotes: downvotes ?? 3,
+              userVote: userVote,
+              onVoteApprove: onVoteApprove!,
+              onVoteReject: onVoteReject!,
             ),
           ],
         ],
