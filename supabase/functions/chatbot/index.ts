@@ -5,7 +5,7 @@ import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 import { buildSystemPromptWithProfile } from "../_shared/system_prompt.ts";
 import { saveMessage, getConversationHistory, type ChatMessage } from "../_shared/chatHistory.ts";
 import { getUserHealthProfile } from "../_shared/userProfile.service.ts";
-import { type InlineImageData } from "../_shared/visionExtract.ts";
+import { type InlineImageData, fetchImageAsInlineData } from "../_shared/visionExtract.ts";
 
 // v3: kullanıcı mesajı + opsiyonel fotoğraf (base64) + sohbet geçmişi + kullanıcı profili
 //     -> kişiselleştirilmiş, multimodal cevap.
@@ -40,13 +40,14 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { user_message, session_id, image_base64, mime_type } = body;
+    const { user_message, session_id, image_base64, mime_type, image_url } = body;
 
     if (typeof user_message !== "string" || user_message.trim().length === 0) {
       return jsonResponse({ status: "error", message: "user_message zorunludur" }, 400);
     }
 
-    // Opsiyonel inline fotoğraf — mobil taraf base64 + mime_type gönderebilir.
+    // Opsiyonel inline fotoğraf — mobil taraf ya base64 + mime_type (extractFromImages
+    // ile aynı format) ya da Storage'a yüklenmiş bir image_url gönderebilir.
     let inlineImage: InlineImageData | null = null;
     if (typeof image_base64 === "string" && image_base64.length > 0) {
       inlineImage = {
@@ -55,6 +56,12 @@ Deno.serve(async (req) => {
           : "image/jpeg",
         data: image_base64,
       };
+    } else if (typeof image_url === "string" && image_url.length > 0) {
+      try {
+        inlineImage = await fetchImageAsInlineData(image_url);
+      } catch (err) {
+        console.error("Chatbot fotoğrafı indirilemedi:", err);
+      }
     }
 
     // session_id istekte yoksa yeni bir oturum başlat.

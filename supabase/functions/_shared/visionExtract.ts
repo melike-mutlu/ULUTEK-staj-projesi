@@ -343,10 +343,11 @@ export function validateVisionResult(raw: unknown): VisionExtractResult {
 
 /**
  * Bir görüntü URL'sini indirir ve Gemini'nin `inline_data` formatına çevirir.
+ * chatbot/index.ts da (multimodal mesajlar için) bu fonksiyonu kullanır.
  */
-async function fetchImageAsInlineData(
+export async function fetchImageAsInlineData(
   url: string,
-): Promise<{ mime_type: string; data: string }> {
+): Promise<InlineImageData> {
   let response: Response;
   try {
     response = await fetch(url);
