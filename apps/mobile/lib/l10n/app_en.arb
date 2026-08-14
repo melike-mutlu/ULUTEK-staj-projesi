@@ -301,5 +301,6 @@
   "manualAddTitle": "Enter product name manually",
   "manualNameHint": "e.g. Milk, Apple, Oats...",
   "searchByNameTitle": "Search by product name",
-  "searchByNameHint": "Search by brand or product name..."
+  "searchByNameHint": "Search by brand or product name...",
+  "medicalDisclaimerShort": "This information is not medical advice."
 }

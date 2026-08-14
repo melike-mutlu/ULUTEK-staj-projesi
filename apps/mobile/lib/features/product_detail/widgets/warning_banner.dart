@@ -126,31 +126,29 @@ class WarningBanner extends StatelessWidget {
                   for (final line in reasonLines!) _bullet(line, style.main)
                 else
                   _reasonText(_reason, style.main),
-                if (explanation.disclaimer.isNotEmpty) ...[
-                  // One blank line, then the disclaimer right under the reason.
-                  const SizedBox(height: 22),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.info_outline_rounded,
-                        size: 13,
-                        color: AkilliSepetColors.textSecondary,
-                      ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Text(
-                          explanation.disclaimer,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AkilliSepetColors.textSecondary,
-                            height: 1.3,
-                          ),
+                // Fixed legal notice, always shown under a real verdict.
+                const SizedBox(height: 22),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 13,
+                      color: AkilliSepetColors.textSecondary,
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        l10n.medicalDisclaimerShort,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AkilliSepetColors.textSecondary,
+                          height: 1.3,
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

@@ -1909,6 +1909,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Marka veya ürün adı ara...'**
   String get searchByNameHint;
+
+  /// Short medical disclaimer under the product verdict.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu bilgi tıbbi tavsiye niteliği taşımaz.'**
+  String get medicalDisclaimerShort;
 }
 
 class _AppLocalizationsDelegate

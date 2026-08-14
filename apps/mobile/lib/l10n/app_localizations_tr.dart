@@ -983,4 +983,8 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get searchByNameHint => 'Marka veya ürün adı ara...';
+
+  @override
+  String get medicalDisclaimerShort =>
+      'Bu bilgi tıbbi tavsiye niteliği taşımaz.';
 }

@@ -971,5 +971,7 @@
   "searchByNameTitle": "Ürün İsmine Göre Ara",
   "@searchByNameTitle": { "description": "Search-by-name section title." },
   "searchByNameHint": "Marka veya ürün adı ara...",
-  "@searchByNameHint": { "description": "Hint for the search-by-name field." }
+  "@searchByNameHint": { "description": "Hint for the search-by-name field." },
+  "medicalDisclaimerShort": "Bu bilgi tıbbi tavsiye niteliği taşımaz.",
+  "@medicalDisclaimerShort": { "description": "Short medical disclaimer under the product verdict." }
 }

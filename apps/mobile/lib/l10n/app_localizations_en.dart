@@ -991,4 +991,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchByNameHint => 'Search by brand or product name...';
+
+  @override
+  String get medicalDisclaimerShort =>
+      'This information is not medical advice.';
 }
