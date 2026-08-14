@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/app_localizations.dart';
 import '../shell_viewmodel.dart';
 
 /// Ekranın altında yüzen kapsül (pill) biçimli alt navigasyon barı.
@@ -69,32 +70,43 @@ class GlassBottomNav extends StatelessWidget {
   static const List<_NavItem> _items = <_NavItem>[
     _NavItem(
       tab: ShellTab.home,
-      label: 'Ana Sayfa',
       icon: Icons.home_outlined,
       activeIcon: Icons.home_rounded,
     ),
     _NavItem(
       tab: ShellTab.scan,
-      label: 'Tara',
       icon: Icons.qr_code_scanner_outlined,
       activeIcon: Icons.qr_code_scanner_rounded,
     ),
     _NavItem(
       tab: ShellTab.chatbot,
-      label: 'Chatbot',
       icon: Icons.chat_bubble_outline_rounded,
       activeIcon: Icons.chat_bubble_rounded,
     ),
     _NavItem(
       tab: ShellTab.profile,
-      label: 'Profil',
       icon: Icons.person_outline_rounded,
       activeIcon: Icons.person_rounded,
     ),
   ];
 
+  /// Localized label for a tab; kept next to [_items] so both stay in sync.
+  static String _labelFor(AppLocalizations l10n, ShellTab tab) {
+    switch (tab) {
+      case ShellTab.home:
+        return l10n.navHome;
+      case ShellTab.scan:
+        return l10n.scanButton;
+      case ShellTab.chatbot:
+        return l10n.navChatbot;
+      case ShellTab.profile:
+        return l10n.profileTitle;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final borderRadius = BorderRadius.circular(barHeight / 2);
     final position = indicatorPosition.clamp(0.0, _items.length - 1.0);
@@ -165,6 +177,7 @@ class GlassBottomNav extends StatelessWidget {
                             Expanded(
                               child: _NavButton(
                                 item: _items[i],
+                                label: _labelFor(l10n, _items[i].tab),
                                 isSelected: _items[i].tab == currentTab,
                                 selection:
                                     (1 - (position - i).abs()).clamp(0.0, 1.0),
@@ -189,13 +202,11 @@ class GlassBottomNav extends StatelessWidget {
 class _NavItem {
   const _NavItem({
     required this.tab,
-    required this.label,
     required this.icon,
     required this.activeIcon,
   });
 
   final ShellTab tab;
-  final String label;
   final IconData icon;
   final IconData activeIcon;
 }
@@ -206,6 +217,7 @@ class _NavItem {
 class _NavButton extends StatelessWidget {
   const _NavButton({
     required this.item,
+    required this.label,
     required this.isSelected,
     required this.selection,
     required this.iconSize,
@@ -213,6 +225,7 @@ class _NavButton extends StatelessWidget {
   });
 
   final _NavItem item;
+  final String label;
 
   /// Erişilebilirlik için kesin durum.
   final bool isSelected;
@@ -239,7 +252,7 @@ class _NavButton extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: item.label,
+      label: label,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
@@ -267,7 +280,7 @@ class _NavButton extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                item.label,
+                label,
                 style: AppTextStyles.navLabel.copyWith(color: color),
                 maxLines: 1,
                 softWrap: false,

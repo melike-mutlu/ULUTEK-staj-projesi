@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../l10n/app_localizations.dart';
 import 'question_card.dart';
 import 'selectable_chip.dart';
 
@@ -27,7 +28,7 @@ class SelectionChipGroup extends StatelessWidget {
     this.selectedFirst = false,
     this.visibleCount,
     this.onShowAll,
-    this.showAllLabel = 'Tümünü gör',
+    this.showAllLabel,
   });
 
   final String title;
@@ -63,16 +64,19 @@ class SelectionChipGroup extends StatelessWidget {
   /// set, a "show all" link is drawn below.
   final int? visibleCount;
   final VoidCallback? onShowAll;
-  final String showAllLabel;
+
+  /// Falls back to the localized "see all" label when not provided.
+  final String? showAllLabel;
 
   static const double _gap = 20;
 
   Future<void> _openAddDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     final result = await showDialog<String>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('Seçenek ekle'),
+        title: Text(l10n.addOption),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -82,11 +86,11 @@ class SelectionChipGroup extends StatelessWidget {
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: const Text('Ekle'),
+            child: Text(l10n.addAction),
           ),
         ],
       ),
@@ -152,7 +156,10 @@ class SelectionChipGroup extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: GestureDetector(
               onTap: onShowAll,
-              child: Text(showAllLabel, style: AppTextStyles.profileLink),
+              child: Text(
+                showAllLabel ?? AppLocalizations.of(context).seeAll,
+                style: AppTextStyles.profileLink,
+              ),
             ),
           ),
         ],

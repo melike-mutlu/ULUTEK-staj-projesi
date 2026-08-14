@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 const List<String> _popularCountries = <String>[
   'Türkiye',
@@ -50,12 +51,13 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.public_rounded, color: AppColors.brand),
-          SizedBox(width: 10),
-          Text('Ülke Seçimi'),
+          const Icon(Icons.public_rounded, color: AppColors.brand),
+          const SizedBox(width: 10),
+          Text(l10n.countryDialogTitle),
         ],
       ),
       content: SingleChildScrollView(
@@ -70,7 +72,7 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
-                hintText: 'Ülke adı yazınız (örn. Türkiye)',
+                hintText: l10n.countryDialogHint,
                 prefixIcon: const Icon(Icons.location_on_outlined),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
@@ -86,9 +88,9 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Hızlı Seçim',
-              style: TextStyle(
+            Text(
+              l10n.quickSelect,
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -119,11 +121,11 @@ class _CountryEditDialogState extends State<CountryEditDialog> {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Vazgeç'),
+          child: Text(l10n.cancel),
         ),
         TextButton(
           onPressed: _submit,
-          child: const Text('Kaydet'),
+          child: Text(l10n.save),
         ),
       ],
     );

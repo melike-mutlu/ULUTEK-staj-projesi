@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/akilli_sepet_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// iOS-style rounded search field: a light grey pill with a leading magnifier,
 /// a hint, and a trailing clear button once text is entered.
@@ -13,18 +14,21 @@ class SearchBarField extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     this.onClear,
-    this.hintText = 'Ürün ara',
+    this.hintText,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final VoidCallback? onClear;
-  final String hintText;
+
+  /// Falls back to the localized "search products" hint when not provided.
+  final String? hintText;
 
   static const Color _fill = Color(0xFFE5E5EA);
 
   @override
   Widget build(BuildContext context) {
+    final resolvedHint = hintText ?? AppLocalizations.of(context).searchProductHint;
     return Container(
       decoration: BoxDecoration(
         color: _fill,
@@ -65,7 +69,7 @@ class SearchBarField extends StatelessWidget {
               );
             },
           ),
-          hintText: hintText,
+          hintText: resolvedHint,
           hintStyle: const TextStyle(
             fontSize: 17,
             color: AkilliSepetColors.textSecondary,

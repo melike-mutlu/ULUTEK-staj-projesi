@@ -117,7 +117,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             note: l10n.contentAnalysis,
                                             noteColor: AkilliSepetColors.success,
                                             backgroundColor: const Color(0xFFE8F5E9),
-                                            time: formatScanDate(entry.scannedAt),
+                                            time: formatScanDate(l10n, entry.scannedAt),
                                             onTap: () {
                                               // Close the sheet first so detail opens on the page below.
                                               Navigator.pop(sheetContext);
@@ -307,7 +307,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             note: l10n.contentAnalysis,
                             noteColor: AkilliSepetColors.success,
                             backgroundColor: const Color(0xFFE8F5E9),
-                            time: formatScanDate(entry.scannedAt),
+                            time: formatScanDate(l10n, entry.scannedAt),
                             onTap: () => _openProductDetail(entry.barcode),
                           ),
                         );

@@ -251,5 +251,19 @@
   "allergenCelery": "Celery",
   "allergenMustard": "Mustard",
   "allergenLupin": "Lupin",
-  "allergenSulphites": "Sulphites"
+  "allergenSulphites": "Sulphites",
+  "navHome": "Home",
+  "navChatbot": "Chatbot",
+  "searchProductHint": "Search products",
+  "addOption": "Add option",
+  "addAction": "Add",
+  "countryDialogTitle": "Country selection",
+  "countryDialogHint": "Enter a country name (e.g. Türkiye)",
+  "quickSelect": "Quick select",
+  "profileLoadRetry": "Could not load your profile. Check your connection and try again.",
+  "relativeJustNow": "Just now",
+  "relativeMinutesAgo": "{count} min ago",
+  "relativeHoursAgo": "{count} h ago",
+  "relativeYesterday": "Yesterday",
+  "relativeDaysAgo": "{count} days ago"
 }

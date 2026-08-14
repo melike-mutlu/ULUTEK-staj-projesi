@@ -1,12 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:akilli_sepet/core/utils/relative_date.dart';
+import 'package:akilli_sepet/l10n/app_localizations_tr.dart';
 
 /// Fixed reference point so the tests never depend on the wall clock.
 final _now = DateTime(2026, 8, 4, 15, 30);
 
-String _format(DateTime scannedAt) => formatScanDate(scannedAt, now: _now);
+final _l10n = AppLocalizationsTr();
+
+String _format(DateTime scannedAt) => formatScanDate(_l10n, scannedAt, now: _now);
 
 void main() {
+  // DateFormat needs the Turkish symbols loaded before formatting month names.
+  setUpAll(() => initializeDateFormatting('tr'));
+
   group('dakika altı ve dakikalar', () {
     test('bir dakikadan yeni tarama "az önce"', () {
       expect(_format(_now.subtract(const Duration(seconds: 59))), equals('az önce'));
@@ -70,7 +77,7 @@ void main() {
       ];
       for (var month = 1; month <= 12; month++) {
         expect(
-          formatScanDate(DateTime(2024, month, 15), now: _now),
+          formatScanDate(_l10n, DateTime(2024, month, 15), now: _now),
           equals('15 ${expected[month - 1]} 2024'),
         );
       }
@@ -88,7 +95,7 @@ void main() {
     });
 
     test('now verilmezse gerçek saate göre çalışır', () {
-      expect(formatScanDate(DateTime.now()), equals('az önce'));
+      expect(formatScanDate(_l10n, DateTime.now()), equals('az önce'));
     });
   });
 }

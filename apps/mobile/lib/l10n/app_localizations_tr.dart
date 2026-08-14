@@ -813,4 +813,53 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get allergenSulphites => 'Sülfitler';
+
+  @override
+  String get navHome => 'Ana Sayfa';
+
+  @override
+  String get navChatbot => 'Chatbot';
+
+  @override
+  String get searchProductHint => 'Ürün ara';
+
+  @override
+  String get addOption => 'Seçenek ekle';
+
+  @override
+  String get addAction => 'Ekle';
+
+  @override
+  String get countryDialogTitle => 'Ülke Seçimi';
+
+  @override
+  String get countryDialogHint => 'Ülke adı yazınız (örn. Türkiye)';
+
+  @override
+  String get quickSelect => 'Hızlı Seçim';
+
+  @override
+  String get profileLoadRetry =>
+      'Profilin yüklenemedi. Bağlantını kontrol edip tekrar dene.';
+
+  @override
+  String get relativeJustNow => 'az önce';
+
+  @override
+  String relativeMinutesAgo(int count) {
+    return '$count dk önce';
+  }
+
+  @override
+  String relativeHoursAgo(int count) {
+    return '$count saat önce';
+  }
+
+  @override
+  String get relativeYesterday => 'dün';
+
+  @override
+  String relativeDaysAgo(int count) {
+    return '$count gün önce';
+  }
 }

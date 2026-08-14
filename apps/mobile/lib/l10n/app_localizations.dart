@@ -1609,6 +1609,90 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Sülfitler'**
   String get allergenSulphites;
+
+  /// Bottom navigation label for the home tab.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana Sayfa'**
+  String get navHome;
+
+  /// Bottom navigation label for the chatbot tab.
+  ///
+  /// In tr, this message translates to:
+  /// **'Chatbot'**
+  String get navChatbot;
+
+  /// Hint text for the product search field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün ara'**
+  String get searchProductHint;
+
+  /// Title of the dialog to add a custom chip option.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçenek ekle'**
+  String get addOption;
+
+  /// Confirm button that adds a custom option.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get addAction;
+
+  /// Title of the country selection dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke Seçimi'**
+  String get countryDialogTitle;
+
+  /// Hint for the country name text field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke adı yazınız (örn. Türkiye)'**
+  String get countryDialogHint;
+
+  /// Label above the quick-pick country chips.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı Seçim'**
+  String get quickSelect;
+
+  /// Error shown on the startup gate when the profile cannot be loaded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilin yüklenemedi. Bağlantını kontrol edip tekrar dene.'**
+  String get profileLoadRetry;
+
+  /// Relative time for a moment ago.
+  ///
+  /// In tr, this message translates to:
+  /// **'az önce'**
+  String get relativeJustNow;
+
+  /// Relative time in minutes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} dk önce'**
+  String relativeMinutesAgo(int count);
+
+  /// Relative time in hours.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} saat önce'**
+  String relativeHoursAgo(int count);
+
+  /// Relative time for the previous day.
+  ///
+  /// In tr, this message translates to:
+  /// **'dün'**
+  String get relativeYesterday;
+
+  /// Relative time in days.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} gün önce'**
+  String relativeDaysAgo(int count);
 }
 
 class _AppLocalizationsDelegate

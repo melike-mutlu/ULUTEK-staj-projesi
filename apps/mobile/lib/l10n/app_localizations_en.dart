@@ -821,4 +821,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allergenSulphites => 'Sulphites';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navChatbot => 'Chatbot';
+
+  @override
+  String get searchProductHint => 'Search products';
+
+  @override
+  String get addOption => 'Add option';
+
+  @override
+  String get addAction => 'Add';
+
+  @override
+  String get countryDialogTitle => 'Country selection';
+
+  @override
+  String get countryDialogHint => 'Enter a country name (e.g. Türkiye)';
+
+  @override
+  String get quickSelect => 'Quick select';
+
+  @override
+  String get profileLoadRetry =>
+      'Could not load your profile. Check your connection and try again.';
+
+  @override
+  String get relativeJustNow => 'Just now';
+
+  @override
+  String relativeMinutesAgo(int count) {
+    return '$count min ago';
+  }
+
+  @override
+  String relativeHoursAgo(int count) {
+    return '$count h ago';
+  }
+
+  @override
+  String get relativeYesterday => 'Yesterday';
+
+  @override
+  String relativeDaysAgo(int count) {
+    return '$count days ago';
+  }
 }
