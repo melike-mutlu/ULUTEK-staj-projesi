@@ -884,4 +884,103 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get noShoppingListsPrompt =>
       'Dokunun ve ilk alışveriş listenizi oluşturun';
+
+  @override
+  String get createListTitle => 'Yeni Liste Oluştur';
+
+  @override
+  String get listNameHint => 'Liste Adı (Örn: Hafta Sonu Pazarı)';
+
+  @override
+  String get createAction => 'Oluştur';
+
+  @override
+  String listCreated(String name) {
+    return '\"$name\" listesi oluşturuldu.';
+  }
+
+  @override
+  String get newListTooltip => 'Yeni Liste';
+
+  @override
+  String get noShoppingListsScreenTitle => 'Henüz bir alışveriş listeniz yok';
+
+  @override
+  String get noShoppingListsScreenBody =>
+      'Market veya pazar alışverişlerinizi kolayca planlamak için yeni bir liste oluşturabilirsiniz.';
+
+  @override
+  String listItemsSummary(int total, int bought) {
+    return '$total ürün • $bought alındı';
+  }
+
+  @override
+  String get deleteListTitle => 'Listeyi Sil';
+
+  @override
+  String get deleteListConfirm =>
+      'Bu alışveriş listesini ve içindeki tüm ürünleri silmek istediğinize emin misiniz?';
+
+  @override
+  String get deleteConfirmAction => 'Evet, Sil';
+
+  @override
+  String get listDeleted => 'Liste silindi.';
+
+  @override
+  String get listDetailTitle => 'Liste Detayı';
+
+  @override
+  String get shoppingProgress => 'Alışveriş İlerlemesi';
+
+  @override
+  String progressBought(int bought, int total) {
+    return '$bought / $total Alındı';
+  }
+
+  @override
+  String get noItemsTitle => 'Bu listede henüz ürün yok';
+
+  @override
+  String get noItemsBody =>
+      'Aşağıdaki \"Ürün Ekle\" butonuna dokunarak son tarananlardan veya arama ile ürün ekleyebilirsiniz.';
+
+  @override
+  String get addProduct => 'Ürün Ekle';
+
+  @override
+  String itemAdded(String name) {
+    return '\"$name\" listeye eklendi.';
+  }
+
+  @override
+  String get itemAddFailed => 'Ürün eklenirken bir hata oluştu.';
+
+  @override
+  String get addProductToList => 'Listeye Ürün Ekle';
+
+  @override
+  String get tabRecentScans => 'Son Tarananlar';
+
+  @override
+  String get tabSearchManual => 'Arama & Elle Ekle';
+
+  @override
+  String get noRecentScansTitle => 'Henüz taranmış ürün bulunmuyor.';
+
+  @override
+  String get noRecentScansBody =>
+      'Barkod tarayarak ürün incelediğinizde öneriler burada görünecektir.';
+
+  @override
+  String get manualAddTitle => 'Elle Ürün Adı Gir';
+
+  @override
+  String get manualNameHint => 'Örn: Süt, Elma, Yulaf...';
+
+  @override
+  String get searchByNameTitle => 'Ürün İsmine Göre Ara';
+
+  @override
+  String get searchByNameHint => 'Marka veya ürün adı ara...';
 }

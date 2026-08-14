@@ -5,6 +5,7 @@ import '../../../core/navigation/app_routes.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ShoppingListsView extends ConsumerStatefulWidget {
   const ShoppingListsView({super.key});
@@ -23,37 +24,38 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
   }
 
   Future<void> _showCreateListDialog() async {
+    final l10n = AppLocalizations.of(context);
     final nameController = TextEditingController();
 
     final String? result = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.playlist_add_rounded, color: AppColors.brand),
-              SizedBox(width: 8),
-              Text('Yeni Liste Oluştur'),
+              const Icon(Icons.playlist_add_rounded, color: AppColors.brand),
+              const SizedBox(width: 8),
+              Text(l10n.createListTitle),
             ],
           ),
           content: TextField(
             controller: nameController,
             autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Liste Adı (Örn: Hafta Sonu Pazarı)',
-              prefixIcon: Icon(Icons.edit_outlined),
+            decoration: InputDecoration(
+              hintText: l10n.listNameHint,
+              prefixIcon: const Icon(Icons.edit_outlined),
             ),
             onSubmitted: (val) => Navigator.pop(dialogContext, val),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
+              child: Text(l10n.cancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(dialogContext, nameController.text),
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.brand),
-              child: const Text('Oluştur', style: TextStyle(color: Colors.white)),
+              child: Text(l10n.createAction, style: const TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -68,7 +70,7 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
       if (newList != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('"${newList.name}" listesi oluşturuldu.'),
+            content: Text(l10n.listCreated(newList.name)),
             backgroundColor: AppColors.brand,
           ),
         );
@@ -84,6 +86,7 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final vm = ref.watch(shoppingListViewModelProvider);
@@ -99,13 +102,13 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
       appBar: AppBar(
         backgroundColor: backgroundColor,
         title: Text(
-          'Alışveriş Listelerim',
+          l10n.shoppingListsTitle,
           style: AppTextStyles.heading2.copyWith(color: textColor),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded, color: AppColors.brand, size: 28),
-            tooltip: 'Yeni Liste',
+            tooltip: l10n.newListTooltip,
             onPressed: _showCreateListDialog,
           ),
         ],
@@ -126,7 +129,7 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Henüz bir alışveriş listeniz yok',
+                          l10n.noShoppingListsScreenTitle,
                           style: AppTextStyles.title.copyWith(
                             color: textColor,
                             fontSize: 18,
@@ -134,7 +137,7 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Market veya pazar alışverişlerinizi kolayca planlamak için yeni bir liste oluşturabilirsiniz.',
+                          l10n.noShoppingListsScreenBody,
                           textAlign: TextAlign.center,
                           style: AppTextStyles.caption.copyWith(
                             color: secondaryTextColor,
@@ -144,9 +147,9 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
                         ElevatedButton.icon(
                           onPressed: _showCreateListDialog,
                           icon: const Icon(Icons.add_rounded, color: Colors.white),
-                          label: const Text(
-                            'Yeni Liste Oluştur',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          label: Text(
+                            l10n.createListTitle,
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.brand,
@@ -214,7 +217,7 @@ class _ShoppingListsViewState extends ConsumerState<ShoppingListsView> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          '${list.totalItems} ürün • ${list.boughtItems} alındı',
+                                          l10n.listItemsSummary(list.totalItems, list.boughtItems),
                                           style: AppTextStyles.caption.copyWith(
                                             color: secondaryTextColor,
                                           ),

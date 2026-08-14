@@ -1735,6 +1735,180 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Dokunun ve ilk alışveriş listenizi oluşturun'**
   String get noShoppingListsPrompt;
+
+  /// Title/button to create a new shopping list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Liste Oluştur'**
+  String get createListTitle;
+
+  /// Hint for the new shopping list name field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste Adı (Örn: Hafta Sonu Pazarı)'**
+  String get listNameHint;
+
+  /// Confirm button that creates the list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oluştur'**
+  String get createAction;
+
+  /// Snackbar after creating a list.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" listesi oluşturuldu.'**
+  String listCreated(String name);
+
+  /// Tooltip on the add-list action.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Liste'**
+  String get newListTooltip;
+
+  /// Empty-state title on the shopping lists screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz bir alışveriş listeniz yok'**
+  String get noShoppingListsScreenTitle;
+
+  /// Empty-state body on the shopping lists screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Market veya pazar alışverişlerinizi kolayca planlamak için yeni bir liste oluşturabilirsiniz.'**
+  String get noShoppingListsScreenBody;
+
+  /// Item count summary on a shopping list card.
+  ///
+  /// In tr, this message translates to:
+  /// **'{total} ürün • {bought} alındı'**
+  String listItemsSummary(int total, int bought);
+
+  /// Delete-list dialog title and tooltip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Listeyi Sil'**
+  String get deleteListTitle;
+
+  /// Delete-list confirmation body.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu alışveriş listesini ve içindeki tüm ürünleri silmek istediğinize emin misiniz?'**
+  String get deleteListConfirm;
+
+  /// Confirm button that deletes the list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet, Sil'**
+  String get deleteConfirmAction;
+
+  /// Snackbar after deleting a list.
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste silindi.'**
+  String get listDeleted;
+
+  /// Fallback title of the list detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste Detayı'**
+  String get listDetailTitle;
+
+  /// Progress card title on the list detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alışveriş İlerlemesi'**
+  String get shoppingProgress;
+
+  /// Bought-of-total label on the progress card.
+  ///
+  /// In tr, this message translates to:
+  /// **'{bought} / {total} Alındı'**
+  String progressBought(int bought, int total);
+
+  /// Empty-state title on the list detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu listede henüz ürün yok'**
+  String get noItemsTitle;
+
+  /// Empty-state body on the list detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aşağıdaki \"Ürün Ekle\" butonuna dokunarak son tarananlardan veya arama ile ürün ekleyebilirsiniz.'**
+  String get noItemsBody;
+
+  /// Add-product FAB label.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün Ekle'**
+  String get addProduct;
+
+  /// Snackbar after adding an item.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" listeye eklendi.'**
+  String itemAdded(String name);
+
+  /// Snackbar when adding an item fails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün eklenirken bir hata oluştu.'**
+  String get itemAddFailed;
+
+  /// Title of the add-product bottom sheet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Listeye Ürün Ekle'**
+  String get addProductToList;
+
+  /// Add-product sheet tab: recent scans.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son Tarananlar'**
+  String get tabRecentScans;
+
+  /// Add-product sheet tab: search & manual add.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arama & Elle Ekle'**
+  String get tabSearchManual;
+
+  /// Empty-state title in the recent scans tab.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz taranmış ürün bulunmuyor.'**
+  String get noRecentScansTitle;
+
+  /// Empty-state body in the recent scans tab.
+  ///
+  /// In tr, this message translates to:
+  /// **'Barkod tarayarak ürün incelediğinizde öneriler burada görünecektir.'**
+  String get noRecentScansBody;
+
+  /// Manual add section title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Elle Ürün Adı Gir'**
+  String get manualAddTitle;
+
+  /// Hint for the manual product name field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn: Süt, Elma, Yulaf...'**
+  String get manualNameHint;
+
+  /// Search-by-name section title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün İsmine Göre Ara'**
+  String get searchByNameTitle;
+
+  /// Hint for the search-by-name field.
+  ///
+  /// In tr, this message translates to:
+  /// **'Marka veya ürün adı ara...'**
+  String get searchByNameHint;
 }
 
 class _AppLocalizationsDelegate
