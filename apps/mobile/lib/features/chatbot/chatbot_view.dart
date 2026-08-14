@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/user_avatar_circle.dart';
 import '../shell/shell_viewmodel.dart';
 import '../profile/profile_viewmodel.dart';
+import '../../shared/services/image_picker_service.dart';
 import '../../core/constants/profile_options.dart'; // OnboardingField (diet, allergy vs) için gerekli
 
 class ChatbotView extends ConsumerStatefulWidget {
@@ -20,6 +21,14 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  //Hazır Soru Çipleri İçin Liste
+  final List<String> _suggestionChips = [
+    "Bu ürün vegan mı?",
+    "İçindekileri açıkla",
+    "Bana sağlıklı bir atıştırmalık öner",
+    "Glutensiz ürünleri nasıl anlarım?",
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -32,16 +41,61 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
     });
   }
 
-  void _sendMessage() {
-    final text = _messageController.text;
+  //textOverride parametresi sayesinde çiplere tıklanınca textfield'ı beklemeden mesaj atabileceğiz.
+  void _sendMessage({String? textOverride}) {
+    final text = textOverride ?? _messageController.text;
     if (text.trim().isNotEmpty) {
       ref.read(chatbotViewModelProvider).sendMessage(
             text,
             errorText: AppLocalizations.of(context).chatError,
           );
-      _messageController.clear();
+      if (textOverride == null){
+        _messageController.clear(); //Eğer textfield'dan geldiyse kutuyu temizle
+      }
       _scrollToBottom();
     }
+  }
+
+  // FOTOĞRAF SEÇME MENÜSÜ ---
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt_rounded, color: AkilliSepetColors.primary),
+                title: const Text('Kameradan Çek'),
+                onTap: () async {
+                  Navigator.pop(context); // Menüyü kapat
+                  final picker = ref.read(imagePickerServiceProvider);
+                  final image = await picker.pickFromCamera();
+                  if (image != null) {
+                    ref.read(chatbotViewModelProvider).setSelectedImage(image);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded, color: AkilliSepetColors.primary),
+                title: const Text('Galeriden Seç'),
+                onTap: () async {
+                  Navigator.pop(context); // Menüyü kapat
+                  final picker = ref.read(imagePickerServiceProvider);
+                  final image = await picker.pickFromGallery();
+                  if (image != null) {
+                    ref.read(chatbotViewModelProvider).setSelectedImage(image);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _scrollToBottom() {
@@ -205,7 +259,62 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
             else if (isPremium) ...[
               // --- PREMIUM İSE: SOHBET EKRANI ---
               Expanded(
-                child: ListView.builder(
+                child:chatVm.messages.isEmpty
+                    // 1. durum: Mesaj yoksa karşılama ekranı çiz
+                    ? Center(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: AkilliSepetColors.primary.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.smart_toy_rounded,
+                                  size: 64,
+                                  color: AkilliSepetColors.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                "Nasıl yardımcı olabilirim?",
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Sağlığın ve beslenmenle ilgili her şeyi bana sorabilirsin.",
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: secondaryTextColor,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 32),
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _suggestionChips.map((chipText){
+                                  return ActionChip(
+                                    label: Text(chipText),
+                                    backgroundColor: surfaceColor,
+                                    onPressed: () => _sendMessage(textOverride: chipText),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                    )
+                    //Mesaj varsa listeyi çiz
+                : ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   itemCount: chatVm.messages.length,
@@ -305,30 +414,68 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                     }
 
                     // --- NORMAL SOHBET BALONU ---
-                    return Align(
-                      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.75,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isUser ? AkilliSepetColors.primary : surfaceColor,
-                          borderRadius: BorderRadius.circular(16).copyWith(
-                            bottomRight: isUser ? const Radius.circular(0) : const Radius.circular(16),
-                            bottomLeft: !isUser ? const Radius.circular(0) : const Radius.circular(16),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          // EĞER MESAJ AI İSE SOLA AVATAR KOY
+                          if (!isUser) ...[
+                            Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(
+                                color: AkilliSepetColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.smart_toy_rounded, size: 16, color: Colors.white),
+                            ),
+                          ],
+
+                          // MESAJ BALONU (Flexible ile sarmaladık ki taşıp hata vermesin)
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: isUser ? AkilliSepetColors.primary : surfaceColor,
+                                borderRadius: BorderRadius.circular(16).copyWith(
+                                  bottomRight: isUser ? const Radius.circular(0) : const Radius.circular(16),
+                                  bottomLeft: !isUser ? const Radius.circular(0) : const Radius.circular(16),
+                                ),
+                                border: isUser ? null : Border.all(color: borderColor),
+                              ),
+                              // --- GÜNCELLENDİ: MESAJ BALONU ---
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // YENİ: EĞER FOTOĞRAF VARSA GÖSTER
+                                  if (msg.attachedImageBytes != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.memory(
+                                          msg.attachedImageBytes!,
+                                          width: 150, // Balonun içinde tatlı bir boyutta dursun
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  // ESKİ: METİN KISMI AYNEN DURUYOR
+                                  Text(
+                                    msg.text,
+                                    style: TextStyle(
+                                      color: isUser ? Colors.white : textColor,
+                                      fontSize: 15,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          border: isUser ? null : Border.all(color: borderColor),
-                        ),
-                        child: Text(
-                          msg.text,
-                          style: TextStyle(
-                            color: isUser ? Colors.white : textColor,
-                            fontSize: 15,
-                            height: 1.3,
-                          ),
-                        ),
+                        ],
                       ),
                     );
                   },
@@ -362,10 +509,58 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+
+                    if (chatVm.selectedImage != null)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.memory(
+                                  chatVm.selectedImage!.bytes,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                right: -4,
+                                top: -4,
+                                child: IconButton(
+                                  icon: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                  ),
+                                  onPressed: () => chatVm.removeSelectedImage(),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                       child: Row(
                         children: [
+
+                          IconButton(
+                            icon: const Icon(Icons.add_a_photo_outlined),
+                            color: secondaryTextColor,
+                            onPressed: _showImagePickerOptions,
+                          ),
+
+
                           Expanded(
                             child: TextField(
                               controller: _messageController,
@@ -393,7 +588,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                             ),
                             child: IconButton(
                               icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-                              onPressed: _sendMessage,
+                              onPressed: () => _sendMessage,
                             ),
                           ),
                         ],

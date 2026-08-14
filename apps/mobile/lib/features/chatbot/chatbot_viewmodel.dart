@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../data/repositories/chatbot_repository.dart';
+import '../../shared/services/image_picker_service.dart';
 
 class ChatMessage {
   ChatMessage({
@@ -8,6 +9,7 @@ class ChatMessage {
     this.isSuggestion = false,
     this.suggestedField,
     this.suggestedValue,
+    this.attachedImageBytes,
   });
   
   final String text;
@@ -15,6 +17,7 @@ class ChatMessage {
   final bool isSuggestion;
   final String? suggestedField;
   final String? suggestedValue;
+  final Uint8List? attachedImageBytes;
 }
 
 class ChatbotViewModel extends ChangeNotifier {
@@ -35,6 +38,17 @@ class ChatbotViewModel extends ChangeNotifier {
   /// [consumePendingInput] so it never re-appears on a later tab visit.
   String? pendingInput;
 
+  PickedImage? selectedImage;
+  void setSelectedImage(PickedImage? image) {
+    selectedImage = image;
+    notifyListeners();
+  }
+
+  void removeSelectedImage() {
+    selectedImage = null;
+    notifyListeners();
+  }
+
   void setPendingInput(String text) {
     pendingInput = text;
     notifyListeners();
@@ -51,15 +65,25 @@ class ChatbotViewModel extends ChangeNotifier {
     errorMessage = null;
     // Yeni sohbet başladığında hafızayı sıfırla
     currentSessionId = null;
+    selectedImage = null;
     notifyListeners();
   }
 
   /// [errorText] is the localized message shown as a bot reply if the request
   /// fails; the View supplies it so the ViewModel stays free of localization.
   Future<void> sendMessage(String userMessage, {required String errorText}) async {
-    if (userMessage.trim().isEmpty) return;
+    if (userMessage.trim().isEmpty && selectedImage == null) return;
 
-    messages.add(ChatMessage(text: userMessage, isUser: true));
+    messages.add(ChatMessage(
+      text: userMessage, 
+      isUser: true,
+      attachedImageBytes: selectedImage?.bytes,
+      ));
+
+    // Gönderim için resmi geçici değişkene alıp UI'dan temizliyoruz
+    final imageToSend = selectedImage;
+    selectedImage = null;
+
     errorMessage = null;
     isTyping = true;
     notifyListeners();
@@ -69,6 +93,7 @@ class ChatbotViewModel extends ChangeNotifier {
       final result = await _chatbotRepository.sendMessage(
         userMessage,
         sessionId: currentSessionId,
+        image: imageToSend,
       );
 
       // Backend'den dönen yeni/güncel session_id'yi alıyoruz
@@ -116,7 +141,8 @@ class ChatbotViewModel extends ChangeNotifier {
        final oldMsg = messages[messageIndex];
        messages[messageIndex] = ChatMessage(
          text: "${oldMsg.text}\n\n*($handledLabel)*",
-         isUser: false
+         isUser: false,
+         attachedImageBytes: oldMsg.attachedImageBytes,
        );
        notifyListeners();
     }
