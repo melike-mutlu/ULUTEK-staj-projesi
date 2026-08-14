@@ -2,6 +2,7 @@ import { getServiceClient, getUserClient } from "../_shared/lib/supabaseClient.t
 import { getFromCache, saveToCache } from "../_shared/supabase/productCache.service.ts";
 import { fetchFromOpenFoodFacts } from "../_shared/openFoodFacts/openFoodFacts.service.ts";
 import { runRuleEngine, findMissingFields } from "../_shared/ruleEngine/ruleEngine.service.ts";
+import { getAdditiveInfo } from "../_shared/ruleEngine/additives_dictionary.ts";
 import { findSafeAlternatives } from "../_shared/alternativeProducts.service.ts";
 import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 
@@ -48,9 +49,12 @@ Deno.serve(async (req: Request) => {
     }
 
     const missingFields = findMissingFields(product);
+    const additivesDetails = (product.additives ?? []).map(getAdditiveInfo);
+
     return jsonResponse({
       status: missingFields.length > 0 ? "partial" : "found",
       product,
+      additives_details: additivesDetails,
       rule_engine_result: ruleEngineResult,
       safe_alternatives: safeAlternatives,
       ...(missingFields.length > 0 ? { missing_fields: missingFields } : {}),
