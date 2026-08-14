@@ -302,5 +302,19 @@
   "manualNameHint": "e.g. Milk, Apple, Oats...",
   "searchByNameTitle": "Search by product name",
   "searchByNameHint": "Search by brand or product name...",
-  "medicalDisclaimerShort": "This information is not medical advice."
+  "medicalDisclaimerShort": "This information is not medical advice.",
+  "optNutsPeanuts": "Nuts / Peanuts",
+  "optVegan": "Vegan",
+  "optVegetarian": "Vegetarian",
+  "optDiabeticFriendly": "Diabetic-friendly",
+  "optAthleteHighProtein": "Athlete / High protein",
+  "optLowCarb": "Low carb",
+  "optGlutenFreeLifestyle": "Gluten-free lifestyle",
+  "optKetogenic": "Ketogenic",
+  "optBloodPressure": "Blood pressure",
+  "optCeliac": "Celiac",
+  "optHighCholesterol": "High cholesterol",
+  "optKidneyDisease": "Kidney disease",
+  "optDiabetesDisease": "Diabetes",
+  "optHeartCondition": "Heart condition"
 }

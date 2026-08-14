@@ -995,4 +995,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get medicalDisclaimerShort =>
       'This information is not medical advice.';
+
+  @override
+  String get optNutsPeanuts => 'Nuts / Peanuts';
+
+  @override
+  String get optVegan => 'Vegan';
+
+  @override
+  String get optVegetarian => 'Vegetarian';
+
+  @override
+  String get optDiabeticFriendly => 'Diabetic-friendly';
+
+  @override
+  String get optAthleteHighProtein => 'Athlete / High protein';
+
+  @override
+  String get optLowCarb => 'Low carb';
+
+  @override
+  String get optGlutenFreeLifestyle => 'Gluten-free lifestyle';
+
+  @override
+  String get optKetogenic => 'Ketogenic';
+
+  @override
+  String get optBloodPressure => 'Blood pressure';
+
+  @override
+  String get optCeliac => 'Celiac';
+
+  @override
+  String get optHighCholesterol => 'High cholesterol';
+
+  @override
+  String get optKidneyDisease => 'Kidney disease';
+
+  @override
+  String get optDiabetesDisease => 'Diabetes';
+
+  @override
+  String get optHeartCondition => 'Heart condition';
 }

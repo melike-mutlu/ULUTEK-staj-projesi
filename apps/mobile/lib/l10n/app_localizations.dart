@@ -1915,6 +1915,90 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu bilgi tıbbi tavsiye niteliği taşımaz.'**
   String get medicalDisclaimerShort;
+
+  /// Profile allergy chip: nuts/peanuts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fındık/Fıstık'**
+  String get optNutsPeanuts;
+
+  /// Profile diet chip: vegan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vegan'**
+  String get optVegan;
+
+  /// Profile diet chip: vegetarian.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vejetaryen'**
+  String get optVegetarian;
+
+  /// Profile diet chip: diabetic-friendly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diyabet dostu'**
+  String get optDiabeticFriendly;
+
+  /// Profile diet chip: athlete / high protein.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sporcu / Yüksek protein'**
+  String get optAthleteHighProtein;
+
+  /// Profile diet chip: low carb.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşük karbonhidrat'**
+  String get optLowCarb;
+
+  /// Profile diet chip: gluten-free lifestyle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Glutensiz yaşam tarzı'**
+  String get optGlutenFreeLifestyle;
+
+  /// Profile diet chip: ketogenic.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ketojenik'**
+  String get optKetogenic;
+
+  /// Profile health chip: blood pressure.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tansiyon'**
+  String get optBloodPressure;
+
+  /// Profile health chip: celiac.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çölyak'**
+  String get optCeliac;
+
+  /// Profile health chip: high cholesterol.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüksek kolesterol'**
+  String get optHighCholesterol;
+
+  /// Profile health chip: kidney disease.
+  ///
+  /// In tr, this message translates to:
+  /// **'Böbrek hastalığı'**
+  String get optKidneyDisease;
+
+  /// Profile health chip: diabetes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şeker hastalığı'**
+  String get optDiabetesDisease;
+
+  /// Profile health chip: heart condition.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalp rahatsızlığı'**
+  String get optHeartCondition;
 }
 
 class _AppLocalizationsDelegate

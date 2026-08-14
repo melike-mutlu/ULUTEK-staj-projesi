@@ -987,4 +987,46 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get medicalDisclaimerShort =>
       'Bu bilgi tıbbi tavsiye niteliği taşımaz.';
+
+  @override
+  String get optNutsPeanuts => 'Fındık/Fıstık';
+
+  @override
+  String get optVegan => 'Vegan';
+
+  @override
+  String get optVegetarian => 'Vejetaryen';
+
+  @override
+  String get optDiabeticFriendly => 'Diyabet dostu';
+
+  @override
+  String get optAthleteHighProtein => 'Sporcu / Yüksek protein';
+
+  @override
+  String get optLowCarb => 'Düşük karbonhidrat';
+
+  @override
+  String get optGlutenFreeLifestyle => 'Glutensiz yaşam tarzı';
+
+  @override
+  String get optKetogenic => 'Ketojenik';
+
+  @override
+  String get optBloodPressure => 'Tansiyon';
+
+  @override
+  String get optCeliac => 'Çölyak';
+
+  @override
+  String get optHighCholesterol => 'Yüksek kolesterol';
+
+  @override
+  String get optKidneyDisease => 'Böbrek hastalığı';
+
+  @override
+  String get optDiabetesDisease => 'Şeker hastalığı';
+
+  @override
+  String get optHeartCondition => 'Kalp rahatsızlığı';
 }

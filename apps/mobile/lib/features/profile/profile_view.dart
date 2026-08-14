@@ -218,6 +218,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               for (final field in OnboardingField.values) ...<Widget>[
                 ProfileSectionCard(
                   title: profileSectionTitle(l10n, field),
+                  labelBuilder: (option) => localizedProfileOption(l10n, option),
                   options: viewModel.optionsFor(field),
                   selected: viewModel.selectionsFor(field),
                   onToggle: (String option) =>

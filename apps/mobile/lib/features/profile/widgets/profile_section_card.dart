@@ -18,12 +18,16 @@ class ProfileSectionCard extends StatelessWidget {
     required this.onShowAll,
     this.onAddCustom,
     this.canAddCustom = true,
+    this.labelBuilder,
   });
 
   final String title;
   final List<String> options;
   final Set<String> selected;
   final ValueChanged<String> onToggle;
+
+  /// Maps an option value to its localized chip label (see SelectionChipGroup).
+  final String Function(String option)? labelBuilder;
 
   /// Whether the card is expanded — collapsed shows only [_collapsedCount].
   final bool isExpanded;
@@ -64,6 +68,7 @@ class ProfileSectionCard extends StatelessWidget {
         onToggle: onToggle,
         onAddCustom: onAddCustom,
         canAddCustom: canAddCustom,
+        labelBuilder: labelBuilder,
         visibleCount: isExpanded ? null : _collapsedCount,
         onShowAll: onShowAll,
       ),

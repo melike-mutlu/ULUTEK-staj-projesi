@@ -29,6 +29,7 @@ class SelectionChipGroup extends StatelessWidget {
     this.visibleCount,
     this.onShowAll,
     this.showAllLabel,
+    this.labelBuilder,
   });
 
   final String title;
@@ -67,6 +68,11 @@ class SelectionChipGroup extends StatelessWidget {
 
   /// Falls back to the localized "see all" label when not provided.
   final String? showAllLabel;
+
+  /// Maps an option value to the text shown on its chip. The value itself is
+  /// still used for selection/toggle; only the label is transformed (e.g. to
+  /// localize catalog options). Defaults to showing the value verbatim.
+  final String Function(String option)? labelBuilder;
 
   static const double _gap = 20;
 
@@ -134,7 +140,7 @@ class SelectionChipGroup extends StatelessWidget {
           children: <Widget>[
             for (final String option in visibleOptions)
               SelectableChip(
-                label: option,
+                label: labelBuilder?.call(option) ?? option,
                 isSelected: selected.contains(option),
                 style: chipStyle,
                 selectedColor: _pastelFor(option),
