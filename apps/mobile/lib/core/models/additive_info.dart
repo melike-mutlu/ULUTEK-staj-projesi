@@ -22,10 +22,25 @@ class AdditiveInfo {
       code: json['code'] as String? ?? '',
       name: json['name'] as String? ?? '',
       category: json['category'] as String? ?? 'Katkı Maddesi',
-      riskLevel: json['risk_level'] as String? ?? 'Bilinmiyor',
+      riskLevel: _riskLevelLabel(json['riskLevel'] as String?),
       description: json['description'] as String? ?? '',
       source: json['source'] as String?,
     );
+  }
+
+  /// Backend (additives_dictionary.ts) döner: "safe" | "caution" | "avoid".
+  /// _RiskBadge Türkçe etiketlere göre renklendiriyor, burada eşliyoruz.
+  static String _riskLevelLabel(String? backendRiskLevel) {
+    switch (backendRiskLevel) {
+      case 'safe':
+        return 'Güvenli';
+      case 'caution':
+        return 'Dikkat Et';
+      case 'avoid':
+        return 'Yüksek Risk';
+      default:
+        return 'Bilinmiyor';
+    }
   }
 
   Map<String, dynamic> toJson() => {

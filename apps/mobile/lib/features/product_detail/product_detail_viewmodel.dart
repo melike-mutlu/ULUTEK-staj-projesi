@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/models/additive_info.dart';
 import '../../core/models/alternative.dart';
 import '../../core/models/explanation.dart';
 import '../../core/models/product.dart';
@@ -56,6 +57,9 @@ class ProductDetailViewModel extends ChangeNotifier {
 
   /// Recommended alternatives for the current product. Empty until loaded.
   List<Alternative> alternatives = const [];
+
+  /// Plain-language info per additive (E-code) the product carries.
+  List<AdditiveInfo> additivesDetails = const [];
 
   /// Diyet/sağlık kategorilerini beslemek için tutulur.
   UserProfile? userProfile;
@@ -138,6 +142,7 @@ class ProductDetailViewModel extends ChangeNotifier {
 
     // Alternatives ride inside the fetch response; no separate request needed.
     alternatives = fetchResult.safeAlternatives;
+    additivesDetails = fetchResult.additivesDetails;
 
     await load(
       product: product,

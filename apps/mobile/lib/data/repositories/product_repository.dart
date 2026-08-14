@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/models/additive_info.dart';
 import '../../core/models/alternative.dart';
 import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
@@ -12,6 +13,9 @@ class ProductFetchResult {
 
   /// Safe alternatives the backend recommends; always a list, empty when none.
   final List<Alternative> safeAlternatives;
+
+  /// Plain-language info for every additive (E-code) the product carries.
+  final List<AdditiveInfo> additivesDetails;
   final String? errorMessage;
 
   const ProductFetchResult({
@@ -19,6 +23,7 @@ class ProductFetchResult {
     this.product,
     this.ruleEngineResult,
     this.safeAlternatives = const [],
+    this.additivesDetails = const [],
     this.errorMessage,
   });
 }
@@ -76,6 +81,7 @@ class ProductRepository {
                 data['rule_engine_result'] as Map<String, dynamic>)
             : null,
         safeAlternatives: _parseAlternatives(data['safe_alternatives']),
+        additivesDetails: _parseAdditivesDetails(data['additives_details']),
       );
     } catch (e, stack) {
       debugPrint('[ProductRepository] fetchProduct Exception: $e\n$stack');
@@ -97,6 +103,16 @@ class ProductRepository {
     return raw
         .whereType<Map<String, dynamic>>()
         .map(Alternative.fromJson)
+        .toList(growable: false);
+  }
+
+  /// Maps the `additives_details` field into models, tolerating a missing or
+  /// malformed value by returning an empty list.
+  List<AdditiveInfo> _parseAdditivesDetails(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map<String, dynamic>>()
+        .map(AdditiveInfo.fromJson)
         .toList(growable: false);
   }
 }

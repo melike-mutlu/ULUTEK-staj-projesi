@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/akilli_sepet_colors.dart';
-import '../../../l10n/app_localizations.dart';
 
 /// Renders the community verification badge + interactive vote (onay/reddet) buttons
 /// when a product is pending/unverified.
@@ -23,7 +21,6 @@ class CommunityVerificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 

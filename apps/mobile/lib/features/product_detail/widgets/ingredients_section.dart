@@ -9,9 +9,18 @@ import 'detail_section.dart';
 /// Ingredients text and additives. Collapsed by default so a long ingredient
 /// list does not push the personal information off the screen.
 class IngredientsSection extends StatefulWidget {
-  const IngredientsSection({super.key, required this.product});
+  const IngredientsSection({
+    super.key,
+    required this.product,
+    this.additivesDetails = const [],
+  });
 
   final Product product;
+
+  /// Backend's plain-language info per additive (fetch-product's
+  /// additives_details). Falls back to AdditiveInfo.getMockInfo when a code
+  /// has no match here (e.g. backend not deployed yet).
+  final List<AdditiveInfo> additivesDetails;
 
   @override
   State<IngredientsSection> createState() => _IngredientsSectionState();
@@ -44,7 +53,10 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                   runSpacing: 6,
                   children: [
                     for (final additive in additives)
-                      _AdditiveChip(code: additive),
+                      _AdditiveChip(
+                        code: additive,
+                        additivesDetails: widget.additivesDetails,
+                      ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -108,9 +120,10 @@ class _IngredientsSectionState extends State<IngredientsSection> {
 }
 
 class _AdditiveChip extends StatelessWidget {
-  const _AdditiveChip({required this.code});
+  const _AdditiveChip({required this.code, this.additivesDetails = const []});
 
   final String code;
+  final List<AdditiveInfo> additivesDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +133,13 @@ class _AdditiveChip extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          final info = AdditiveInfo.getMockInfo(code);
+          final info = additivesDetails
+              .cast<AdditiveInfo?>()
+              .firstWhere(
+                (a) => a?.code.toUpperCase() == cleanCode,
+                orElse: () => null,
+              ) ??
+              AdditiveInfo.getMockInfo(code);
           AdditiveInfoSheet.show(context, info);
         },
         borderRadius: BorderRadius.circular(6),

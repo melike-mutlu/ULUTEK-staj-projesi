@@ -358,7 +358,10 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                     // 8. İÇİNDEKİLER (Ingredients & Additives)
                     KeyedSubtree(
                       key: _sectionKeys[7],
-                      child: IngredientsSection(product: product),
+                      child: IngredientsSection(
+                        product: product,
+                        additivesDetails: _viewModel.additivesDetails,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
