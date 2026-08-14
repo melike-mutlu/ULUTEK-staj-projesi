@@ -1,3 +1,4 @@
+import { searchProductsByCategory } from "./openFoodFacts/openFoodFacts.service.ts";
 import { runRuleEngine } from "./ruleEngine/ruleEngine.service.ts";
 
 type UserProfile = any;
@@ -13,89 +14,143 @@ export interface AlternativeProduct {
   recommendation_reason?: string;
 }
 
+const IGNORED_CATEGORIES = new Set([
+  "en:foods",
+  "en:groceries",
+  "en:plant-based-foods",
+  "en:plant-based-foods-and-beverages",
+  "en:beverages-and-beverages-preparations",
+]);
+
 /**
- * "Safe" mirrors the rule engine's own verdict directly — has_conflict already
- * rolls up allergens, health conditions, and diet conflicts. Insufficient data
- * is never "safe" either: an alternative with no evidence is not a real
- * recommendation.
+ * İki kategori kümesi arasındaki Jaccard benzerliğini hesaplar.
+ * J(A, B) = |A ∩ B| / |A ∪ B|
+ */
+function calculateJaccardSimilarity(
+  setA: Set<string>,
+  setB: Set<string>,
+): number {
+  if (setA.size === 0 || setB.size === 0) return 0;
+
+  let intersectionCount = 0;
+  for (const item of setA) {
+    if (setB.has(item)) intersectionCount++;
+  }
+
+  const unionCount = new Set([...setA, ...setB]).size;
+  return unionCount === 0 ? 0 : intersectionCount / unionCount;
+}
+
+/**
+ * Rule engine sonucunu değerlendirir.
  */
 function isSafeAlternative(ruleResult: any): boolean {
   if (!ruleResult) return false;
   if (ruleResult.data_sufficiency === "insufficient") return false;
-  return !ruleResult.has_conflict;
+  return !ruleResult.has_conflict && !ruleResult.hasConflict;
 }
 
-/**
- * Nutri-Score sıralama önceliği.
- */
-const scoreOrder: Record<string, number> = {
-  A: 1,
-  B: 2,
-  C: 3,
-  D: 4,
-  E: 5,
-};
-
-/**
- * Taratılan ürünle aynı kategorideki doğrulanmış ürünleri product_cache tablosundan çeker,
- * mevcut rule engine'den geçirir ve yalnızca güvenli alternatifleri döndürür.
- */
 export async function findSafeAlternatives(
   scannedProduct: ProductData,
   userProfile: UserProfile,
-  supabaseClient: any,
-  limit: number = 3,
+  _supabaseClient: any,
+  limit: number = 5,
 ): Promise<AlternativeProduct[]> {
-  const category = scannedProduct.categories_tags?.[0];
-  if (!category) return [];
+  const scannedCategories: string[] = scannedProduct.categories_tags ?? [];
+  if (scannedCategories.length === 0) return [];
 
-  const { data: candidates, error } = await supabaseClient
-    .from("product_cache")
-    .select("*")
-    .contains("categories_tags", [category])
-    .neq("barcode", scannedProduct.barcode)
-    .limit(20);
+  // Çok genel kategorileri çıkar
+  const scannedFiltered = scannedCategories.filter(
+    (c) => !IGNORED_CATEGORIES.has(c),
+  );
+  if (scannedFiltered.length === 0) return [];
 
-  if (error) {
-    console.error("Alternatif ürün sorgu hatası:", error);
-    return [];
+  const scannedSet = new Set<string>(scannedFiltered);
+
+  // En spesifik 3 kategoriyi dene
+  const categoriesToTry = scannedFiltered.slice(-3).reverse();
+
+  let rawCandidates: any[] = [];
+
+  for (const category of categoriesToTry) {
+    try {
+      const results = await searchProductsByCategory(category, 25);
+
+      if (results.length > 0) {
+        rawCandidates = results;
+        break;
+      }
+    } catch (e) {
+      console.error("OFF Arama Hatası:", e);
+    }
   }
 
-  if (!candidates || candidates.length === 0) {
-    return [];
-  }
+  if (rawCandidates.length === 0) return [];
+
+  const scannedBarcode = scannedProduct.barcode || scannedProduct.code;
+
+  // Benzerlik hesapla ve sırala
+  const scoredCandidates = rawCandidates
+    .filter((candidate) => {
+      const candidateBarcode = candidate.barcode || candidate.code;
+      return candidateBarcode !== scannedBarcode;
+    })
+    .map((candidate) => {
+      const candidateCategories: string[] = candidate.categories_tags ?? [];
+      const candidateFiltered = candidateCategories.filter(
+        (c) => !IGNORED_CATEGORIES.has(c),
+      );
+      const candidateSet = new Set<string>(candidateFiltered);
+
+      const similarity = calculateJaccardSimilarity(
+        scannedSet,
+        candidateSet,
+      );
+
+      return { candidate, similarity };
+    })
+    .filter((item) => item.similarity >= 0.15)
+    .sort((a, b) => b.similarity - a.similarity);
 
   const safeAlternatives: AlternativeProduct[] = [];
 
-  // Deterministik rule engine süzgeci
-  for (const candidate of candidates) {
+  // Rule engine filtresi
+  for (const { candidate } of scoredCandidates) {
     const ruleResult = runRuleEngine(candidate, userProfile);
 
-    if (!isSafeAlternative(ruleResult)) {
-      continue;
-    }
+    if (!isSafeAlternative(ruleResult)) continue;
 
-    const grade = candidate.nutriscore?.toUpperCase();
+    const grade = (
+      candidate.nutriscore_grade ?? candidate.nutriscore
+    )?.toUpperCase();
 
     safeAlternatives.push({
-      barcode: candidate.barcode,
-      product_name: candidate.name ?? "Bilinmeyen Ürün",
-      brand: candidate.brand ?? undefined,
-      image_url: candidate.image_url ?? undefined,
+      barcode: candidate.barcode || candidate.code,
+      product_name:
+        candidate.product_name ??
+        candidate.name ??
+        "Bilinmeyen Ürün",
+      brand: candidate.brands || candidate.brand,
+      image_url:
+        candidate.image_front_small_url ||
+        candidate.image_url ||
+        candidate.image_front_url,
       nutriscore_grade: grade,
       is_safe: true,
       recommendation_reason: grade
         ? `Nutri-Score ${grade} kalitesinde ve sağlık profilinizle uyumlu.`
         : "Sağlık ve diyet profilinizle uyumlu.",
     });
+
+    if (safeAlternatives.length >= limit) break;
   }
 
-  // Nutri-Score'a göre sırala (A -> E)
-  safeAlternatives.sort((a, b) => {
-    const scoreA = scoreOrder[a.nutriscore_grade ?? "Z"] ?? 99;
-    const scoreB = scoreOrder[b.nutriscore_grade ?? "Z"] ?? 99;
-    return scoreA - scoreB;
+  // Tek özet log
+  console.log("Alternative search completed", {
+    barcode: scannedBarcode,
+    candidatesFound: scoredCandidates.length,
+    alternativesReturned: safeAlternatives.length,
   });
 
-  return safeAlternatives.slice(0, limit);
+  return safeAlternatives;
 }
