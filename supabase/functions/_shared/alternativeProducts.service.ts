@@ -22,6 +22,14 @@ const IGNORED_CATEGORIES = new Set([
   "en:beverages-and-beverages-preparations",
 ]);
 
+const scoreOrder: Record<string, number> = {
+  A: 1,
+  B: 2,
+  C: 3,
+  D: 4,
+  E: 5,
+};
+
 /**
  * İki kategori kümesi arasındaki Jaccard benzerliğini hesaplar.
  * J(A, B) = |A ∩ B| / |A ∪ B|
@@ -145,6 +153,13 @@ export async function findSafeAlternatives(
     if (safeAlternatives.length >= limit) break;
   }
 
+  // Güvenli alternatifleri Nutri-Score'a göre sırala
+  safeAlternatives.sort((a, b) => {
+    const scoreA = scoreOrder[a.nutriscore_grade ?? "Z"] ?? 99;
+    const scoreB = scoreOrder[b.nutriscore_grade ?? "Z"] ?? 99;
+    return scoreA - scoreB;
+  });
+
   // Tek özet log
   console.log("Alternative search completed", {
     barcode: scannedBarcode,
@@ -152,5 +167,5 @@ export async function findSafeAlternatives(
     alternativesReturned: safeAlternatives.length,
   });
 
-  return safeAlternatives;
+  return safeAlternatives.slice(0, limit);
 }
