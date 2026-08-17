@@ -98,7 +98,7 @@ class CommunityVerificationCard extends StatelessWidget {
                     onVoteApprove();
                     _showFeedbackToast(
                       context,
-                      isUpvoted ? 'Oyunuz geri alındı.' : 'Ürün doğrulamasını onayladınız! (Mock)',
+                      isUpvoted ? 'Oyunuz geri alındı.' : 'Ürün doğrulamasını onayladınız!',
                       isUpvoted ? Colors.grey : const Color(0xFF10B981),
                     );
                   },
@@ -162,7 +162,7 @@ class CommunityVerificationCard extends StatelessWidget {
                     onVoteReject();
                     _showFeedbackToast(
                       context,
-                      isDownvoted ? 'Oyunuz geri alındı.' : 'Ürün doğrulamasını reddettiniz! (Mock)',
+                      isDownvoted ? 'Oyunuz geri alındı.' : 'Ürün doğrulamasını reddettiniz!',
                       isDownvoted ? Colors.grey : const Color(0xFFEF4444),
                     );
                   },

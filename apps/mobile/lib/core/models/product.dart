@@ -41,6 +41,7 @@ class Nutriments {
 /// docs/architecture.md — Sözleşme 1 (`fetch-product`) yanıtındaki "product" nesnesi.
 class Product {
   final String barcode;
+  final String? pendingProductId; //Backend'den gelecek olan asıl tablo kimliği
   final String name;
   final String? brand;
   final String? imageUrl;
@@ -61,6 +62,7 @@ class Product {
 
   const Product({
     required this.barcode,
+    this.pendingProductId,
     required this.name,
     this.brand,
     this.imageUrl,
@@ -91,6 +93,7 @@ class Product {
 
     return Product(
       barcode: json['barcode'] as String,
+      pendingProductId: json['pending_product_id'] as String? ?? json['id'] as String?,
       name: json['name'] as String,
       brand: json['brand'] as String? ?? json['brands'] as String?,
       imageUrl: json['image_url'] as String? ??

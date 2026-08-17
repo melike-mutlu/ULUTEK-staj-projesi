@@ -553,7 +553,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () {
-                  _viewModel.loadMockState('green');
+                  _viewModel.loadMockState('pending');
                 },
                 child: Text(l10n.sampleProductDemo),
               ),
