@@ -92,6 +92,11 @@ class _FakeProductRepository implements ProductRepository {
       ),
     );
   }
+
+  @override
+  Future<List<ProductFetchResult>> compareProducts(List<String> barcodes) async {
+    return [for (final barcode in barcodes) await fetchProduct(barcode)];
+  }
 }
 
 /// Opens the screen with a route argument; profile layer is faked (no Supabase).

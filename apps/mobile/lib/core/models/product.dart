@@ -60,6 +60,11 @@ class Product {
   /// Topluluk tarafından eklenmiş ve henüz onay bekleyen/doğrulanmamış ürün göstergesi.
   final bool isPending;
 
+  /// `pending_products` tablosundaki satırın UUID'si — yalnızca [isPending]
+  /// true olduğunda dolu. Onay/oylama sistemi (pending_product_votes) bu
+  /// id'yi bekliyor; barkod bu amaçla kullanılamaz.
+  final String? pendingProductId;
+
   const Product({
     required this.barcode,
     this.pendingProductId,
@@ -74,6 +79,7 @@ class Product {
     this.nutriscore,
     this.status,
     bool? isPending,
+    this.pendingProductId,
   }) : isPending = isPending ?? (status == 'PENDING');
 
   /// Ingredients text for the given [localeName] (e.g. `l10n.localeName`):
@@ -116,6 +122,7 @@ class Product {
       nutriscore: json['nutriscore'] as String?,
       status: statusVal,
       isPending: isPendingVal,
+      pendingProductId: json['id'] as String?,
     );
   }
 
@@ -140,6 +147,7 @@ class Product {
       'nutriscore': nutriscore,
       if (status != null) 'status': status,
       'is_pending': isPending,
+      if (pendingProductId != null) 'id': pendingProductId,
     };
   }
 }

@@ -17,6 +17,7 @@ import 'widgets/profile_check_section.dart';
 import 'widgets/product_header_card.dart';
 import 'widgets/recommendations_section.dart';
 import 'widgets/warning_banner.dart';
+import '../product_comparison/widgets/health_condition_info_card.dart';
 
 class ProductDetailView extends ConsumerStatefulWidget {
   const ProductDetailView({super.key});
@@ -319,20 +320,45 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 5. SAĞLIK (Health Conditions Checks)
-                    KeyedSubtree(
-                      key: _sectionKeys[4],
-                      child: ProfileCheckSection(
-                        title: l10n.healthConditionTitle,
-                        icon: Icons.favorite_outline_rounded,
-                        checks: healthChecks(
-                          l10n,
-                          _viewModel.userProfile,
-                          _viewModel.ruleEngineResult,
+                    // 5. SAĞLIK (Health Conditions Checks + kural motorunun
+                    // tanımadığı özel durumlar için genel bilgi kartı)
+                    Builder(builder: (context) {
+                      final checks = healthChecks(
+                        l10n,
+                        _viewModel.userProfile,
+                        _viewModel.ruleEngineResult,
+                      );
+                      // level == null: kural motorunun sözlüğünde olmayan,
+                      // dolayısıyla "değerlendirilemedi" dönen özel durumlar.
+                      // Sadece bunlar için genel bilgi kartı gösteriyoruz —
+                      // kural motorunun gerçek karar verdiği durumlar zaten
+                      // ProfileCheckSection'da net biçimde görünüyor.
+                      final unrecognized =
+                          checks.where((c) => c.level == null).toList();
+
+                      return KeyedSubtree(
+                        key: _sectionKeys[4],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ProfileCheckSection(
+                              title: l10n.healthConditionTitle,
+                              icon: Icons.favorite_outline_rounded,
+                              checks: checks,
+                              emptyMessage: l10n.noHealthCondition,
+                            ),
+                            for (final check in unrecognized) ...[
+                              const SizedBox(height: 12),
+                              HealthConditionInfoCard(
+                                conditionName: check.label,
+                                infoText:
+                                    '"${check.label}" durumu için kural motorumuzda henüz özel bir eşik tanımlı değil, bu yüzden bu ürünü bu duruma göre değerlendiremiyoruz. Tüketmeden önce ambalaj etiketini kontrol et ve doktoruna danış.',
+                              ),
+                            ],
+                          ],
                         ),
-                        emptyMessage: l10n.noHealthCondition,
-                      ),
-                    ),
+                      );
+                    }),
                     const SizedBox(height: 16),
 
                     // 6. BESİN DEĞERLERİ (Nutritional Values Card)
@@ -370,6 +396,39 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                       key: _sectionKeys[8],
                       child: RecommendationsSection(
                         alternatives: _viewModel.alternatives,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Ürün Karşılaştırma Aksiyon Butonu
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(productComparisonViewModelProvider)
+                              .initializeWithProducts([product]);
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.productComparison,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AkilliSepetColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.compare_arrows_rounded),
+                        label: const Text(
+                          'Bu Ürünü Başka Bir Ürünle Karşılaştır',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 32),
