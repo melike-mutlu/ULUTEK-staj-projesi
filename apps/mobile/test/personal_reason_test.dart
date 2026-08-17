@@ -93,6 +93,24 @@ void main() {
     expect(checks.single.note, 'Düşük şeker oranı. Diyabet dostu.');
   });
 
+  test('sozluk tabanli diyet (ketojenik) diet_conditions uzerinden gosterilir', () {
+    final checks = dietChecks(
+      l10n,
+      _profile(diets: ['Ketojenik']),
+      const RuleEngineResult(
+        matchedAllergens: [],
+        hasConflict: true,
+        veganCompatible: null,
+        dietConditions: [
+          DietConditionResult(diet: 'Ketojenik', status: 'conflict'),
+        ],
+      ),
+    );
+
+    expect(checks, hasLength(1));
+    expect(checks.single.level, WarningLevel.warning);
+  });
+
   test('kisisel bir sey yoksa backend mesajina duser', () {
     final reason = personalReason(
       l10n: l10n,

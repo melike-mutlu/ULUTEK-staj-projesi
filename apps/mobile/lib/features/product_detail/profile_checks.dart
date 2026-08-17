@@ -21,17 +21,25 @@ class ProfileCheck {
   final WarningLevel? level;
 }
 
-/// Diet preferences vs. the product. Only vegan/vegetarian have a backend
-/// compatibility flag; every other diet is reported "not evaluated" rather than
+/// Diet preferences vs. the product. Vegan/vegetarian have a backend
+/// compatibility flag, glutensiz/ketojenik/düşük karbonhidrat come from
+/// diet_conditions; every other diet is reported "not evaluated" rather than
 /// falsely marked compatible.
 List<ProfileCheck> dietChecks(
     AppLocalizations l10n, UserProfile? profile, RuleEngineResult? rule) {
   final preferences = profile?.dietPreferences ?? const <String>[];
-  return [for (final preference in preferences) _dietCheck(l10n, preference, rule)];
+  final statuses = <String, String>{
+    for (final d in rule?.dietConditions ?? const <DietConditionResult>[])
+      d.diet.toLowerCase(): d.status,
+  };
+  return [
+    for (final preference in preferences)
+      _dietCheck(l10n, preference, rule, statuses[preference.toLowerCase()]),
+  ];
 }
 
-ProfileCheck _dietCheck(
-    AppLocalizations l10n, String preference, RuleEngineResult? rule) {
+ProfileCheck _dietCheck(AppLocalizations l10n, String preference,
+    RuleEngineResult? rule, String? dictionaryStatus) {
   // "Diyabet dostu" is a diet preference on the backend (hasDiet(profile,
   // "diyabet_dostu")), but it's judged via diet_flags.diabetic_note (sugar
   // content), not the vegan/vegetarian compatibility flags below — same note
@@ -47,6 +55,22 @@ ProfileCheck _dietCheck(
       note: diabeticNote,
       level: _diabeticLevel(diabeticNote),
     );
+  }
+
+  // Dictionary-driven diets (glutensiz yaşam tarzı, ketojenik, düşük
+  // karbonhidrat): the backend already judged these in diet_conditions.
+  if (dictionaryStatus != null && dictionaryStatus != 'not_evaluated') {
+    return dictionaryStatus == 'conflict'
+        ? ProfileCheck(
+            label: preference,
+            note: l10n.dietIncompatibleNote,
+            level: WarningLevel.warning,
+          )
+        : ProfileCheck(
+            label: preference,
+            note: l10n.dietCompatibleNote,
+            level: WarningLevel.ok,
+          );
   }
 
   final compatible = _dietCompatibility(preference, rule);
