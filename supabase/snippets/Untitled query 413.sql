@@ -1,0 +1,1 @@
+  add column if not existsimage_url

@@ -55,8 +55,9 @@ export async function getFromCache(
 
 export async function saveToCache(
   product: OffProduct,
-): Promise<OffProduct> {
+): Promise<CachedProduct> {
   const supabase = getServiceClient();
+  const fetched_at = new Date().toISOString();
 
   // Explicit column allowlist rather than spreading the product object.
   const { error } = await supabase
@@ -75,10 +76,10 @@ export async function saveToCache(
       nutriments: product.nutriments,
       nutriscore: product.nutriscore,
       image_url: product.image_url,
-      fetched_at: new Date().toISOString(),
+      fetched_at,
     });
 
   if (error) throw error;
 
-  return product;
+  return { ...product, fetched_at };
 }

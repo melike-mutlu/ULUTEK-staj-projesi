@@ -1,5 +1,6 @@
 import { getServiceClient, getUserClient } from "../_shared/lib/supabaseClient.ts";
 import { getFromCache, saveToCache } from "../_shared/supabase/productCache.service.ts";
+import { getPendingProduct } from "../_shared/supabase/pendingProduct.service.ts";
 import { fetchFromOpenFoodFacts } from "../_shared/openFoodFacts/openFoodFacts.service.ts";
 import { runRuleEngine, findMissingFields } from "../_shared/ruleEngine/ruleEngine.service.ts";
 import { getAdditiveInfo } from "../_shared/ruleEngine/additives_dictionary.ts";
@@ -26,7 +27,24 @@ Deno.serve(async (req: Request) => {
     if (!product) {
       const offProduct = await fetchFromOpenFoodFacts(barcode);
       if (!offProduct) {
-        return jsonResponse({ status: "not_found", barcode });
+        const pending = await getPendingProduct(barcode);
+        if (!pending) {
+          return jsonResponse({ status: "not_found", barcode });
+        }
+        return jsonResponse({
+          status: "found",
+          product: {
+            id: pending.id,
+            barcode: pending.barcode,
+            name: pending.product_name,
+            ingredients_text: pending.ingredients_text ?? "",
+            image_url: pending.image_front_url,
+            is_pending: true,
+          },
+          additives_details: [],
+          rule_engine_result: null,
+          safe_alternatives: [],
+        });
       }
       product = await saveToCache(offProduct);
     }
