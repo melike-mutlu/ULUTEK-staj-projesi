@@ -56,33 +56,7 @@ class ProductRepository {
         );
       }
 
-      final status = data['status'] as String? ?? 'error';
-
-      if (status == 'error') {
-        final errorMsg = data['message'] as String? ?? 'Sunucu hatası';
-        debugPrint('[ProductRepository] fetchProduct Server Error: $errorMsg');
-        return ProductFetchResult(
-          status: 'error',
-          errorMessage: errorMsg,
-        );
-      }
-
-      if (status != 'found' && status != 'partial') {
-        return ProductFetchResult(status: status);
-      }
-
-      return ProductFetchResult(
-        status: status,
-        product: data['product'] != null
-            ? Product.fromJson(data['product'] as Map<String, dynamic>)
-            : null,
-        ruleEngineResult: data['rule_engine_result'] != null
-            ? RuleEngineResult.fromJson(
-                data['rule_engine_result'] as Map<String, dynamic>)
-            : null,
-        safeAlternatives: _parseAlternatives(data['safe_alternatives']),
-        additivesDetails: _parseAdditivesDetails(data['additives_details']),
-      );
+      return _parseLookupResult(data);
     } catch (e, stack) {
       debugPrint('[ProductRepository] fetchProduct Exception: $e\n$stack');
       final errStr = e.toString();
@@ -94,6 +68,69 @@ class ProductRepository {
         errorMessage: userMsg,
       );
     }
+  }
+
+  /// Birden fazla barkodu tek istekte karşılaştırır (`compare-products`).
+  /// fetch-product'ı N kere ayrı ayrı çağırmak yerine — karşılaştırma ekranı
+  /// bunu kullanmalı. En fazla 10 barkod, backend'in kabul ettiği üst sınır.
+  Future<List<ProductFetchResult>> compareProducts(List<String> barcodes) async {
+    if (barcodes.isEmpty) return const [];
+
+    try {
+      final response = await supabase.functions.invoke(
+        'compare-products',
+        body: {'barcodes': barcodes},
+      );
+
+      if (response.status != 200) {
+        debugPrint('[ProductRepository] compareProducts HTTP Error: ${response.status}');
+        return const [];
+      }
+
+      final data = response.data;
+      final results = data is Map<String, dynamic> ? data['results'] : null;
+      if (results is! List) return const [];
+
+      return results
+          .whereType<Map<String, dynamic>>()
+          .map(_parseLookupResult)
+          .toList(growable: false);
+    } catch (e, stack) {
+      debugPrint('[ProductRepository] compareProducts Exception: $e\n$stack');
+      return const [];
+    }
+  }
+
+  /// fetch-product ve compare-products aynı ProductLookupResult şeklini
+  /// paylaşıyor (ikisi de backend'de productLookup.service.ts'i kullanıyor).
+  ProductFetchResult _parseLookupResult(Map<String, dynamic> data) {
+    final status = data['status'] as String? ?? 'error';
+
+    if (status == 'error') {
+      final errorMsg = data['message'] as String? ?? 'Sunucu hatası';
+      debugPrint('[ProductRepository] Server Error: $errorMsg');
+      return ProductFetchResult(
+        status: 'error',
+        errorMessage: errorMsg,
+      );
+    }
+
+    if (status != 'found' && status != 'partial') {
+      return ProductFetchResult(status: status);
+    }
+
+    return ProductFetchResult(
+      status: status,
+      product: data['product'] != null
+          ? Product.fromJson(data['product'] as Map<String, dynamic>)
+          : null,
+      ruleEngineResult: data['rule_engine_result'] != null
+          ? RuleEngineResult.fromJson(
+              data['rule_engine_result'] as Map<String, dynamic>)
+          : null,
+      safeAlternatives: _parseAlternatives(data['safe_alternatives']),
+      additivesDetails: _parseAdditivesDetails(data['additives_details']),
+    );
   }
 
   /// Maps the `safe_alternatives` field into models, tolerating a missing or

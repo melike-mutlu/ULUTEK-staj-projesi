@@ -88,7 +88,7 @@ class ProductComparisonViewModel extends ChangeNotifier {
     if (_selectedProducts.any((p) => p.barcode == product.barcode)) return;
 
     _selectedProducts.add(product);
-    _fetchRuleResultForProduct(product);
+    _loadRuleEngineResults();
     notifyListeners();
   }
 
@@ -106,72 +106,36 @@ class ProductComparisonViewModel extends ChangeNotifier {
     final old = _selectedProducts[index];
     _ruleResults.remove(old.barcode);
     _selectedProducts[index] = newProduct;
-    _fetchRuleResultForProduct(newProduct);
+    _loadRuleEngineResults();
     notifyListeners();
   }
 
-  void _loadRuleEngineResults() {
-    for (final product in _selectedProducts) {
-      _fetchRuleResultForProduct(product);
-    }
-  }
+  /// Seçili ürünlerin hepsi için kural motoru sonucunu TEK istekte çeker
+  /// (compare-products) — her ürün için ayrı ayrı fetchProduct çağırmak yerine.
+  Future<void> _loadRuleEngineResults() async {
+    final repo = _productRepository;
+    if (repo == null || _selectedProducts.isEmpty) return;
 
-  Future<void> _fetchRuleResultForProduct(Product product) async {
-    if (_productRepository != null) {
-      try {
-        final res = await _productRepository.fetchProduct(product.barcode);
-        if (res.ruleEngineResult != null) {
-          _ruleResults[product.barcode] = res.ruleEngineResult!;
-          notifyListeners();
-          return;
+    try {
+      final barcodes = _selectedProducts.map((p) => p.barcode).toList();
+      final results = await repo.compareProducts(barcodes);
+
+      for (final result in results) {
+        final barcode = result.product?.barcode;
+        if (barcode != null && result.ruleEngineResult != null) {
+          _ruleResults[barcode] = result.ruleEngineResult!;
         }
-      } catch (e) {
-        debugPrint('[ProductComparisonViewModel] Error fetching rule engine: $e');
       }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('[ProductComparisonViewModel] compareProducts error: $e');
     }
-
-    // Backend isteği yapılamıyorsa veya kural sonucu boşsa mock kural sonucu
-    _ruleResults[product.barcode] = _generateMockRuleResult(product);
-    notifyListeners();
   }
 
-  RuleEngineResult _generateMockRuleResult(Product product) {
-    final hasMilk = product.allergensTags.contains('en:milk');
-    final hasGluten = product.allergensTags.contains('en:gluten');
-
-    return RuleEngineResult(
-      matchedAllergens: hasGluten ? ['gluten'] : [],
-      hasConflict: hasGluten,
-      veganCompatible: !hasMilk,
-      vegetarianCompatible: true,
-      healthConditions: [
-        HealthConditionResult(
-          condition: 'Gluten Hassasiyeti',
-          status: hasGluten ? 'conflict' : 'ok',
-        ),
-      ],
-    );
-  }
-
-  /// Sevde'nin yazdığı özel sağlık durumu bilgi kartı metnini ürün özelinde üretir
-  String getHealthInfoTextForProduct(Product product) {
-    if (product.nutriscore == 'a' || product.nutriscore == 'b') {
-      return '${product.name}, düşük doymuş yağ ve dengeli besin değerleri ile günlük tüketime son derece uygundur. Diyabet ve yüksek tansiyon takibi yapan bireyler için güvenli bir alternatif oluşturur.';
-    } else if (product.nutriscore == 'e' || product.nutriscore == 'd') {
-      return '${product.name}, yüksek ilave şeker ve kalori yoğunluğuna sahiptir. İnsülin direnci, diyabet veya porsiyon kontrolü yapan bireylerin porsiyon miktarını kısıtlayarak tüketmesi önerilir.';
-    }
-    return '${product.name} içeriğindeki bileşenler dengeli porsiyonlarda tüketilmelidir. Özel diyet ve beslenme takibiniz varsa porsiyon ölçüsüne dikkat ediniz.';
-  }
-
-  /// Sevde'nin yazdığı bilgi kartı başlığını döner
-  String getHealthInfoTitleForProduct(Product product) {
-    if (product.allergensTags.contains('en:gluten')) {
-      return 'Gluten & Sindirim Rehberi';
-    } else if (product.allergensTags.contains('en:milk')) {
-      return 'Laktoz & Süt Protein Rehberi';
-    } else if ((product.nutriments.sugars100g ?? 0) > 10) {
-      return 'Diyabet & Şeker Dengesi Notu';
-    }
-    return 'Sağlıklı Beslenme Bilgi Notu';
-  }
+  // NOT: getHealthInfoTextForProduct/getHealthInfoTitleForProduct buradan
+  // kaldırıldı — sadece Nutri-Score'a bakarak "diyabet/tansiyon hastaları
+  // için güvenli" gibi kullanıcının gerçek profiline hiç bakmayan, kural
+  // motorunu bypass eden sağlık iddiaları üretiyordu. Bu ekran şu an
+  // UserProfile'a erişemiyor; doğru yapmak için önce profili buraya
+  // taşımak gerekiyor.
 }

@@ -9,12 +9,11 @@ import '../../core/theme/app_colors.dart';
 import 'product_comparison_viewmodel.dart';
 import 'widgets/comparison_attribute_row.dart';
 import 'widgets/comparison_column_header.dart';
-import 'widgets/health_condition_info_card.dart';
 import 'widgets/product_selector_modal.dart';
 
 /// Mobil Ürün Karşılaştırma Ekranı.
-/// 2-3 ürünü yan yana besin değerleri, Nutri-Score, kural motoru sonuçları ve
-/// Sevde'nin sağlık bilgi kartıyla kıyaslamayı sağlar.
+/// 2-3 ürünü yan yana besin değerleri, Nutri-Score ve kural motoru
+/// sonuçlarıyla kıyaslamayı sağlar.
 class ProductComparisonView extends ConsumerStatefulWidget {
   const ProductComparisonView({
     super.key,
@@ -139,25 +138,13 @@ class _ProductComparisonViewState
                     }),
                   ),
 
-                  // 3. Sağlık Durumu Bilgi Kartı UI (Sevde'nin Yazacağı Metin)
-                  ComparisonAttributeRow(
-                    title: 'Sağlık Durumu Bilgi Kartı',
-                    icon: Icons.health_and_safety_rounded,
-                    badgeText: 'Sevde\'nin Sağlık Notu',
-                    badgeColor: const Color(0xFF6366F1), // Indigo renk
-                    children: List.generate(columnCount, (index) {
-                      if (index >= products.length) return const SizedBox.shrink();
-                      final p = products[index];
-                      final title = viewModel.getHealthInfoTitleForProduct(p);
-                      final text = viewModel.getHealthInfoTextForProduct(p);
-                      return HealthConditionInfoCard(
-                        isCompact: true,
-                        conditionName: title,
-                        infoText: text,
-                        expertName: 'Sevde (Sağlık Uzmanı)',
-                      );
-                    }),
-                  ),
+                  // NOT: "Sağlık Durumu Bilgi Kartı" satırı buradan kaldırıldı.
+                  // Nutri-Score'a bakarak "diyabet/tansiyon hastaları için
+                  // güvenli" gibi dogrudan saglik iddialari uretiyordu -
+                  // kullanicinin gercek sagligina hic bakmadan, kural
+                  // motorunu bypass ederek. Bu ekran su an UserProfile'a
+                  // erisimi olmadigi icin dogru/kisisellestirilmis bir
+                  // sekilde yapilamiyor - ayri bir gorev olarak birakildi.
 
                   // 4. Nutri-Score Karşılaştırması
                   ComparisonAttributeRow(
@@ -343,7 +330,44 @@ class _ProductComparisonViewState
   }
 
   Widget _buildRuleEngineCell(RuleEngineResult? ruleRes, bool isDark) {
-    final hasConflict = ruleRes?.hasConflict ?? false;
+    // ruleRes == null: henüz yüklenmedi ya da yüklenemedi — "Profiline Uygun"
+    // (güvenli) göstermek yanlış bir güven verirdi, ayrı bir nötr durum lazım.
+    if (ruleRes == null) {
+      return Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF2A2E3A) : const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? Colors.white12 : const Color(0xFFE5E7EB),
+          ),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: isDark ? Colors.white54 : Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Değerlendiriliyor…',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white54 : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final hasConflict = ruleRes.hasConflict;
     final bgColor = hasConflict
         ? (isDark ? const Color(0xFF3E1F23) : const Color(0xFFFFEBEE))
         : (isDark ? const Color(0xFF1B382B) : const Color(0xFFE8F5E9));

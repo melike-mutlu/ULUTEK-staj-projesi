@@ -320,32 +320,45 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 5. SAĞLIK (Health Conditions Checks & Sevde'nin Bilgi Kartı)
-                    KeyedSubtree(
-                      key: _sectionKeys[4],
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ProfileCheckSection(
-                            title: l10n.healthConditionTitle,
-                            icon: Icons.favorite_outline_rounded,
-                            checks: healthChecks(
-                              l10n,
-                              _viewModel.userProfile,
-                              _viewModel.ruleEngineResult,
+                    // 5. SAĞLIK (Health Conditions Checks + kural motorunun
+                    // tanımadığı özel durumlar için genel bilgi kartı)
+                    Builder(builder: (context) {
+                      final checks = healthChecks(
+                        l10n,
+                        _viewModel.userProfile,
+                        _viewModel.ruleEngineResult,
+                      );
+                      // level == null: kural motorunun sözlüğünde olmayan,
+                      // dolayısıyla "değerlendirilemedi" dönen özel durumlar.
+                      // Sadece bunlar için genel bilgi kartı gösteriyoruz —
+                      // kural motorunun gerçek karar verdiği durumlar zaten
+                      // ProfileCheckSection'da net biçimde görünüyor.
+                      final unrecognized =
+                          checks.where((c) => c.level == null).toList();
+
+                      return KeyedSubtree(
+                        key: _sectionKeys[4],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ProfileCheckSection(
+                              title: l10n.healthConditionTitle,
+                              icon: Icons.favorite_outline_rounded,
+                              checks: checks,
+                              emptyMessage: l10n.noHealthCondition,
                             ),
-                            emptyMessage: l10n.noHealthCondition,
-                          ),
-                          const SizedBox(height: 12),
-                          const HealthConditionInfoCard(
-                            conditionName: 'Sağlık Durumu & Beslenme Notu',
-                            infoText:
-                                'Bu ürün için besin ögeleri ve porsiyon değerleri değerlendirilmiştir. Diyabet veya hipertansiyon takibiniz varsa günlük tüketim miktarına ve porsiyon kısıtlamasına dikkat ediniz.',
-                            expertName: 'Sevde (Sağlık Uzmanı)',
-                          ),
-                        ],
-                      ),
-                    ),
+                            for (final check in unrecognized) ...[
+                              const SizedBox(height: 12),
+                              HealthConditionInfoCard(
+                                conditionName: check.label,
+                                infoText:
+                                    '"${check.label}" durumu için kural motorumuzda henüz özel bir eşik tanımlı değil, bu yüzden bu ürünü bu duruma göre değerlendiremiyoruz. Tüketmeden önce ambalaj etiketini kontrol et ve doktoruna danış.',
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    }),
                     const SizedBox(height: 16),
 
                     // 6. BESİN DEĞERLERİ (Nutritional Values Card)

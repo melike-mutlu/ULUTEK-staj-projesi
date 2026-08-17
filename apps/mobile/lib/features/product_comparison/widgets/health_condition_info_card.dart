@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/akilli_sepet_colors.dart';
-import '../../../core/theme/app_colors.dart';
-
-/// Sevde'nin yazacağı sağlık durumu bilgi metnini gösteren özel UI kartı.
+/// Kural motorunun tanımadığı özel bir sağlık durumu için genel bilgilendirme
+/// kartı. Bu bir karar/verdict DEĞİLDİR — kural motorunun "uygun/çakışma"
+/// kararından bilerek ayrıştırılmış, sadece genel bilgi taşıyan bir not.
 ///
-/// Kural motorunun kesin (uygun / çakışma) kararlarından net bir şekilde
-/// ayrışması için özel indigo/soft-teal arka plan, belirgin ikon ve
-/// "Sağlık Bilgi Notu · Kural Motorundan Bağımsızdır" alt rozeti içerir.
+/// Kimseye ait bir "uzman görüşü" gibi sunulmamalı: bu ekibin öğrenci
+/// stajyerleri yazıyor, lisanslı bir sağlık uzmanı değiller. Metin, kural
+/// motorunun gerçek verisinden (Nutri-Score gibi genel bir sezgiden değil)
+/// bağımsız üretilmemeli ve asla "güvenlidir/tüketebilirsiniz" gibi bir
+/// güvenlik iddiası içermemeli.
 class HealthConditionInfoCard extends StatelessWidget {
   const HealthConditionInfoCard({
     super.key,
-    this.conditionName = 'Sağlık Durumu Değerlendirmesi',
-    this.infoText =
-        'Bu ürün için sağlık uzmanı tarafından hazırlanan beslenme ve tüketim rehberi notudur.',
-    this.expertName = 'Sevde (Beslenme & Sağlık Uzmanı)',
+    required this.conditionName,
+    required this.infoText,
     this.isCompact = false,
   });
 
-  /// Sağlık durumu başlığı (ör. "Diyabet Uyarısı", "Tansiyon & Sodyum Dengesi", "Genel Sağlık Notu")
+  /// Sağlık durumu başlığı — kullanıcının profiline kendi yazdığı durum adı.
   final String conditionName;
 
-  /// Sevde'nin kaleme aldığı detaylı/özet sağlık bilgisi metni
+  /// Genel bilgilendirme metni. Kesinlikle bir "tüketebilirsin/tüketemezsin"
+  /// kararı içermemeli.
   final String infoText;
-
-  /// Bilgiyi yazan uzmanın adı / unvanı
-  final String expertName;
 
   /// Yan yana karşılaştırma matrisinde dar sütunlar için daha sıkışık görünüm
   final bool isCompact;
@@ -159,26 +156,13 @@ class HealthConditionInfoCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      conditionName,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: titleColor,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      expertName,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDark ? AppColors.darkTextSecondary : AkilliSepetColors.textSecondary,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  conditionName,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: titleColor,
+                  ),
                 ),
               ),
             ],
