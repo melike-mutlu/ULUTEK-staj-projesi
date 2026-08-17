@@ -17,6 +17,7 @@ import 'widgets/profile_check_section.dart';
 import 'widgets/product_header_card.dart';
 import 'widgets/recommendations_section.dart';
 import 'widgets/warning_banner.dart';
+import '../product_comparison/widgets/health_condition_info_card.dart';
 
 class ProductDetailView extends ConsumerStatefulWidget {
   const ProductDetailView({super.key});
@@ -319,18 +320,30 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 5. SAĞLIK (Health Conditions Checks)
+                    // 5. SAĞLIK (Health Conditions Checks & Sevde'nin Bilgi Kartı)
                     KeyedSubtree(
                       key: _sectionKeys[4],
-                      child: ProfileCheckSection(
-                        title: l10n.healthConditionTitle,
-                        icon: Icons.favorite_outline_rounded,
-                        checks: healthChecks(
-                          l10n,
-                          _viewModel.userProfile,
-                          _viewModel.ruleEngineResult,
-                        ),
-                        emptyMessage: l10n.noHealthCondition,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ProfileCheckSection(
+                            title: l10n.healthConditionTitle,
+                            icon: Icons.favorite_outline_rounded,
+                            checks: healthChecks(
+                              l10n,
+                              _viewModel.userProfile,
+                              _viewModel.ruleEngineResult,
+                            ),
+                            emptyMessage: l10n.noHealthCondition,
+                          ),
+                          const SizedBox(height: 12),
+                          const HealthConditionInfoCard(
+                            conditionName: 'Sağlık Durumu & Beslenme Notu',
+                            infoText:
+                                'Bu ürün için besin ögeleri ve porsiyon değerleri değerlendirilmiştir. Diyabet veya hipertansiyon takibiniz varsa günlük tüketim miktarına ve porsiyon kısıtlamasına dikkat ediniz.',
+                            expertName: 'Sevde (Sağlık Uzmanı)',
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -370,6 +383,39 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                       key: _sectionKeys[8],
                       child: RecommendationsSection(
                         alternatives: _viewModel.alternatives,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Ürün Karşılaştırma Aksiyon Butonu
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(productComparisonViewModelProvider)
+                              .initializeWithProducts([product]);
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.productComparison,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AkilliSepetColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.compare_arrows_rounded),
+                        label: const Text(
+                          'Bu Ürünü Başka Bir Ürünle Karşılaştır',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 32),

@@ -13,6 +13,7 @@ import '../features/chatbot/chatbot_viewmodel.dart';
 import '../data/repositories/chatbot_repository.dart';
 import '../data/repositories/shopping_list_repository.dart';
 import '../features/shopping_list/shopping_list_viewmodel.dart';
+import '../features/product_comparison/product_comparison_viewmodel.dart';
 import '../core/supabase_client.dart';
 import 'localization/locale_controller.dart';
 
@@ -97,3 +98,11 @@ final shoppingListViewModelProvider =
     ref.watch(scanHistoryRepositoryProvider),
   );
 });
+
+final productComparisonViewModelProvider =
+    ChangeNotifierProvider<ProductComparisonViewModel>((ref) {
+  return ProductComparisonViewModel(
+    ref.watch(productRepositoryProvider),
+  );
+});
+
