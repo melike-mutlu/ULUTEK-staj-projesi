@@ -167,9 +167,11 @@ export function runRuleEngine(product: any, profile: any) {
   for (const tag of product.allergens_tags ?? []) {
     resolveAllergenKeys(String(tag)).forEach(addKey);
   }
-  resolveAllergenKeysFromText(String(product.ingredients_text ?? "")).forEach(
-    addKey,
-  );
+  resolveAllergenKeysFromText(
+  String(product.ingredients_text ?? ""),
+  userAllergies,
+  ).forEach(addKey);
+
   const productKeySet = new Set(productKeys);
 
   const profileKeys = new Set(
