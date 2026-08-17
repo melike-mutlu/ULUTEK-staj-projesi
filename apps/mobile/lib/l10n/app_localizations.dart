@@ -542,11 +542,11 @@ abstract class AppLocalizations {
   /// **'Hesap silme işlemi gerçekleştirilemedi.'**
   String get deleteAccountFailed;
 
-  /// Profile stat tile label for scanned product count.
+  /// Profile stat tile label for distinct scanned product count.
   ///
   /// In tr, this message translates to:
-  /// **'Taranan ürün'**
-  String get statScannedProducts;
+  /// **'Farklı ürün'**
+  String get statDistinctProducts;
 
   /// Profile stat tile label for avoided allergen count.
   ///

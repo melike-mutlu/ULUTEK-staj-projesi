@@ -74,7 +74,7 @@
   "deleteAccountFinalConfirm": "Yes, I'm sure — Delete",
   "accountDeleted": "Your account has been deleted.",
   "deleteAccountFailed": "Could not delete the account.",
-  "statScannedProducts": "Scanned products",
+  "statDistinctProducts": "Distinct products",
   "statAvoidedAllergens": "Avoided allergens",
   "statMemberDays": "Member days",
   "signUp": "Sign up",

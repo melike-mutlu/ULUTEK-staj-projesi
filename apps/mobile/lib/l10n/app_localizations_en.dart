@@ -249,7 +249,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountFailed => 'Could not delete the account.';
 
   @override
-  String get statScannedProducts => 'Scanned products';
+  String get statDistinctProducts => 'Distinct products';
 
   @override
   String get statAvoidedAllergens => 'Avoided allergens';

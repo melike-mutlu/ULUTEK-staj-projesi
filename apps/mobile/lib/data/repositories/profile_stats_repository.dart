@@ -21,14 +21,14 @@ class SupabaseProfileStatsRepository implements ProfileStatsRepository {
     final user = supabase.auth.currentUser;
     if (user == null) {
       return const ProfileStats(
-        scannedProducts: 0,
+        distinctProducts: 0,
         avoidedAllergens: 0,
         daysSinceSignup: 0,
       );
     }
 
     return ProfileStats(
-      scannedProducts: await _distinctScannedProducts(user.id),
+      distinctProducts: await _distinctScannedProducts(user.id),
       avoidedAllergens: _mockAvoidedAllergens,
       daysSinceSignup: _daysSince(user.createdAt),
     );

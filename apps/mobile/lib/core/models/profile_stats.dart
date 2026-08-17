@@ -1,13 +1,13 @@
 /// Small dashboard metrics shown on the profile screen.
 class ProfileStats {
   const ProfileStats({
-    required this.scannedProducts,
+    required this.distinctProducts,
     required this.avoidedAllergens,
     required this.daysSinceSignup,
   });
 
   /// Distinct products the user has scanned.
-  final int scannedProducts;
+  final int distinctProducts;
 
   /// Times a scan flagged an allergen the user avoids.
   final int avoidedAllergens;

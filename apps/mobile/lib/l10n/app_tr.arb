@@ -311,9 +311,9 @@
   "@deleteAccountFailed": {
     "description": "Snackbar when account deletion fails."
   },
-  "statScannedProducts": "Taranan ürün",
-  "@statScannedProducts": {
-    "description": "Profile stat tile label for scanned product count."
+  "statDistinctProducts": "Farklı ürün",
+  "@statDistinctProducts": {
+    "description": "Profile stat tile label for distinct scanned product count."
   },
   "statAvoidedAllergens": "Kaçınılan alerjen",
   "@statAvoidedAllergens": {
