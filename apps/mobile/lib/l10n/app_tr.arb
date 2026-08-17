@@ -323,6 +323,54 @@
   "@statMemberDays": {
     "description": "Profile stat tile label for days since signup."
   },
+  "statsTitle": "İstatistiklerim",
+  "@statsTitle": {
+    "description": "Title of the profile stats detail screen and its entry tooltip."
+  },
+  "statTotalScans": "Toplam tarama",
+  "@statTotalScans": {
+    "description": "Stat tile label for total scan count including repeats."
+  },
+  "statStreak": "Gün serisi",
+  "@statStreak": {
+    "description": "Stat tile label for the current consecutive-day scan streak."
+  },
+  "statsWeeklyTitle": "Son 7 gün",
+  "@statsWeeklyTitle": {
+    "description": "Section title above the weekly scan breakdown chart."
+  },
+  "statsWeeklyEmpty": "Bu hafta henüz tarama yok.",
+  "@statsWeeklyEmpty": {
+    "description": "Empty state when there are no scans in the last 7 days."
+  },
+  "achievementsTitle": "Başarımlar",
+  "@achievementsTitle": {
+    "description": "Section title above the achievements grid."
+  },
+  "achievementFirstScan": "İlk tarama",
+  "@achievementFirstScan": {
+    "description": "Achievement label for the first scan."
+  },
+  "achievementTenProducts": "10 farklı ürün",
+  "@achievementTenProducts": {
+    "description": "Achievement label for scanning 10 distinct products."
+  },
+  "achievementFiftyProducts": "50 farklı ürün",
+  "@achievementFiftyProducts": {
+    "description": "Achievement label for scanning 50 distinct products."
+  },
+  "achievementHundredProducts": "100 farklı ürün",
+  "@achievementHundredProducts": {
+    "description": "Achievement label for scanning 100 distinct products."
+  },
+  "achievementWeekStreak": "7 gün serisi",
+  "@achievementWeekStreak": {
+    "description": "Achievement label for a 7-day scan streak."
+  },
+  "achievementMonthMember": "30 gün üye",
+  "@achievementMonthMember": {
+    "description": "Achievement label for 30 days since signup."
+  },
   "signUp": "Kayıt Ol",
   "@signUp": {
     "description": "Sign-up button and title."

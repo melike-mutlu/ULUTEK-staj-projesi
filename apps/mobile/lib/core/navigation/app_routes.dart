@@ -6,6 +6,7 @@ import '../../features/home/home_view.dart';
 import '../../features/onboarding/onboarding_view.dart';
 import '../../features/pending_product/pending_product_view.dart';
 import '../../features/product_detail/product_detail_view.dart';
+import '../../features/profile/profile_stats_view.dart';
 import '../../features/profile/profile_view.dart';
 import '../../features/scan/scan_view.dart';
 import '../../features/settings/settings_view.dart';
@@ -53,6 +54,9 @@ abstract final class AppRoutes {
   /// Profil — alt navigasyonun 4. sekmesi.
   static const String profile = '/profile';
 
+  /// İstatistiklerim — profil ekranının sağ üstündeki grafik ikonundan açılır.
+  static const String profileStats = '/profile-stats';
+
   /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
   static const String settings = '/settings';
 
@@ -78,6 +82,7 @@ abstract final class AppRoutes {
         scan: (_) => const ScanView(),
         chatbot: (_) => const ChatbotView(),
         profile: (_) => const ProfileView(),
+        profileStats: (_) => const ProfileStatsView(),
         settings: (_) => const SettingsView(),
         productDetail: (_) => const ProductDetailView(),
         pendingProduct: (_) => const PendingProductView(),
