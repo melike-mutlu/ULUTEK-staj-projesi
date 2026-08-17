@@ -225,16 +225,39 @@ function containsPhrase(tokens: string[], phrase: string[]): boolean {
  * canonical keys found. Whole-word / whole-phrase only — "et" never matches
  * inside "petit", so no substring false positives.
  */
-export function resolveAllergenKeysFromText(text: string): string[] {
+export function resolveAllergenKeysFromText(
+  text: string,
+  customAllergens: string[] = [],
+): string[] {
   const tokens = tokenize(text);
   if (tokens.length === 0) return [];
 
   const found: string[] = [];
+
+  // Sözlükte bulunan alerjenleri tara
   for (const [synonym, keys] of SYNONYM_INDEX) {
     if (!containsPhrase(tokens, synonym.split(" "))) continue;
+
     for (const key of keys) {
       if (!found.includes(key)) found.push(key);
     }
   }
+
+  // Kullanıcının eklediği özel alerjenleri düz metinde tara
+  for (const allergen of customAllergens) {
+    const normalized = normalize(allergen);
+    if (!normalized) continue;
+
+    const allergenTokens = tokenize(normalized);
+
+    if (
+      allergenTokens.length > 0 &&
+      containsPhrase(tokens, allergenTokens) &&
+      !found.includes(normalized)
+    ) {
+      found.push(normalized);
+    }
+  }
+
   return found;
 }
