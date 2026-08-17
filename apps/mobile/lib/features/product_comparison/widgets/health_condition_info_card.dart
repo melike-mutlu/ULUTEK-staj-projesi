@@ -213,12 +213,14 @@ class HealthConditionInfoCard extends StatelessWidget {
                   color: badgeTextColor,
                 ),
                 const SizedBox(width: 5),
-                Text(
-                  'Genel Bilgilendirme · Kural Motoru Kararından Bağımsızdır',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: badgeTextColor,
+                Flexible(
+                  child: Text(
+                    'Genel Bilgilendirme · Kural Motoru Kararından Bağımsızdır',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: badgeTextColor,
+                    ),
                   ),
                 ),
               ],
