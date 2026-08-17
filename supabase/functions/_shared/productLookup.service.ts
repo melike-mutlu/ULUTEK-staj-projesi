@@ -3,6 +3,7 @@
 
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getFromCache, saveToCache } from "./supabase/productCache.service.ts";
+import { getPendingProduct } from "./supabase/pendingProduct.service.ts";
 import { fetchFromOpenFoodFacts } from "./openFoodFacts/openFoodFacts.service.ts";
 import { runRuleEngine, findMissingFields } from "./ruleEngine/ruleEngine.service.ts";
 import { getAdditiveInfo } from "./ruleEngine/additives_dictionary.ts";
@@ -33,7 +34,28 @@ export async function lookupProduct(
   if (!product) {
     const offProduct = await fetchFromOpenFoodFacts(barcode);
     if (!offProduct) {
-      return { status: "not_found", barcode };
+      // OFF'ta yok — topluluk tarafından eklenmiş, onay bekleyen bir ürün mü diye bak.
+      // Bu durumda kural motorunu çalıştırmıyoruz: pending_products'ta besin/alerjen
+      // verisi henüz doğrulanmadığından güvenilir bir karar üretilemez.
+      const pending = await getPendingProduct(barcode);
+      if (!pending) {
+        return { status: "not_found", barcode };
+      }
+      return {
+        status: "found",
+        barcode,
+        product: {
+          id: pending.id,
+          barcode: pending.barcode,
+          name: pending.product_name ?? "Bilinmeyen Ürün (Onay Bekliyor)",
+          ingredients_text: pending.ingredients_text ?? "",
+          image_url: pending.image_front_url,
+          is_pending: true,
+        },
+        additives_details: [],
+        rule_engine_result: null,
+        safe_alternatives: [],
+      };
     }
     product = await saveToCache(offProduct);
   }
