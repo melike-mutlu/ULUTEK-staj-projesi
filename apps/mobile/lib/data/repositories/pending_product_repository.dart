@@ -188,7 +188,7 @@ class PendingProductRepository {
       final userId = supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('Oy vermek için giriş yapmalısınız.');
 
-      // Ranim'in tasarımına uygun olarak: Oy verse de, geri alsa da hep UPSERT atıyoruz.
+      // Oy verse de, geri alsa da hep UPSERT atıyoruz.
       // Eğer oyu geri çektiyse isUpvote 'null' olarak gidecek.
       await supabase.from('pending_product_votes').upsert({
         'pending_product_id': pendingProductId,
