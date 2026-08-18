@@ -588,7 +588,7 @@ class _ChatbotViewState extends ConsumerState<ChatbotView> {
                             ),
                             child: IconButton(
                               icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-                              onPressed: () => _sendMessage,
+                              onPressed: () => _sendMessage(),
                             ),
                           ),
                         ],
