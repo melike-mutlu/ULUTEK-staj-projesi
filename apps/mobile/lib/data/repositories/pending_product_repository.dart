@@ -188,22 +188,15 @@ class PendingProductRepository {
       final userId = supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('Oy vermek için giriş yapmalısınız.');
 
-      if (isUpvote == null) {
-        // KULLANICI OYUNU GERİ ÇEKTİYSE -> TABLODAN SİL
-        await supabase
-            .from('pending_product_votes')
-            .delete()
-            .eq('pending_product_id', pendingProductId)
-            .eq('user_id', userId);
-      } else {
-        // KULLANICI YENİ OY VERDİYSE (VEYA DEĞİŞTİRDİYSE) -> UPSERT
-        await supabase.from('pending_product_votes').upsert({
-          'pending_product_id': pendingProductId,
-          'user_id': userId,
-          'is_approve': isUpvote,
-          'created_at': DateTime.now().toIso8601String(),
-        }, onConflict: 'pending_product_id, user_id'); 
-      }
+      // Ranim'in tasarımına uygun olarak: Oy verse de, geri alsa da hep UPSERT atıyoruz.
+      // Eğer oyu geri çektiyse isUpvote 'null' olarak gidecek.
+      await supabase.from('pending_product_votes').upsert({
+        'pending_product_id': pendingProductId,
+        'user_id': userId,
+        'is_approve': isUpvote, // true, false veya null
+        'created_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'pending_product_id, user_id'); 
+
     } catch (e) {
       debugPrint('[PendingProductRepository] castVote Error: $e');
       throw Exception('Oyunuz kaydedilemedi.');
