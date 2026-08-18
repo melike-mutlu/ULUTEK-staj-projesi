@@ -139,6 +139,71 @@ class PendingProductRepository {
       return null;
     }
   }
+
+  // --- TOPLULUK DOĞRULAMASI (OYLAMA) METODLARI ---
+
+  /// RPC (Remote Procedure Call) ile gerçek onay/red sayılarını çeker.
+  Future<Map<String, int>> getVoteCounts(String pendingProductId) async {
+    try {
+      final response = await supabase.rpc(
+        'get_pending_product_vote_counts',
+        params: {'p_pending_product_id': pendingProductId},
+      );
+      
+      // SUPABASE'DEN GELEN GERÇEK RAW VERİYİ KONSOLA YAZALIM
+       
+
+      Map<String, dynamic>? data;
+
+      // Eğer yanıt bir Liste ise ve boş değilse, ilk elemanını al
+      if (response is List && response.isNotEmpty) {
+        data = response.first as Map<String, dynamic>;
+      } 
+      // Eğer yanıt direkt Sözlük (Map) ise direkt al
+      else if (response is Map) {
+        data = response as Map<String, dynamic>;
+      }
+
+      if (data != null) {
+        return {
+          'upvotes': (data['approve_count'] as num?)?.toInt() ?? 0,
+          'downvotes': (data['reject_count'] as num?)?.toInt() ?? 0,
+        };
+      }
+      
+      return {'upvotes': 0, 'downvotes': 0};
+    } catch (e) {
+      debugPrint('[PendingProductRepository] getVoteCounts Error: $e');
+      return {'upvotes': 0, 'downvotes': 0};
+    }
+  }
+
+  /// Kullanıcının oyunu veritabanına yazar.
+  /// (Upsert kullanıyoruz: Kullanıcı fikrini değiştirirse eski oyu ezilsin diye)
+  /// Kullanıcının oyunu veritabanına yazar.
+  /// (Upsert kullanıyoruz: Kullanıcı fikrini değiştirirse eski oyu ezilsin diye)
+/// Kullanıcının oyunu veritabanına yazar veya oyu geri çeker.
+  Future<void> castVote(String pendingProductId, bool? isUpvote) async {
+    try {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('Oy vermek için giriş yapmalısınız.');
+
+      // Oy verse de, geri alsa da hep UPSERT atıyoruz.
+      // Eğer oyu geri çektiyse isUpvote 'null' olarak gidecek.
+      await supabase.from('pending_product_votes').upsert({
+        'pending_product_id': pendingProductId,
+        'user_id': userId,
+        'is_approve': isUpvote, // true, false veya null
+        'created_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'pending_product_id, user_id'); 
+
+    } catch (e) {
+      debugPrint('[PendingProductRepository] castVote Error: $e');
+      throw Exception('Oyunuz kaydedilemedi.');
+    }
+  }
+  
+
 }
 
 final pendingProductRepositoryProvider = Provider<PendingProductRepository>((ref) {

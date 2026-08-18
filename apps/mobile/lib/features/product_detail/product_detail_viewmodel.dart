@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-
+import '../../data/repositories/pending_product_repository.dart';
 import '../../core/models/additive_info.dart';
 import '../../core/models/alternative.dart';
 import '../../core/models/explanation.dart';
@@ -13,46 +13,102 @@ import '../../data/repositories/profile_repository.dart';
 enum ProductDetailStatus { loading, found, notFound, partial, error }
 
 class ProductDetailViewModel extends ChangeNotifier {
-  ProductDetailViewModel([this._explanationRepository]);
+  
+  // Dışarıdan gelmezse (null ise) varsayılan olarak PendingProductRepository() oluşturur.
+  ProductDetailViewModel([this._explanationRepository, PendingProductRepository? repo])
+      : _pendingProductRepository = repo ?? PendingProductRepository();
 
   final ExplanationRepository? _explanationRepository;
+  
+  final PendingProductRepository? _pendingProductRepository;
 
   ProductDetailStatus status = ProductDetailStatus.found;
   Product? product;
   RuleEngineResult? ruleEngineResult;
   Explanation? explanation;
 
-  /// Community verification voting count and state (Ranim's backend integration ready)
-  int upvotesCount = 14;
-  int downvotesCount = 3;
+  /// Community verification voting count and state
+  int upvotesCount = 0;
+  int downvotesCount = 0;
   String? userVote; // null, 'up', or 'down'
 
-  void voteApprove() {
-    if (userVote == 'up') {
-      userVote = null;
-      upvotesCount--;
-    } else {
-      if (userVote == 'down') {
-        downvotesCount--;
-      }
-      userVote = 'up';
-      upvotesCount++;
+  Future<void> fetchRealVotes() async {
+    if (_pendingProductRepository == null) {
+      return;
     }
+    
+    if (product == null) {
+      return;
+    }
+
+    final productId = product!.pendingProductId;
+    if (productId == null || productId.isEmpty) {
+      return;
+    }
+
+    final counts = await _pendingProductRepository!.getVoteCounts(productId);
+    
+    upvotesCount = counts['upvotes'] ?? 0;
+    downvotesCount = counts['downvotes'] ?? 0;
     notifyListeners();
   }
 
-  void voteReject() {
+  //Onay Verme
+  Future<void> voteApprove() async {
+    final oldVote = userVote;
+    bool? voteToSend; // Supabase'e ne gidecek? (true, false veya null)
+
+    if (userVote == 'up') {
+      userVote = null;
+      upvotesCount--;
+      voteToSend = null; // Zaten onaylıysa, oyu sil (Geri çek)
+    } else {
+      if (userVote == 'down') downvotesCount--;
+      userVote = 'up';
+      upvotesCount++;
+      voteToSend = true; // Yeni onay oyu
+    }
+    notifyListeners();
+
+    try {
+      final productId = product?.pendingProductId;
+      if (productId == null || productId.isEmpty) return;
+
+      // voteToSend değişkenini gönderiyoruz!
+      await _pendingProductRepository?.castVote(productId, voteToSend);
+      await fetchRealVotes();
+    } catch (e) {
+      userVote = oldVote;
+      notifyListeners();
+    }
+  }
+
+  Future<void> voteReject() async {
+    final oldVote = userVote;
+    bool? voteToSend;
+
     if (userVote == 'down') {
       userVote = null;
       downvotesCount--;
+      voteToSend = null; // Zaten ret ise, oyu sil (Geri çek)
     } else {
-      if (userVote == 'up') {
-        upvotesCount--;
-      }
+      if (userVote == 'up') upvotesCount--;
       userVote = 'down';
       downvotesCount++;
+      voteToSend = false; // Yeni ret oyu
     }
     notifyListeners();
+
+    try {
+      final productId = product?.pendingProductId;
+      if (productId == null || productId.isEmpty) return;
+
+      await _pendingProductRepository?.castVote(productId, voteToSend);
+      await fetchRealVotes();
+    } catch (e) {
+      userVote = oldVote;
+      notifyListeners();
+    }
   }
 
   /// Recommended alternatives for the current product. Empty until loaded.
@@ -67,7 +123,8 @@ class ProductDetailViewModel extends ChangeNotifier {
   String? errorMessage;
 
   ProductDetailViewModel.withMock({String mockState = 'warning'})
-      : _explanationRepository = null {
+      : _explanationRepository = null,
+        _pendingProductRepository = PendingProductRepository() { 
     loadMockState(mockState);
   }
 
@@ -151,7 +208,7 @@ class ProductDetailViewModel extends ChangeNotifier {
     );
   }
 
-  void loadMockState(String state) {
+  void loadMockState(String state) async {
     status = ProductDetailStatus.loading;
     notifyListeners();
 
@@ -161,6 +218,7 @@ class ProductDetailViewModel extends ChangeNotifier {
         product = const Product(
           barcode: '9998887776655',
           name: 'Organik Ev Yapımı Granola',
+          pendingProductId: '1faca5a1-4d47-4d40-af35-d95d08054183',
           brand: 'Topluluk Katkısı',
           ingredientsText: 'Yulaf ezmesi, bal, ceviz, tarçın.',
           additives: [],
@@ -315,6 +373,7 @@ class ProductDetailViewModel extends ChangeNotifier {
     alternatives = _mockAlternatives;
     _applyPendingProductRule();
     status = ProductDetailStatus.found;
+    await fetchRealVotes();
     notifyListeners();
   }
 
@@ -349,7 +408,9 @@ class ProductDetailViewModel extends ChangeNotifier {
     }
 
     _applyPendingProductRule();
+    
     status = ProductDetailStatus.found;
+    await fetchRealVotes();
     notifyListeners();
   }
 

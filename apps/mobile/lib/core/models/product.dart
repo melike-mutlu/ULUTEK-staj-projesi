@@ -41,6 +41,7 @@ class Nutriments {
 /// docs/architecture.md — Sözleşme 1 (`fetch-product`) yanıtındaki "product" nesnesi.
 class Product {
   final String barcode;
+  final String? pendingProductId; //Backend'den gelecek olan asıl tablo kimliği
   final String name;
   final String? brand;
   final String? imageUrl;
@@ -62,10 +63,10 @@ class Product {
   /// `pending_products` tablosundaki satırın UUID'si — yalnızca [isPending]
   /// true olduğunda dolu. Onay/oylama sistemi (pending_product_votes) bu
   /// id'yi bekliyor; barkod bu amaçla kullanılamaz.
-  final String? pendingProductId;
 
   const Product({
     required this.barcode,
+    this.pendingProductId,
     required this.name,
     this.brand,
     this.imageUrl,
@@ -77,7 +78,6 @@ class Product {
     this.nutriscore,
     this.status,
     bool? isPending,
-    this.pendingProductId,
   }) : isPending = isPending ?? (status == 'PENDING');
 
   /// Ingredients text for the given [localeName] (e.g. `l10n.localeName`):
@@ -97,6 +97,7 @@ class Product {
 
     return Product(
       barcode: json['barcode'] as String,
+      pendingProductId: json['pending_product_id'] as String? ?? json['id'] as String?,
       name: json['name'] as String,
       brand: json['brand'] as String? ?? json['brands'] as String?,
       imageUrl: json['image_url'] as String? ??
@@ -119,7 +120,6 @@ class Product {
       nutriscore: json['nutriscore'] as String?,
       status: statusVal,
       isPending: isPendingVal,
-      pendingProductId: json['id'] as String?,
     );
   }
 
