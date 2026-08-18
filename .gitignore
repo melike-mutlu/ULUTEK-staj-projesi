@@ -11,6 +11,9 @@ apps/mobile/.env
 supabase/.branches
 supabase/.temp
 
+# Supabase Studio SQL snippet'leri (kişisel sorgular, repoya girmemeli)
+supabase/snippets/
+
 # İşletim sistemi dosyaları
 .DS_Store
 Thumbs.db
