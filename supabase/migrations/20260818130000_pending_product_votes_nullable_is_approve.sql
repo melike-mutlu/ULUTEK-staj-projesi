@@ -1,0 +1,13 @@
+-- pending_product_votes.is_approve NOT NULL kısıtı, oy geri çekme (withdraw)
+-- akışını kırıyordu: mobil taraf (ProductDetailViewModel.voteApprove/voteReject,
+-- PR #81) kullanıcı oyunu geri çektiğinde is_approve: null ile UPSERT atıyor
+-- (aynı satırı DELETE etmek yerine — pending_product_votes için bir DELETE RLS
+-- policy'si zaten tanımlı değil). NOT NULL kısıtı yüzünden bu UPSERT Postgres
+-- seviyesinde "null value in column is_approve violates not-null constraint"
+-- hatasıyla başarısız oluyor, repository bunu yutup sessizce eski oya geri
+-- dönüyor — kullanıcı için "geri çekme" hiç çalışmıyor.
+--
+-- get_pending_product_vote_counts() zaten is_approve = true/false filtreleri
+-- kullandığı için null satırları doğal olarak sayıma dahil etmiyor, bu yüzden
+-- kısıtı kaldırmak sayım mantığını bozmuyor.
+alter table pending_product_votes alter column is_approve drop not null;
