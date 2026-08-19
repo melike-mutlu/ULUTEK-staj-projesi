@@ -7,8 +7,10 @@ import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../l10n/app_localizations.dart';
+import '../settings/read_aloud_viewmodel.dart';
 import 'product_detail_viewmodel.dart';
 import 'profile_checks.dart';
+import 'read_aloud_script.dart';
 import 'widgets/ingredients_section.dart';
 import 'widgets/nutriments_card.dart';
 import 'widgets/other_allergens_section.dart';
@@ -30,6 +32,10 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   late final ProductDetailViewModel _viewModel;
   bool _isInitialLoaded = false;
   String? _scannedBarcode;
+
+  /// Guards the auto read-aloud so it fires once per loaded product, not on
+  /// every notify (votes and other updates also trigger the listener).
+  bool _hasSpokenVerdict = false;
 
   final ScrollController _scrollController = ScrollController();
   final List<GlobalKey> _sectionKeys = List.generate(9, (_) => GlobalKey());
@@ -150,6 +156,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   /// Loads the screen from the route argument, which is either a ready
   /// [ProductFetchResult] or a barcode to fetch. "Tekrar Dene" reuses this.
   void _loadFromRouteArguments() {
+    _hasSpokenVerdict = false;
     final args = ModalRoute.of(context)?.settings.arguments;
     final profileRepo = ref.read(profileRepositoryProvider);
 
@@ -171,13 +178,59 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   }
 
   void _onViewModelChanged() {
-    if (mounted) {
-      setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    _maybeSpeakVerdict();
+  }
+
+  /// Reads the verdict aloud once the product is loaded, if the accessibility
+  /// toggle is on. Pending/safe/conflict ordering lives in [buildVerdictSpeech].
+  void _maybeSpeakVerdict() {
+    if (_hasSpokenVerdict) return;
+    if (_viewModel.status != ProductDetailStatus.found) return;
+    if (!ref.read(readAloudViewModelProvider).isEnabled) return;
+
+    final product = _viewModel.product;
+    final explanation = _viewModel.explanation;
+    if (product == null || explanation == null) return;
+
+    _hasSpokenVerdict = true;
+    final segments = buildVerdictSpeech(
+      l10n: AppLocalizations.of(context),
+      product: product,
+      explanation: explanation,
+      rule: _viewModel.ruleEngineResult,
+      profile: _viewModel.userProfile,
+    );
+    _speakSegments(segments);
+  }
+
+  /// Speaks the ingredients list on demand ("Read Details" button).
+  void _speakIngredients() {
+    final product = _viewModel.product;
+    if (product == null) return;
+    final text = buildIngredientsSpeech(
+      l10n: AppLocalizations.of(context),
+      product: product,
+      localeName: _localeName(),
+    );
+    _speakSegments([text]);
+  }
+
+  Future<void> _speakSegments(List<String> segments) async {
+    final tts = ref.read(ttsServiceProvider);
+    final localeName = _localeName();
+    await tts.stop();
+    for (final segment in segments) {
+      await tts.speak(segment, localeName: localeName);
     }
   }
 
+  String _localeName() => Localizations.localeOf(context).languageCode;
+
   @override
   void dispose() {
+    ref.read(ttsServiceProvider).stop();
     _scrollController.dispose();
     _viewModel.removeListener(_onViewModelChanged);
     super.dispose();
@@ -389,6 +442,17 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                         additivesDetails: _viewModel.additivesDetails,
                       ),
                     ),
+                    if (ref.watch(readAloudViewModelProvider).isEnabled) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _speakIngredients,
+                          icon: const Icon(Icons.volume_up_rounded),
+                          label: Text(l10n.readAloudDetailsButton),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
 
                     // 9. ÖNERİLER (Recommendations)
