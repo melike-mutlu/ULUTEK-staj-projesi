@@ -13,6 +13,7 @@ import '../../features/shell/shell_view.dart';
 import '../../features/shopping_list/views/shopping_list_detail_view.dart';
 import '../../features/shopping_list/views/shopping_lists_view.dart';
 import '../../features/product_comparison/product_comparison_view.dart';
+import '../../features/food_dictionary/food_dictionary_view.dart';
 import '../../features/startup/startup_gate.dart';
 
 /// Uygulamadaki TÜM route adları ve eşleştikleri ekranlar burada tanımlanır.
@@ -68,9 +69,11 @@ abstract final class AppRoutes {
 
   /// Alışveriş Listesi Detay ekranı.
   static const String shoppingListDetail = '/shopping-list-detail';
-
   /// Ürün Karşılaştırma ekranı.
   static const String productComparison = '/product-comparison';
+
+  /// Gıda Sözlüğü ekranı.
+  static const String foodDictionary = '/food-dictionary';
 
   /// `MaterialApp.routes` tablosu.
   static Map<String, WidgetBuilder> get table => <String, WidgetBuilder>{
@@ -88,6 +91,7 @@ abstract final class AppRoutes {
         shoppingLists: (_) => const ShoppingListsView(),
         shoppingListDetail: (_) => const ShoppingListDetailView(),
         productComparison: (_) => const ProductComparisonView(),
+        foodDictionary: (_) => const FoodDictionaryView(),
       };
 }
 
