@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Koyu Tema'**
   String get darkTheme;
 
+  /// Read-aloud accessibility toggle row label in Settings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sesli Okuma'**
+  String get readAloud;
+
   /// Language option that follows the device locale.
   ///
   /// In tr, this message translates to:

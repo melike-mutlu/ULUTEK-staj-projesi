@@ -20,6 +20,10 @@
   "@darkTheme": {
     "description": "Dark theme toggle row label in Settings."
   },
+  "readAloud": "Sesli Okuma",
+  "@readAloud": {
+    "description": "Read-aloud accessibility toggle row label in Settings."
+  },
   "languageSystem": "Sistem",
   "@languageSystem": {
     "description": "Language option that follows the device locale."

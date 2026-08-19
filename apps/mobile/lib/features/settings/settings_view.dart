@@ -13,6 +13,7 @@ import '../../core/utils/email_masker.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../profile/profile_viewmodel.dart';
+import 'read_aloud_viewmodel.dart';
 import 'widgets/country_edit_dialog.dart';
 
 /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
@@ -608,6 +609,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     final isPremium = ref.watch(homeViewModelProvider).isPremium;
     final country = ref.watch(profileViewModelProvider).country;
     final themeVm = ref.watch(themeViewModelProvider);
+    final readAloudVm = ref.watch(readAloudViewModelProvider);
 
     final backgroundColor = theme.scaffoldBackgroundColor;
     final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
@@ -681,6 +683,15 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   value: themeVm.isDarkMode,
                   onChanged: (bool value) {
                     ref.read(themeViewModelProvider).toggleTheme(value);
+                  },
+                ),
+                const SizedBox(height: 10),
+                _SettingsSwitchRow(
+                  icon: Icons.record_voice_over_outlined,
+                  label: l10n.readAloud,
+                  value: readAloudVm.isEnabled,
+                  onChanged: (bool value) {
+                    ref.read(readAloudViewModelProvider).toggle(value);
                   },
                 ),
                 const SizedBox(height: 10),

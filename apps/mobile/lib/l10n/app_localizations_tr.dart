@@ -24,6 +24,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get darkTheme => 'Koyu Tema';
 
   @override
+  String get readAloud => 'Sesli Okuma';
+
+  @override
   String get languageSystem => 'Sistem';
 
   @override
