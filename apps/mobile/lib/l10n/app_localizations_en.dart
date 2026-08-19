@@ -27,6 +27,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readAloud => 'Read Aloud';
 
   @override
+  String get readAloudNotVerified =>
+      'This product has not been verified yet. Please check the ingredient and allergen label before consuming.';
+
+  @override
+  String get readAloudSafe => 'This product looks suitable for your profile.';
+
+  @override
+  String get readAloudIngredientsIntro => 'Ingredients:';
+
+  @override
+  String get readAloudDetailsButton => 'Read Details';
+
+  @override
   String get languageSystem => 'System';
 
   @override

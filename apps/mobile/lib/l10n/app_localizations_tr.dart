@@ -27,6 +27,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get readAloud => 'Sesli Okuma';
 
   @override
+  String get readAloudNotVerified =>
+      'Bu ürün henüz doğrulanmadı. Tüketmeden önce içerik ve alerjen etiketini kontrol ediniz.';
+
+  @override
+  String get readAloudSafe => 'Bu ürün profilinize uygun görünüyor.';
+
+  @override
+  String get readAloudIngredientsIntro => 'İçindekiler:';
+
+  @override
+  String get readAloudDetailsButton => 'Detayları Oku';
+
+  @override
   String get languageSystem => 'Sistem';
 
   @override

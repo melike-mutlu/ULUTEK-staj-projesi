@@ -134,6 +134,30 @@ abstract class AppLocalizations {
   /// **'Sesli Okuma'**
   String get readAloud;
 
+  /// Spoken first for pending (community-added) products; never says safe.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün henüz doğrulanmadı. Tüketmeden önce içerik ve alerjen etiketini kontrol ediniz.'**
+  String get readAloudNotVerified;
+
+  /// Short spoken confirmation when there is no conflict.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ürün profilinize uygun görünüyor.'**
+  String get readAloudSafe;
+
+  /// Spoken lead-in before the ingredients list.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçindekiler:'**
+  String get readAloudIngredientsIntro;
+
+  /// Button that reads the ingredients list aloud on demand.
+  ///
+  /// In tr, this message translates to:
+  /// **'Detayları Oku'**
+  String get readAloudDetailsButton;
+
   /// Language option that follows the device locale.
   ///
   /// In tr, this message translates to:
