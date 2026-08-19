@@ -29,7 +29,7 @@ Finder _navLabel(String label) => find.descendant(
 /// Supabase hic baslatilmiyor.
 class _FakeScanHistoryRepository implements ScanHistoryRepository {
   @override
-  Future<void> saveScanHistory(String barcode) async {}
+  Future<void> saveScanHistory(String barcode ,{bool hadConflict = false}) async {}
 
   @override
   Future<List<Map<String, dynamic>>> getScanHistory({int limit = 10}) async =>
