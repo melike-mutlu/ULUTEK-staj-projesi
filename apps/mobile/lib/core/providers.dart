@@ -14,6 +14,7 @@ import '../data/repositories/chatbot_repository.dart';
 import '../data/repositories/shopping_list_repository.dart';
 import '../features/shopping_list/shopping_list_viewmodel.dart';
 import '../features/product_comparison/product_comparison_viewmodel.dart';
+import '../features/food_dictionary/food_dictionary_viewmodel.dart';
 import '../core/supabase_client.dart';
 import 'localization/locale_controller.dart';
 
@@ -108,4 +109,9 @@ final productComparisonViewModelProvider =
 
 /// Kullanıcının "Basit Mod" tercihini tutar.
 final simpleModeProvider = StateProvider<bool>((ref) => false);
+final foodDictionaryViewModelProvider =
+    ChangeNotifierProvider<FoodDictionaryViewModel>((ref) {
+  return FoodDictionaryViewModel();
+});
+
 
