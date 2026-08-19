@@ -5,7 +5,7 @@
 // Örnek   : docs/ai/schemas/vision-extract-example.json
 //
 // Kullanım:
-//   import { extractFromImages, validateVisionResult } from "./_shared/visionExtract.ts";
+//   import { extractFromImages, validateVisionResult } from "../_shared/visionExtract.ts";
 //
 //   // 1) URL listesiyle (public Storage URL)
 //   const result = await extractFromImages([ingredientsUrl, nutritionUrl]);
