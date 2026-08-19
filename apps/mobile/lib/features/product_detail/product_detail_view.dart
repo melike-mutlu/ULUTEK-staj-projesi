@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/accessibility/tts_service.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
@@ -53,12 +54,17 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
     {'title': 'Öneriler', 'icon': Icons.thumb_up_outlined},
   ];
 
+  /// Cached in [initState] so [dispose] can stop speech without touching `ref`,
+  /// which is illegal once the widget is disposed.
+  late final TtsService _ttsService;
+
   @override
   void initState() {
     super.initState();
     _viewModel = ProductDetailViewModel(
       ref.read(explanationRepositoryProvider),
     );
+    _ttsService = ref.read(ttsServiceProvider);
     _viewModel.addListener(_onViewModelChanged);
   }
 
@@ -218,11 +224,10 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   }
 
   Future<void> _speakSegments(List<String> segments) async {
-    final tts = ref.read(ttsServiceProvider);
     final localeName = _localeName();
-    await tts.stop();
+    await _ttsService.stop();
     for (final segment in segments) {
-      await tts.speak(segment, localeName: localeName);
+      await _ttsService.speak(segment, localeName: localeName);
     }
   }
 
@@ -230,7 +235,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
 
   @override
   void dispose() {
-    ref.read(ttsServiceProvider).stop();
+    _ttsService.stop();
     _scrollController.dispose();
     _viewModel.removeListener(_onViewModelChanged);
     super.dispose();
