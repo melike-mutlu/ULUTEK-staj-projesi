@@ -447,6 +447,12 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
+                          // Detail screen stays light in both themes; force a
+                          // dark foreground so the label is not invisible in
+                          // dark mode over the light background.
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AkilliSepetColors.textPrimary,
+                          ),
                           onPressed: _speakIngredients,
                           icon: const Icon(Icons.volume_up_rounded),
                           label: Text(l10n.readAloudDetailsButton),
