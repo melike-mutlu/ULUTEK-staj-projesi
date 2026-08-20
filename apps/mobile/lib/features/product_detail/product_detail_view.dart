@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/accessibility/tts_service.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../l10n/app_localizations.dart';
+import '../settings/read_aloud_viewmodel.dart';
 import 'product_detail_viewmodel.dart';
 import 'profile_checks.dart';
+import 'read_aloud_script.dart';
 import 'widgets/ingredients_section.dart';
 import 'widgets/nutriments_card.dart';
 import 'widgets/other_allergens_section.dart';
@@ -31,6 +34,10 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   bool _isInitialLoaded = false;
   String? _scannedBarcode;
 
+  /// Guards the auto read-aloud so it fires once per loaded product, not on
+  /// every notify (votes and other updates also trigger the listener).
+  bool _hasSpokenVerdict = false;
+
   final ScrollController _scrollController = ScrollController();
   final List<GlobalKey> _sectionKeys = List.generate(9, (_) => GlobalKey());
   int _activeSectionIndex = 0;
@@ -47,12 +54,17 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
     {'title': 'Öneriler', 'icon': Icons.thumb_up_outlined},
   ];
 
+  /// Cached in [initState] so [dispose] can stop speech without touching `ref`,
+  /// which is illegal once the widget is disposed.
+  late final TtsService _ttsService;
+
   @override
   void initState() {
     super.initState();
     _viewModel = ProductDetailViewModel(
       ref.read(explanationRepositoryProvider),
     );
+    _ttsService = ref.read(ttsServiceProvider);
     _viewModel.addListener(_onViewModelChanged);
   }
 
@@ -150,6 +162,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   /// Loads the screen from the route argument, which is either a ready
   /// [ProductFetchResult] or a barcode to fetch. "Tekrar Dene" reuses this.
   void _loadFromRouteArguments() {
+    _hasSpokenVerdict = false;
     final args = ModalRoute.of(context)?.settings.arguments;
     final profileRepo = ref.read(profileRepositoryProvider);
 
@@ -171,13 +184,58 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   }
 
   void _onViewModelChanged() {
-    if (mounted) {
-      setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    _maybeSpeakVerdict();
+  }
+
+  /// Reads the verdict aloud once the product is loaded, if the accessibility
+  /// toggle is on. Pending/safe/conflict ordering lives in [buildVerdictSpeech].
+  void _maybeSpeakVerdict() {
+    if (_hasSpokenVerdict) return;
+    if (_viewModel.status != ProductDetailStatus.found) return;
+    if (!ref.read(readAloudViewModelProvider).isEnabled) return;
+
+    final product = _viewModel.product;
+    final explanation = _viewModel.explanation;
+    if (product == null || explanation == null) return;
+
+    _hasSpokenVerdict = true;
+    final segments = buildVerdictSpeech(
+      l10n: AppLocalizations.of(context),
+      product: product,
+      explanation: explanation,
+      rule: _viewModel.ruleEngineResult,
+      profile: _viewModel.userProfile,
+    );
+    _speakSegments(segments);
+  }
+
+  /// Speaks the ingredients list on demand ("Read Details" button).
+  void _speakIngredients() {
+    final product = _viewModel.product;
+    if (product == null) return;
+    final text = buildIngredientsSpeech(
+      l10n: AppLocalizations.of(context),
+      product: product,
+      localeName: _localeName(),
+    );
+    _speakSegments([text]);
+  }
+
+  Future<void> _speakSegments(List<String> segments) async {
+    final localeName = _localeName();
+    await _ttsService.stop();
+    for (final segment in segments) {
+      await _ttsService.speak(segment, localeName: localeName);
     }
   }
 
+  String _localeName() => Localizations.localeOf(context).languageCode;
+
   @override
   void dispose() {
+    _ttsService.stop();
     _scrollController.dispose();
     _viewModel.removeListener(_onViewModelChanged);
     super.dispose();
@@ -389,6 +447,23 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                         additivesDetails: _viewModel.additivesDetails,
                       ),
                     ),
+                    if (ref.watch(readAloudViewModelProvider).isEnabled) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          // Detail screen stays light in both themes; force a
+                          // dark foreground so the label is not invisible in
+                          // dark mode over the light background.
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AkilliSepetColors.textPrimary,
+                          ),
+                          onPressed: _speakIngredients,
+                          icon: const Icon(Icons.volume_up_rounded),
+                          label: Text(l10n.readAloudDetailsButton),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
 
                     // 9. ÖNERİLER (Recommendations)

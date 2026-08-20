@@ -16,6 +16,7 @@ import '../features/shopping_list/shopping_list_viewmodel.dart';
 import '../features/product_comparison/product_comparison_viewmodel.dart';
 import '../features/food_dictionary/food_dictionary_viewmodel.dart';
 import '../core/supabase_client.dart';
+import '../core/accessibility/tts_service.dart';
 import 'localization/locale_controller.dart';
 
 /// Holds the persisted language choice; `app.dart` binds it to
@@ -23,6 +24,11 @@ import 'localization/locale_controller.dart';
 final localeControllerProvider =
     ChangeNotifierProvider<LocaleController>((ref) {
   return LocaleController();
+});
+
+/// Single shared TTS engine for the read-aloud accessibility feature.
+final ttsServiceProvider = Provider<TtsService>((ref) {
+  return TtsService();
 });
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
