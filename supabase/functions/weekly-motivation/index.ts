@@ -8,11 +8,12 @@
 
 import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 
+// gpt-4o-mini kasitli olarak zincirde degil - bkz. explain-product/index.ts'teki not:
+// LLM_API_KEY projede Gemini anahtari, OpenAI'a gonderilirse 401 doner.
 const MODEL_FALLBACK_CHAIN = [
   "gemini-3.6-flash",
   "gemini-3.5-flash",
   "gemini-2.5-flash",
-  "gpt-4o-mini",
 ];
 
 const RETRYABLE_STATUS_CODES = new Set([429, 503]);

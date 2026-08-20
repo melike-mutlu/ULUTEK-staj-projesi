@@ -18,15 +18,19 @@ import {
 import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 
 /**
- * Gemini ve OpenAI modelleri arasında fallback zinciri.
+ * Gemini modelleri arasında fallback zinciri (chatbot/index.ts ile aynı desen).
  * Kota (429) veya geçici sunucu hatası (503) durumunda bir sonraki modele geçilir.
  * Sıra önemli: ilk model en güçlü/varsayılan model olmalı.
+ *
+ * NOT: gpt-4o-mini kasıtlı olarak zincirde değil — Deno.env.get("LLM_API_KEY")
+ * projede Gemini anahtarı olarak deploy edilmiş (bkz. chatbot/index.ts), OpenAI'a
+ * Bearer token olarak gönderilirse 401 döner ve bu kod RETRYABLE_STATUS_CODES
+ * içinde olmadığı için zinciri orada sessizce durdururdu.
  */
 const MODEL_FALLBACK_CHAIN = [
   "gemini-3.6-flash",
   "gemini-3.5-flash",
   "gemini-2.5-flash",
-  "gpt-4o-mini",
 ];
 
 /**
