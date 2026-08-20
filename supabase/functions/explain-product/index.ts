@@ -17,8 +17,22 @@ import {
 
 import { jsonResponse, handleCorsPreflight } from "../_shared/http.ts";
 
-/** Swappable via Supabase secret; gpt-4o family is being retired. */
-const DEFAULT_MODEL = "gpt-4o-mini";
+/**
+ * Gemini ve OpenAI modelleri arasında fallback zinciri.
+ * Kota (429) veya geçici sunucu hatası (503) durumunda bir sonraki modele geçilir.
+ * Sıra önemli: ilk model en güçlü/varsayılan model olmalı.
+ */
+const MODEL_FALLBACK_CHAIN = [
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-2.5-flash",
+  "gpt-4o-mini",
+];
+
+/**
+ * Bu status kodları "geçici" kabul edilir ve bir sonraki modele geçilmesini tetikler.
+ */
+const RETRYABLE_STATUS_CODES = new Set([429, 503]);
 
 type Level = "ok" | "caution" | "warning";
 const SEVERITY: Level[] = ["ok", "caution", "warning"];
@@ -78,14 +92,13 @@ async function handleRequest(req: Request): Promise<Response> {
 
     const prompt = buildPrompt(product, rule_engine_result, profile);
     const apiKey = Deno.env.get("LLM_API_KEY");
-    const model = Deno.env.get("LLM_MODEL") ?? DEFAULT_MODEL;
     const llmOutput = apiKey
-      ? await callLlm(prompt, apiKey, model, floor)
+      ? await callLlm(prompt, apiKey, floor)
       : callLlmPlaceholder("LLM_API_KEY tanimli degil.", floor);
 
     return jsonResponse(llmOutput);
   } catch (error) {
-    console.error(error);
+    console.error("explain-product isteği işlenirken hata oluştu:", error);
     return jsonResponse({ status: "error", message: "beklenmeyen hata" }, 500);
   }
 }
@@ -138,48 +151,129 @@ Profil JSON: ${JSON.stringify(profile, null, 2)}
 async function callLlm(
   prompt: string,
   apiKey: string,
-  model: string,
   floor: Level,
 ) {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      messages: [
-        {
-          role: "system",
-          content:
-            "Sen bir ürün açıklama asistanısın. Alerjen ve diyet kararlarını değiştirme; sadece mevcut veriyi sade bir şekilde sun."
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: 700,
-    }),
-  });
+  let lastErrorStatus: number | null = null;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("LLM çağrısı başarısız oldu:", response.status, errorText);
-    return callLlmPlaceholder("LLM API çağrısı başarısız oldu.", floor);
+  for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
+    const model = MODEL_FALLBACK_CHAIN[i];
+    const isLastModel = i === MODEL_FALLBACK_CHAIN.length - 1;
+
+    try {
+      let response: Response;
+
+      if (model.startsWith("gemini")) {
+        // Gemini REST API
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{
+                  text:
+                    "Sen bir ürün açıklama asistanısın. Alerjen ve diyet kararlarını değiştirme; sadece mevcut veriyi sade bir şekilde sun.",
+                }],
+              },
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: prompt }],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 700,
+                responseMimeType: "application/json",
+              },
+            }),
+          },
+        );
+      } else {
+        // OpenAI API
+        response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            temperature: 0.2,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Sen bir ürün açıklama asistanısın. Alerjen ve diyet kararlarını değiştirme; sadece mevcut veriyi sade bir şekilde sun.",
+              },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 700,
+          }),
+        });
+      }
+
+      if (response.ok) {
+        const payload = await response.json();
+        let content: string | null = null;
+
+        if (model.startsWith("gemini")) {
+          content = payload?.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+        } else {
+          content = payload?.choices?.[0]?.message?.content ?? null;
+        }
+
+        if (typeof content === "string" && content.trim().length > 0) {
+          const parsed = parseLlmJson(content);
+          if (parsed && typeof parsed === "object") {
+            if (i > 0) {
+              console.warn(
+                `explain-product fallback kullanıldı: ${MODEL_FALLBACK_CHAIN[0]} yerine ${model}`,
+              );
+            }
+            return validateLlmResponse(parsed, floor);
+          }
+        }
+
+        console.error(`${model} geçersiz içerik döndü:`, payload);
+        lastErrorStatus = null;
+        continue;
+      }
+
+      const errorText = await response.text();
+      console.error(
+        `${model} API çağrısı başarısız oldu:`,
+        response.status,
+        errorText,
+      );
+      lastErrorStatus = response.status;
+
+      if (!RETRYABLE_STATUS_CODES.has(response.status)) {
+        // Kota (429) veya sunucu (503) hatası dışındaki hatalarda zinciri durdur
+        break;
+      }
+
+      if (!isLastModel) {
+        console.warn(
+          `${model} geçici hata verdi (${response.status}), sıradaki modele geçiliyor: ${
+            MODEL_FALLBACK_CHAIN[i + 1]
+          }`,
+        );
+      }
+    } catch (err) {
+      console.error(`${model} çağrısında istisna oluştu:`, err);
+    }
   }
 
-  const payload = await response.json();
-  const content = payload?.choices?.[0]?.message?.content;
-  if (typeof content !== "string") {
-    console.error("LLM geçersiz içerik döndü", payload);
-    return callLlmPlaceholder("LLM geçersiz içerik döndürdü.", floor);
-  }
-
-  const parsed = parseLlmJson(content);
-  return validateLlmResponse(parsed, floor);
+  console.error(
+    "explain-product: fallback zincirindeki tüm modeller başarısız oldu.",
+    { lastErrorStatus },
+  );
+  return callLlmPlaceholder(
+    "Tüm modeller başarısız oldu veya LLM servisi yanıt vermiyor.",
+    floor,
+  );
 }
 
 function parseLlmJson(content: string) {
@@ -260,5 +354,3 @@ function insufficientResponse() {
     disclaimer: "Bu bilgi tıbbi tavsiye niteliği taşımaz.",
   };
 }
-
-

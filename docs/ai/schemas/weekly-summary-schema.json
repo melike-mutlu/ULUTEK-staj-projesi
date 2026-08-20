@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WeeklySummaryResponse",
+  "description": "Akıllı Sepet Haftalık Özet AI Yanıt Şeması",
+  "type": "object",
+  "properties": {
+    "tone_scenario": {
+      "type": "string",
+      "enum": [
+        "SCENARIO_HIGH_RISK",
+        "SCENARIO_BALANCED",
+        "SCENARIO_LOW_USAGE",
+        "SCENARIO_DIET_FOCUSED"
+      ],
+      "description": "Kullanılan AI iletişim tonu ve senaryo kategorisi"
+    },
+    "overall_score_label": {
+      "type": "string",
+      "description": "Haftayı özetleyen kısa başlık (örn: 'Bilinçli Tercihler', 'Harika Denge')"
+    },
+    "personalized_message": {
+      "type": "string",
+      "description": "Kullanıcının haftalık tarama alışkanlıklarına özel samimi açıklama metni"
+    },
+    "top_highlights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Haftanın öne çıkan 2-3 önemli bulgusu veya başarısı"
+    },
+    "recommendation": {
+      "type": "string",
+      "description": "Gelecek hafta için küçük ve uygulanabilir tavsiye veya ipucu"
+    },
+    "disclaimer": {
+      "type": "string",
+      "description": "Zorunlu tıbbi tavsiye değildir uyarısı",
+      "default": "Bu özet bilgilendirme amaçlıdır; tıbbi tavsiye niteliği taşımaz."
+    }
+  },
+  "required": [
+    "tone_scenario",
+    "overall_score_label",
+    "personalized_message",
+    "top_highlights",
+    "recommendation",
+    "disclaimer"
+  ],
+  "additionalProperties": false
+}
