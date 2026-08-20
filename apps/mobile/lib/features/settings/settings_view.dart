@@ -695,6 +695,15 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   },
                 ),
                 const SizedBox(height: 10),
+                _SettingsSwitchRow(
+                  icon: Icons.child_care_rounded,
+                  label: 'Basit Görünüm Modu',
+                  value: ref.watch(simpleModeProvider),
+                  onChanged: (bool value) {
+                    ref.read(simpleModeProvider.notifier).state = value;
+                  },
+                ),
+                const SizedBox(height: 10),
                 _SettingsRow(
                   icon: Icons.language_rounded,
                   label: l10n.language,

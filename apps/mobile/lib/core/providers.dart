@@ -113,6 +113,8 @@ final productComparisonViewModelProvider =
   );
 });
 
+/// Kullanıcının "Basit Mod" tercihini tutar.
+final simpleModeProvider = StateProvider<bool>((ref) => false);
 final foodDictionaryViewModelProvider =
     ChangeNotifierProvider<FoodDictionaryViewModel>((ref) {
   return FoodDictionaryViewModel();

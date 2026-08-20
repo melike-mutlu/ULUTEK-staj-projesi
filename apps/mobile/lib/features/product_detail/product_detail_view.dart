@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../core/accessibility/tts_service.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/providers.dart';
@@ -19,6 +18,7 @@ import 'widgets/personal_risks_section.dart';
 import 'widgets/profile_check_section.dart';
 import 'widgets/product_header_card.dart';
 import 'widgets/recommendations_section.dart';
+import 'widgets/simple_mode_card.dart';
 import 'widgets/warning_banner.dart';
 import '../product_comparison/widgets/health_condition_info_card.dart';
 
@@ -294,22 +294,48 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
 
         final insufficient =
             _viewModel.ruleEngineResult?.hasSufficientData == false;
+        
+        // 1. BASİT MOD AÇIK MI DİYE KONTROL EDİYORUZ
+        final isSimpleMode = ref.watch(simpleModeProvider);
+
+        // 2. RİSK SEVİYESİNİ ALIYORUZ
+        final String riskLevel = explanation.level.name;
 
         return Column(
           children: [
-            // Sticky Quick Section Navigation Bar
-            _buildSectionNavBar(),
+            // Basit mod kapalıysa üstteki sekmeli navigasyon barını göster, açıksa gizle
+            if (!isSimpleMode) _buildSectionNavBar(),
 
             // Main single scroll content with 9 sequential sections
+
             Expanded(
               child: SingleChildScrollView(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 physics: const BouncingScrollPhysics(),
-                child: Column(
+
+                // Basit mod açıksa sadece Kimlik Kartı ve Büyük Risk Kartı
+                child: isSimpleMode 
+                  ? Column(
+                      children: [
+                        ProductHeaderCard(
+                          product: product,
+                          upvotes: _viewModel.upvotesCount,
+                          downvotes: _viewModel.downvotesCount,
+                          userVote: _viewModel.userVote,
+                          onVoteApprove: _viewModel.voteApprove,
+                          onVoteReject: _viewModel.voteReject,
+                        ),
+                        const SizedBox(height: 32),
+                        SimpleModeCard(level: riskLevel),
+                      ],
+                    )
+
+                // Basit mod kapalıysa mevcut standart 9 bölümü göster
+                : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. UYGUNLUK (Warning / Verdict Banner)
+                    // 1. UYGUNLUK
                     KeyedSubtree(
                       key: _sectionKeys[0],
                       child: Column(
