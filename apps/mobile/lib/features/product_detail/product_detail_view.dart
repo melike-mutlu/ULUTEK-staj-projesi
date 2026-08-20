@@ -8,6 +8,7 @@ import '../../data/repositories/product_repository.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../settings/read_aloud_viewmodel.dart';
+import '../settings/simple_mode_viewmodel.dart';
 import 'product_detail_viewmodel.dart';
 import 'profile_checks.dart';
 import 'read_aloud_script.dart';
@@ -296,7 +297,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
             _viewModel.ruleEngineResult?.hasSufficientData == false;
         
         // 1. BASİT MOD AÇIK MI DİYE KONTROL EDİYORUZ
-        final isSimpleMode = ref.watch(simpleModeProvider);
+        final isSimpleMode = ref.watch(simpleModeViewModelProvider).isEnabled;
 
         // 2. RİSK SEVİYESİNİ ALIYORUZ
         final String riskLevel = explanation.level.name;

@@ -14,6 +14,7 @@ import '../../data/repositories/profile_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../profile/profile_viewmodel.dart';
 import 'read_aloud_viewmodel.dart';
+import 'simple_mode_viewmodel.dart';
 import 'widgets/country_edit_dialog.dart';
 
 /// Ayarlar — profil ekranının sağ üstündeki dişli ikonundan açılır.
@@ -610,6 +611,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     final country = ref.watch(profileViewModelProvider).country;
     final themeVm = ref.watch(themeViewModelProvider);
     final readAloudVm = ref.watch(readAloudViewModelProvider);
+    final simpleModeVm = ref.watch(simpleModeViewModelProvider);
 
     final backgroundColor = theme.scaffoldBackgroundColor;
     final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
@@ -698,9 +700,9 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 _SettingsSwitchRow(
                   icon: Icons.child_care_rounded,
                   label: 'Basit Görünüm Modu',
-                  value: ref.watch(simpleModeProvider),
+                  value: simpleModeVm.isEnabled,
                   onChanged: (bool value) {
-                    ref.read(simpleModeProvider.notifier).state = value;
+                    ref.read(simpleModeViewModelProvider).toggle(value);
                   },
                 ),
                 const SizedBox(height: 10),
