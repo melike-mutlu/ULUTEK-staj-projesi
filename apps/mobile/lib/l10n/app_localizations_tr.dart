@@ -245,13 +245,49 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deleteAccountFailed => 'Hesap silme işlemi gerçekleştirilemedi.';
 
   @override
-  String get statScannedProducts => 'Taranan ürün';
+  String get statDistinctProducts => 'Farklı ürün';
 
   @override
   String get statAvoidedAllergens => 'Kaçınılan alerjen';
 
   @override
   String get statMemberDays => 'Üyelik günü';
+
+  @override
+  String get statsTitle => 'İstatistiklerim';
+
+  @override
+  String get statTotalScans => 'Toplam tarama';
+
+  @override
+  String get statStreak => 'Gün serisi';
+
+  @override
+  String get statsWeeklyTitle => 'Son 7 gün';
+
+  @override
+  String get statsWeeklyEmpty => 'Bu hafta henüz tarama yok.';
+
+  @override
+  String get achievementsTitle => 'Başarımlar';
+
+  @override
+  String get achievementFirstScan => 'İlk tarama';
+
+  @override
+  String get achievementTenProducts => '10 farklı ürün';
+
+  @override
+  String get achievementFiftyProducts => '50 farklı ürün';
+
+  @override
+  String get achievementHundredProducts => '100 farklı ürün';
+
+  @override
+  String get achievementWeekStreak => '7 gün serisi';
+
+  @override
+  String get achievementMonthMember => '30 gün üye';
 
   @override
   String get signUp => 'Kayıt Ol';

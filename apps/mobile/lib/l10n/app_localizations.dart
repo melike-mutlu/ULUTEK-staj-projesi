@@ -542,11 +542,11 @@ abstract class AppLocalizations {
   /// **'Hesap silme işlemi gerçekleştirilemedi.'**
   String get deleteAccountFailed;
 
-  /// Profile stat tile label for scanned product count.
+  /// Profile stat tile label for distinct scanned product count.
   ///
   /// In tr, this message translates to:
-  /// **'Taranan ürün'**
-  String get statScannedProducts;
+  /// **'Farklı ürün'**
+  String get statDistinctProducts;
 
   /// Profile stat tile label for avoided allergen count.
   ///
@@ -559,6 +559,78 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Üyelik günü'**
   String get statMemberDays;
+
+  /// Title of the profile stats detail screen and its entry tooltip.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstatistiklerim'**
+  String get statsTitle;
+
+  /// Stat tile label for total scan count including repeats.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam tarama'**
+  String get statTotalScans;
+
+  /// Stat tile label for the current consecutive-day scan streak.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gün serisi'**
+  String get statStreak;
+
+  /// Section title above the weekly scan breakdown chart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son 7 gün'**
+  String get statsWeeklyTitle;
+
+  /// Empty state when there are no scans in the last 7 days.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta henüz tarama yok.'**
+  String get statsWeeklyEmpty;
+
+  /// Section title above the achievements grid.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başarımlar'**
+  String get achievementsTitle;
+
+  /// Achievement label for the first scan.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk tarama'**
+  String get achievementFirstScan;
+
+  /// Achievement label for scanning 10 distinct products.
+  ///
+  /// In tr, this message translates to:
+  /// **'10 farklı ürün'**
+  String get achievementTenProducts;
+
+  /// Achievement label for scanning 50 distinct products.
+  ///
+  /// In tr, this message translates to:
+  /// **'50 farklı ürün'**
+  String get achievementFiftyProducts;
+
+  /// Achievement label for scanning 100 distinct products.
+  ///
+  /// In tr, this message translates to:
+  /// **'100 farklı ürün'**
+  String get achievementHundredProducts;
+
+  /// Achievement label for a 7-day scan streak.
+  ///
+  /// In tr, this message translates to:
+  /// **'7 gün serisi'**
+  String get achievementWeekStreak;
+
+  /// Achievement label for 30 days since signup.
+  ///
+  /// In tr, this message translates to:
+  /// **'30 gün üye'**
+  String get achievementMonthMember;
 
   /// Sign-up button and title.
   ///

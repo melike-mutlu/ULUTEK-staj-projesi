@@ -249,13 +249,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountFailed => 'Could not delete the account.';
 
   @override
-  String get statScannedProducts => 'Scanned products';
+  String get statDistinctProducts => 'Distinct products';
 
   @override
   String get statAvoidedAllergens => 'Avoided allergens';
 
   @override
   String get statMemberDays => 'Member days';
+
+  @override
+  String get statsTitle => 'My stats';
+
+  @override
+  String get statTotalScans => 'Total scans';
+
+  @override
+  String get statStreak => 'Day streak';
+
+  @override
+  String get statsWeeklyTitle => 'Last 7 days';
+
+  @override
+  String get statsWeeklyEmpty => 'No scans yet this week.';
+
+  @override
+  String get achievementsTitle => 'Achievements';
+
+  @override
+  String get achievementFirstScan => 'First scan';
+
+  @override
+  String get achievementTenProducts => '10 distinct products';
+
+  @override
+  String get achievementFiftyProducts => '50 distinct products';
+
+  @override
+  String get achievementHundredProducts => '100 distinct products';
+
+  @override
+  String get achievementWeekStreak => '7-day streak';
+
+  @override
+  String get achievementMonthMember => '30 days member';
 
   @override
   String get signUp => 'Sign up';

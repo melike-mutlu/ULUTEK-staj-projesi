@@ -152,6 +152,13 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
         title: Text(l10n.profileTitle, style: AppTextStyles.heading2.copyWith(color: textColor)),
         actions: <Widget>[
           IconButton(
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.profileStats),
+            icon: const Icon(Icons.insights_rounded),
+            color: textColor,
+            tooltip: l10n.statsTitle,
+          ),
+          IconButton(
             onPressed: () => Navigator.pushNamed(context, AppRoutes.shoppingLists),
             icon: const Icon(Icons.format_list_bulleted_rounded),
             color: textColor,

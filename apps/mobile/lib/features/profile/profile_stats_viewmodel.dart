@@ -17,18 +17,24 @@ class ProfileStatsViewModel extends ChangeNotifier {
   ProfileStats? _stats;
   ProfileStats? get stats => _stats;
 
+  bool _loadFailed = false;
+  bool get loadFailed => _loadFailed;
+
   bool _disposed = false;
 
   Future<void> load() async {
     _isLoading = true;
+    _loadFailed = false;
     notifyListeners();
 
     try {
       _stats = await _repository.fetch();
     } catch (error) {
-      // Stats are non-critical: on failure the section simply hides itself.
+      // Stats are non-critical: on failure the compact section hides itself; the
+      // detail screen shows a retry via [loadFailed].
       if (kDebugMode) debugPrint('ProfileStatsViewModel: load failed <- $error');
       _stats = null;
+      _loadFailed = true;
     }
 
     _isLoading = false;
