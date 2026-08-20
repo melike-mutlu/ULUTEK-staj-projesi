@@ -14,7 +14,7 @@ import 'package:akilli_sepet/shared/widgets/user_avatar_circle.dart';
 
 class _FakeScanHistoryRepository implements ScanHistoryRepository {
   @override
-  Future<void> saveScanHistory(String barcode) async {}
+  Future<void> saveScanHistory(String barcode,   {bool hadConflict = false}) async {}
 
   @override
   Future<List<Map<String, dynamic>>> getScanHistory({int limit = 10}) async =>

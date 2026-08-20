@@ -11,11 +11,6 @@ abstract class ProfileStatsRepository {
 }
 
 class SupabaseProfileStatsRepository implements ProfileStatsRepository {
-  // TODO(backend): the avoided-allergen count has no source yet. Melike Dal
-  // will expose an RPC/column; until then this constant is the single point to
-  // swap for the real value.
-  static const int _mockAvoidedAllergens = 12;
-
   @override
   Future<ProfileStats> fetch() async {
     final user = supabase.auth.currentUser;
@@ -27,9 +22,27 @@ class SupabaseProfileStatsRepository implements ProfileStatsRepository {
       );
     }
 
+    // 1. RPC fonksiyonunu çağırıyoruz
+    final summaryResponse = await supabase.rpc(
+      'get_user_weekly_monthly_summary',
+      params: {
+        'p_user_id': user.id,
+        'p_start_date': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+      },
+    );
+
+    int avoidedCount = 0;
+    if (summaryResponse != null && summaryResponse is Map<String, dynamic>) {
+      avoidedCount = (summaryResponse['conflicts'] ?? 0) as int;
+    }
+
+    // 2. await işlemini burada, return'den önce yapıyoruz
+    final scannedCount = await _distinctScannedProducts(user.id);
+
+    // 3. Değerleri güvenle döndürüyoruz
     return ProfileStats(
-      scannedProducts: await _distinctScannedProducts(user.id),
-      avoidedAllergens: _mockAvoidedAllergens,
+      scannedProducts: scannedCount,
+      avoidedAllergens: avoidedCount,
       daysSinceSignup: _daysSince(user.createdAt),
     );
   }

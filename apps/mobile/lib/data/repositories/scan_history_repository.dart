@@ -10,7 +10,7 @@ class ScanHistoryRepository {
 
   final ProductCacheRepository _productCacheRepository;
 
-  Future<void> saveScanHistory(String barcode) async {
+  Future<void> saveScanHistory(String barcode , {bool hadConflict = false}) async {
     try {
       // O an giriş yapmış kullanıcının ID'sini Supabase Auth'tan otomatik çekiyoruz
       final userId = supabase.auth.currentUser?.id;
@@ -23,6 +23,7 @@ class ScanHistoryRepository {
         'user_id': userId,
         'barcode': barcode,
         'scanned_at': DateTime.now().toUtc().toIso8601String(),
+        'had_conflict': hadConflict,
       });
     } catch (e) {
       debugPrint('[ScanHistoryRepository] Kayıt hatası: $e');
