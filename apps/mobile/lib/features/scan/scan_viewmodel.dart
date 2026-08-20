@@ -17,21 +17,26 @@ class ScanViewModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    // 1. ÖNCE SUPABASE'E KAYDETMEYİ DENE
+    // 1. ÖNCE ÜRÜNÜ GETİR
+    // Tarama geçmişine "had_conflict" olarak dogru degeri yazabilmek icin
+    // kural motoru sonucunun (rule engine result) once gelmesi gerekiyor.
+    final result = await _productRepository.fetchProduct(barcode);
+
+    // 2. SONRA SUPABASE'E KAYDETMEYİ DENE
     // Eğer burada bir hata olursa bile catch bloğu sayesinde kod çökmeyecek
-    // ve ürün detaylarını getirmeye devam edecek.
+    // ve ürün detayları ekranda gösterilmeye devam edecek.
     try {
-      await _scanHistoryRepository.saveScanHistory(barcode);
+      await _scanHistoryRepository.saveScanHistory(
+        barcode,
+        hadConflict: result.ruleEngineResult?.hasConflict ?? false,
+      );
     } catch (e) {
        print('ViewModel de kayıt hatası yakalandı: $e');
     }
 
-    // 2. SONRA ÜRÜNÜ GETİR VE EKRANI AÇ
-    final result = await _productRepository.fetchProduct(barcode);
-    
     isLoading = false;
     notifyListeners();
-    
+
     return result;
   }
 
