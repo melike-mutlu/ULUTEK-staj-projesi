@@ -67,6 +67,11 @@ class ProductComparisonViewModel extends ChangeNotifier {
 
   /// Seçili ürünlerin hepsi için kural motoru sonucunu TEK istekte çeker
   /// (compare-products) — her ürün için ayrı ayrı fetchProduct çağırmak yerine.
+  ///
+  /// Arama sonucundan eklenen ürünler [ProductSelectorModal]'da içerik/besin
+  /// değeri boş bir taslak (stub) olarak geliyor — burada dönen gerçek
+  /// [ProductFetchResult.product] ile o taslağın yerini alıyoruz, yoksa
+  /// karşılaştırma tablosunda içindekiler/besin değerleri hep boş görünür.
   Future<void> _loadRuleEngineResults() async {
     final repo = _productRepository;
     if (repo == null || _selectedProducts.isEmpty) return;
@@ -77,8 +82,15 @@ class ProductComparisonViewModel extends ChangeNotifier {
 
       for (final result in results) {
         final barcode = result.product?.barcode;
-        if (barcode != null && result.ruleEngineResult != null) {
+        if (barcode == null) continue;
+
+        if (result.ruleEngineResult != null) {
           _ruleResults[barcode] = result.ruleEngineResult!;
+        }
+
+        final index = _selectedProducts.indexWhere((p) => p.barcode == barcode);
+        if (index != -1 && result.product != null) {
+          _selectedProducts[index] = result.product!;
         }
       }
       notifyListeners();

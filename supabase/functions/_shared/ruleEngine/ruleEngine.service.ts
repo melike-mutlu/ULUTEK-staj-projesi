@@ -360,6 +360,25 @@ export function runRuleEngine(product: any, profile: any) {
     hasDietConflict ||
     hasHealthConflict;
 
+  // Sporcu ve diyabet dostu diyetler sözlük tabanlı değil (protein/şeker eşiği
+  // doğrudan kontrol ediliyor), ama has_conflict'e katkıları var — mobil
+  // tarafta *hiçbir ekranda* neden gösterilmiyordu çünkü diet_conditions'a hiç
+  // girmiyorlardı. Diğer diyetlerle aynı sözleşmeyi paylaşmaları, mevcut
+  // dietConditions tüketicilerinin (profil ekranı, karşılaştırma "Riskli"
+  // gerekçesi) bunları otomatik olarak yakalamasını sağlıyor.
+  if (isAthleteUser) {
+    dietConditions.push({
+      diet: "Sporcu / Yüksek protein",
+      status: hasAthleteConflict ? "conflict" : "ok",
+    });
+  }
+  if (isDiabeticDietUser) {
+    dietConditions.push({
+      diet: "Diyabet dostu",
+      status: hasDiabeticDietConflict ? "conflict" : "ok",
+    });
+  }
+
   return {
     matched_allergens: matched,
     allergens,

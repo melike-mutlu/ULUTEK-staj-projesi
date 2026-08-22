@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/allergen_catalog.dart';
 import '../../core/models/product.dart';
 import '../../core/models/rule_engine_result.dart';
 import '../../core/providers.dart';
 import '../../core/theme/akilli_sepet_colors.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import 'product_comparison_viewmodel.dart';
 import 'widgets/comparison_attribute_row.dart';
 import 'widgets/comparison_column_header.dart';
@@ -134,7 +136,7 @@ class _ProductComparisonViewState
                       if (index >= products.length) return const SizedBox.shrink();
                       final p = products[index];
                       final ruleRes = viewModel.ruleResults[p.barcode];
-                      return _buildRuleEngineCell(ruleRes, isDark);
+                      return _buildRuleEngineCell(context, ruleRes, isDark);
                     }),
                   ),
 
@@ -329,7 +331,28 @@ class _ProductComparisonViewState
     );
   }
 
-  Widget _buildRuleEngineCell(RuleEngineResult? ruleRes, bool isDark) {
+  /// "Riskli" etiketinin altına konacak kısa gerekçe — hangi alerjen/sağlık
+  /// durumu/diyetin çakıştığını söyler. Hücre dar olduğu için en fazla 2 madde
+  /// gösterilir, gerisi "+N" ile özetlenir.
+  String? _conflictReason(BuildContext context, RuleEngineResult ruleRes) {
+    final l10n = AppLocalizations.of(context);
+    final reasons = <String>[
+      for (final key in ruleRes.personalRiskKeys)
+        allergenLabel(l10n, allergenInfo(key)),
+      for (final h in ruleRes.healthConditions)
+        if (h.isConflict) h.condition,
+      for (final d in ruleRes.dietConditions)
+        if (d.isConflict) d.diet,
+      if (ruleRes.veganCompatible == false) 'Vegan değil',
+      if (ruleRes.vegetarianCompatible == false) 'Vejetaryen değil',
+    ];
+
+    if (reasons.isEmpty) return null;
+    if (reasons.length <= 2) return reasons.join(', ');
+    return '${reasons.take(2).join(', ')} +${reasons.length - 2}';
+  }
+
+  Widget _buildRuleEngineCell(BuildContext context, RuleEngineResult? ruleRes, bool isDark) {
     // ruleRes == null: henüz yüklenmedi ya da yüklenemedi — "Profiline Uygun"
     // (güvenli) göstermek yanlış bir güven verirdi, ayrı bir nötr durum lazım.
     if (ruleRes == null) {
@@ -374,8 +397,9 @@ class _ProductComparisonViewState
     final textColor = hasConflict
         ? (isDark ? const Color(0xFFFF8A80) : const Color(0xFFC62828))
         : (isDark ? const Color(0xFF81C784) : const Color(0xFF2E7D32));
-    final label = hasConflict ? 'Riskli / Alerjen Çakışması' : 'Profiline Uygun';
+    final label = hasConflict ? 'Riskli' : 'Profiline Uygun';
     final icon = hasConflict ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded;
+    final reason = hasConflict ? _conflictReason(context, ruleRes) : null;
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -397,6 +421,19 @@ class _ProductComparisonViewState
               color: textColor,
             ),
           ),
+          if (reason != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              reason,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9.5,
+                color: textColor.withOpacity(0.85),
+              ),
+            ),
+          ],
         ],
       ),
     );

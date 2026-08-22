@@ -36,6 +36,18 @@ class _ProductSelectorModalState extends ConsumerState<ProductSelectorModal> {
   List<Product> _searchResults = [];
   bool _isSearching = false;
 
+  bool get _isQueryActive => _searchController.text.trim().isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    // "Son Taranan Geçmiş" önerisi fullHistory'e bakıyor; bu sadece
+    // loadFullHistory() çağrılınca doluyor (Home'daki recentScans'ten ayrı).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(homeViewModelProvider).loadFullHistory();
+    });
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -56,7 +68,7 @@ class _ProductSelectorModalState extends ConsumerState<ProductSelectorModal> {
 
     try {
       final searchRepo = ref.read(productSearchRepositoryProvider);
-      final results = await searchRepo.searchByName(query);
+      final results = await searchRepo.searchByName(trimmed);
       if (mounted) {
         setState(() {
           _searchResults = results
@@ -184,14 +196,30 @@ class _ProductSelectorModalState extends ConsumerState<ProductSelectorModal> {
                 : ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     children: [
-                      if (_searchResults.isNotEmpty) ...[
-                        _buildSectionTitle('Arama Sonuçları', isDark),
-                        ..._searchResults.map((p) => _buildProductTile(p, isDark)),
-                        const SizedBox(height: 16),
-                      ],
-
-                      if (historyState.fullHistory.isNotEmpty) ...[
-                        const SizedBox(height: 16),
+                      // Arama aktifken geçmiş listesi karışıklık yaratmasın diye
+                      // gizli — kullanıcı sonucun boş mu yoksa geçmişin mi
+                      // göründüğünü ayırt edemiyordu.
+                      if (_isQueryActive) ...[
+                        if (_searchResults.isNotEmpty) ...[
+                          _buildSectionTitle('Arama Sonuçları', isDark),
+                          ..._searchResults.map((p) => _buildProductTile(p, isDark)),
+                        ] else
+                          Padding(
+                            padding: const EdgeInsets.only(top: 40),
+                            child: Center(
+                              child: Text(
+                                'Sonuç bulunamadı.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AkilliSepetColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ] else if (historyState.fullHistory.isNotEmpty) ...[
                         _buildSectionTitle('Son Taranan Geçmiş', isDark),
                         ...historyState.fullHistory.map((item) {
                           final p = Product(
@@ -206,16 +234,12 @@ class _ProductSelectorModalState extends ConsumerState<ProductSelectorModal> {
                           );
                           return _buildProductTile(p, isDark);
                         }),
-                      ],
-
-                      if (_searchResults.isEmpty && historyState.fullHistory.isEmpty)
+                      ] else
                         Padding(
                           padding: const EdgeInsets.only(top: 40),
                           child: Center(
                             child: Text(
-                              _searchController.text.trim().isEmpty
-                                  ? 'Eklemek istediğin ürünü aramak için yukarıya yaz.'
-                                  : 'Sonuç bulunamadı.',
+                              'Eklemek istediğin ürünü aramak için yukarıya yaz.',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 13,
