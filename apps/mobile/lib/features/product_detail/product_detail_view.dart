@@ -338,21 +338,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           conflictPhrases.add("${conflictingHealths.join(", ")} hastalığınız");
         }
 
-        // D. CÜMLEYİ TÜRKÇE DİLBİLGİSİNE UYGUN TOPARLAMA
-        // (Örn: "Süt alerjiniz, Çölyak hastalığınız ve Düşük Karbonhidrat beslenme düzeniniz")
-        String matchedReasons = "profilinizdeki kısıtlamalar"; // Hiçbir şey bulunamazsa varsayılan
-        if (conflictPhrases.isNotEmpty){
-          if (conflictPhrases.length == 1){
-            matchedReasons = conflictPhrases.first;
-          } else if (conflictPhrases.length == 2) {
-            matchedReasons = "${conflictPhrases[0]} ve ${conflictPhrases[1]}";
-          } else {
-            final last = conflictPhrases.removeLast();
-            matchedReasons = "${conflictPhrases.join(", ")} ve $last";
-          }
-        }
-
-
+        
         return Column(
           children: [
             // Basit mod kapalıysa üstteki sekmeli navigasyon barını göster, açıksa gizle
@@ -381,7 +367,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                         const SizedBox(height: 32),
                         SimpleModeCard(
                           level: riskLevel,
-                          matchedReasons: matchedReasons,
+                          conflictPhrases: conflictPhrases,
                           ),
                       ],
                     )
