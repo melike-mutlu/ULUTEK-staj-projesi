@@ -22,6 +22,8 @@ import 'widgets/recommendations_section.dart';
 import 'widgets/simple_mode_card.dart';
 import 'widgets/warning_banner.dart';
 import '../product_comparison/widgets/health_condition_info_card.dart';
+import '../../core/constants/allergen_catalog.dart';
+import '../../core/models/explanation.dart';
 
 class ProductDetailView extends ConsumerStatefulWidget {
   const ProductDetailView({super.key});
@@ -302,6 +304,41 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
         // 2. RİSK SEVİYESİNİ ALIYORUZ
         final String riskLevel = explanation.level.name;
 
+        // AKILLI CÜMLE KURUCU (SADECE ÇAKIŞANLAR)
+        final rule = _viewModel.ruleEngineResult;
+        final profile = _viewModel.userProfile;
+
+        List<String> conflictPhrases = [];
+        // A. ALERJİLER (Sadece ürünle eşleşen riskli alerjileri alıyoruz)
+        final conflictingAllergens = (rule?.personalRiskKeys ?? const <String>[])
+            .map((key) => allergenLabel(l10n, allergenInfo(key)))
+            .toList();
+        
+        if (conflictingAllergens.isNotEmpty) {
+          conflictPhrases.add("${conflictingAllergens.join(", ")} alerjiniz");
+        }
+
+        // B. DİYETLER (Sadece kural motorunun 'warning' verdiği diyetleri alıyoruz)
+        final conflictingDiets = dietChecks(l10n, profile, rule)
+            .where((c) => c.level == WarningLevel.warning)
+            .map((c) => c.label)
+            .toList();
+        
+        if (conflictingDiets.isNotEmpty) {
+          conflictPhrases.add("${conflictingDiets.join(", ")} beslenme düzeniniz");
+        }
+
+        // C. HASTALIKLAR (Sadece kural motorunun 'warning' verdiği hastalıkları alıyoruz)
+        final conflictingHealths = healthChecks(l10n, profile, rule)
+            .where((c) => c.level == WarningLevel.warning)
+            .map((c) => c.label)
+            .toList();
+
+        if (conflictingHealths.isNotEmpty) {
+          conflictPhrases.add("${conflictingHealths.join(", ")} hastalığınız");
+        }
+
+        
         return Column(
           children: [
             // Basit mod kapalıysa üstteki sekmeli navigasyon barını göster, açıksa gizle
@@ -328,7 +365,10 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                           onVoteReject: _viewModel.voteReject,
                         ),
                         const SizedBox(height: 32),
-                        SimpleModeCard(level: riskLevel),
+                        SimpleModeCard(
+                          level: riskLevel,
+                          conflictPhrases: conflictPhrases,
+                          ),
                       ],
                     )
 
