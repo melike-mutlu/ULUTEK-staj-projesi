@@ -160,7 +160,7 @@ async function callChatbotLlm(
     ],
     generationConfig: {
       temperature: 0.4,
-      maxOutputTokens: 500,
+      maxOutputTokens: 2000,
     },
   };
  
