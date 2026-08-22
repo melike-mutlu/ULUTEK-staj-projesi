@@ -36,105 +36,6 @@ class _ProductSelectorModalState extends ConsumerState<ProductSelectorModal> {
   List<Product> _searchResults = [];
   bool _isSearching = false;
 
-  // Hazır Karşılaştırma Örnek Ürünleri (Hızlı test ve gösterim için)
-  static final List<Product> _sampleProducts = [
-    const Product(
-      barcode: '8690504018001',
-      name: 'Tam Yağlı Taze Süt 1L',
-      brand: 'Sütaş',
-      imageUrl: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300',
-      ingredientsText: 'Pastörize inek sütü.',
-      additives: [],
-      allergensTags: ['en:milk'],
-      nutriments: Nutriments(
-        energyKcal100g: 62,
-        sugars100g: 4.7,
-        fat100g: 3.3,
-        proteins100g: 3.2,
-        salt100g: 0.1,
-        carbohydrates100g: 4.7,
-      ),
-      nutriscore: 'b',
-      status: 'VERIFIED',
-    ),
-    const Product(
-      barcode: '8690504018002',
-      name: 'Yulaf Sütü Organik 1L',
-      brand: 'Alpro',
-      imageUrl: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=300',
-      ingredientsText: 'Su, yulaf (%10), ayçiçek yağı, deniz tuzu.',
-      additives: [],
-      allergensTags: ['en:gluten'],
-      nutriments: Nutriments(
-        energyKcal100g: 44,
-        sugars100g: 3.2,
-        fat100g: 1.5,
-        proteins100g: 0.8,
-        salt100g: 0.08,
-        carbohydrates100g: 6.8,
-      ),
-      nutriscore: 'a',
-      status: 'VERIFIED',
-    ),
-    const Product(
-      barcode: '8690504018003',
-      name: 'Yulaf Ezmesi 500g',
-      brand: 'Eti Lifalif',
-      imageUrl: 'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=300',
-      ingredientsText: '%100 Yulaf Ezmesi.',
-      additives: [],
-      allergensTags: ['en:gluten'],
-      nutriments: Nutriments(
-        energyKcal100g: 356,
-        sugars100g: 1.2,
-        fat100g: 7.0,
-        proteins100g: 12.5,
-        salt100g: 0.02,
-        carbohydrates100g: 57.0,
-      ),
-      nutriscore: 'a',
-      status: 'VERIFIED',
-    ),
-    const Product(
-      barcode: '8690504018004',
-      name: 'Fındıklı Sütlü Çikolata 80g',
-      brand: 'Ülker',
-      imageUrl: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=300',
-      ingredientsText: 'Şeker, tam yağlı süt tozu, kakao yağı, fındık (%13), kakao kitlesi, emülgatör (soya lesitini).',
-      additives: ['E322'],
-      allergensTags: ['en:milk', 'en:nuts', 'en:soybeans'],
-      nutriments: Nutriments(
-        energyKcal100g: 545,
-        sugars100g: 48.0,
-        fat100g: 33.0,
-        proteins100g: 9.0,
-        salt100g: 0.2,
-        carbohydrates100g: 52.0,
-      ),
-      nutriscore: 'e',
-      status: 'VERIFIED',
-    ),
-    const Product(
-      barcode: '8690504018005',
-      name: 'Bitter Çikolata %70 Kakao 80g',
-      brand: 'Lindt',
-      imageUrl: 'https://images.unsplash.com/photo-1548907040-4baa42d10919?w=300',
-      ingredientsText: 'Kakao kitlesi, şeker, kakao yağı, vanilya.',
-      additives: [],
-      allergensTags: [],
-      nutriments: Nutriments(
-        energyKcal100g: 566,
-        sugars100g: 29.0,
-        fat100g: 41.0,
-        proteins100g: 9.5,
-        salt100g: 0.05,
-        carbohydrates100g: 34.0,
-      ),
-      nutriscore: 'd',
-      status: 'VERIFIED',
-    ),
-  ];
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -289,9 +190,6 @@ class _ProductSelectorModalState extends ConsumerState<ProductSelectorModal> {
                         const SizedBox(height: 16),
                       ],
 
-                      _buildSectionTitle('Örnek Karşılaştırma Ürünleri', isDark),
-                      ..._sampleProducts.map((p) => _buildProductTile(p, isDark)),
-
                       if (historyState.fullHistory.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         _buildSectionTitle('Son Taranan Geçmiş', isDark),
@@ -309,6 +207,25 @@ class _ProductSelectorModalState extends ConsumerState<ProductSelectorModal> {
                           return _buildProductTile(p, isDark);
                         }),
                       ],
+
+                      if (_searchResults.isEmpty && historyState.fullHistory.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 40),
+                          child: Center(
+                            child: Text(
+                              _searchController.text.trim().isEmpty
+                                  ? 'Eklemek istediğin ürünü aramak için yukarıya yaz.'
+                                  : 'Sonuç bulunamadı.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AkilliSepetColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
           ),
